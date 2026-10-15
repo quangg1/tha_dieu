@@ -19,6 +19,7 @@ export default function App() {
   useEffect(() => {
     const s = new SkyScene(canvas.current!);
     setSky(s);
+    if (import.meta.env.DEV) (window as unknown as { __sky: SkyScene }).__sky = s;
     return () => s.destroy();
   }, []);
 

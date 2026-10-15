@@ -109,3 +109,34 @@ describe('admin', () => {
     expect(q.answers.has('chimngusac')).toBe(false);
   });
 });
+
+describe('review queue without a referee', () => {
+  it('logs unknown answers, and an accepted one scores from then on', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const p = 'player_test_0005';
+    const qid = 'loai-hoa';
+    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa ngũ sắc' }, nullReferee);
+    expect(r.ok).toBe(false);
+    expect(r.reason).toMatch(/trưởng làng/);
+    await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa ngu sac' }, nullReferee);
+    const queue = await S.submissions(db);
+    const item = queue.find((x) => x.question_id === qid && x.input_key === 'hoangusac')!;
+    expect(item.n).toBe(2);
+    await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa ngũ sắc', tier: 3 });
+    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'ngũ sắc' }, nullReferee);
+    expect(ok.ok).toBe(true);
+    expect(ok.tier).toBe(3);
+    expect((await S.submissions(db)).some((x) => x.input_key === 'hoangusac')).toBe(false);
+  });
+
+  it('a dismissed answer is refused without queuing again', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const p = 'player_test_0006';
+    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
+    await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: 'raugido', decision: 'dismiss' });
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    expect(r.reason).toMatch(/không công nhận/);
+  });
+});

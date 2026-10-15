@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
-import { claudeReferee, type Referee } from './referee.js';
+import { pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
 
 export interface Req extends IncomingMessage {
@@ -92,6 +92,26 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
       return { stats: await S.stats(db, S.vnToday()), pending: await S.pending(db) };
     },
   },
+  'admin/queue': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return { queue: await S.submissions(db) };
+    },
+  },
+  'admin/decide': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.decideSubmission(db, {
+        questionId: String(body.questionId),
+        inputKey: String(body.inputKey),
+        decision: body.decision === 'dismiss' ? 'dismiss' : 'accept',
+        display: typeof body.display === 'string' ? body.display : undefined,
+        tier: body.tier as number | undefined,
+      });
+    },
+  },
   'admin/review': {
     method: 'POST',
     admin: true,
@@ -131,7 +151,7 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
   try {
     const body = req.method === 'POST' ? await readBody(req) : {};
     const db = opts.db ?? (await getDb());
-    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? claudeReferee, admin });
+    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin });
     send(res, 200, data);
   } catch (e) {
     if (e instanceof S.GameError) return send(res, e.status, { error: e.message });

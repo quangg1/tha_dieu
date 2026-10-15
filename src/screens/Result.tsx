@@ -93,7 +93,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         </span>
         <span className="gd-print gd-print--night result-alt">{formatAlt(shown)}</span>
         <span className="result-note">
-          {result.players > 1 ? `Cao hơn ${result.beaten}% người chơi ${mode === 'daily' ? 'hôm nay' : 'thả đêm hôm nay'}. ` : 'Bạn là người đầu tiên thả hôm nay. '}
+          {result.players > 1
+            ? `Hạng ${result.rank} trên ${result.players.toLocaleString('vi-VN')} người ${mode === 'daily' ? 'thả hôm nay' : 'thả đêm hôm nay'}${result.beaten >= 50 ? `, cao hơn ${result.beaten}% số diều` : ''}. `
+            : 'Bạn là người đầu tiên thả hôm nay. '}
           {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
         </span>
       </div>

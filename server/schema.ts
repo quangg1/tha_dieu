@@ -82,5 +82,16 @@ create table if not exists runs (
   primary key (player_id, day, mode)
 );
 
+create table if not exists submissions (
+  question_id text not null,
+  input_key text not null,
+  display text not null,
+  n int not null default 1,
+  first_at timestamptz not null default now(),
+  last_at timestamptz not null default now(),
+  status text not null default 'open',
+  primary key (question_id, input_key)
+);
+
 create index if not exists runs_day_alt on runs (day, mode, altitude desc);
 `;

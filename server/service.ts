@@ -10,7 +10,7 @@ import {
   type TierIndex,
 } from '../shared/scoring.js';
 import type { Db } from './db.js';
-import type { Referee } from './referee.js';
+import { nullReferee, type Referee } from './referee.js';
 import { SCHEMA } from './schema.js';
 
 export class GameError extends Error {
@@ -252,7 +252,8 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     if (c.valid && c.canonical_key && q.answers.has(c.canonical_key)) return { key: c.canonical_key, reason: '' };
     if (!c.valid) return { key: null, reason: c.reason || 'Trọng tài không công nhận đáp án này.' };
   }
-  const [usage] = await db.query<{ calls: number }>(
+  const hasReferee = referee !== nullReferee;
+  const [usage] = !hasReferee ? [{ calls: 0 }] : await db.query<{ calls: number }>(
     `insert into referee_usage (player_id, day, calls) values ($1,$2::date,1)
      on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls`,
     [playerId, day],
@@ -264,7 +265,15 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   } catch {
     v = null;
   }
-  if (!v) return { key: null, reason: 'Không có trong sổ của làng.' };
+  if (!v) {
+    // No referee available: log the answer so the village head can review it, the way Krillion grows its list.
+    await db.query(
+      `insert into submissions (question_id, input_key, display) values ($1,$2,$3)
+       on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
+      [q.id, inputKey, input.slice(0, 60)],
+    );
+    return { key: null, reason: 'Chưa có trong sổ của làng. Đáp án đã được gửi để trưởng làng xem lại.' };
+  }
   if (!v.valid) {
     await db.query(
       `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`,
@@ -479,12 +488,65 @@ export async function review(db: Db, a: { questionId: string; key: string; decis
 }
 
 export async function stats(db: Db, day: string) {
-  const [r] = await db.query<{ players: number; answers: number; pending: number; questions: number }>(
+  const [r] = await db.query<{ players: number; answers: number; pending: number; queued: number; questions: number }>(
     `select (select count(*) from runs where day=$1::date and mode='daily')::int as players,
             (select count(*) from turns where day=$1::date and answered_at is not null)::int as answers,
             (select count(*) from answers where status='pending')::int as pending,
+            (select count(*) from submissions where status='open')::int as queued,
             (select count(*) from questions where active)::int as questions`,
     [day],
   );
   return r;
+}
+
+/* ------------------------------------------------------------------ review queue */
+
+export async function submissions(db: Db) {
+  return db.query<{ question_id: string; prompt: string; input_key: string; display: string; n: number; last_at: Date }>(
+    `select s.question_id, q.prompt, s.input_key, s.display, s.n, s.last_at
+     from submissions s join questions q on q.id = s.question_id
+     where s.status = 'open' order by s.n desc, s.last_at desc limit 300`,
+  );
+}
+
+/** Accepts a logged answer into the bank (optionally under a corrected name or as an alias of an existing answer), or dismisses it. */
+export async function decideSubmission(
+  db: Db,
+  a: { questionId: string; inputKey: string; decision: 'accept' | 'dismiss'; display?: string; tier?: number },
+) {
+  const rows = await db.query<{ display: string }>(
+    `select display from submissions where question_id=$1 and input_key=$2`,
+    [a.questionId, a.inputKey],
+  );
+  if (!rows.length) throw new GameError(404, 'Không tìm thấy đáp án này trong hàng chờ.');
+  if (a.decision === 'dismiss') {
+    await db.query(`update submissions set status='dismissed' where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
+    await db.query(
+      `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,'Trưởng làng đã xem và không công nhận đáp án này.')
+       on conflict (question_id, input_key) do update set valid=false, reason=excluded.reason`,
+      [a.questionId, a.inputKey],
+    );
+    return { ok: true };
+  }
+  const display = (a.display ?? rows[0].display).trim().slice(0, 60);
+  if (!display) throw new GameError(400, 'Tên đáp án trống.');
+  const q = await loadQuestion(db, a.questionId);
+  const existing = q.matcher.match(display);
+  const key = existing?.key ?? norm(display);
+  const tier = Number.isInteger(a.tier) ? Math.max(0, Math.min(4, a.tier!)) : 4;
+  if (!existing) {
+    await db.query(
+      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'player','approved')
+       on conflict (question_id, key) do update set status='approved', prior_tier=excluded.prior_tier`,
+      [a.questionId, key, display, tier],
+    );
+  }
+  await db.query(
+    `insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`,
+    [a.questionId, a.inputKey, key, norm(display)],
+  );
+  await db.query(`update submissions set status='accepted' where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
+  await db.query(`delete from verdicts where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
+  forgetQuestion(a.questionId);
+  return { ok: true, key };
 }

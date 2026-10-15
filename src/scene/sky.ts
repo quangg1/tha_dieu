@@ -1,6 +1,29 @@
 // The living sky of Thả Diều: posterized woodblock bands, objects placed at their real altitude on a log scale,
 // the kite-string altimeter, and a kite that sways, leaps and dips.
 import { MILESTONES, formatAlt } from '../../shared/scoring.js';
+import * as Art from './art';
+
+let ART: ReturnType<typeof makeArt> | null = null;
+function makeArt() {
+  return {
+    sun: Art.sprite(Art.sunSvg()),
+    clouds: [Art.sprite(Art.cloudSvg(0)), Art.sprite(Art.cloudSvg(1))],
+    stork: [Art.sprite(Art.storkSvg(0)), Art.sprite(Art.storkSvg(1))],
+    dinh: Art.sprite(Art.dinhSvg()),
+    bamboo: Art.sprite(Art.bambooSvg()),
+    fansipan: Art.sprite(Art.fansipanSvg()),
+    plane: Art.sprite(Art.planeSvg()),
+    station: Art.sprite(Art.stationSvg()),
+    vinasat: Art.sprite(Art.vinasatSvg()),
+    moon: Art.sprite(Art.moonSvg()),
+    moonArm: Art.moonSvg().arm,
+    mars: Art.sprite(Art.planetSvg('mars')),
+    jupiter: Art.sprite(Art.planetSvg('jupiter')),
+    neptune: Art.sprite(Art.planetSvg('neptune')),
+    magpie: Art.sprite(Art.magpieSvg()),
+    comet: Art.sprite(Art.cometSvg()),
+  };
+}
 
 const INK = '#1f1b16';
 const PAPER = '#f4ead2';
@@ -79,9 +102,10 @@ export class SkyScene {
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!;
+    ART ??= makeArt();
     for (let i = 0; i < 140; i++) this.stars.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.4, tw: Math.random() * 6.28 });
     const rnd = mulberry(7);
-    for (let i = 0; i < 14; i++) this.clouds.push({ L: 2.5 + rnd() * 1.3 + (i > 10 ? 1.2 : 0), x: rnd(), w: 0.22 + rnd() * 0.3 });
+    for (let i = 0; i < 9; i++) this.clouds.push({ L: 2.6 + (i / 8) * 1.5 + rnd() * 0.15, x: rnd(), w: 0.2 + rnd() * 0.22 });
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(canvas);
     this.resize();
@@ -189,258 +213,165 @@ export class SkyScene {
     return y > -pad && y < this.H + pad;
   }
 
+  /** Draws a sprite with its width set in pixels, centred on (x, y) unless an anchor says otherwise. */
+  private put(sp: Art.Sprite, x: number, y: number, w: number, ax = 0.5, ay = 0.5, alpha = 1) {
+    if (!sp.ready) return;
+    const h = (w * sp.h) / sp.w;
+    this.ctx.globalAlpha = alpha;
+    this.ctx.drawImage(sp.img, x - w * ax, y - h * ay, w, h);
+    this.ctx.globalAlpha = 1;
+  }
+
   private drawNear() {
-    const { ctx, W } = this;
-    // Storks.
+    const { W } = this;
+    const A = ART!;
+    // The Đông Sơn sun hangs in the daytime sky and fades as the kite reaches the edge of space.
+    const sunA = Math.max(0, Math.min(1, (4.6 - this.camL) / 1.2));
+    if (sunA > 0) {
+      const size = Math.min(W, this.H) * 0.28;
+      this.ctx.save();
+      const sx = W * 0.82;
+      const sy = this.H * 0.085 + this.camL * 6;
+      this.ctx.translate(sx, sy);
+      this.ctx.rotate(this.reduce ? 0 : this.t * 0.02);
+      this.put(A.sun, 0, 0, size, 0.5, 0.5, sunA);
+      this.ctx.restore();
+    }
+    // Fansipan with its rice terraces, peak at 3.143 m.
+    if (this.visible(3.5, 900)) {
+      const peakY = this.y(3.497);
+      const h = Math.max(160, this.layout.decade * this.H * 1.15);
+      const w = h * (A.fansipan.w / A.fansipan.h);
+      this.put(A.fansipan, W * 0.74, peakY, w, 300 / 466, 14 / 306);
+    }
+    // White storks.
     if (this.visible(2.08)) {
       const y0 = this.y(2.08);
       for (let i = 0; i < 5; i++) {
-        const x = ((this.t * 18 + i * 37) % (W + 120)) - 60;
-        const y = y0 + Math.sin(i * 2.1) * 16;
-        const f = Math.sin(this.t * 6 + i) * 4;
-        ctx.strokeStyle = INK;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x - 9, y - 3 + f);
-        ctx.quadraticCurveTo(x - 4, y - 6, x, y);
-        ctx.quadraticCurveTo(x + 4, y - 6, x + 9, y - 3 + f);
-        ctx.stroke();
+        const x = ((this.t * 22 + i * 61) % (W + 160)) - 80;
+        const y = y0 + Math.sin(i * 2.1) * 18 + Math.sin(this.t * 0.8 + i) * 4;
+        const frame = Math.floor(this.t * 3 + i) % 2;
+        this.put(A.stork[frame], x, y, W * (0.13 + (i % 2) * 0.03));
       }
     }
-    // Fansipan.
-    if (this.visible(3.5, 600)) {
-      const peak = this.y(3.5);
-      const base = this.y(2.3);
-      ctx.fillStyle = LA;
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(W * 0.45, base);
-      ctx.lineTo(W * 0.68, peak + (base - peak) * 0.45);
-      ctx.lineTo(W * 0.78, peak);
-      ctx.lineTo(W * 0.9, peak + (base - peak) * 0.35);
-      ctx.lineTo(W * 1.1, base);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = PAPER;
-      ctx.beginPath();
-      ctx.moveTo(W * 0.78, peak);
-      ctx.lineTo(W * 0.74, peak + (base - peak) * 0.12);
-      ctx.lineTo(W * 0.82, peak + (base - peak) * 0.12);
-      ctx.closePath();
-      ctx.fill();
-    }
-    // Clouds: paper cut-outs with ink edges.
-    for (const c of this.clouds) {
+    // Scrolling clouds.
+    for (const [i, c] of this.clouds.entries()) {
       if (!this.visible(c.L)) continue;
       const y = this.y(c.L);
-      const x = ((c.x * (W + 200) + this.t * 6) % (W + 200)) - 100;
-      const w = c.w * W;
-      ctx.fillStyle = PAPER;
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 2;
-      roundRect(ctx, x, y, w, 22, 11);
-      roundRect(ctx, x + w * 0.2, y - 14, w * 0.45, 22, 11);
+      const w = c.w * W * 1.4;
+      const x = ((c.x * (W + w) + this.t * (5 + (i % 3) * 2)) % (W + w)) - w / 2;
+      this.put(A.clouds[i % 2], x, y, w);
     }
-    // Plane.
+    // An airliner crossing at 10 km.
     if (this.visible(4)) {
-      const y = this.y(4);
-      const x = ((this.t * 40) % (W + 160)) - 80;
-      ctx.fillStyle = PAPER;
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + 46, y - 2);
-      ctx.quadraticCurveTo(x + 58, y, x + 46, y + 2);
-      ctx.lineTo(x, y + 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x + 22, y - 1);
-      ctx.lineTo(x + 12, y - 12);
-      ctx.lineTo(x + 18, y - 12);
-      ctx.lineTo(x + 32, y - 1);
-      ctx.moveTo(x + 22, y + 1);
-      ctx.lineTo(x + 12, y + 12);
-      ctx.lineTo(x + 18, y + 12);
-      ctx.lineTo(x + 32, y + 1);
-      ctx.fill();
-      ctx.stroke();
+      const w = W * 0.5;
+      const x = ((this.t * 38) % (W + w * 2)) - w;
+      this.put(A.plane, x, this.y(4), w);
     }
     // Edge of space.
     if (this.visible(5)) {
-      ctx.setLineDash([6, 6]);
-      ctx.strokeStyle = 'rgba(244,234,210,.55)';
-      ctx.lineWidth = 1.5;
+      const ctx = this.ctx;
+      ctx.setLineDash([8, 7]);
+      ctx.strokeStyle = 'rgba(244,234,210,.6)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       const y = this.y(5);
-      ctx.moveTo(0, y + 30);
-      ctx.quadraticCurveTo(W / 2, y - 30, W, y + 30);
+      ctx.moveTo(-10, y + 40);
+      ctx.quadraticCurveTo(W / 2, y - 40, W + 10, y + 40);
       ctx.stroke();
       ctx.setLineDash([]);
     }
   }
 
   private drawFar() {
-    const { ctx, W } = this;
-    // Space station and Vinasat drift across.
-    for (const [L, speed, wide] of [[5.6, 30, 34], [7.55, 12, 26]] as const) {
-      if (!this.visible(L)) continue;
-      const y = this.y(L);
-      const x = ((this.t * speed + L * 100) % (W + 100)) - 50;
-      ctx.fillStyle = CHAM_DEEP;
-      ctx.strokeStyle = PAPER;
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(x - wide / 2, y - 4, wide * 0.32, 8);
-      ctx.strokeRect(x - wide / 2, y - 4, wide * 0.32, 8);
-      ctx.fillRect(x + wide / 2 - wide * 0.32, y - 4, wide * 0.32, 8);
-      ctx.strokeRect(x + wide / 2 - wide * 0.32, y - 4, wide * 0.32, 8);
-      ctx.fillStyle = PAPER;
-      ctx.fillRect(x - 5, y - 5, 10, 10);
+    const { W, H } = this;
+    const A = ART!;
+    if (this.visible(5.6)) {
+      const w = W * 0.4;
+      const x = ((this.t * 16) % (W + w)) - w / 2;
+      this.put(A.station, x, this.y(5.6), w);
     }
-    // Moon with the banyan tree and chú Cuội.
-    if (this.visible(8.585, 400)) {
-      const y = this.y(8.585);
-      const r = Math.min(W, this.H) * 0.26;
-      const cx = W * 0.7;
-      ctx.fillStyle = INK;
-      disc(ctx, cx + 5, y + 5, r);
-      ctx.fillStyle = TRANG;
-      disc(ctx, cx, y, r);
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-      ctx.fillStyle = '#e2c46a';
-      disc(ctx, cx - r * 0.5, y - r * 0.45, r * 0.12);
-      disc(ctx, cx + r * 0.55, y + r * 0.5, r * 0.09);
-      disc(ctx, cx - r * 0.35, y + r * 0.55, r * 0.08);
-      ctx.fillStyle = INK;
-      ctx.fillRect(cx - r * 0.04, y - r * 0.05, r * 0.08, r * 0.62);
-      ctx.fillStyle = LA;
-      ctx.beginPath();
-      ctx.ellipse(cx, y - r * 0.18, r * 0.5, r * 0.3, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = INK;
-      disc(ctx, cx + r * 0.32, y + r * 0.38, r * 0.06);
-      ctx.beginPath();
-      ctx.moveTo(cx + r * 0.22, y + r * 0.62);
-      ctx.quadraticCurveTo(cx + r * 0.32, y + r * 0.36, cx + r * 0.42, y + r * 0.62);
-      ctx.fill();
-      const wave = Math.sin(this.t * 3) * 0.25;
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(cx + r * 0.36, y + r * 0.45);
-      ctx.lineTo(cx + r * 0.5, y + r * (0.3 + wave * 0.2));
-      ctx.stroke();
+    if (this.visible(7.55)) {
+      const w = W * 0.46;
+      this.put(A.vinasat, W * 0.3 + Math.sin(this.t * 0.3) * 10, this.y(7.55), w);
     }
-    // Planets.
-    for (const [L, col, ring] of [[11.35, '#c4532f', false], [11.89, '#d9a066', true], [12.65, '#3a7fbc', false]] as const) {
-      if (!this.visible(L, 120)) continue;
-      const y = this.y(L);
-      const x = W * (L === 11.89 ? 0.25 : 0.72);
-      const r = L === 11.89 ? 34 : 20;
-      ctx.fillStyle = col;
-      disc(ctx, x, y, r);
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      if (ring) {
-        ctx.strokeStyle = PAPER;
-        ctx.lineWidth = 3;
-        for (const dy of [-8, 4, 14]) {
-          ctx.beginPath();
-          ctx.moveTo(x - r * 0.9, y + dy);
-          ctx.lineTo(x + r * 0.9, y + dy);
-          ctx.stroke();
-        }
+    // Cung Trăng: the banyan, the jade rabbit, and chú Cuội waving.
+    if (this.visible(8.585, 500)) {
+      const size = Math.min(W * 0.92, H * 0.55);
+      const cx = W * 0.6;
+      const cy = this.y(8.585);
+      this.put(A.moon, cx, cy, size);
+      if (A.moon.ready) {
+        const ctx = this.ctx;
+        const ax = cx - size / 2 + A.moonArm.x * size;
+        const ay = cy - size / 2 + A.moonArm.y * size;
+        const wave = this.reduce ? 0 : Math.sin(this.t * 4) * 0.35;
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(-0.9 + wave);
+        ctx.strokeStyle = INK;
+        ctx.lineCap = 'round';
+        ctx.lineWidth = Math.max(4, size * 0.022);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(size * 0.055, 0);
+        ctx.stroke();
+        ctx.strokeStyle = CHAM_DEEP;
+        ctx.lineWidth = Math.max(2, size * 0.012);
+        ctx.stroke();
+        ctx.restore();
       }
     }
-    // Oort cloud.
-    if (this.visible(15.98, 300)) {
+    const planets: [number, Art.Sprite, number, number][] = [
+      [11.35, A.mars, 0.72, 0.3],
+      [11.89, A.jupiter, 0.3, 0.44],
+      [12.65, A.neptune, 0.7, 0.26],
+    ];
+    for (const [L, sp, fx, fw] of planets) if (this.visible(L, 220)) this.put(sp, W * fx, this.y(L), W * fw);
+    // Oort cloud: drifting comets and ice.
+    if (this.visible(15.98, 400)) {
       const y0 = this.y(15.98);
       const rnd = mulberry(3);
-      ctx.fillStyle = 'rgba(167,216,238,.7)';
-      for (let i = 0; i < 160; i++) ctx.fillRect(rnd() * W, y0 + (rnd() - 0.5) * 220, 2, 2);
+      this.ctx.fillStyle = 'rgba(167,216,238,.75)';
+      for (let i = 0; i < 160; i++) this.ctx.fillRect(rnd() * W, y0 + (rnd() - 0.5) * 260, 2, 2);
+      for (let i = 0; i < 3; i++) {
+        const x = ((this.t * (10 + i * 4) + i * 140) % (W + 200)) - 100;
+        this.put(A.comet, x, y0 - 80 + i * 70, W * 0.32);
+      }
     }
-    // Sông Ngân: a river of stars, crossed by a bridge of magpies.
+    // Sông Ngân: a river of stars crossed by the magpie bridge of Ô Thước.
     if (this.visible(20.4, 500)) {
       const y0 = this.y(20.4);
       const rnd = mulberry(11);
-      for (let i = 0; i < 420; i++) {
+      for (let i = 0; i < 520; i++) {
         const u = rnd();
         const x = u * W;
-        const y = y0 - (u - 0.5) * 260 + (rnd() - 0.5) * 90;
-        ctx.fillStyle = `rgba(244,234,210,${0.3 + rnd() * 0.7})`;
-        ctx.fillRect(x, y, 1.6, 1.6);
+        const y = y0 - (u - 0.5) * 300 + (rnd() - 0.5) * 110;
+        this.ctx.fillStyle = `rgba(244,234,210,${0.3 + rnd() * 0.7})`;
+        this.ctx.fillRect(x, y, 1.8, 1.8);
       }
-      ctx.strokeStyle = TRANG;
-      ctx.lineWidth = 2;
       for (let i = 0; i < 9; i++) {
-        const x = W * 0.3 + i * W * 0.05;
-        const y = y0 + Math.sin(i / 8 * Math.PI) * -26 + 10;
-        ctx.beginPath();
-        ctx.moveTo(x - 7, y - 2);
-        ctx.quadraticCurveTo(x - 3, y - 6, x, y);
-        ctx.quadraticCurveTo(x + 3, y - 6, x + 7, y - 2);
-        ctx.stroke();
+        const u = i / 8;
+        const x = W * (0.18 + u * 0.64);
+        const y = y0 - Math.sin(u * Math.PI) * 46 + (u - 0.5) * -40;
+        this.put(A.magpie, x, y + Math.sin(this.t * 2 + i) * 2, W * 0.11);
       }
     }
   }
 
   private drawGround() {
     const { ctx, W, H } = this;
+    const A = ART!;
     const yg = this.y(-0.55);
     if (yg > H + 10) return;
-    // Bamboo grove on the left: leaning culms with leaf clumps, at most ~130px tall.
-    const gh = Math.min(130, H * 0.16);
-    const top = yg - gh;
-    for (let i = 0; i < 9; i++) {
-      const bx = W * 0.02 + i * W * 0.045;
-      const lean = Math.sin(this.t * 1.1 + i * 0.7) * 4 + (i - 4) * 2;
-      const h = gh * (0.7 + 0.3 * Math.abs(Math.sin(i * 2.3)));
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(bx, yg);
-      ctx.quadraticCurveTo(bx + lean * 0.3, yg - h * 0.5, bx + lean, yg - h);
-      ctx.stroke();
-    }
-    ctx.fillStyle = LA;
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 6; i++) {
-      const cx = W * 0.05 + i * W * 0.07 + Math.sin(this.t * 1.1 + i) * 3;
-      const cy = top + gh * 0.18 + Math.abs(Math.sin(i * 1.9)) * gh * 0.25;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, W * 0.06, gh * 0.16, Math.sin(i) * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    }
-    // Communal house roof on the right.
-    const ry = yg - Math.min(70, gh * 0.55);
-    ctx.fillStyle = SON;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.58, yg - (yg - ry) * 0.35);
-    ctx.quadraticCurveTo(W * 0.62, ry, W * 0.68, ry);
-    ctx.lineTo(W * 0.9, ry);
-    ctx.quadraticCurveTo(W * 0.96, ry, W * 1.0, yg - (yg - ry) * 0.35);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#e9dcbc';
-    ctx.fillRect(W * 0.62, yg - (yg - ry) * 0.35, W * 0.34, (yg - ry) * 0.35);
-    ctx.strokeRect(W * 0.62, yg - (yg - ry) * 0.35, W * 0.34, (yg - ry) * 0.35);
-    // Fields.
+    // Bamboo grove on the left and the village đình on the right, standing on the field line.
+    this.put(A.bamboo, W * 0.24, yg + 4, Math.min(W * 0.56, 300), 0.5, 1);
+    this.put(A.dinh, W * 0.76, yg + 2, Math.min(W * 0.56, 320), 0.5, 1);
     ctx.fillStyle = LA;
     ctx.fillRect(0, yg, W, H - yg + 10);
-    ctx.strokeStyle = 'rgba(244,234,210,.25)';
+    ctx.strokeStyle = 'rgba(244,234,210,.22)';
     ctx.lineWidth = 1;
-    for (let i = 1; i < 6; i++) {
+    for (let i = 1; i < 7; i++) {
       const y = yg + i * 14;
       ctx.beginPath();
       ctx.moveTo(0, y);
@@ -448,7 +379,7 @@ export class SkyScene {
       ctx.stroke();
     }
     ctx.strokeStyle = INK;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(0, yg);
     ctx.lineTo(W, yg);
@@ -462,7 +393,8 @@ export class SkyScene {
     ctx.strokeStyle = this.camL >= 4.3 ? 'rgba(244,234,210,.6)' : 'rgba(31,27,22,.5)';
     ctx.lineWidth = 2;
     const yk0 = this.H * this.layout.kiteY;
-    const r0 = Math.max(120, yk0 - H * 0.2);
+    const sunVisible = this.camL < 4.2;
+    const r0 = Math.max(sunVisible ? H * 0.085 + Math.min(W, H) * 0.16 + 10 : 120, yk0 - H * 0.2);
     const r1 = Math.min(H * 0.6, yk0 + H * 0.28);
     ctx.beginPath();
     ctx.moveTo(x, r0);

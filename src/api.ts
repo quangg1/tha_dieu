@@ -81,6 +81,9 @@ export const api = {
     pending: (token: string) => call<{ stats: Record<string, number>; pending: { question_id: string; prompt: string; key: string; display: string; plays: number }[] }>('admin/pending', undefined, { 'x-admin-token': token }),
     review: (token: string, b: { questionId: string; key: string; decision: 'approve' | 'reject'; tier?: number }) =>
       call<{ ok: boolean }>('admin/review', b, { 'x-admin-token': token }),
+    queue: (token: string) => call<{ queue: { question_id: string; prompt: string; input_key: string; display: string; n: number }[] }>('admin/queue', undefined, { 'x-admin-token': token }),
+    decide: (token: string, b: { questionId: string; inputKey: string; decision: 'accept' | 'dismiss'; display?: string; tier?: number }) =>
+      call<{ ok: boolean }>('admin/decide', b, { 'x-admin-token': token }),
     setup: (token: string) => call<{ questions: number }>('setup', {}, { 'x-admin-token': token }),
   },
 };

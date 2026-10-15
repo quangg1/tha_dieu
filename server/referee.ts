@@ -11,6 +11,14 @@ export type Referee = (prompt: string, note: string | undefined, input: string) 
 
 let client: Anthropic | null = null;
 
+/** Used when no API key is set: every unknown answer goes to the review queue. */
+export const nullReferee: Referee = async () => null;
+
+/** The Claude referee when ANTHROPIC_API_KEY is set, otherwise the review queue. */
+export function pickReferee(): Referee {
+  return process.env.ANTHROPIC_API_KEY ? claudeReferee : nullReferee;
+}
+
 export const claudeReferee: Referee = async (prompt, note, input) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;

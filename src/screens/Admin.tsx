@@ -3,6 +3,7 @@ import { TIERS } from '../../shared/scoring.js';
 import { api } from '../api';
 
 type Pending = { question_id: string; prompt: string; key: string; display: string; plays: number };
+type Queued = { question_id: string; prompt: string; input_key: string; display: string; n: number };
 
 /** Small moderation page at /#admin: set up the database and review answers the Claude referee accepted. */
 export default function Admin({ onExit }: { onExit: () => void }) {
@@ -10,12 +11,15 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   const [data, setData] = useState<{ stats: Record<string, number>; pending: Pending[] } | null>(null);
   const [msg, setMsg] = useState('');
   const [tiers, setTiers] = useState<Record<string, number>>({});
+  const [queue, setQueue] = useState<Queued[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
 
   const load = async () => {
     setMsg('');
     try {
       sessionStorage.setItem('thadieu.admin', token);
       setData(await api.admin.pending(token));
+      setQueue((await api.admin.queue(token)).queue);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Lỗi');
     }
@@ -35,6 +39,16 @@ export default function Admin({ onExit }: { onExit: () => void }) {
     try {
       await api.admin.review(token, { questionId: p.question_id, key: p.key, decision, tier: tiers[p.question_id + p.key] });
       setData((d) => d && { ...d, pending: d.pending.filter((x) => !(x.question_id === p.question_id && x.key === p.key)) });
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Lỗi');
+    }
+  };
+
+  const decideQueued = async (x: Queued, decision: 'accept' | 'dismiss') => {
+    const id = x.question_id + x.input_key;
+    try {
+      await api.admin.decide(token, { questionId: x.question_id, inputKey: x.input_key, decision, display: names[id] ?? x.display, tier: tiers[id] ?? 4 });
+      setQueue((q) => q.filter((y) => !(y.question_id === x.question_id && y.input_key === x.input_key)));
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Lỗi');
     }
@@ -63,8 +77,50 @@ export default function Admin({ onExit }: { onExit: () => void }) {
             <section className="gd-paper">
               <div className="gd-label">Hôm nay</div>
               <p style={{ margin: '6px 0 0' }}>
-                {data.stats.players} người đã hoàn thành chuyến bay · {data.stats.answers} câu trả lời · {data.stats.questions} câu hỏi đang dùng · {data.stats.pending} đáp án chờ duyệt
+                {data.stats.players} người đã hoàn thành chuyến bay · {data.stats.answers} câu trả lời · {data.stats.questions} câu hỏi đang dùng · {data.stats.queued} đáp án người chơi chờ xem · {data.stats.pending} đáp án Claude chờ duyệt
               </p>
+            </section>
+            <section className="gd-paper">
+              <div className="gd-label" style={{ marginBottom: 4 }}>Đáp án người chơi gõ mà sổ chưa có</div>
+              <p className="gd-msg" style={{ margin: '0 0 8px' }}>
+                Sửa tên cho đúng chính tả rồi bấm Nhận để thêm vào sổ. Nếu đó là cách viết khác của một đáp án đã có, gõ đúng tên đáp án đó: hệ thống sẽ ghép làm biệt danh.
+              </p>
+              {queue.length === 0 ? (
+                <p className="gd-msg" style={{ margin: 0 }}>Hàng chờ đang trống.</p>
+              ) : (
+                <div className="tbl">
+                  <table>
+                    <thead>
+                      <tr><th>Câu hỏi</th><th>Đáp án</th><th>Lượt gõ</th><th>Hạng</th><th /></tr>
+                    </thead>
+                    <tbody>
+                      {queue.map((x) => {
+                        const id = x.question_id + x.input_key;
+                        return (
+                          <tr key={id}>
+                            <td>{x.prompt}</td>
+                            <td>
+                              <label className="sr" htmlFor={`n-${id}`}>Tên đáp án</label>
+                              <input id={`n-${id}`} className="gd-input" style={{ fontSize: 15, minHeight: 36 }} value={names[id] ?? x.display} onChange={(e) => setNames((m) => ({ ...m, [id]: e.target.value }))} />
+                            </td>
+                            <td>{x.n}</td>
+                            <td>
+                              <label className="sr" htmlFor={`q-${id}`}>Hạng gốc</label>
+                              <select id={`q-${id}`} defaultValue={4} onChange={(e) => setTiers((t) => ({ ...t, [id]: Number(e.target.value) }))}>
+                                {TIERS.slice(0, 5).map((t) => <option key={t.index} value={t.index}>{t.name}</option>)}
+                              </select>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <button className="gd-chip" onClick={() => decideQueued(x, 'accept')}>Nhận</button>{' '}
+                              <button className="gd-chip" onClick={() => decideQueued(x, 'dismiss')}>Bỏ</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
             <section className="gd-paper">
               <div className="gd-label" style={{ marginBottom: 8 }}>Đáp án trọng tài Claude đã công nhận, chờ duyệt</div>
