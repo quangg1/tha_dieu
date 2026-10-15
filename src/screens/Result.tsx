@@ -45,8 +45,21 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const d = new Date(Date.now() + 7 * 3600_000);
   const share = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
-    const title = mode === 'daily' ? `Thả Diều ${d.getUTCDate()}/${d.getUTCMonth() + 1}` : 'Thả Diều · Thả đêm';
-    return `${title} 🪁\nDiều bay ${formatAlt(result.altitude)} · ${reached.alt ? `qua ${reached.name}` : 'còn sát bãi cỏ'}\n${grid}\n${location.origin}`;
+    const title = mode === 'daily' ? `🪁 Thả Diều ${d.getUTCDate()}/${d.getUTCMonth() + 1}` : '🪁 Thả Diều · Thả đêm';
+    const moons = result.grid.split('').filter((c) => c === '5').length;
+    const brag = [
+      result.players > 1 ? `cao hơn ${result.beaten}% người chơi` : '',
+      moons ? `${moons} đáp án Cung Trăng` : '',
+    ].filter(Boolean);
+    return [
+      title,
+      `Diều bay ${formatAlt(result.altitude)} · ${reached.alt ? `qua ${reached.name}` : 'còn sát bãi cỏ'}`,
+      brag.length ? brag.join(' · ') : '',
+      grid,
+      location.origin,
+    ]
+      .filter(Boolean)
+      .join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 

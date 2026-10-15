@@ -16,11 +16,11 @@ export interface Tier {
 }
 
 export const TIERS: readonly Tier[] = [
-  { index: 0, name: 'Sáo đơn', points: 10, flutes: 1, wind: 3, css: 'sao-don', emoji: '⬜', meaning: 'ai cũng nghĩ ra', line: 'Cả làng cùng nghĩ ra câu này. Diều chỉ nhích lên chút xíu.' },
-  { index: 1, name: 'Sáo đôi', points: 25, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🟩', meaning: 'khá phổ biến', line: 'Vững gió, nhưng hàng xóm cũng thả được con này.' },
-  { index: 2, name: 'Sáo ba', points: 45, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🟦', meaning: 'ít người nghĩ tới', line: 'Tiếng sáo bắt đầu vang qua lũy tre.' },
-  { index: 3, name: 'Sáo bảy', points: 65, flutes: 7, wind: 8, css: 'sao-bay', emoji: '🟨', meaning: 'hiếm', line: 'Cả xóm ngẩng lên nhìn.' },
-  { index: 4, name: 'Sáo chín', points: 80, flutes: 9, wind: 10, css: 'sao-chin', emoji: '🟥', meaning: 'rất hiếm', line: 'Hiếm lắm mới có cánh diều bay cao thế này.' },
+  { index: 0, name: 'Là là', points: 10, flutes: 1, wind: 3, css: 'sao-don', emoji: '🌾', meaning: 'ai cũng nghĩ ra', line: 'Ai cũng nghĩ ra câu này nên diều chỉ là là.' },
+  { index: 1, name: 'Lưng chừng', points: 25, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🎋', meaning: 'khá phổ biến', line: 'Câu này khá quen, hàng xóm cũng nghĩ ra.' },
+  { index: 2, name: 'Bay bổng', points: 45, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🕊️', meaning: 'ít người nghĩ tới', line: 'Ít người nghĩ tới. Gió bắt đầu nâng diều.' },
+  { index: 3, name: 'Chót vót', points: 65, flutes: 7, wind: 8, css: 'sao-bay', emoji: '⛰️', meaning: 'hiếm', line: 'Câu hiếm. Cả xóm ngẩng đầu nhìn.' },
+  { index: 4, name: 'Tít mây xanh', points: 80, flutes: 9, wind: 10, css: 'sao-chin', emoji: '☁️', meaning: 'rất hiếm', line: 'Hiếm lắm mới có người nghĩ ra câu này.' },
   { index: 5, name: 'Cung Trăng', points: 100, flutes: 9, wind: 14, css: 'cung-trang', emoji: '🌕', meaning: 'đáp án ẩn duy nhất', line: 'Một trong một triệu. Chú Cuội vẫy tay chào!' },
 ];
 
@@ -45,7 +45,7 @@ export function tierFromCounts(priorTier: number, count: number, total: number):
   return 4;
 }
 
-/** Bonus for consecutive answers at Sáo ba or rarer. */
+/** Bonus for consecutive answers at Bay bổng or rarer. */
 export function streakBonus(streak: number): number {
   return Math.min(20, Math.max(0, 5 * (streak - 1)));
 }
