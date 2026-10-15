@@ -2,6 +2,26 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
+import { BANK } from '../shared/bank.js';
+
+let ready: Promise<void> | null = null;
+
+/** Creates the tables and loads the question bank the first time a server instance meets an empty or older database. */
+function ensureReady(db: Db) {
+  ready ??= (async () => {
+    let n = 0;
+    try {
+      n = (await db.query<{ n: number }>(`select count(*)::int as n from questions`))[0].n;
+    } catch {
+      n = 0;
+    }
+    if (n < BANK.length) await S.setup(db);
+  })().catch((e) => {
+    ready = null;
+    throw e;
+  });
+  return ready;
+}
 
 export interface Req extends IncomingMessage {
   body?: unknown;
@@ -151,6 +171,7 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
   try {
     const body = req.method === 'POST' ? await readBody(req) : {};
     const db = opts.db ?? (await getDb());
+    if (!opts.db) await ensureReady(db);
     const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin });
     send(res, 200, data);
   } catch (e) {
