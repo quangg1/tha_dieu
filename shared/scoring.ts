@@ -4,7 +4,7 @@ export interface Tier {
   index: TierIndex;
   name: string;
   points: number;
-  /** Order by rarity; Khôn lỏi sits between Là là and Lưng chừng. */
+  /** Order by rarity; Khôn lỏi sits between Tà tà and Lưng chừng. */
   rank: number;
   /** Number of flutes that sing when this tier is struck. */
   flutes: number;
@@ -19,7 +19,7 @@ export interface Tier {
 
 /** Indices are stored in the database, so a new tier gets a new index rather than shifting the others. */
 export const TIERS: readonly Tier[] = [
-  { index: 0, name: 'Là là', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '🌾', meaning: 'ai cũng nghĩ ra', line: 'Câu ai cũng buột miệng.' },
+  { index: 0, name: 'Tà tà', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '🌾', meaning: 'ai cũng nghĩ ra', line: 'Câu ai cũng buột miệng.' },
   { index: 1, name: 'Lưng chừng', points: 25, rank: 2, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🎋', meaning: 'khá phổ biến', line: 'Ổn. Bay cùng cả làng.' },
   { index: 2, name: 'Bay bổng', points: 45, rank: 3, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🕊️', meaning: 'ít người nghĩ tới', line: 'Ít ai nghĩ tới. Gió đẹp.' },
   { index: 3, name: 'Chót vót', points: 65, rank: 4, flutes: 7, wind: 8, css: 'sao-bay', emoji: '⛰️', meaning: 'hiếm', line: 'Hiếm thật. Cả xóm ngước nhìn.' },
@@ -52,7 +52,7 @@ export interface DayBand {
 
 /** The day's title, by total score. */
 export const DAY_BANDS: readonly DayBand[] = [
-  { min: 0, tier: 0, verdict: 'Là là. Trời còn rộng lắm.' },
+  { min: 0, tier: 0, verdict: 'Tà tà. Trời còn rộng lắm.' },
   { min: 150, tier: 1, verdict: 'Lưng chừng. Bay cùng cả làng.' },
   { min: 260, tier: 2, verdict: 'Bay bổng. Qua khỏi lũy tre. Khá đấy.' },
   { min: 370, tier: 3, verdict: 'Chót vót. Cả xóm ngước nhìn.' },

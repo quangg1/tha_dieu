@@ -244,7 +244,7 @@ class FluteEngine {
     }
   }
 
-  /** The flutes of a tier join the music: 1 flute for Là là up to 9 in harmony for Tít mây xanh and Cung Trăng. */
+  /** The flutes of a tier join the music: 1 flute for Tà tà up to 9 in harmony for Tít mây xanh and Cung Trăng. */
   strike(flutes: number, moon = false) {
     const ctx = this.ctx;
     if (!ctx) return;
