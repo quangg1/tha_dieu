@@ -100,7 +100,7 @@ export interface Milestone {
   alt: number;
   name: string;
   note?: string;
-  kind: 'ground' | 'bamboo' | 'stork' | 'cloud' | 'mountain' | 'plane' | 'strato' | 'edge' | 'station' | 'satellite' | 'moon' | 'planet' | 'cloud-oort' | 'river';
+  kind: 'ground' | 'bamboo' | 'stork' | 'cloud' | 'balloon' | 'plane' | 'strato' | 'edge' | 'station' | 'satellite' | 'moon' | 'planet' | 'cloud-oort' | 'river';
 }
 
 const LY = 9.4607e15;
@@ -108,18 +108,20 @@ export const MILESTONES: readonly Milestone[] = [
   { alt: 0, name: 'Bãi cỏ', note: 'nơi bắt đầu', kind: 'ground' },
   { alt: 15, name: 'Ngọn tre đầu làng', kind: 'bamboo' },
   { alt: 120, name: 'Đàn cò trắng', kind: 'stork' },
-  { alt: 1000, name: 'Tầng mây', kind: 'cloud' },
-  { alt: 3143, name: 'Đỉnh Fansipan', kind: 'mountain' },
+  { alt: 1000, name: 'Tầng mây', note: 'bên dưới là biển mây', kind: 'cloud' },
+  { alt: 3000, name: 'Khinh khí cầu', note: 'trôi trên biển mây', kind: 'balloon' },
   { alt: 10000, name: 'Máy bay chở khách', kind: 'plane' },
-  { alt: 30000, name: 'Tầng bình lưu', kind: 'strato' },
-  { alt: 100000, name: 'Đường Kármán', note: 'bờ vũ trụ', kind: 'edge' },
+  { alt: 30000, name: 'Bóng thám không', note: 'tầng bình lưu', kind: 'strato' },
+  { alt: 100000, name: 'Bờ vũ trụ', note: 'cực quang, đường Kármán', kind: 'edge' },
   { alt: 400000, name: 'Trạm vũ trụ quốc tế', kind: 'station' },
   { alt: 35786000, name: 'Vệ tinh Vinasat', note: 'quỹ đạo địa tĩnh', kind: 'satellite' },
   { alt: 384400000, name: 'Cung Trăng', note: 'chú Cuội, chị Hằng, cây đa', kind: 'moon' },
+  { alt: 4.2e10, name: 'Sao Kim', note: 'lúc gần Trái Đất nhất', kind: 'planet' },
   { alt: 2.25e11, name: 'Sao Hỏa', kind: 'planet' },
   { alt: 7.8e11, name: 'Sao Mộc', kind: 'planet' },
+  { alt: 1.43e12, name: 'Sao Thổ', kind: 'planet' },
   { alt: 4.5e12, name: 'Sao Hải Vương', kind: 'planet' },
-  { alt: LY, name: 'Đám mây Oort', kind: 'cloud-oort' },
+  { alt: LY, name: 'Sao chổi', note: 'đám mây Oort', kind: 'cloud-oort' },
   { alt: 26000 * LY, name: 'Sông Ngân', note: 'nơi Ngưu Lang gặp Chức Nữ', kind: 'river' },
 ];
 
@@ -141,6 +143,13 @@ export function crossed(from: number, to: number): Milestone | null {
 }
 
 /** Vietnamese-formatted altitude: metres under 10 km, then km, then triệu/tỷ km, then năm ánh sáng. */
+/** Altitude split into number and unit, for displays that set the unit smaller. */
+export function formatAltParts(alt: number): [string, string] {
+  const s = formatAlt(alt);
+  const i = s.indexOf(' ');
+  return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + 1)];
+}
+
 export function formatAlt(alt: number): string {
   const vi = (n: number, d = 0) => n.toLocaleString('vi-VN', { maximumFractionDigits: d, minimumFractionDigits: 0 });
   if (alt < 1) return '0 m';

@@ -256,6 +256,46 @@ class FluteEngine {
     this.nextAt = Math.max(this.nextAt, at + 1.2);
   }
 
+  /** A plucked note, like a đàn tranh string, rising one pentatonic step per rung of the rarity ladder. */
+  step(i: number) {
+    const ctx = this.ctx;
+    if (!ctx || !this._on) return;
+    const at = ctx.currentTime + 0.01;
+    const hz = degreeHz(5 + [0, 1, 2, 3, 4, 5, 6][Math.max(0, Math.min(6, i))] * 1);
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(hz * 1.01, at);
+    o.frequency.exponentialRampToValueAtTime(hz, at + 0.05);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.22, at + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
+    o.connect(g);
+    g.connect(this.dry);
+    g.connect(this.wet);
+    o.start(at);
+    o.stop(at + 0.55);
+    this.bell(hz * 2, at, 0.12);
+  }
+
+  /** Khôn lỏi: the climb collapses with a comic downward slide. */
+  boing() {
+    const ctx = this.ctx;
+    if (!ctx || !this._on) return;
+    const at = ctx.currentTime;
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(degreeHz(9), at);
+    o.frequency.exponentialRampToValueAtTime(degreeHz(1), at + 0.45);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.2, at);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.55);
+    o.connect(g);
+    g.connect(this.dry);
+    o.start(at);
+    o.stop(at + 0.6);
+  }
+
   /** A wrong answer: a short low slide. */
   wrong() {
     const ctx = this.ctx;

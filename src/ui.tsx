@@ -93,7 +93,13 @@ export function MilestoneBanner({ m, alt, dark }: { m: Milestone; alt: string; d
 function MilestoneIcon({ kind }: { kind: Milestone['kind'] }) {
   const ink = { stroke: 'var(--than)', strokeWidth: 2, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
   const shapes: Partial<Record<Milestone['kind'], ReactNode>> = {
-    mountain: <path d="M2 26 L12 8 L17 15 L22 3 L32 26 Z" fill="var(--la)" {...ink} />,
+    balloon: (
+      <>
+        <path d="M17 3 C 28 3, 31 12, 30 17 C 29 22, 22 26, 20 29 L 14 29 C 12 26, 5 22, 4 17 C 3 12, 6 3, 17 3 Z" fill="var(--son)" {...ink} />
+        <path d="M17 3 C 13 10, 13 22, 15 29 M17 3 C 21 10, 21 22, 19 29" fill="none" stroke="var(--hoe)" strokeWidth={2} />
+        <rect x="13" y="29" width="8" height="4" fill="var(--than-70)" />
+      </>
+    ),
     cloud: <rect x="3" y="11" width="28" height="12" rx="6" fill="var(--diep-100)" {...ink} />,
     plane: <path d="M2 17 L28 15 C 33 15, 33 19, 28 19 L2 18 Z M14 16 L8 6 L12 6 L20 16 Z M14 18 L8 28 L12 28 L20 18 Z" fill="var(--diep-100)" {...ink} />,
     moon: <><circle cx="17" cy="17" r="13" fill="var(--diep-100)" {...ink} /><path d="M15 26 L15 17 M9 18 C 9 11, 23 11, 23 18 Z" fill="var(--la)" {...ink} /></>,

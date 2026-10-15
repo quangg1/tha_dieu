@@ -1,21 +1,24 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import {
   NIGHT_MAX_SECONDS,
   NIGHT_START_SECONDS,
   QUESTION_SECONDS,
   CUNG_TRANG,
+  KHON_LOI,
   TIERS,
   altitudeFor,
   rankOf,
   crossed,
   formatAlt,
+  formatAltParts,
   type Milestone,
 } from '../../shared/scoring.js';
 import { api, ApiError, type AnswerResult, type FinishResult, type PublicQuestion } from '../api';
 import { flute } from '../audio/flute';
+import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { playerId, prefs, recordFlight, saveToday, today, vnDay, type LocalRow } from '../store';
-import { BackIcon, MilestoneBanner, Seal } from '../ui';
+import { BackIcon } from '../ui';
 
 export interface Summary {
   mode: 'daily' | 'night';
@@ -23,7 +26,7 @@ export interface Summary {
   result: FinishResult;
 }
 
-type Phase = 'loading' | 'intro' | 'asking' | 'judging' | 'result' | 'error';
+type Phase = 'loading' | 'intro' | 'asking' | 'judging' | 'reveal' | 'result' | 'error';
 
 interface Outcome {
   kind: 'landed' | 'nothing' | 'late';
@@ -36,9 +39,22 @@ interface Outcome {
   judged?: boolean;
   reason?: string;
   altitude: number;
+  milestone?: Milestone | null;
+}
+
+interface Reveal {
+  text: string;
+  tier: number;
+  /** Highest ladder rung reached so far, -1 before the climb starts. */
+  step: number;
+  /** Khôn lỏi: the climb collapsed back to the bottom. */
+  fell: boolean;
 }
 
 const INTRO_SECONDS = 3;
+/** Rungs of the rarity ladder from the bottom: Tà tà, Lưng chừng, Bay bổng, Chót vót, Tít mây xanh, Cung Trăng. */
+const LADDER = [0, 1, 2, 3, 4, 5];
+const LEVELS = ['', 'gió nhẹ', 'gió vừa', 'gió mạnh'];
 
 export function musicLevel(alt: number) {
   const L = Math.log10(Math.max(1, alt));
@@ -46,17 +62,73 @@ export function musicLevel(alt: number) {
 }
 
 function WindDial({ left, total }: { left: number; total: number }) {
-  const r = 22;
+  const r = 20;
   const c = 2 * Math.PI * r;
   const p = Math.max(0, Math.min(1, left / total));
   const low = left <= 5;
   return (
     <div className={`dial${low ? ' low' : ''}`} role="timer" aria-label={`Còn ${Math.max(0, Math.ceil(left))} giây gió`}>
-      <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
-        <circle cx="28" cy="28" r={r} fill="none" stroke="var(--diep-300)" strokeWidth="5" />
-        <circle cx="28" cy="28" r={r} fill="none" stroke={low ? 'var(--son)' : 'var(--cham)'} strokeWidth="5" strokeDasharray={`${c * p} ${c}`} strokeLinecap="round" transform="rotate(-90 28 28)" />
+      <svg width="50" height="50" viewBox="0 0 50 50" aria-hidden="true">
+        <circle cx="25" cy="25" r={r} fill="none" stroke="#e6ebf1" strokeWidth="5" />
+        <circle cx="25" cy="25" r={r} fill="none" stroke={low ? '#e5533d' : '#3a8fd8'} strokeWidth="5" strokeDasharray={`${c * p} ${c}`} strokeLinecap="round" transform="rotate(-90 25 25)" />
       </svg>
       <span>{Math.max(0, Math.ceil(left))}</span>
+    </div>
+  );
+}
+
+/** Animated number for the HUD. */
+function useRoll(value: number) {
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = from.current;
+    if (start === value) return;
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / 900);
+      const v = start + (value - start) * (1 - Math.pow(1 - p, 3));
+      setShown(v);
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else from.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      from.current = value;
+    };
+  }, [value]);
+  return shown;
+}
+
+/** The rarity ladder: six rungs from Tà tà to Cung Trăng, lit one by one as an answer climbs. */
+function Ladder({ step, tier, fell, side, done }: { step: number; tier: number | null; fell: boolean; side?: boolean; done?: boolean }) {
+  const khon = tier === KHON_LOI;
+  return (
+    <div className={`ladder${side ? ' ladder--side' : ''}${fell ? ' ladder--fell' : ''}`} aria-hidden="true">
+      {side && <span className="ladder-k">Độ hiếm</span>}
+      <ol>
+        {[...LADDER].reverse().map((t) => {
+          const i = LADDER.indexOf(t);
+          const lit = i <= step;
+          const here = i === step && step >= 0;
+          const final = done && here && !khon;
+          return (
+            <li key={t} className={`rung${lit ? ' lit' : ''}${here ? ' here' : ''}${final ? ' final' : ''}`} style={{ '--c': TIER_COLOR[t] } as CSSProperties}>
+              <TierIcon tier={t} size={side ? 30 : 28} />
+              <span className="rung-name">{TIERS[t].name}</span>
+              <span className="rung-pts">{TIERS[t].points}</span>
+            </li>
+          );
+        })}
+      </ol>
+      {fell && (
+        <div className="ladder-khon" style={{ '--c': TIER_COLOR[KHON_LOI] } as CSSProperties}>
+          <TierIcon tier={KHON_LOI} size={28} />
+          <span>Khôn lỏi · {TIERS[KHON_LOI].points}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -80,7 +152,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const [score, setScore] = useState(0);
   const scoreRef = useRef(0);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
-  const [banner, setBanner] = useState<{ m: Milestone; key: number } | null>(null);
+  const [reveal, setReveal] = useState<Reveal | null>(null);
   const [quitArmed, setQuitArmed] = useState(false);
   const [notice, setNotice] = useState('');
   const seen = useRef<string[]>([]);
@@ -88,16 +160,42 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const inputRef = useRef<HTMLInputElement>(null);
   const autoNext = useRef<number | null>(null);
   const finishing = useRef(false);
+  const timers = useRef<number[]>([]);
+  const skipReveal = useRef<(() => void) | null>(null);
 
   const altitude = altitudeFor(score);
-  const dark = Math.log10(Math.max(1, altitude)) >= 4.3;
+  const shownScore = useRoll(score);
+  const shownAlt = useRoll(altitude);
+  const dark = Math.log10(Math.max(1, altitudeFor(shownScore))) >= 4.3;
+  const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const hudRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // The scene keeps the kite and the ruler below the HUD, whatever height it wraps to.
+    const el = hudRef.current;
+    const fit = () => {
+      // Short landscape phones: the kite flies on the left so the prompt keeps the middle of the screen.
+      const land = window.innerHeight < 560 && window.innerWidth > window.innerHeight * 1.4 && window.innerWidth < 1100;
+      sky.setLayout({ ...LAYOUTS.play, top: el ? Math.round(el.getBoundingClientRect().bottom) : LAYOUTS.play.top, ...(land ? { kiteX: 0.12, kiteY: 0.5, kiteSize: 0.3, text: [0, 1] as [number, number] } : {}) });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (el) ro.observe(el);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [sky]);
 
   useEffect(() => {
-    sky.setLayout(LAYOUTS.play);
     sky.setAltitude(0, false);
     sky.setFlutes(1);
     flute.setLevel(1);
-    return () => sky.setNervous(false);
+    return () => {
+      sky.setNervous(false);
+      timers.current.forEach(clearTimeout);
+    };
   }, [sky]);
 
   const pushRow = (r: LocalRow) => {
@@ -134,11 +232,56 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2400);
   };
 
+  /** Climbs the rarity ladder rung by rung while the camera rises; resolves when the climb settles. */
+  const climb = (text: string, tier: number, after: number) =>
+    new Promise<void>((resolve) => {
+      const khon = tier === KHON_LOI;
+      const target = khon ? 3 : LADDER.indexOf(tier);
+      const k = mode === 'night' ? 0.6 : 1;
+      setReveal({ text, tier, step: -1, fell: false });
+      setPhase('reveal');
+      if (reduce) {
+        setReveal({ text, tier, step: khon ? 0 : target, fell: khon });
+        sky.setAltitude(after);
+        resolve();
+        return;
+      }
+      let t = 420 * k;
+      const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
+      for (let i = 0; i <= target; i++) {
+        at(t, () => {
+          setReveal((r) => (r ? { ...r, step: i } : r));
+          flute.step(i);
+        });
+        t += (120 + i * 75) * k;
+      }
+      if (khon) {
+        t += 260 * k;
+        at(t, () => {
+          setReveal((r) => (r ? { ...r, step: 0, fell: true } : r));
+          flute.boing();
+          sky.dip(0.9);
+        });
+        t += 520 * k;
+      } else t += 260 * k;
+      sky.setAltitude(after, true, t / 1000 + 0.5);
+      const done = () => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+        skipReveal.current = null;
+        setReveal((r) => (r ? { ...r, step: khon ? 0 : target, fell: khon } : r));
+        resolve();
+      };
+      skipReveal.current = done;
+      at(t, done);
+    });
+
   /* ------------------------------------------------ opening questions */
   /** Shows the prompt, counts down, then starts the server clock. */
   const open = useCallback(
     async (question: PublicQuestion, d: string): Promise<'open' | 'answered' | 'expired' | 'error'> => {
       setOutcome(null);
+      setReveal(null);
       setSuggest(null);
       setInput('');
       setNotice('');
@@ -312,24 +455,24 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
 
     const tier = r.tier!;
     const before = altitudeFor(scoreRef.current);
-    scoreRef.current += r.points!;
-    setScore(scoreRef.current);
-    const after = altitudeFor(scoreRef.current);
+    const after = altitudeFor(scoreRef.current + r.points!);
     const rank = rankOf(tier);
-    bestTier.current = Math.max(bestTier.current, rank);
-    sky.setFlutes(bestTier.current >= 3 ? 3 : bestTier.current >= 2 ? 2 : 1);
-    sky.setAltitude(after);
-    sky.boost(0.8 + rank * 0.12);
-    flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
-    flute.setLevel(musicLevel(after));
     const m = crossed(before, after);
-    if (m) setBanner({ m, key: Date.now() });
     if (mode === 'night') {
       leftRef.current = Math.min(NIGHT_MAX_SECONDS, leftRef.current + TIERS[tier].wind);
       setLeft(leftRef.current);
     }
     pushRow({ questionId: q.id, prompt: q.prompt, display: r.display!, tier, points: r.points! });
-    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after });
+    await climb(r.display!, tier, after);
+    scoreRef.current += r.points!;
+    setScore(scoreRef.current);
+    bestTier.current = Math.max(bestTier.current, rank);
+    sky.setFlutes(bestTier.current >= 3 ? 3 : bestTier.current >= 2 ? 2 : 1);
+    sky.boost(0.8 + rank * 0.12);
+    sky.celebrate(rank);
+    flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
+    flute.setLevel(musicLevel(after));
+    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after, milestone: m });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2600);
   };
@@ -360,115 +503,146 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   /* ------------------------------------------------ view */
   const count = list.length || 7;
   const lastDaily = mode === 'daily' && idx + 1 >= count;
+  const [altNum, altUnit] = formatAltParts(shownAlt);
+  const asking = phase === 'intro' || phase === 'asking' || phase === 'judging';
+  const sideTier = phase === 'reveal' ? reveal?.tier ?? null : phase === 'result' && outcome?.kind === 'landed' ? outcome.tier! : null;
+  const sideStep = phase === 'reveal' ? reveal?.step ?? -1 : phase === 'result' && outcome?.kind === 'landed' ? (outcome.tier === KHON_LOI ? 0 : LADDER.indexOf(outcome.tier!)) : -1;
+  const sideFell = (phase === 'reveal' && !!reveal?.fell) || (phase === 'result' && outcome?.tier === KHON_LOI);
 
   return (
-    <main className={`stage play${dark ? ' night' : ''}`}>
-      <header className="playbar">
-        <div className="playbar-in">
-          <button className="icon-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
-            <BackIcon />
-          </button>
-          <div className="stat">
-            <span className="k">Độ cao</span>
-            <span className="v">{formatAlt(altitude)}</span>
-          </div>
-          <div className="hud-mid">
-            {mode === 'daily' ? (
+    <main className={`stage play${dark ? ' night' : ''}`} onClick={() => phase === 'reveal' && skipReveal.current?.()}>
+      <header className="hud" ref={hudRef}>
+        <button className="hud-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
+          <BackIcon />
+        </button>
+        <div className="hud-panel">
+          <span className="k">Độ cao</span>
+          <span className="v">
+            {altNum}
+            <small>{altUnit}</small>
+          </span>
+        </div>
+        <div className="hud-panel mid">
+          {mode === 'daily' ? (
+            <>
               <div className="pips" aria-label={`Câu ${Math.min(idx + 1, count)} trên ${count}`}>
                 {Array.from({ length: count }, (_, i) => {
                   const r = rows.find((x) => x.questionId === list[i]?.id);
                   const tier = r?.tier;
-                  const bg = tier === undefined ? undefined : tier < 0 ? 'var(--than-70)' : `var(--tier-${TIERS[tier].css})`;
+                  const bg = tier === undefined ? undefined : tier < 0 ? '#6b7280' : TIER_COLOR[tier];
                   return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
                 })}
               </div>
-            ) : (
-              <div className="pips-text">Thả đêm · {rows.length} câu</div>
-            )}
-            {mode === 'daily' && <span className="hud-step">Câu {Math.min(idx + 1, count)}/{count}</span>}
-          </div>
-          <div className="stat right">
-            <span className="k">Điểm</span>
-            <span className="v son">{score}</span>
-          </div>
-          {soundButton}
+              <span className="k">
+                Câu {Math.min(idx + 1, count)} / {count}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="v small">{rows.length}</span>
+              <span className="k">Thả đêm</span>
+            </>
+          )}
         </div>
-        {quitArmed && <span className="knot-tag quit-tag">Bấm lần nữa để rời</span>}
+        <div className="hud-panel right">
+          <span className="k">Điểm</span>
+          <span className="v gold">{Math.round(shownScore)}</span>
+        </div>
+        <span className="hud-sound">{soundButton}</span>
+        {quitArmed && <span className="quit-tag">Bấm lần nữa để rời</span>}
       </header>
 
-      {banner && <MilestoneBanner key={banner.key} m={banner.m} alt={formatAlt(banner.m.alt)} dark={Math.log10(Math.max(1, banner.m.alt)) >= 4.3} />}
+      <Ladder side step={sideStep} tier={sideTier} fell={sideFell} done={phase === 'result'} />
 
-      <div className="play-mid">
+      <section className="play-center" aria-live="polite">
         {phase === 'error' && (
-          <section className="gd-paper gd-slip prompt-card">
-            <p className="gd-msg gd-msg--bad" style={{ margin: 0 }}>{error}</p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="gd-btn" onClick={() => location.reload()}>Thử lại</button>
-              <button className="gd-btn gd-btn--paper" onClick={onExit}>Về bãi cỏ</button>
+          <div className="block">
+            <p className="out-line">{error}</p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="pill-btn" onClick={() => location.reload()}>Thử lại</button>
+              <button className="pill-btn ghost" onClick={onExit}>Về bãi cỏ</button>
             </div>
-          </section>
+          </div>
         )}
 
-        {(phase === 'intro' || phase === 'asking' || phase === 'judging') && q && (
-          <section className="gd-paper gd-slip prompt-card" key={q.id}>
-            <span className="gd-slip__cat">{q.category}</span>
-            <span className="gd-label">
-              {mode === 'daily' ? `Câu ${idx + 1} trên ${count}` : 'Thả đêm'}
-              {q.level ? ` · ${['', 'gió nhẹ', 'gió vừa', 'gió mạnh'][q.level]}` : ''}
-            </span>
-            <h2 className="gd-slip__q">{q.prompt}</h2>
-            {q.note && <div className="gd-slip__note">{q.note}</div>}
-            <div className="prompt-sub">
-              {q.pool ? <>sổ làng có <b>{q.pool.toLocaleString('vi-VN')}</b> đáp án · </> : null}
-              đáp án càng hiếm, diều càng cao
+        {asking && q && (
+          <div className="block prompt-block" key={q.id}>
+            <div className="cue">
+              <span className="cue-cat">{q.category}</span>
+              <span className="cue-meta">
+                {mode === 'daily' ? `Câu ${idx + 1}/${count}` : 'Thả đêm'}
+                {q.level ? ` · ${LEVELS[q.level]}` : ''}
+              </span>
             </div>
-          </section>
+            <h2 className="prompt">{q.prompt}</h2>
+            {q.note && <p className="prompt-note">{q.note}</p>}
+            <p className="prompt-sub">
+              {q.pool ? (
+                <>
+                  Sổ làng có <b>{q.pool.toLocaleString('vi-VN')}</b> đáp án ·{' '}
+                </>
+              ) : null}
+              càng hiếm, diều càng cao
+            </p>
+          </div>
         )}
 
-        {phase === 'result' && outcome && q && (
-          <section className="outcome" aria-live="polite">
+        {phase === 'reveal' && reveal && (
+          <div className="block reveal-block">
+            <p className="reveal-answer">“{reveal.text}”</p>
+            <Ladder step={reveal.step} tier={reveal.tier} fell={reveal.fell} />
+            <span className="reveal-skip">chạm để xem ngay</span>
+          </div>
+        )}
+
+        {phase === 'result' && outcome && (
+          <div className={`block out-block${outcome.kind === 'landed' ? '' : ' miss'}`} style={{ '--c': outcome.kind === 'landed' ? TIER_COLOR[outcome.tier!] : '#6b7280' } as CSSProperties}>
+            <TierIcon tier={outcome.kind === 'landed' ? outcome.tier! : null} size={76} className="out-icon" />
             {outcome.kind === 'landed' ? (
               <>
-                <Seal tier={outcome.tier!} strike className="outcome-seal" extra={`+${outcome.points}`} />
-                <h2 className={`gd-print outcome-title${dark ? ' gd-print--night' : ''}`}>{TIERS[outcome.tier!].name}</h2>
-                <p className="outcome-answer">“{outcome.display}”</p>
-                <p className="outcome-pts">
-                  +{outcome.points} điểm{outcome.bonus ? ` (gồm +${outcome.bonus} chuỗi hiếm)` : ''} · diều lên {formatAlt(outcome.altitude)}
+                <h2 className="out-title">{TIERS[outcome.tier!].name}</h2>
+                <p className="out-answer">“{outcome.display}”</p>
+                <p className="out-pts">
+                  <span className="pts-badge">+{outcome.points} điểm</span>
+                  <span>diều lên {formatAlt(outcome.altitude)}</span>
                 </p>
-                <p className="outcome-line">{TIERS[outcome.tier!].line}</p>
-                {outcome.share != null && <p className="outcome-share">{outcome.share.toLocaleString('vi-VN')}% người chơi hôm nay cũng nghĩ ra câu này.</p>}
-                {outcome.judged && <p className="outcome-share">Đáp án mới, vừa được trọng tài công nhận.</p>}
+                <p className="out-line">{TIERS[outcome.tier!].line}</p>
+                <div className="chips">
+                  {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
+                  {outcome.share != null && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
+                  {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
+                  {outcome.milestone && <span className="chip mile">Vượt mốc · {outcome.milestone.name}</span>}
+                </div>
               </>
             ) : (
               <>
-                <span className="gd-seal outcome-seal" style={{ color: 'var(--than-70)' }}>{outcome.kind === 'late' ? 'Hết gió' : 'Không lên'}</span>
-                <h2 className={`gd-print outcome-title${dark ? ' gd-print--night' : ''}`}>Diều không lên</h2>
-                {outcome.input ? <p className="outcome-answer">“{outcome.input}”</p> : <p className="outcome-answer">—</p>}
-                <p className="outcome-pts">+0 điểm</p>
-                <p className="outcome-line">
-                  {outcome.kind === 'late' ? 'Gió lặng mất rồi, chưa kịp thả câu nào.' : outcome.reason || 'Không có trong sổ của làng. Đã gửi để trưởng làng xem lại.'}
+                <h2 className="out-title">{outcome.kind === 'late' ? 'Hết gió' : 'Không lên'}</h2>
+                <p className="out-answer">{outcome.input ? `“${outcome.input}”` : '—'}</p>
+                <p className="out-pts">
+                  <span className="pts-badge">+0 điểm</span>
                 </p>
+                <p className="out-line">{outcome.kind === 'late' ? 'Gió lặng mất rồi, chưa kịp thả câu nào.' : outcome.reason || 'Không có trong sổ của làng. Đã gửi để trưởng làng xem lại.'}</p>
               </>
             )}
-          </section>
+          </div>
         )}
-      </div>
+      </section>
 
       <div className="play-dock">
         {(phase === 'intro' || phase === 'loading') && (
           <div className="intro-pill" aria-live="polite">
-            {phase === 'loading' ? 'Đang đón gió…' : <>gió đang lên · đồng hồ chạy sau <b>{intro}</b></>}
+            {phase === 'loading' ? 'Đang đón gió…' : <>Gió lên sau <b>{intro}</b></>}
           </div>
         )}
         {(phase === 'asking' || phase === 'judging') && (
           <>
             {suggest && (
-              <div className="suggest" role="status">
+              <div className="toast-pill" role="status">
                 “{suggest.from}” → <b>“{suggest.to}”</b>
                 <span>bấm Thả lần nữa để chốt, hoặc sửa lại</span>
               </div>
             )}
-            {notice && <div className="suggest bad" role="status">{notice}</div>}
+            {notice && <div className="toast-pill bad" role="status">{notice}</div>}
             <form className="answer-bar" onSubmit={submit}>
               <WindDial left={left} total={mode === 'night' ? total : QUESTION_SECONDS} />
               <label htmlFor="answer" className="sr">Đáp án của bạn</label>
@@ -482,7 +656,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   if (suggest && e.target.value !== suggest.to) setSuggest(null);
                   if (notice) setNotice('');
                 }}
-                placeholder="gõ một đáp án…"
+                placeholder="Gõ một đáp án…"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}
@@ -490,15 +664,15 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 disabled={phase === 'judging'}
                 enterKeyHint="send"
               />
-              <button className="gd-btn" type="submit" disabled={phase === 'judging' || !input.trim()}>
+              <button className="send-btn" type="submit" disabled={phase === 'judging' || !input.trim()}>
                 {phase === 'judging' ? '…' : 'Thả'}
               </button>
             </form>
           </>
         )}
         {phase === 'result' && (
-          <button className="gd-btn next-btn" onClick={next} autoFocus>
-            {lastDaily ? 'Xem diều bay tới đâu' : 'Bay tiếp ▲'}
+          <button className="next-btn" onClick={next} autoFocus>
+            {lastDaily ? 'Xem diều bay tới đâu' : 'Bay tiếp'} <span aria-hidden="true">▲</span>
           </button>
         )}
       </div>
