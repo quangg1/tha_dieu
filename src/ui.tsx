@@ -12,12 +12,12 @@ export function Seal({ tier, small, strike, extra, className = '' }: { tier: num
   );
 }
 
-export function MissBox() {
+export function MissBox({ missed }: { missed?: boolean }) {
   return (
-    <span className="miss-box" aria-label="Hết gió">
-      hết
+    <span className="miss-box" aria-label={missed ? 'Không lên' : 'Hết gió'}>
+      {missed ? 'không' : 'hết'}
       <br />
-      gió
+      {missed ? 'lên' : 'gió'}
     </span>
   );
 }

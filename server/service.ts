@@ -219,18 +219,6 @@ async function currentStreak(db: Db, a: { playerId: string; day: string; mode: M
   return s;
 }
 
-async function crowd(db: Db, q: LoadedQuestion, mine: string | null) {
-  const rows = await db.query<{ answer_key: string; n: number }>(
-    `select answer_key, n from counts where question_id=$1 order by n desc`,
-    [q.id],
-  );
-  const total = rows.reduce((s, r) => s + r.n, 0);
-  const pct = (n: number) => (total ? Math.round((n / total) * 1000) / 10 : 0);
-  const top = rows.slice(0, 4).map((r) => ({ display: q.answers.get(r.answer_key)?.display ?? r.answer_key, pct: pct(r.n), mine: r.answer_key === mine }));
-  const mineRow = mine ? rows.find((r) => r.answer_key === mine) : undefined;
-  return { total, top, mine: mineRow ? pct(mineRow.n) : 0, estimated: total < 30 };
-}
-
 async function countsFor(db: Db, questionId: string, key: string) {
   const [r] = await db.query<{ c: number; t: number }>(
     `select coalesce(sum(n) filter (where answer_key=$2),0)::int as c, coalesce(sum(n),0)::int as t from counts where question_id=$1`,
@@ -304,19 +292,31 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
 }
 
 export interface AnswerResult {
-  ok: boolean;
+  /** landed: scored · nothing: not a valid answer, the prompt is over · late: the wind ran out · confirm: a near match to accept · empty: nothing typed */
+  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'empty';
+  input?: string;
+  suggestion?: string;
   reason?: string;
-  late?: boolean;
   display?: string;
   tier?: TierIndex;
   points?: number;
   bonus?: number;
   judged?: boolean;
-  crowd?: Awaited<ReturnType<typeof crowd>>;
-  krill?: string;
-  deep?: string[];
+  /** Percentage of today's players who gave the same answer, once enough people have played. */
+  share?: number | null;
 }
 
+async function closeTurn(db: Db, a: { playerId: string; day: string; mode: Mode; questionId: string }) {
+  await db.query(
+    `update turns set answered_at=now(), tier=-1, points=0 where player_id=$1 and day=$2::date and mode=$3 and question_id=$4 and answered_at is null`,
+    [a.playerId, a.day, a.mode, a.questionId],
+  );
+}
+
+/**
+ * One answer per prompt, as in Krillion: an answer the village book does not know ends the prompt with nothing.
+ * A near miss on a known answer is not scored yet; the player is shown the corrected name and submits again to accept it.
+ */
 export async function answer(
   db: Db,
   a: { playerId: string; day: string; mode: Mode; questionId: string; input: string },
@@ -324,22 +324,27 @@ export async function answer(
   now = new Date(),
 ): Promise<AnswerResult> {
   const input = String(a.input ?? '').trim().slice(0, 80);
-  if (!input) return { ok: false, reason: 'Chưa gõ đáp án.' };
+  if (!input) return { status: 'empty' };
   await ensureInSet(db, a.mode, a.day, a.questionId);
   const { late } = await openTurn(db, a, now);
   const q = await loadQuestion(db, a.questionId);
   if (late) {
-    await db.query(
-      `update turns set answered_at=now(), tier=-1, points=0 where player_id=$1 and day=$2::date and mode=$3 and question_id=$4`,
-      [a.playerId, a.day, a.mode, a.questionId],
-    );
-    return { ok: false, late: true, reason: 'Hết gió rồi.', krill: q.answers.get(q.krillKey)?.display };
+    await closeTurn(db, a);
+    return { status: 'late', input };
   }
-  let key = q.matcher.match(input)?.key ?? null;
+  const m = q.matcher.match(input);
+  if (m && !m.exact) {
+    const suggestion = q.answers.get(m.key)!.display;
+    return { status: 'confirm', input, suggestion };
+  }
+  let key = m?.key ?? null;
   let judged = false;
   if (!key) {
     const j = await judge(db, q, input, a.playerId, a.day, referee);
-    if (!j.key) return { ok: false, reason: j.reason };
+    if (!j.key) {
+      await closeTurn(db, a);
+      return { status: 'nothing', input, reason: j.reason };
+    }
     key = j.key;
     judged = true;
   }
@@ -361,45 +366,15 @@ export async function answer(
       [q.id, key],
     );
   }
-  const deep = [...q.answers.entries()]
-    .filter(([k, v]) => v.prior === 4 && v.status === 'approved' && k !== key)
-    .map(([, v]) => v.display)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
-  return {
-    ok: true,
-    display: entry.display,
-    tier,
-    points,
-    bonus,
-    judged,
-    crowd: await crowd(db, q, key),
-    krill: q.answers.get(q.krillKey)?.display,
-    deep,
-  };
+  const after = await countsFor(db, q.id, key);
+  const share = after.total >= 30 ? Math.round((after.count / after.total) * 1000) / 10 : null;
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share };
 }
 
-/** Records a question the wind ran out on. */
+/** Records a question the wind ran out on. Nothing about the answers is revealed. */
 export async function miss(db: Db, a: { playerId: string; day: string; mode: Mode; questionId: string }) {
-  await db.query(
-    `update turns set answered_at=now(), tier=-1, points=0 where player_id=$1 and day=$2::date and mode=$3 and question_id=$4 and answered_at is null`,
-    [a.playerId, a.day, a.mode, a.questionId],
-  );
-  const q = await loadQuestion(db, a.questionId);
-  return { krill: q.answers.get(q.krillKey)?.display, crowd: await crowd(db, q, null) };
-}
-
-/** The first letter and length pattern of one very rare answer: "Hỏi bà". */
-export async function hint(db: Db, questionId: string) {
-  const q = await loadQuestion(db, questionId);
-  const pool = [...q.answers.values()].filter((v) => v.prior === 4 && v.status === 'approved');
-  if (!pool.length) return { pattern: '' };
-  const pick = pool[Math.floor(Math.random() * pool.length)].display;
-  const pattern = pick
-    .split(/\s+/)
-    .map((w) => [...w].map((ch, i) => (i === 0 ? ch.toLocaleUpperCase('vi') : '_')).join(' '))
-    .join('   ');
-  return { pattern };
+  await closeTurn(db, a);
+  return { ok: true };
 }
 
 /* ------------------------------------------------------------------ runs and board */

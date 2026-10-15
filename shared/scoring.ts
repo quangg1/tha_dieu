@@ -11,15 +11,17 @@ export interface Tier {
   css: string;
   emoji: string;
   meaning: string;
+  /** One line said when the answer lands. */
+  line: string;
 }
 
 export const TIERS: readonly Tier[] = [
-  { index: 0, name: 'Sáo đơn', points: 10, flutes: 1, wind: 3, css: 'sao-don', emoji: '⬜', meaning: 'ai cũng nghĩ ra' },
-  { index: 1, name: 'Sáo đôi', points: 25, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🟩', meaning: 'khá phổ biến' },
-  { index: 2, name: 'Sáo ba', points: 45, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🟦', meaning: 'ít người nghĩ tới' },
-  { index: 3, name: 'Sáo bảy', points: 65, flutes: 7, wind: 8, css: 'sao-bay', emoji: '🟨', meaning: 'hiếm' },
-  { index: 4, name: 'Sáo chín', points: 80, flutes: 9, wind: 10, css: 'sao-chin', emoji: '🟥', meaning: 'rất hiếm' },
-  { index: 5, name: 'Cung Trăng', points: 100, flutes: 9, wind: 14, css: 'cung-trang', emoji: '🌕', meaning: 'đáp án ẩn duy nhất' },
+  { index: 0, name: 'Sáo đơn', points: 10, flutes: 1, wind: 3, css: 'sao-don', emoji: '⬜', meaning: 'ai cũng nghĩ ra', line: 'Cả làng cùng nghĩ ra câu này. Diều chỉ nhích lên chút xíu.' },
+  { index: 1, name: 'Sáo đôi', points: 25, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🟩', meaning: 'khá phổ biến', line: 'Vững gió, nhưng hàng xóm cũng thả được con này.' },
+  { index: 2, name: 'Sáo ba', points: 45, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🟦', meaning: 'ít người nghĩ tới', line: 'Tiếng sáo bắt đầu vang qua lũy tre.' },
+  { index: 3, name: 'Sáo bảy', points: 65, flutes: 7, wind: 8, css: 'sao-bay', emoji: '🟨', meaning: 'hiếm', line: 'Cả xóm ngẩng lên nhìn.' },
+  { index: 4, name: 'Sáo chín', points: 80, flutes: 9, wind: 10, css: 'sao-chin', emoji: '🟥', meaning: 'rất hiếm', line: 'Hiếm lắm mới có cánh diều bay cao thế này.' },
+  { index: 5, name: 'Cung Trăng', points: 100, flutes: 9, wind: 14, css: 'cung-trang', emoji: '🌕', meaning: 'đáp án ẩn duy nhất', line: 'Một trong một triệu. Chú Cuội vẫy tay chào!' },
 ];
 
 export const QUESTION_SECONDS = 25;

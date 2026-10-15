@@ -97,11 +97,10 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
       {howto && (
         <section className="gd-paper howto">
           <ol>
-            <li>Mỗi câu chốt <b>một đáp án đúng</b> trước khi hết gió. Gõ sai không mất lượt, chỉ mất 2 giây gió.</li>
+            <li>Mỗi câu chỉ được <b>thả một đáp án</b>. Không có đáp án đúng hay sai, chỉ có đáp án hợp lệ và đáp án hiếm.</li>
             <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm tính từ câu trả lời của mọi người chơi.</li>
-            <li>Mỗi câu giấu một <b>đáp án Cung Trăng</b> đáng 100 điểm.</li>
+            <li>Gõ nhầm chính tả? Diều sẽ hỏi lại để bạn chốt. Câu không liên quan thì diều không lên.</li>
             <li>Cứ 65 điểm, diều bay cao gấp mười lần. Bầu trời không có trần.</li>
-            <li>Đáp án lạ chưa có trong sổ sẽ được <b>trọng tài Claude</b> xem xét.</li>
             <li><b>Thả đêm</b>: 45 giây gió chung, đáp án hiếm nạp thêm gió. Bay tới khi tắt gió.</li>
           </ol>
           <div className="seal-row">

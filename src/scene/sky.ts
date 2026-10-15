@@ -72,7 +72,7 @@ export interface SkyLayout {
 
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
   home: { kiteX: 0.66, kiteY: 0.2, decade: 0.95, kiteSize: 0.3, ruler: false },
-  play: { kiteX: 0.4, kiteY: 0.36, decade: 0.3, kiteSize: 0.2, ruler: true },
+  play: { kiteX: 0.4, kiteY: 0.3, decade: 0.3, kiteSize: 0.2, ruler: true },
   result: { kiteX: 0.32, kiteY: 0.2, decade: 0.3, kiteSize: 0.16, ruler: false },
 };
 
@@ -214,6 +214,11 @@ export class SkyScene {
   }
 
   /** Draws a sprite with its width set in pixels, centred on (x, y) unless an anchor says otherwise. */
+  /** Sprite scale unit: the width on phones, capped so desktop skies don't fill up with giant clouds. */
+  private get U() {
+    return Math.min(this.W, 540);
+  }
+
   private put(sp: Art.Sprite, x: number, y: number, w: number, ax = 0.5, ay = 0.5, alpha = 1) {
     if (!sp.ready) return;
     const h = (w * sp.h) / sp.w;
@@ -228,9 +233,9 @@ export class SkyScene {
     // The Đông Sơn sun hangs in the daytime sky and fades as the kite reaches the edge of space.
     const sunA = Math.max(0, Math.min(1, (4.6 - this.camL) / 1.2));
     if (sunA > 0) {
-      const size = Math.min(W, this.H) * 0.28;
+      const size = Math.min(this.U, this.H) * 0.28;
       this.ctx.save();
-      const sx = W * 0.82;
+      const sx = W >= 900 ? Math.min(W - 120, W / 2 + 470) : W * 0.82;
       const sy = this.H * 0.085 + this.camL * 6;
       this.ctx.translate(sx, sy);
       this.ctx.rotate(this.reduce ? 0 : this.t * 0.02);
@@ -251,20 +256,20 @@ export class SkyScene {
         const x = ((this.t * 22 + i * 61) % (W + 160)) - 80;
         const y = y0 + Math.sin(i * 2.1) * 18 + Math.sin(this.t * 0.8 + i) * 4;
         const frame = Math.floor(this.t * 3 + i) % 2;
-        this.put(A.stork[frame], x, y, W * (0.13 + (i % 2) * 0.03));
+        this.put(A.stork[frame], x, y, this.U * (0.11 + (i % 2) * 0.03));
       }
     }
     // Scrolling clouds.
     for (const [i, c] of this.clouds.entries()) {
       if (!this.visible(c.L)) continue;
       const y = this.y(c.L);
-      const w = c.w * W * 1.4;
+      const w = c.w * this.U * 1.3;
       const x = ((c.x * (W + w) + this.t * (5 + (i % 3) * 2)) % (W + w)) - w / 2;
       this.put(A.clouds[i % 2], x, y, w);
     }
     // An airliner crossing at 10 km.
     if (this.visible(4)) {
-      const w = W * 0.5;
+      const w = this.U * 0.46;
       const x = ((this.t * 38) % (W + w * 2)) - w;
       this.put(A.plane, x, this.y(4), w);
     }
@@ -287,17 +292,17 @@ export class SkyScene {
     const { W, H } = this;
     const A = ART!;
     if (this.visible(5.6)) {
-      const w = W * 0.4;
+      const w = this.U * 0.4;
       const x = ((this.t * 16) % (W + w)) - w / 2;
       this.put(A.station, x, this.y(5.6), w);
     }
     if (this.visible(7.55)) {
-      const w = W * 0.46;
+      const w = this.U * 0.46;
       this.put(A.vinasat, W * 0.3 + Math.sin(this.t * 0.3) * 10, this.y(7.55), w);
     }
     // Cung Trăng: the banyan, the jade rabbit, and chú Cuội waving.
     if (this.visible(8.585, 500)) {
-      const size = Math.min(W * 0.92, H * 0.55);
+      const size = Math.min(this.U * 0.92, H * 0.55);
       const cx = W * 0.6;
       const cy = this.y(8.585);
       this.put(A.moon, cx, cy, size);
@@ -327,7 +332,7 @@ export class SkyScene {
       [11.89, A.jupiter, 0.3, 0.44],
       [12.65, A.neptune, 0.7, 0.26],
     ];
-    for (const [L, sp, fx, fw] of planets) if (this.visible(L, 220)) this.put(sp, W * fx, this.y(L), W * fw);
+    for (const [L, sp, fx, fw] of planets) if (this.visible(L, 220)) this.put(sp, W * fx, this.y(L), this.U * fw);
     // Oort cloud: drifting comets and ice.
     if (this.visible(15.98, 400)) {
       const y0 = this.y(15.98);
@@ -336,7 +341,7 @@ export class SkyScene {
       for (let i = 0; i < 160; i++) this.ctx.fillRect(rnd() * W, y0 + (rnd() - 0.5) * 260, 2, 2);
       for (let i = 0; i < 3; i++) {
         const x = ((this.t * (10 + i * 4) + i * 140) % (W + 200)) - 100;
-        this.put(A.comet, x, y0 - 80 + i * 70, W * 0.32);
+        this.put(A.comet, x, y0 - 80 + i * 70, this.U * 0.32);
       }
     }
     // Sông Ngân: a river of stars crossed by the magpie bridge of Ô Thước.
@@ -354,7 +359,7 @@ export class SkyScene {
         const u = i / 8;
         const x = W * (0.18 + u * 0.64);
         const y = y0 - Math.sin(u * Math.PI) * 46 + (u - 0.5) * -40;
-        this.put(A.magpie, x, y + Math.sin(this.t * 2 + i) * 2, W * 0.11);
+        this.put(A.magpie, x, y + Math.sin(this.t * 2 + i) * 2, this.U * 0.11);
       }
     }
   }
@@ -440,7 +445,7 @@ export class SkyScene {
     const s = size / 120;
     const nerv = this.nervous ? Math.sin(this.t * 17) * 0.05 : 0;
     const sway = this.reduce ? 0 : Math.sin(this.t * 1.6) * 0.07 + Math.sin(this.t * 0.55) * 0.05 + nerv;
-    const kx = W * L.kiteX + (this.reduce ? 0 : Math.sin(this.t * 0.8) * W * 0.02);
+    const kx = (W >= 1000 && L === LAYOUTS.play ? W / 2 - 470 : W * L.kiteX) + (this.reduce ? 0 : Math.sin(this.t * 0.8) * W * 0.02);
     const ky = H * L.kiteY + this.kite.y + (this.reduce ? 0 : Math.sin(this.t * 1.1) * 4);
     const angle = sway + this.kite.a * 0.1;
     // String: from the bridle point down past the bottom-left corner, sagging with the wind.

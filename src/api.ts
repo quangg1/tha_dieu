@@ -15,17 +15,16 @@ export interface Crowd {
 }
 
 export interface AnswerResult {
-  ok: boolean;
+  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'empty';
+  input?: string;
+  suggestion?: string;
   reason?: string;
-  late?: boolean;
   display?: string;
   tier?: TierIndex;
   points?: number;
   bonus?: number;
   judged?: boolean;
-  crowd?: Crowd;
-  krill?: string;
-  deep?: string[];
+  share?: number | null;
 }
 
 export interface FinishResult {
@@ -73,8 +72,7 @@ export const api = {
   start: (b: { playerId: string; day: string; mode: string; questionId: string }) =>
     call<{ startedAt: string; now: string; answered: boolean }>('start', b),
   answer: (b: { playerId: string; day: string; mode: string; questionId: string; input: string }) => call<AnswerResult>('answer', b),
-  miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ krill?: string; crowd: Crowd }>('miss', b),
-  hint: (questionId: string) => call<{ pattern: string }>('hint', { questionId }),
+  miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
   finish: (b: { playerId: string; day: string; mode: string; name?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
   admin: {

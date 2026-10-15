@@ -73,12 +73,6 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
       return S.miss(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionId: String(body.questionId) });
     },
   },
-  hint: {
-    method: 'POST',
-    async run({ db, body }) {
-      return S.hint(db, String(body.questionId));
-    },
-  },
   night: {
     method: 'POST',
     async run({ db, body }) {

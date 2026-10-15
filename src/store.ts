@@ -50,6 +50,8 @@ export interface LocalRow {
   display: string | null;
   tier: number;
   points: number;
+  /** What the player typed when the kite did not lift. */
+  input?: string;
 }
 
 export interface DayRecord {

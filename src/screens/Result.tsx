@@ -106,9 +106,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           <div className="rows">
             {rows.map((r) => (
               <div className="row" key={r.questionId + r.points + r.display}>
-                {r.tier >= 0 ? <Seal tier={r.tier} small /> : <MissBox />}
+                {r.tier >= 0 ? <Seal tier={r.tier} small /> : <MissBox missed={!!r.input} />}
                 <span style={{ minWidth: 0 }}>
-                  <b style={{ fontWeight: 600 }}>{r.display ?? 'Hết gió'}</b>
+                  <b style={{ fontWeight: 600 }}>{r.display ?? (r.input ? `“${r.input}”` : 'Hết gió')}</b>
                   <br />
                   <span style={{ fontSize: 13, color: 'var(--than-70)' }}>{r.prompt}</span>
                 </span>
