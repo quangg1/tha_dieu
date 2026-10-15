@@ -3,8 +3,10 @@ import {
   NIGHT_MAX_SECONDS,
   NIGHT_START_SECONDS,
   QUESTION_SECONDS,
+  CUNG_TRANG,
   TIERS,
   altitudeFor,
+  rankOf,
   crossed,
   formatAlt,
   type Milestone,
@@ -313,11 +315,12 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     scoreRef.current += r.points!;
     setScore(scoreRef.current);
     const after = altitudeFor(scoreRef.current);
-    bestTier.current = Math.max(bestTier.current, tier);
-    sky.setFlutes(bestTier.current >= 2 ? 3 : bestTier.current + 1);
+    const rank = rankOf(tier);
+    bestTier.current = Math.max(bestTier.current, rank);
+    sky.setFlutes(bestTier.current >= 3 ? 3 : bestTier.current >= 2 ? 2 : 1);
     sky.setAltitude(after);
-    sky.boost(0.8 + tier * 0.15);
-    flute.strike(TIERS[tier].flutes, tier === 5);
+    sky.boost(0.8 + rank * 0.12);
+    flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
     flute.setLevel(musicLevel(after));
     const m = crossed(before, after);
     if (m) setBanner({ m, key: Date.now() });

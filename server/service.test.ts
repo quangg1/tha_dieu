@@ -136,6 +136,30 @@ describe('runs', () => {
   });
 });
 
+describe('Khôn lỏi', () => {
+  const q = { krillKey: 'krill', traps: new Set(['tesla']) };
+  it('marks hand-picked traps until the crowd proves them rare', () => {
+    expect(S.tierFor(q, 'tesla', 2, 0, 0)).toBe(6);
+    expect(S.tierFor(q, 'tesla', 2, 1, 500)).toBe(4);
+  });
+  it('finds answers the book thought rare but many players give', () => {
+    expect(S.tierFor(q, 'other', 3, 60, 400)).toBe(6);
+    expect(S.tierFor(q, 'common', 0, 60, 400)).toBe(0);
+    expect(S.tierFor(q, 'other', 3, 0, 10)).toBe(4);
+  });
+  it('never touches the hidden answer', () => {
+    expect(S.tierFor({ krillKey: 'tesla', traps: new Set(['tesla']) }, 'tesla', 4, 300, 400)).toBe(5);
+  });
+  it('lands a trap from the book in play', async () => {
+    const p = 'player_test_0010';
+    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'nha-khoa-hoc' });
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'nha-khoa-hoc', input: 'Tesla' }, referee);
+    expect(r.status).toBe('landed');
+    expect(r.tier).toBe(6);
+    expect(r.points).toBe(15);
+  });
+});
+
 describe('vague answers', () => {
   it('asks for something specific without using up the prompt', async () => {
     const p = 'player_test_0009';

@@ -1,7 +1,7 @@
 // Every question in the game: the handcrafted bank (extended with the village book) plus questions generated from book labels.
 import { BANK } from '../bank.js';
 import { parseRaw, type QuestionDef } from '../match.js';
-import { buildSpec, extendQuestion, type Built, type Source, type Spec } from './build.js';
+import { buildSpec, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
 import { LEXICONS } from './index.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
@@ -44,6 +44,27 @@ const EXTEND: Record<string, Source[]> = {
 };
 
 const q = (id: string, c: string, text: string, from: Source[], more: Partial<Spec> = {}): Spec => ({ id, c, q: text, from, ...more });
+
+/**
+ * "Khôn lỏi" answers: the pick that feels clever but that half the village reaches for.
+ * Hand-marked here from day one; the server also finds them from play (see answer()).
+ */
+const TRAPS: Record<string, string[]> = {
+  'nha-khoa-hoc': ['Nikola Tesla'],
+  'loai-chim': ['Chim cánh cụt', 'Đà điểu'],
+  'sinh-vat-bien': ['Cá ngựa'],
+  'thu-do': ['Canberra', 'Ottawa', 'Naypyidaw'],
+  'chau-a': ['Triều Tiên'],
+  'dv-thu': ['Cá voi', 'Dơi', 'Thú mỏ vịt'],
+  'dv-bay': ['Cá chuồn', 'Sóc bay'],
+  'dv-1tieng': ['Kiến'],
+  'so-nguyen-to': ['2'],
+  'so-chinh-phuong': ['169'],
+  'tv-qua-chua': ['Cóc'],
+  'nguyen-to': ['Urani'],
+  'tg-kientruc': ['Angkor Wat'],
+  'qg-noi': ['Mông Cổ'],
+};
 
 export const SPECS: Spec[] = [
   // ---------------------------------------------------------------- Động vật
@@ -342,17 +363,18 @@ function assemble() {
   for (const raw of BANK) {
     const base = parseRaw(raw);
     const ext = EXTEND[raw.id];
-    const qd = ext ? extendQuestion(base, ext, LEXICONS) : base;
+    const qd0 = ext ? extendQuestion(base, ext, LEXICONS) : base;
+    const qd = { ...qd0, traps: resolveTraps(qd0.answers, TRAPS[raw.id]) };
     const strong = qd.answers.filter((a) => a.priorTier <= 1).length;
     out.push({ ...qd, level: qd.answers.length >= 60 && strong >= 3 ? 1 : 2, family: qd.family ?? raw.id });
   }
   const dropped: string[] = [];
   for (const spec of SPECS) {
-    const b = buildSpec(spec, LEXICONS);
+    const b = buildSpec(TRAPS[spec.id] ? { ...spec, traps: TRAPS[spec.id] } : spec, LEXICONS);
     if (b) out.push(b);
     else dropped.push(spec.id);
   }
-  out.push(...NUMBER_QUESTIONS);
+  out.push(...NUMBER_QUESTIONS.map((n) => ({ ...n, traps: resolveTraps(n.answers, TRAPS[n.id]) })));
   return { questions: out, dropped };
 }
 

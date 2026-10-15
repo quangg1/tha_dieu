@@ -2,8 +2,11 @@ import { BOOK, BOOK_BY_ID, BOOK_VERSION } from '../shared/book/questions.js';
 import { Matcher } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
+  CUNG_TRANG,
+  KHON_LOI,
   QUESTION_SECONDS,
   TIERS,
+  isRare,
   altitudeFor,
   streakBonus,
   tierFromCounts,
@@ -141,6 +144,7 @@ export interface LoadedQuestion {
   answers: Map<string, { display: string; prior: number; status: string }>;
   matcher: Matcher;
   vague: Set<string>;
+  traps: Set<string>;
 }
 
 const cache = new Map<string, { at: number; q: LoadedQuestion }>();
@@ -192,6 +196,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     answers,
     matcher,
     vague: new Set((base.vague ?? []).flatMap((v) => [soft(v), norm(v)])),
+    traps: new Set(base.traps ?? []),
   };
   cache.set(id, { at: Date.now(), q });
   return q;
@@ -256,7 +261,7 @@ async function currentStreak(db: Db, a: { playerId: string; day: string; mode: M
   );
   let s = 0;
   for (const r of rows) {
-    if (r.tier !== null && r.tier >= 2) s++;
+    if (isRare(r.tier)) s++;
     else break;
   }
   return s;
@@ -350,6 +355,22 @@ export interface AnswerResult {
   share?: number | null;
 }
 
+/** Minimum players before the crowd can call an answer Khôn lỏi on its own. */
+const KHON_LOI_MIN_PLAYERS = 30;
+
+/**
+ * The tier an answer lands at. Besides plain rarity, an answer the book expected to be uncommon but that many
+ * players give is Khôn lỏi: the pick that feels clever but that half the village reaches for.
+ */
+export function tierFor(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, count: number, total: number): TierIndex {
+  if (key === q.krillKey) return CUNG_TRANG;
+  const base = tierFromCounts(prior, count, total);
+  const enough = total >= KHON_LOI_MIN_PLAYERS;
+  if (q.traps.has(key) && (!enough || base <= 2)) return KHON_LOI;
+  if (enough && prior >= 2 && base <= 1) return KHON_LOI;
+  return base;
+}
+
 async function closeTurn(db: Db, a: { playerId: string; day: string; mode: Mode; questionId: string }) {
   await db.query(
     `update turns set answered_at=now(), tier=-1, points=0 where player_id=$1 and day=$2::date and mode=$3 and question_id=$4 and answered_at is null`,
@@ -397,8 +418,8 @@ export async function answer(
   }
   const entry = q.answers.get(key)!;
   const { count, total } = await countsFor(db, q.id, key);
-  const tier: TierIndex = key === q.krillKey ? 5 : tierFromCounts(entry.prior, count, total);
-  const streak = tier >= 2 ? (await currentStreak(db, a)) + 1 : 0;
+  const tier = tierFor(q, key, entry.prior, count, total);
+  const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
   const bonus = streakBonus(streak);
   const points = TIERS[tier].points + bonus;
   const updated = await db.query(

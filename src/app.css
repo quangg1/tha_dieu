@@ -67,6 +67,8 @@ button{font:inherit;color:inherit}
 .result-head{padding-top:42vh;display:flex;flex-direction:column;gap:2px}
 .result-alt{font-size:clamp(44px,15vw,62px);line-height:1;font-variant-numeric:tabular-nums}
 .result-note{color:var(--diep-200);max-width:32ch}
+.result-verdict{font-size:17px;font-weight:600;line-height:1.3;color:var(--diep-100);margin:4px 0 8px;max-width:30ch;text-wrap:balance}
+.result-verdict b{display:block;font-family:var(--font-display);font-weight:800;font-size:clamp(24px,6.4vw,30px);line-height:1.05;color:var(--trang)}
 .result-body{display:flex;flex-direction:column;gap:24px;padding-top:24px}
 .rows{display:flex;flex-direction:column}
 .row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-top:1px dashed var(--diep-300)}
@@ -149,4 +151,6 @@ button{font:inherit;color:inherit}
 @media (min-width:900px){.stage.play{padding-bottom:28px}.play-mid{padding-top:max(12px,calc(35dvh - 64px))}.prompt-card,.outcome{width:min(600px,100%)}.prompt-card .gd-slip__q{font-size:40px}}
 @media (prefers-reduced-motion:reduce){.prompt-card,.outcome,.dial.low span{animation:none}}
 /* Result headline sits on the open sky; a soft ink halo keeps it legible over passing clouds. */
-.result-head .gd-label,.result-head .result-alt,.result-head .result-note{text-shadow:0 1px 0 #101c3d,0 0 10px rgba(16,28,61,.9),0 0 22px rgba(16,28,61,.7)}
+.result-head .gd-label,.result-head .result-alt,.result-head .result-note,.result-head .result-verdict{text-shadow:0 1px 0 #101c3d,0 0 10px rgba(16,28,61,.9),0 0 22px rgba(16,28,61,.7)}
+
+.result-plate{display:flex;flex-direction:column;gap:2px;background:rgba(12,22,48,.78);border:2px solid rgba(244,234,210,.22);border-radius:6px;padding:14px 16px 16px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}

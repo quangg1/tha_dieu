@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BANK } from './bank.js';
 import { Matcher, parseRaw } from './match.js';
 import { norm } from './normalize.js';
-import { altitudeFor, crossed, formatAlt, tierFromCounts, streakBonus } from './scoring.js';
+import { TIERS_BY_RANK, altitudeFor, bandFor, crossed, formatAlt, isRare, tierFromCounts, streakBonus } from './scoring.js';
 
 const Q = Object.fromEntries(BANK.map((r) => [r.id, parseRaw(r)]));
 const matcher = (id: string) => new Matcher(Q[id].strip, Q[id].answers);
@@ -74,6 +74,16 @@ describe('scoring', () => {
   it('reports milestones crossed', () => {
     expect(crossed(900, 12000)?.name).toBe('Máy bay chở khách');
     expect(crossed(12000, 13000)).toBeNull();
+  });
+  it('orders tiers by rarity with Khôn lỏi second', () => {
+    expect(TIERS_BY_RANK.map((t) => t.name)).toEqual(['Là là', 'Khôn lỏi', 'Lưng chừng', 'Bay bổng', 'Chót vót', 'Tít mây xanh', 'Cung Trăng']);
+    expect(isRare(6)).toBe(false);
+    expect(isRare(2)).toBe(true);
+  });
+  it('titles the day by total score', () => {
+    expect(bandFor(0).verdict).toMatch(/^Là là/);
+    expect(bandFor(300).verdict).toMatch(/^Bay bổng/);
+    expect(bandFor(700).verdict).toMatch(/^Cung Trăng/);
   });
   it('caps the streak bonus', () => {
     expect(streakBonus(1)).toBe(0);

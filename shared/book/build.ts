@@ -31,6 +31,8 @@ export interface Spec {
   level?: number;
   /** Names of entries that should never be the hidden answer. */
   noKrill?: string[];
+  /** Names of answers that feel clever but that everyone gives: they land as Khôn lỏi. */
+  traps?: string[];
 }
 
 /** Classifier words that may be typed in front of an answer, per lexicon. */
@@ -223,6 +225,7 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
     spec.level ??
     (spec.start || spec.head || spec.syllables || items.length < 25 ? 3 : items.length >= 60 && strong >= 3 ? 1 : 2);
   return {
+    traps: resolveTraps(answers, spec.traps),
     id: spec.id,
     category: spec.c,
     prompt: spec.q,
@@ -235,6 +238,17 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
     family: lexes.join('+'),
     pool: answers.length,
   };
+}
+
+/** Keys of the answers named as traps; the hidden answer is never a trap. */
+export function resolveTraps(answers: AnswerEntry[], names: string[] = []): string[] {
+  const out: string[] = [];
+  for (const n of names) {
+    const a = answers.find((x) => x.aliases.some((al) => soft(al) === soft(n)));
+    if (!a) throw new Error(`Trap "${n}" is not an answer`);
+    if (a.priorTier !== 5) out.push(a.key);
+  }
+  return out;
 }
 
 /** Adds book entries to a handcrafted question, keeping its curated tiers and hidden answer. */

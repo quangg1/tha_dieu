@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { TIERS, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
+import { TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
 import { api, type BoardRow } from '../api';
 import { flute } from '../audio/flute';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
@@ -43,23 +43,12 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   }, []);
 
   const d = new Date(Date.now() + 7 * 3600_000);
+  const verdict = bandFor(result.score).verdict;
   const share = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
     const title = mode === 'daily' ? `🪁 Thả Diều ${d.getUTCDate()}/${d.getUTCMonth() + 1}` : '🪁 Thả Diều · Thả đêm';
-    const moons = result.grid.split('').filter((c) => c === '5').length;
-    const brag = [
-      result.players > 1 ? `cao hơn ${result.beaten}% người chơi` : '',
-      moons ? `${moons} đáp án Cung Trăng` : '',
-    ].filter(Boolean);
-    return [
-      title,
-      `Diều bay ${formatAlt(result.altitude)} · ${reached.alt ? `qua ${reached.name}` : 'còn sát bãi cỏ'}`,
-      brag.length ? brag.join(' · ') : '',
-      grid,
-      location.origin,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
+    return [title, verdict, height, grid, location.origin].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
@@ -100,17 +89,22 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         {soundButton}
       </div>
       <div className="result-head">
-        <span className="gd-label" style={{ color: 'var(--trang)' }}>
-          {mode === 'daily' ? `Chuyến bay ${d.getUTCDate()}/${d.getUTCMonth() + 1}` : 'Thả đêm'}
-          {reached.alt ? ` · qua ${reached.name}` : ''}
-        </span>
-        <span className="gd-print gd-print--night result-alt">{formatAlt(shown)}</span>
-        <span className="result-note">
-          {result.players > 1
-            ? `Hạng ${result.rank} trên ${result.players.toLocaleString('vi-VN')} người ${mode === 'daily' ? 'thả hôm nay' : 'thả đêm hôm nay'}${result.beaten >= 50 ? `, cao hơn ${result.beaten}% số diều` : ''}. `
-            : 'Bạn là người đầu tiên thả hôm nay. '}
-          {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
-        </span>
+        <div className="result-plate">
+          <span className="gd-label" style={{ color: 'var(--trang)' }}>
+            {mode === 'daily' ? `Chuyến bay ${d.getUTCDate()}/${d.getUTCMonth() + 1}` : 'Thả đêm'}
+            {reached.alt ? ` · qua ${reached.name}` : ''}
+          </span>
+          <span className="gd-print gd-print--night result-alt">{formatAlt(shown)}</span>
+          <span className="result-verdict">
+            <b>{verdict.split('. ')[0]}.</b> {verdict.split('. ').slice(1).join('. ')}
+          </span>
+          <span className="result-note">
+            {result.players > 1
+              ? `Hạng ${result.rank} trên ${result.players.toLocaleString('vi-VN')} người ${mode === 'daily' ? 'thả hôm nay' : 'thả đêm hôm nay'}${result.beaten >= 50 ? `, cao hơn ${result.beaten}% số diều` : ''}. `
+              : 'Bạn là người đầu tiên thả hôm nay. '}
+            {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
+          </span>
+        </div>
       </div>
 
       <div className="result-body">

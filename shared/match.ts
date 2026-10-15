@@ -26,6 +26,8 @@ export interface QuestionDef {
   level?: number;
   /** Lexicons the question draws from, used to keep a day's set varied. */
   family?: string;
+  /** Keys of "famously obscure" answers that everyone reaches for: they land as Khôn lỏi. */
+  traps?: string[];
 }
 
 /** Turns a compact handcrafted bank entry into a structured question. The first name in each group is the display name. */
