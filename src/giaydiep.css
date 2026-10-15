@@ -1,0 +1,111 @@
+/* Giấy Điệp tokens + components (copied from the Giấy Điệp design system) */
+:root{--diep-100:#f4ead2;--diep-200:#e9dcbc;--diep-300:#cdbb8f;--than:#1f1b16;--than-70:#4a4238;--son:#c0392b;--son-dark:#8f2a1f;--hoe:#e2a72e;--hoe-dark:#8a5f0c;--cham:#26476f;--cham-deep:#142640;--la:#3f6b2c;--trang:#f3dc8a;--troi-1:#a7d8ee;--troi-2:#6db6e0;--troi-3:#3a7fbc;--troi-4:#1d4a80;--troi-5:#101c3d;--vu-tru:#070a1a;--tier-sao-don:var(--diep-300);--tier-sao-doi:var(--la);--tier-sao-ba:var(--cham);--tier-sao-bay:var(--hoe);--tier-sao-chin:var(--son);--tier-cung-trang:var(--trang);--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--radius-print:3px;--radius-btn:10px;--radius-pill:999px;--print-ink:4px 4px 0 #1f1b16;--print-son:3px 3px 0 #8f2a1f;--print-small:2px 2px 0 #1f1b16;--font-display:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;--font-body:"Be Vietnam Pro",system-ui,sans-serif;}
+/* Giấy Điệp — component styles. Every colour comes from tokens.css. */
+
+/* Paper: giấy điệp with pearly diagonal brush streaks, a double print frame, and a misregistered ink layer instead of a blur shadow. */
+.gd-paper{position:relative;background-color:var(--diep-100);background-image:repeating-linear-gradient(118deg,rgba(255,255,255,.38) 0 1px,transparent 1px 6px),repeating-linear-gradient(118deg,rgba(205,187,143,.18) 0 1px,transparent 1px 13px);color:var(--than);border:2px solid var(--than);border-radius:var(--radius-print);box-shadow:var(--print-ink)}
+.gd-paper::before{content:"";position:absolute;inset:5px;border:1px solid var(--diep-300);border-radius:1px;pointer-events:none}
+.gd-paper--dark{background-color:var(--cham-deep);background-image:repeating-linear-gradient(118deg,rgba(255,255,255,.05) 0 1px,transparent 1px 6px);color:var(--diep-100)}
+.gd-paper--dark::before{border-color:rgba(243,220,138,.35)}
+
+/* Woodblock text: ink letters with a son plate printed slightly off-register. */
+.gd-print{font-family:var(--font-display);font-weight:800;color:var(--than);text-shadow:3px 2px 0 var(--son)}
+.gd-print--night{color:var(--trang);text-shadow:3px 2px 0 var(--son)}
+.gd-label{font-family:var(--font-body);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--than-70)}
+
+/* Buttons */
+.gd-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border:2px solid var(--than);border-radius:var(--radius-btn);background:var(--son);color:var(--diep-100);font-family:var(--font-display);font-weight:800;font-size:19px;letter-spacing:.01em;box-shadow:var(--print-ink);cursor:pointer;text-decoration:none;transition:transform .08s,box-shadow .08s}
+.gd-btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--than)}
+.gd-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--than)}
+.gd-btn:focus-visible{outline:3px solid var(--hoe);outline-offset:3px}
+.gd-btn--paper{background:var(--diep-100);color:var(--than)}
+.gd-btn--night{background:var(--trang);color:var(--than)}
+.gd-btn[disabled]{opacity:.45;pointer-events:none}
+
+.gd-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1.5px dashed var(--than);border-radius:var(--radius-btn);background:transparent;color:var(--than);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer}
+.gd-chip:hover{background:var(--diep-200);border-style:solid}
+.gd-chip:focus-visible{outline:3px solid var(--hoe);outline-offset:2px}
+.gd-chip[disabled]{opacity:.4;pointer-events:none}
+.gd-chip .gd-chip__count{font-family:var(--font-display);font-weight:800;font-size:13px;min-width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;background:var(--than);color:var(--diep-100)}
+
+/* Question slip: a printed sheet with a seal for the category. */
+.gd-slip{display:flex;flex-direction:column;gap:14px;padding:22px 20px 20px}
+.gd-slip__cat{position:absolute;top:-14px;right:18px;background:var(--son);color:var(--diep-100);font-family:var(--font-display);font-weight:700;font-size:13px;padding:4px 10px;border:2px solid var(--than);border-radius:2px;transform:rotate(3deg);box-shadow:var(--print-small)}
+.gd-slip__q{margin:0;font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.15;color:var(--than);text-wrap:balance}
+.gd-slip__note{font-size:13px;color:var(--than-70)}
+.gd-answer{display:flex;gap:10px;align-items:stretch}
+.gd-input{flex:1;min-width:0;min-height:52px;box-sizing:border-box;padding:0 4px;border:0;border-bottom:3px solid var(--than);border-radius:0;background:transparent;font-family:var(--font-display);font-weight:600;font-size:22px;color:var(--than);outline:none}
+.gd-input::placeholder{color:var(--than-70);font-weight:500;opacity:.8}
+.gd-input:focus{border-bottom-color:var(--son)}
+.gd-msg{font-size:14px;line-height:1.45;color:var(--than-70);min-height:20px}
+.gd-msg--bad{color:var(--son-dark)}
+.gd-msg--hint{color:var(--cham);font-weight:600}
+
+/* Wind ribbon timer: a kite-tail streamer with a swallowtail end that shortens as time runs. */
+.gd-wind{display:flex;align-items:center;gap:10px}
+.gd-wind__track{position:relative;flex:1;height:14px}
+.gd-wind__ribbon{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(90deg,var(--cham) 0 18px,var(--troi-3) 18px 22px);clip-path:polygon(0 0,100% 0,calc(100% - 9px) 50%,100% 100%,0 100%);transition:width .1s linear}
+.gd-wind__track::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;background:var(--diep-300)}
+.gd-wind--low .gd-wind__ribbon{background:repeating-linear-gradient(90deg,var(--son) 0 18px,var(--son-dark) 18px 22px)}
+.gd-wind__time{font-family:var(--font-display);font-weight:800;font-size:18px;min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Tier seal: a square triện stamp, struck at a slight angle. */
+.gd-seal{display:inline-grid;place-items:center;width:76px;height:76px;box-sizing:border-box;padding:6px;border:3px solid currentColor;outline:1px solid currentColor;outline-offset:-8px;border-radius:4px;font-family:var(--font-display);font-weight:800;font-size:15px;line-height:1.05;text-align:center;transform:rotate(-7deg);background:rgba(244,234,210,.85)}
+.gd-seal small{display:block;font-family:var(--font-body);font-weight:700;font-size:10px;letter-spacing:.08em;margin-top:2px}
+.gd-seal--sao-don{color:var(--than-70)}
+.gd-seal--sao-doi{color:var(--la)}
+.gd-seal--sao-ba{color:var(--cham)}
+.gd-seal--sao-bay{color:var(--hoe-dark)}
+.gd-seal--sao-chin{color:var(--son)}
+.gd-seal--cung-trang{color:var(--than);background:var(--trang)}
+.gd-seal--small{width:44px;height:44px;font-size:10px;padding:3px;outline-offset:-5px;border-width:2px}
+@keyframes gd-strike{0%{transform:scale(1.8) rotate(-18deg);opacity:0}60%{transform:scale(.94) rotate(-6deg);opacity:1}100%{transform:scale(1) rotate(-7deg)}}
+.gd-seal--strike{animation:gd-strike .32s cubic-bezier(.2,1.4,.4,1) both}
+
+/* Kite string altimeter: the string is the ruler, each milestone a knot. */
+.gd-string{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding-right:18px;min-height:260px}
+.gd-string::after{content:"";position:absolute;right:7px;top:0;bottom:0;width:2px;background:var(--than);opacity:.55}
+.gd-knot{position:relative;display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:12px;line-height:1.25;text-align:right;color:var(--than)}
+.gd-knot::after{content:"";position:absolute;right:-17px;width:10px;height:10px;border-radius:50%;background:var(--diep-100);border:2px solid var(--than);box-sizing:border-box}
+.gd-knot b{font-weight:700}
+.gd-knot--passed{opacity:.55}
+.gd-knot--now{font-family:var(--font-display);font-weight:800;font-size:14px}
+.gd-knot--now::after{width:16px;height:16px;right:-20px;background:var(--son)}
+.gd-knot--now span{background:var(--son);color:var(--diep-100);padding:2px 8px;border:2px solid var(--than);border-radius:4px}
+.gd-string--night .gd-knot{color:var(--diep-100)}
+.gd-string--night::after{background:var(--diep-100)}
+
+/* Crowd bars: how many people gave each answer. */
+.gd-crowd{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,9fr) 46px;gap:7px 10px;align-items:center;font-size:14px}
+.gd-crowd__bar{height:12px;border:1.5px solid var(--than);border-radius:var(--radius-pill);background:var(--diep-200);overflow:hidden}
+.gd-crowd__fill{height:100%;background:var(--diep-300)}
+.gd-crowd__pct{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.gd-crowd__me{font-weight:700;color:var(--son-dark)}
+.gd-crowd__me + .gd-crowd__bar .gd-crowd__fill{background:var(--son)}
+.gd-crowd__me + .gd-crowd__bar + .gd-crowd__pct{color:var(--son-dark);font-weight:800}
+
+/* Milestone banner: a printed vignette that drops in when the kite passes a mốc. */
+.gd-milestone{display:flex;align-items:center;gap:14px;padding:12px 16px 12px 12px}
+.gd-milestone__art{flex:none;width:52px;height:52px;border:2px solid var(--than);border-radius:2px;background:var(--hoe);display:grid;place-items:center}
+.gd-milestone__k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--than-70)}
+.gd-milestone__t{font-family:var(--font-display);font-weight:800;font-size:20px;line-height:1.15}
+
+/* Share ticket */
+.gd-ticket{display:flex;flex-direction:column;gap:12px;padding:20px}
+.gd-ticket__row{display:flex;gap:6px}
+.gd-ticket__sq{width:30px;height:30px;border:2px solid var(--than);border-radius:3px;box-sizing:border-box}
+
+/* Leaderboard */
+.gd-board{display:flex;flex-direction:column}
+.gd-board__row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 4px;border-top:1px dashed var(--diep-300);font-size:15px}
+.gd-board__row:first-child{border-top:0}
+.gd-board__rank{font-family:var(--font-display);font-weight:800;color:var(--than-70)}
+.gd-board__alt{font-family:var(--font-display);font-weight:800;font-variant-numeric:tabular-nums}
+.gd-board__row--me{background:var(--trang);border:2px solid var(--than);border-radius:4px;padding:8px 10px;margin:4px -6px}
+
+/* Sky bands: posterized, woodblock-flat, never a smooth gradient. */
+.gd-sky{background:linear-gradient(180deg,var(--troi-3) 0 22%,var(--troi-2) 22% 52%,var(--troi-1) 52% 100%)}
+.gd-sky--high{background:linear-gradient(180deg,var(--troi-5) 0 26%,var(--troi-4) 26% 58%,var(--troi-3) 58% 100%)}
+.gd-sky--space{background:var(--vu-tru)}
+
+@media (prefers-reduced-motion:reduce){.gd-seal--strike{animation:none}.gd-btn,.gd-wind__ribbon{transition:none}}
