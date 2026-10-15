@@ -5,6 +5,10 @@ export interface PublicQuestion {
   category: string;
   prompt: string;
   note: string | null;
+  /** How many answers the village book holds for this prompt. */
+  pool?: number;
+  /** 1 easy · 2 medium · 3 hard. */
+  level?: number;
 }
 
 export interface Crowd {
@@ -15,7 +19,7 @@ export interface Crowd {
 }
 
 export interface AnswerResult {
-  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'empty';
+  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;

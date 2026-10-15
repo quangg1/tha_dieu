@@ -1,6 +1,6 @@
-import { BANK } from '../shared/bank.js';
-import { Matcher, parseRaw } from '../shared/match.js';
-import { norm } from '../shared/normalize.js';
+import { BOOK, BOOK_BY_ID, BOOK_VERSION } from '../shared/book/questions.js';
+import { Matcher } from '../shared/match.js';
+import { norm, soft } from '../shared/normalize.js';
 import {
   QUESTION_SECONDS,
   TIERS,
@@ -20,39 +20,51 @@ export class GameError extends Error {
 }
 
 export const DAILY_COUNT = 7;
-/** Seconds a daily turn may stay open: the wind, one "Gọi gió", the referee's think time and network slack. */
+/** Seconds a daily turn may stay open: the wind, the referee's think time and network slack. */
 const TURN_GRACE_SECONDS = QUESTION_SECONDS + 10 + 15;
 const REFEREE_CALLS_PER_DAY = 25;
 
 /* ------------------------------------------------------------------ setup */
 
-/** Creates tables and loads the built-in question bank. Safe to run again: existing answers and counts are kept. */
+/**
+ * Creates tables and syncs the questions table with the village book. Answers live in code (the book);
+ * the database only keeps what players and the village head add, plus counts. Safe to run again.
+ */
 export async function setup(db: Db) {
   await db.exec(SCHEMA);
-  for (const raw of BANK) {
-    const q = parseRaw(raw);
-    await db.query(
-      `insert into questions (id, category, prompt, note, strip, krill_key) values ($1,$2,$3,$4,$5,$6)
-       on conflict (id) do update set category=excluded.category, prompt=excluded.prompt, note=excluded.note, strip=excluded.strip, krill_key=excluded.krill_key`,
-      [q.id, q.category, q.prompt, q.note ?? null, q.strip, q.krillKey],
-    );
-    const keys = q.answers.map((a) => a.key);
-    await db.query(
-      `insert into answers (question_id, key, display, prior_tier)
-       select $1, k, d, t from unnest($2::text[], $3::text[], $4::int[]) as x(k, d, t)
-       on conflict (question_id, key) do nothing`,
-      [q.id, keys, q.answers.map((a) => a.display), q.answers.map((a) => a.priorTier)],
-    );
-    const aliasRows = q.answers.flatMap((a) => a.aliases.map((al) => [norm(al), a.key] as const)).filter(([al]) => al);
-    await db.query(
-      `insert into aliases (question_id, alias, key)
-       select $1, a, k from unnest($2::text[], $3::text[]) as x(a, k)
-       on conflict (question_id, alias) do nothing`,
-      [q.id, aliasRows.map((r) => r[0]), aliasRows.map((r) => r[1])],
-    );
-  }
+  const ids = BOOK.map((q) => q.id);
+  await db.query(
+    `insert into questions (id, category, prompt, note, strip, krill_key, active)
+     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, true
+     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[]) as x(id, c, p, n, st, k)
+     on conflict (id) do update set category=excluded.category, prompt=excluded.prompt, note=excluded.note,
+       strip=excluded.strip, krill_key=excluded.krill_key, active=true`,
+    [
+      ids,
+      BOOK.map((q) => q.category),
+      BOOK.map((q) => q.prompt),
+      BOOK.map((q) => q.note ?? ''),
+      BOOK.map((q) => q.strip.join(' ')),
+      BOOK.map((q) => q.krillKey),
+    ],
+  );
+  await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
+  await db.query(
+    `insert into meta (key, value) values ('book_version', $1) on conflict (key) do update set value=excluded.value`,
+    [BOOK_VERSION],
+  );
   const [{ n }] = await db.query<{ n: number }>(`select count(*)::int as n from questions where active`);
-  return { questions: n };
+  return { questions: n, version: BOOK_VERSION };
+}
+
+/** The book version the database was last synced with, or null for a fresh database. */
+export async function syncedVersion(db: Db): Promise<string | null> {
+  try {
+    const rows = await db.query<{ value: string }>(`select value from meta where key='book_version'`);
+    return rows[0]?.value ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /* ------------------------------------------------------------------ days */
@@ -75,26 +87,43 @@ function seeded(seed: string) {
   };
 }
 
-/** The day's question ids, created on first request from the questions not used in the previous few days. */
+/** Difficulty plan for the seven daily questions: warm up, build, end on the hardest. */
+const LEVEL_PLAN = [1, 2, 1, 2, 3, 2, 3];
+
+/**
+ * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
+ * and nothing asked in the last six weeks while there is enough left to choose from.
+ */
 export async function dailySet(db: Db, day: string): Promise<string[]> {
   const found = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
   if (found.length) return found[0].question_ids;
-  const ids = (await db.query<{ id: string }>(`select id from questions where active order by id`)).map((r) => r.id);
-  const recent = new Set(
-    (
-      await db.query<{ question_ids: string[] }>(
-        `select question_ids from daily_sets where day < $1::date and day >= $1::date - 3 order by day desc`,
-        [day],
-      )
-    ).flatMap((r) => r.question_ids),
+  const active = new Set((await db.query<{ id: string }>(`select id from questions where active`)).map((r) => r.id));
+  const pool = BOOK.filter((q) => active.has(q.id));
+  const recentRows = await db.query<{ day: string; question_ids: string[] }>(
+    `select to_char(day, 'YYYY-MM-DD') as day, question_ids from daily_sets where day < $1::date and day >= $1::date - 42`,
+    [day],
   );
   const rnd = seeded('tha-dieu-' + day);
-  const shuffled = ids
-    .map((id) => ({ id, r: rnd() + (recent.has(id) ? 1 : 0) }))
-    .sort((a, b) => a.r - b.r)
-    .map((x) => x.id);
-  const pick = shuffled.slice(0, DAILY_COUNT);
-  await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict (day) do nothing`, [day, pick]);
+  const order = pool.map((q) => ({ q, r: rnd() })).sort((a, b) => a.r - b.r).map((x) => x.q);
+  const pick: typeof pool = [];
+  for (const window of [42, 14, 3, 0]) {
+    const cutoff = new Date(new Date(day + 'T00:00:00Z').getTime() - window * 86400_000).toISOString().slice(0, 10);
+    const recent = new Set(recentRows.filter((r) => r.day >= cutoff).flatMap((r) => r.question_ids));
+    for (const level of LEVEL_PLAN.slice(pick.length)) {
+      const ok = (q: (typeof pool)[number], strictLevel: boolean) =>
+        !recent.has(q.id) &&
+        !pick.includes(q) &&
+        (!strictLevel || (q.level ?? 2) === level) &&
+        !pick.some((p) => p.category === q.category || p.family === q.family);
+      const next = order.find((q) => ok(q, true)) ?? order.find((q) => ok(q, false));
+      if (!next) break;
+      pick.push(next);
+    }
+    if (pick.length >= DAILY_COUNT) break;
+  }
+  for (const q of order) if (pick.length < DAILY_COUNT && !pick.includes(q)) pick.push(q);
+  const ids = pick.slice(0, DAILY_COUNT).map((q) => q.id);
+  await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict (day) do nothing`, [day, ids]);
   const again = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
   return again[0].question_ids;
 }
@@ -108,8 +137,10 @@ export interface LoadedQuestion {
   note: string | null;
   krillKey: string;
   strip: string[];
+  level: number;
   answers: Map<string, { display: string; prior: number; status: string }>;
   matcher: Matcher;
+  vague: Set<string>;
 }
 
 const cache = new Map<string, { at: number; q: LoadedQuestion }>();
@@ -119,43 +150,55 @@ export function forgetQuestion(id: string) {
   cache.delete(id);
 }
 
+/** A question from the book, plus answers and spellings learned from players (review queue, referee). */
 export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> {
   const hit = cache.get(id);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.q;
-  const rows = await db.query<{ id: string; category: string; prompt: string; note: string | null; krill_key: string; strip: string[] }>(
-    `select id, category, prompt, note, krill_key, strip from questions where id=$1`,
+  const base = BOOK_BY_ID.get(id);
+  if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  const answers = new Map(base.answers.map((a) => [a.key, { display: a.display, prior: a.priorTier, status: 'approved' }]));
+  const entries = base.answers.map((a) => ({ key: a.key, aliases: [...a.aliases], priorTier: a.priorTier }));
+  const learned = await db.query<{ key: string; display: string; prior_tier: number; status: string; source: string }>(
+    `select key, display, prior_tier, status, source from answers where question_id=$1 and (source <> 'seed' or status = 'rejected')`,
     [id],
   );
-  if (!rows.length) throw new GameError(404, 'Không tìm thấy câu hỏi.');
-  const r = rows[0];
-  const ans = await db.query<{ key: string; display: string; prior_tier: number; status: string }>(
-    `select key, display, prior_tier, status from answers where question_id=$1 and status <> 'rejected'`,
-    [id],
-  );
+  const rekey = new Map<string, string>();
+  for (const l of learned) {
+    const key = answers.has(l.key) ? l.key : soft(l.display);
+    rekey.set(l.key, key);
+    if (l.status === 'rejected') {
+      answers.delete(key);
+      continue;
+    }
+    if (!answers.has(key)) {
+      answers.set(key, { display: l.display, prior: l.prior_tier, status: l.status });
+      entries.push({ key, aliases: [l.display], priorTier: l.prior_tier });
+    }
+  }
+  const matcher = new Matcher(base.strip, entries.filter((e) => answers.has(e.key)));
   const al = await db.query<{ alias: string; key: string }>(`select alias, key from aliases where question_id=$1`, [id]);
-  const answers = new Map(ans.map((a) => [a.key, { display: a.display, prior: a.prior_tier, status: a.status }]));
-  const byKey = new Map<string, string[]>();
-  for (const a of al) if (answers.has(a.key)) byKey.set(a.key, [...(byKey.get(a.key) ?? []), a.alias]);
-  const matcher = new Matcher(
-    r.strip,
-    [...answers.keys()].map((key) => ({ key, aliases: byKey.get(key) ?? [] })),
-  );
+  for (const a of al) {
+    const key = rekey.get(a.key) ?? a.key;
+    if (answers.has(key)) matcher.addAlias(a.alias, key, answers.get(key)!.prior);
+  }
   const q: LoadedQuestion = {
-    id: r.id,
-    category: r.category,
-    prompt: r.prompt,
-    note: r.note,
-    krillKey: r.krill_key,
-    strip: r.strip,
+    id: base.id,
+    category: base.category,
+    prompt: base.prompt,
+    note: base.note ?? null,
+    krillKey: base.krillKey,
+    strip: base.strip,
+    level: base.level ?? 2,
     answers,
     matcher,
+    vague: new Set((base.vague ?? []).flatMap((v) => [soft(v), norm(v)])),
   };
   cache.set(id, { at: Date.now(), q });
   return q;
 }
 
 export function publicQuestion(q: LoadedQuestion) {
-  return { id: q.id, category: q.category, prompt: q.prompt, note: q.note };
+  return { id: q.id, category: q.category, prompt: q.prompt, note: q.note, pool: q.answers.size, level: q.level };
 }
 
 /* ------------------------------------------------------------------ turns */
@@ -229,8 +272,8 @@ async function countsFor(db: Db, questionId: string, key: string) {
 
 /** Uses the cached verdict, or asks the referee (within the player's daily budget), for an answer the bank does not know. */
 async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee) {
-  const inputKey = norm(input);
-  if (inputKey.length < 2 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
+  const inputKey = soft(input);
+  if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
   const cached = await db.query<{ valid: boolean; canonical_key: string | null; reason: string | null }>(
     `select valid, canonical_key, reason from verdicts where question_id=$1 and input_key=$2`,
     [q.id, inputKey],
@@ -270,7 +313,7 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     return { key: null, reason: v.reason || 'Trọng tài không công nhận đáp án này.' };
   }
   const known = q.matcher.match(v.canonical);
-  let key = known?.key ?? norm(v.canonical);
+  const key = known?.key ?? soft(v.canonical);
   if (!known) {
     await db.query(
       `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,4,'claude','pending') on conflict do nothing`,
@@ -280,7 +323,7 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   }
   await db.query(
     `insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`,
-    [q.id, inputKey, key, norm(v.canonical)],
+    [q.id, inputKey, key, soft(v.canonical)],
   );
   q.matcher.addAlias(input, key);
   q.matcher.addAlias(v.canonical, key);
@@ -292,8 +335,9 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
 }
 
 export interface AnswerResult {
-  /** landed: scored · nothing: not a valid answer, the prompt is over · late: the wind ran out · confirm: a near match to accept · empty: nothing typed */
-  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'empty';
+  /** landed: scored · nothing: not a valid answer, the prompt is over · late: the wind ran out · confirm: a near match to accept
+   *  vague: too general ("chim" for a bird), try again · empty: nothing typed */
+  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;
@@ -336,6 +380,9 @@ export async function answer(
   if (m && !m.exact) {
     const suggestion = q.answers.get(m.key)!.display;
     return { status: 'confirm', input, suggestion };
+  }
+  if (!m && (q.vague.has(soft(input)) || q.vague.has(norm(input)))) {
+    return { status: 'vague', input, reason: `“${input}” chung chung quá. Hãy kể tên một thứ cụ thể hơn.` };
   }
   let key = m?.key ?? null;
   let judged = false;
@@ -507,7 +554,7 @@ export async function decideSubmission(
   if (!display) throw new GameError(400, 'Tên đáp án trống.');
   const q = await loadQuestion(db, a.questionId);
   const existing = q.matcher.match(display);
-  const key = existing?.key ?? norm(display);
+  const key = existing && existing.exact ? existing.key : soft(display);
   const tier = Number.isInteger(a.tier) ? Math.max(0, Math.min(4, a.tier!)) : 4;
   if (!existing) {
     await db.query(
@@ -518,7 +565,7 @@ export async function decideSubmission(
   }
   await db.query(
     `insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`,
-    [a.questionId, a.inputKey, key, norm(display)],
+    [a.questionId, a.inputKey, key, soft(display)],
   );
   await db.query(`update submissions set status='accepted' where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
   await db.query(`delete from verdicts where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);

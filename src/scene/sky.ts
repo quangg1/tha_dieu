@@ -68,12 +68,20 @@ export interface SkyLayout {
   /** Kite width as a fraction of the viewport's short side. */
   kiteSize: number;
   ruler: boolean;
+  /** Pixels at the top covered by the page's own bar; the scene keeps its fixed pieces below it. */
+  top?: number;
+  /** Width of the page's central column on wide screens; fixed landmarks are moved into the margins beside it. */
+  column?: number;
+  /** Upper bound on the kite width in pixels. */
+  kiteMax?: number;
+  /** Where the field sits on the log scale; lower values leave more open sky under the kite at take-off. */
+  ground?: number;
 }
 
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
-  home: { kiteX: 0.66, kiteY: 0.2, decade: 0.95, kiteSize: 0.3, ruler: false },
-  play: { kiteX: 0.4, kiteY: 0.3, decade: 0.3, kiteSize: 0.2, ruler: true },
-  result: { kiteX: 0.32, kiteY: 0.2, decade: 0.3, kiteSize: 0.16, ruler: false },
+  home: { kiteX: 0.62, kiteY: 0.36, decade: 0.95, kiteSize: 0.3, ruler: false, kiteMax: 190, column: 460 },
+  play: { kiteX: 0.5, kiteY: 0.2, decade: 0.3, kiteSize: 0.2, ruler: true, top: 64, column: 700, kiteMax: 110, ground: -1.9 },
+  result: { kiteX: 0.32, kiteY: 0.2, decade: 0.3, kiteSize: 0.16, ruler: false, column: 520, kiteMax: 130 },
 };
 
 const LEAF = new Path2D('M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z');
@@ -105,7 +113,7 @@ export class SkyScene {
     ART ??= makeArt();
     for (let i = 0; i < 140; i++) this.stars.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.4, tw: Math.random() * 6.28 });
     const rnd = mulberry(7);
-    for (let i = 0; i < 9; i++) this.clouds.push({ L: 2.6 + (i / 8) * 1.5 + rnd() * 0.15, x: rnd(), w: 0.2 + rnd() * 0.22 });
+    for (let i = 0; i < 6; i++) this.clouds.push({ L: 2.4 + (i / 5) * 2 + rnd() * 0.12, x: (i * 0.37 + rnd() * 0.2) % 1, w: 0.17 + rnd() * 0.15 });
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(canvas);
     this.resize();
@@ -183,13 +191,14 @@ export class SkyScene {
   private draw() {
     const { ctx, W, H } = this;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    // Posterized like a woodblock print, but in many shallow steps so no single hard edge cuts across the page.
     const [top, mid, low] = bandsAt(this.camL);
-    ctx.fillStyle = css(top);
-    ctx.fillRect(0, 0, W, H * 0.3);
-    ctx.fillStyle = css(mid);
-    ctx.fillRect(0, H * 0.3 - 0.5, W, H * 0.34);
-    ctx.fillStyle = css(low);
-    ctx.fillRect(0, H * 0.64 - 0.5, W, H * 0.36 + 1);
+    const steps = 9;
+    for (let i = 0; i < steps; i++) {
+      const t = i / (steps - 1);
+      ctx.fillStyle = css(t < 0.5 ? mix(top, mid, t * 2) : mix(mid, low, (t - 0.5) * 2));
+      ctx.fillRect(0, Math.floor((i * H) / steps), W, Math.ceil(H / steps) + 1);
+    }
 
     const starA = Math.max(0, Math.min(1, (this.camL - 4.3) / 1.3));
     if (starA > 0) {
@@ -219,6 +228,30 @@ export class SkyScene {
     return Math.min(this.W, 540);
   }
 
+  /** Horizontal spot for a fixed landmark: a fraction of the width on phones, or a spot in the margin beside the page column on wide screens. */
+  private gx(fx: number) {
+    const col = this.layout.column;
+    const { W } = this;
+    if (!col || W < col + 420) return W * fx;
+    const left = (W - col) / 2;
+    const right = W - 64;
+    return fx < 0.5 ? left * (0.15 + fx * 1.5) : (W + col) / 2 + (right - (W + col) / 2) * ((fx - 0.5) * 2);
+  }
+
+  /** Wide enough for fixed landmarks to sit in the margins beside the page column. */
+  private get wide() {
+    const col = this.layout.column;
+    return !!col && this.W >= col + 420;
+  }
+
+  private get sunSize() {
+    return Math.min(this.U, this.H) * (this.layout.column ? (this.wide ? 0.22 : 0.3) : 0.28);
+  }
+
+  private get top() {
+    return this.layout.top ?? 0;
+  }
+
   private put(sp: Art.Sprite, x: number, y: number, w: number, ax = 0.5, ay = 0.5, alpha = 1) {
     if (!sp.ready) return;
     const h = (w * sp.h) / sp.w;
@@ -233,21 +266,32 @@ export class SkyScene {
     // The Đông Sơn sun hangs in the daytime sky and fades as the kite reaches the edge of space.
     const sunA = Math.max(0, Math.min(1, (4.6 - this.camL) / 1.2));
     if (sunA > 0) {
-      const size = Math.min(this.U, this.H) * 0.28;
+      const size = this.sunSize;
       this.ctx.save();
-      const sx = W >= 900 ? Math.min(W - 120, W / 2 + 470) : W * 0.82;
-      const sy = this.H * 0.085 + this.camL * 6;
+      // On phones the sun peeks in from the top-left corner, clear of the altimeter on the right.
+      const narrow = this.layout.ruler && !!this.layout.column && !this.wide;
+      const sx = this.wide ? this.gx(0.8) : narrow ? size * 0.26 : W * 0.82;
+      const sy = narrow ? this.top + size * 0.24 + this.camL * 4 : this.top + size * 0.62 + this.H * 0.02 + this.camL * 6;
       this.ctx.translate(sx, sy);
       this.ctx.rotate(this.reduce ? 0 : this.t * 0.02);
       this.put(A.sun, 0, 0, size, 0.5, 0.5, sunA);
       this.ctx.restore();
     }
     // Fansipan with its rice terraces, peak at 3.143 m.
-    if (this.visible(3.5, 900)) {
+    // Fansipan rises above a sea of clouds, so the peak sits at its real height without a mountain floating in the sky.
+    if (this.visible(3.5, 500)) {
       const peakY = this.y(3.497);
-      const h = Math.max(160, this.layout.decade * this.H * 1.15);
-      const w = h * (A.fansipan.w / A.fansipan.h);
-      this.put(A.fansipan, W * 0.74, peakY, w, 300 / 466, 14 / 306);
+      const w = Math.min(this.U * 0.6, 330);
+      const h = (w * A.fansipan.h) / A.fansipan.w;
+      const px = this.wide ? this.gx(0.22) : W * 0.3;
+      this.put(A.fansipan, px, peakY, w, 300 / 466, 14 / 306);
+      const left = px - w * (300 / 466);
+      const baseY = peakY + h * 0.82;
+      for (let i = 0; i < 4; i++) {
+        const cx = left - w * 0.08 + (w * 1.16 * i) / 3;
+        const cw = w * (0.44 + (i % 2) * 0.08);
+        this.put(A.clouds[i % 2], cx + Math.sin(this.t * 0.4 + i) * 3, baseY + (i % 2) * h * 0.1, cw);
+      }
     }
     // White storks.
     if (this.visible(2.08)) {
@@ -297,13 +341,13 @@ export class SkyScene {
       this.put(A.station, x, this.y(5.6), w);
     }
     if (this.visible(7.55)) {
-      const w = this.U * 0.46;
-      this.put(A.vinasat, W * 0.3 + Math.sin(this.t * 0.3) * 10, this.y(7.55), w);
+      const w = this.U * 0.42;
+      this.put(A.vinasat, this.gx(0.25) + Math.sin(this.t * 0.3) * 10, this.y(7.55), w);
     }
     // Cung Trăng: the banyan, the jade rabbit, and chú Cuội waving.
     if (this.visible(8.585, 500)) {
       const size = Math.min(this.U * 0.92, H * 0.55);
-      const cx = W * 0.6;
+      const cx = this.layout.column ? W / 2 : W * 0.6;
       const cy = this.y(8.585);
       this.put(A.moon, cx, cy, size);
       if (A.moon.ready) {
@@ -332,7 +376,7 @@ export class SkyScene {
       [11.89, A.jupiter, 0.3, 0.44],
       [12.65, A.neptune, 0.7, 0.26],
     ];
-    for (const [L, sp, fx, fw] of planets) if (this.visible(L, 220)) this.put(sp, W * fx, this.y(L), this.U * fw);
+    for (const [L, sp, fx, fw] of planets) if (this.visible(L, 220)) this.put(sp, this.gx(fx), this.y(L), this.U * fw);
     // Oort cloud: drifting comets and ice.
     if (this.visible(15.98, 400)) {
       const y0 = this.y(15.98);
@@ -367,11 +411,11 @@ export class SkyScene {
   private drawGround() {
     const { ctx, W, H } = this;
     const A = ART!;
-    const yg = this.y(-0.55);
+    const yg = this.y(this.layout.ground ?? -0.55);
     if (yg > H + 10) return;
     // Bamboo grove on the left and the village đình on the right, standing on the field line.
-    this.put(A.bamboo, W * 0.24, yg + 4, Math.min(W * 0.56, 300), 0.5, 1);
-    this.put(A.dinh, W * 0.76, yg + 2, Math.min(W * 0.56, 320), 0.5, 1);
+    this.put(A.bamboo, this.gx(0.24), yg + 4, Math.min(W * 0.5, 280), 0.5, 1);
+    this.put(A.dinh, this.gx(0.76), yg + 2, Math.min(W * 0.5, 300), 0.5, 1);
     ctx.fillStyle = LA;
     ctx.fillRect(0, yg, W, H - yg + 10);
     ctx.strokeStyle = 'rgba(244,234,210,.22)';
@@ -399,7 +443,8 @@ export class SkyScene {
     ctx.lineWidth = 2;
     const yk0 = this.H * this.layout.kiteY;
     const sunVisible = this.camL < 4.2;
-    const r0 = Math.max(sunVisible ? H * 0.085 + Math.min(W, H) * 0.16 + 10 : 120, yk0 - H * 0.2);
+    const sunBottom = this.top + this.sunSize * 1.15 + H * 0.02 + 12;
+    const r0 = Math.max(sunVisible && !this.layout.column ? sunBottom : this.top + 24, yk0 - H * 0.2);
     const r1 = Math.min(H * 0.6, yk0 + H * 0.28);
     ctx.beginPath();
     ctx.moveTo(x, r0);
@@ -407,7 +452,7 @@ export class SkyScene {
     ctx.stroke();
     ctx.textAlign = 'right';
     for (const m of MILESTONES) {
-      const L = m.alt <= 0 ? -0.55 : log(m.alt);
+      const L = m.alt <= 0 ? this.layout.ground ?? -0.55 : log(m.alt);
       const y = this.y(L);
       if (y < r0 || y > r1 || Math.abs(y - yk0) < 26) continue;
       const passed = log(this.alt) >= L;
@@ -441,11 +486,14 @@ export class SkyScene {
   private drawKite() {
     const { ctx, W, H } = this;
     const L = this.layout;
-    const size = Math.min(W, H) * L.kiteSize;
+    const size = Math.min(Math.min(W, H) * L.kiteSize, L.kiteMax ?? Infinity);
     const s = size / 120;
     const nerv = this.nervous ? Math.sin(this.t * 17) * 0.05 : 0;
     const sway = this.reduce ? 0 : Math.sin(this.t * 1.6) * 0.07 + Math.sin(this.t * 0.55) * 0.05 + nerv;
-    const kx = (W >= 1000 && L === LAYOUTS.play ? W / 2 - 470 : W * L.kiteX) + (this.reduce ? 0 : Math.sin(this.t * 0.8) * W * 0.02);
+    // On wide screens a kite placed beside the page flies in the margin instead of over the text.
+    const col = L.column ?? 0;
+    const side = this.wide && L.kiteX !== 0.5 ? (L.kiteX > 0.5 ? (W + col) / 2 + Math.min(170, (W - col) * 0.2) : (W - col) / 2 - Math.min(170, (W - col) * 0.2)) : W * L.kiteX;
+    const kx = side + (this.reduce ? 0 : Math.sin(this.t * 0.8) * this.U * 0.03);
     const ky = H * L.kiteY + this.kite.y + (this.reduce ? 0 : Math.sin(this.t * 1.1) * 4);
     const angle = sway + this.kite.a * 0.1;
     // String: from the bridle point down past the bottom-left corner, sagging with the wind.

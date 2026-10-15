@@ -292,6 +292,12 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       return;
     }
     if (r.status === 'empty') return setPhase('asking');
+    if (r.status === 'vague') {
+      setNotice(r.reason ?? 'Chung chung quá. Hãy kể tên một thứ cụ thể hơn.');
+      setPhase('asking');
+      setTimeout(() => inputRef.current?.select(), 30);
+      return;
+    }
     if (r.status === 'confirm') {
       setSuggest({ from: text, to: r.suggestion! });
       setInput(r.suggestion!);
@@ -354,38 +360,38 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
 
   return (
     <main className={`stage play${dark ? ' night' : ''}`}>
-      <header className="hud3">
-        <div className="hud-panel">
-          <span className="k">Độ cao</span>
-          <span className="v">{formatAlt(altitude)}</span>
+      <header className="playbar">
+        <div className="playbar-in">
+          <button className="icon-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
+            <BackIcon />
+          </button>
+          <div className="stat">
+            <span className="k">Độ cao</span>
+            <span className="v">{formatAlt(altitude)}</span>
+          </div>
+          <div className="hud-mid">
+            {mode === 'daily' ? (
+              <div className="pips" aria-label={`Câu ${Math.min(idx + 1, count)} trên ${count}`}>
+                {Array.from({ length: count }, (_, i) => {
+                  const r = rows.find((x) => x.questionId === list[i]?.id);
+                  const tier = r?.tier;
+                  const bg = tier === undefined ? undefined : tier < 0 ? 'var(--than-70)' : `var(--tier-${TIERS[tier].css})`;
+                  return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
+                })}
+              </div>
+            ) : (
+              <div className="pips-text">Thả đêm · {rows.length} câu</div>
+            )}
+            {mode === 'daily' && <span className="hud-step">Câu {Math.min(idx + 1, count)}/{count}</span>}
+          </div>
+          <div className="stat right">
+            <span className="k">Điểm</span>
+            <span className="v son">{score}</span>
+          </div>
+          {soundButton}
         </div>
-        <div className="hud-mid">
-          {mode === 'daily' ? (
-            <div className="pips" aria-label={`Câu ${Math.min(idx + 1, count)} trên ${count}`}>
-              {Array.from({ length: count }, (_, i) => {
-                const r = rows.find((x) => x.questionId === list[i]?.id);
-                const tier = r?.tier;
-                const bg = tier === undefined ? undefined : tier < 0 ? 'var(--than-70)' : `var(--tier-${TIERS[tier].css})`;
-                return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
-              })}
-            </div>
-          ) : (
-            <div className="pips-text">Thả đêm · {rows.length} câu</div>
-          )}
-          <span className="hud-step">{mode === 'daily' ? `Câu ${Math.min(idx + 1, count)}/${count}` : ''}</span>
-        </div>
-        <div className="hud-panel right">
-          <span className="k">Điểm</span>
-          <span className="v son">{score}</span>
-        </div>
+        {quitArmed && <span className="knot-tag quit-tag">Bấm lần nữa để rời</span>}
       </header>
-      <div className="hud-tools">
-        <button className="icon-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
-          <BackIcon />
-        </button>
-        {quitArmed && <span className="knot-tag">Bấm lần nữa để rời</span>}
-        {soundButton}
-      </div>
 
       {banner && <MilestoneBanner key={banner.key} m={banner.m} alt={formatAlt(banner.m.alt)} dark={Math.log10(Math.max(1, banner.m.alt)) >= 4.3} />}
 
@@ -403,10 +409,16 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         {(phase === 'intro' || phase === 'asking' || phase === 'judging') && q && (
           <section className="gd-paper gd-slip prompt-card" key={q.id}>
             <span className="gd-slip__cat">{q.category}</span>
-            <span className="gd-label">{mode === 'daily' ? `Câu ${idx + 1} trên ${count}` : 'Thả đêm'}</span>
+            <span className="gd-label">
+              {mode === 'daily' ? `Câu ${idx + 1} trên ${count}` : 'Thả đêm'}
+              {q.level ? ` · ${['', 'gió nhẹ', 'gió vừa', 'gió mạnh'][q.level]}` : ''}
+            </span>
             <h2 className="gd-slip__q">{q.prompt}</h2>
             {q.note && <div className="gd-slip__note">{q.note}</div>}
-            <div className="prompt-sub">▲ đáp án càng hiếm, diều càng bay cao ▲</div>
+            <div className="prompt-sub">
+              {q.pool ? <>sổ làng có <b>{q.pool.toLocaleString('vi-VN')}</b> đáp án · </> : null}
+              đáp án càng hiếm, diều càng cao
+            </div>
           </section>
         )}
 
@@ -465,6 +477,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 onChange={(e) => {
                   setInput(e.target.value);
                   if (suggest && e.target.value !== suggest.to) setSuggest(null);
+                  if (notice) setNotice('');
                 }}
                 placeholder="gõ một đáp án…"
                 autoComplete="off"

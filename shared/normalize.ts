@@ -4,8 +4,18 @@ export function norm(input: string): string {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[đĐ]/g, 'd')
+    .replace(/♯/g, '#')
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+    .replace(/[^a-z0-9+#]/g, '');
+}
+
+/** Lowercase with tones kept, used to tell "cắt" from "cát" before falling back to the toneless key. */
+export function soft(input: string): string {
+  return input
+    .normalize('NFC')
+    .replace(/♯/g, '#')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}+#]+/gu, '');
 }
 
 /** Removes a leading classifier word ("hoa", "bánh", "tiếng"…) when something meaningful remains. */

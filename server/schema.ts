@@ -93,5 +93,10 @@ create table if not exists submissions (
   primary key (question_id, input_key)
 );
 
+create table if not exists meta (
+  key text primary key,
+  value text not null
+);
+
 create index if not exists runs_day_alt on runs (day, mode, altitude desc);
 `;

@@ -99,7 +99,8 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <ol>
             <li>Mỗi câu chỉ được <b>thả một đáp án</b>. Không có đáp án đúng hay sai, chỉ có đáp án hợp lệ và đáp án hiếm.</li>
             <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm tính từ câu trả lời của mọi người chơi.</li>
-            <li>Gõ nhầm chính tả? Diều sẽ hỏi lại để bạn chốt. Câu không liên quan thì diều không lên.</li>
+            <li>Gõ nhầm chính tả hay thiếu dấu? Diều sẽ hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Câu không liên quan thì diều không lên.</li>
+            <li>Sổ làng có hơn 18.000 đáp án cho hơn 260 câu hỏi, từ tỉnh thành, món ăn đến chòm sao, từ láy, số nguyên tố.</li>
             <li>Cứ 65 điểm, diều bay cao gấp mười lần. Bầu trời không có trần.</li>
             <li><b>Thả đêm</b>: 45 giây gió chung, đáp án hiếm nạp thêm gió. Bay tới khi tắt gió.</li>
           </ol>

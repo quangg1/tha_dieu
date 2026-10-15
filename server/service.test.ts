@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { pglite, type Db } from './db.js';
 import type { Referee } from './referee.js';
 import * as S from './service.js';
+import { soft } from '../shared/normalize.js';
 
 let db: Db;
 const day = S.vnToday();
@@ -25,6 +26,19 @@ describe('daily set', () => {
     const b = await S.dailySet(db, day);
     expect(a).toHaveLength(7);
     expect(b).toEqual(a);
+  });
+
+  it('mixes categories and does not repeat recent questions', async () => {
+    const { BOOK_BY_ID } = await import('../shared/book/questions.js');
+    const days = ['2031-01-01', '2031-01-02', '2031-01-03', '2031-01-04'];
+    const sets = [];
+    for (const d of days) sets.push(await S.dailySet(db, d));
+    for (const set of sets) {
+      const cats = set.map((id) => BOOK_BY_ID.get(id)!.category);
+      expect(new Set(cats).size).toBe(7);
+    }
+    const all = sets.flat();
+    expect(new Set(all).size).toBe(all.length);
   });
 });
 
@@ -122,11 +136,24 @@ describe('runs', () => {
   });
 });
 
+describe('vague answers', () => {
+  it('asks for something specific without using up the prompt', async () => {
+    const p = 'player_test_0009';
+    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim' });
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'chim' }, referee);
+    expect(r.status).toBe('vague');
+    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'chim sẻ' }, referee);
+    expect(ok.status).toBe('landed');
+  });
+});
+
 describe('admin', () => {
   it('rejecting an answer removes it from matching', async () => {
-    await S.review(db, { questionId: 'loai-chim', key: 'chimngusac', decision: 'reject' });
+    const key = soft('Chim ngũ sắc');
+    expect((await S.loadQuestion(db, 'loai-chim')).answers.has(key)).toBe(true);
+    await S.review(db, { questionId: 'loai-chim', key, decision: 'reject' });
     const q = await S.loadQuestion(db, 'loai-chim');
-    expect(q.answers.has('chimngusac')).toBe(false);
+    expect(q.answers.has(key)).toBe(false);
   });
 });
 
@@ -136,20 +163,20 @@ describe('review queue without a referee', () => {
     const p = 'player_test_0005';
     const qid = 'loai-hoa';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa ngũ sắc' }, nullReferee);
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
     expect(r.status).toBe('nothing');
     expect(r.reason).toMatch(/trưởng làng/);
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa ngu sac' }, nullReferee);
+    await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa bảy màu thần kỳ' }, nullReferee);
     const queue = await S.submissions(db);
-    const item = queue.find((x) => x.question_id === qid && x.input_key === 'hoangusac')!;
+    const item = queue.find((x) => x.question_id === qid && x.input_key === soft('Hoa bảy màu thần kỳ'))!;
     expect(item.n).toBe(2);
-    await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa ngũ sắc', tier: 3 });
+    await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa bảy màu thần kỳ', tier: 3 });
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'ngũ sắc' }, nullReferee);
+    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
     expect(ok.status).toBe('landed');
     expect(ok.tier).toBe(3);
-    expect((await S.submissions(db)).some((x) => x.input_key === 'hoangusac')).toBe(false);
+    expect((await S.submissions(db)).some((x) => x.input_key === soft('Hoa bảy màu thần kỳ'))).toBe(false);
   });
 
   it('a dismissed answer is refused without queuing again', async () => {
@@ -157,7 +184,7 @@ describe('review queue without a referee', () => {
     const p = 'player_test_0006';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
     await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
-    await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: 'raugido', decision: 'dismiss' });
+    await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: soft('rau gì đó'), decision: 'dismiss' });
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
     const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
     expect(r.reason).toMatch(/không công nhận/);
