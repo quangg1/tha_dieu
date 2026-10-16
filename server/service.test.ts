@@ -68,7 +68,7 @@ describe('answering', () => {
     const qid = 'loai-chim';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const bad = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim lửa' }, referee);
-    expect(bad.status).toBe('nothing');
+    expect(bad.status).toBe('retry');
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const good = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim ngũ sắc' }, referee);
     expect(good.status).toBe('landed');
@@ -78,7 +78,7 @@ describe('answering', () => {
     const n = calls.length;
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const again = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim lửa' }, referee);
-    expect(again.status).toBe('nothing');
+    expect(again.status).toBe('retry');
     expect(calls.length).toBe(n);
     const pend = await S.pending(db);
     expect(pend.some((x) => x.display === 'Chim ngũ sắc')).toBe(true);
@@ -115,12 +115,15 @@ describe('one answer per prompt', () => {
     const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'nha-khoa-hoc', input: c.suggestion! }, referee);
     expect(ok.status).toBe('landed');
   });
-  it('an unknown answer closes the prompt', async () => {
+  it('an unknown answer asks for another try and keeps the prompt open', async () => {
     const p = 'player_test_0008';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim' });
     const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'xe đạp' }, referee);
-    expect(r.status).toBe('nothing');
-    await expect(S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'đại bàng' }, referee)).rejects.toThrow();
+    expect(r.status).toBe('retry');
+    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'đại bàng' }, referee);
+    expect(ok.status).toBe('landed');
+    expect(ok.crowd?.top.length).toBeGreaterThan(0);
+    await expect(S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-chim', input: 'cú mèo' }, referee)).rejects.toThrow();
   });
 });
 
@@ -188,15 +191,13 @@ describe('review queue without a referee', () => {
     const qid = 'loai-hoa';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
-    expect(r.status).toBe('nothing');
+    expect(r.status).toBe('retry');
     expect(r.reason).toMatch(/trưởng làng/);
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa bảy màu thần kỳ' }, nullReferee);
     const queue = await S.submissions(db);
     const item = queue.find((x) => x.question_id === qid && x.input_key === soft('Hoa bảy màu thần kỳ'))!;
     expect(item.n).toBe(2);
     await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa bảy màu thần kỳ', tier: 3 });
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
     expect(ok.status).toBe('landed');
     expect(ok.tier).toBe(3);
@@ -209,8 +210,39 @@ describe('review queue without a referee', () => {
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
     await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
     await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: soft('rau gì đó'), decision: 'dismiss' });
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
     const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
     expect(r.reason).toMatch(/không công nhận/);
+  });
+});
+
+describe('settling the day', () => {
+  it('scores early and late players with the same crowd data, and keeps device replays off the board', async () => {
+    const d = '2031-02-01';
+    const [qid] = await S.dailySet(db, d);
+    const q = await S.loadQuestion(db, qid);
+    const rare = [...q.answers.entries()].find(([k, a]) => a.prior === 3 && k !== q.krillKey && !q.traps.has(k))!;
+    const players = Array.from({ length: 6 }, (_, i) => `settle_player_${i}`);
+    const firstTier: number[] = [];
+    for (const p of players) {
+      await S.startTurn(db, { playerId: p, day: d, mode: 'daily', questionId: qid });
+      const r = await S.answer(db, { playerId: p, day: d, mode: 'daily', questionId: qid, input: rare[1].display }, referee);
+      firstTier.push(r.tier!);
+    }
+    const set = await S.dailySet(db, d);
+    for (const id of set.slice(1)) {
+      await S.startTurn(db, { playerId: players[0], day: d, mode: 'daily', questionId: id });
+      await S.miss(db, { playerId: players[0], day: d, mode: 'daily', questionId: id });
+    }
+    const a = await S.finish(db, { playerId: players[0], day: d, mode: 'daily', dev: 'dev-a', since: '2031-01-01' });
+    const b = await S.finish(db, { playerId: players[5], day: d, mode: 'daily', dev: 'dev-b', since: '2031-01-01' });
+    expect(a.score).toBe(b.score);
+    expect(b.reveal).toBeUndefined();
+    expect(a.reveal?.[0].krill).toBe(q.answers.get(q.krillKey)!.display);
+    expect(a.reveal?.[0].mine).toBe(rare[1].display);
+    // Same device, a player id first seen today: a replay in a private tab.
+    const c = await S.finish(db, { playerId: players[3], day: d, mode: 'daily', dev: 'dev-a', since: d });
+    expect(c.replay).toBe(true);
+    const board = await S.board(db, d, 'daily');
+    expect(board.players).toBe(2);
   });
 });

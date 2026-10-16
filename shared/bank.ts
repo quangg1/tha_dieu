@@ -206,4 +206,84 @@ export const BANK: RawQuestion[] = [
 'Cá mè, Cá trắm, Cá bống, Cá nục, Cá cơm, Cá kèo, Cá chim, Cá đối, Cá thát lát',
 'Cá linh, Cá lăng, Cá chình, Cá mú, Cá hú, Cá tra, Cá dứa, Cá bớp, Cá cờ, Cá ngựa',
 'Cá chiên, Cá bỗng, Cá tầm, Cá còm, Cá rồng, Cá kìm, Cá thòi lòi, Cá mặt trăng, Cá bông lau, Cá ngát']},
+
+// ---- Đại chúng: pop culture, snacks, apps, films and songs. Two of these join every daily flight. ----
+{id:'pop-an-vat',c:'Tuổi thơ',q:'Kể tên một món ăn vặt cổng trường',s:['mon','banh'],k:'Bánh tráng me',t:[
+'Bánh tráng trộn, Xúc xích|Xúc xích nướng|Xúc xích chiên, Trà sữa, Bim bim|Snack',
+'Kem, Cá viên chiên|Cá viên, Bánh tráng nướng|Pizza Việt Nam, Nem chua rán, Khoai tây chiên, Ô mai',
+'Bò bía, Bánh gạo, Kẹo bông|Kẹo bông gòn, Me lắc|Me ngào, Chè, Bắp xào|Ngô xào, Trứng vịt lộn|Hột vịt lộn, Bánh flan|Bánh plan',
+'Kẹo kéo, Bò khô, Xoài lắc, Cóc lắc|Cóc dầm, Bánh bò, Que cay, Bánh mì que, Bánh cá, Kẹo mút, Mực nướng|Mực khô, Nước mía, Ốc luộc',
+'Bánh tai heo, Kẹo dừa, Bánh đúc nóng, Bánh tráng chấm, Ổi lắc, Kẹo lạc|Kẹo đậu phộng, Bỏng ngô|Bắp rang, Sữa chua túi, Bánh rán, Bánh khúc, Kem xôi, Bánh tráng cuốn']},
+{id:'pop-topping',c:'Ăn uống',q:'Kể tên một loại topping trà sữa',s:['tran','thach'],k:'Hạt chia',t:[
+'Trân châu|Trân châu đen, Thạch, Pudding',
+'Kem cheese|Kem phô mai|Kem muối|Macchiato, Trân châu trắng, Thạch dừa, Nha đam|Lô hội, Bánh flan',
+'Đậu đỏ, Trân châu đường đen, Thạch củ năng|Củ năng, Sương sáo, Trân châu hoàng kim, Khúc bạch',
+'Thạch cà phê, Thạch phô mai, Khoai môn, Thạch trái cây, Đào miếng|Đào, Vải, Kem trứng, Hạt sen',
+'Trân châu baby, Thạch rau câu, Thạch lá dứa, Trân châu ngọc trai, Mochi, Hạt é, Thạch đào, Sữa chua']},
+{id:'pop-mang-xa-hoi',c:'Công nghệ',q:'Kể tên một ứng dụng mạng xã hội hoặc nhắn tin',s:['app','ung dung'],k:'Zing Me',t:[
+'Facebook|FB, Zalo, TikTok|Tik Tok',
+'Instagram|IG|Insta, Messenger, YouTube',
+'Threads, Telegram, X|Twitter, Viber, Snapchat, Discord',
+'Pinterest, Lotus, Reddit, WhatsApp, LinkedIn, Line, Locket',
+'Tumblr, WeChat, Weibo, BeReal, Bluesky, KakaoTalk, Skype, Clubhouse, Douyin, Xiaohongshu|Tiểu Hồng Thư, Yahoo Messenger|Yahoo Chat, Myspace']},
+{id:'pop-hoat-hinh',c:'Tuổi thơ',q:'Kể tên một nhân vật hoạt hình hoặc truyện tranh',s:['nhan vat','chu'],k:'Sửu Ẹo',t:[
+'Doraemon|Đôrêmon|Đô rê mon, Tom|Mèo Tom, Jerry|Chuột Jerry, Conan|Thám tử Conan, Mickey|Chuột Mickey',
+'Nobita, Shin|Shin cậu bé bút chì|Cậu bé bút chì, Pikachu, Songoku|Goku|Son Goku, Elsa, SpongeBob|Bọt biển',
+'Xuka|Shizuka, Chaien|Jaian, Xeko|Suneo, Naruto, Luffy, Gấu Pooh|Winnie the Pooh, Heo Peppa|Peppa Pig, Masha, Thủy thủ Mặt Trăng|Sailor Moon, Simba',
+'Dekhi|Dekisugi, Nemo, Olaf, Buzz Lightyear, Woody, Shrek, Stitch, Minion, Gấu trúc Po|Po, Dora, Hello Kitty, Snoopy, Popeye, Totoro, Trạng Tí|Tí',
+'Dần Béo, Cả Mẹo, Thỏ Bảy Màu, Pucca, Tintin, Lucky Luke, Garfield, Scooby Doo, Thỏ Bugs|Bugs Bunny, Vịt Donald|Donald, Nhóc Maruko|Maruko, Kiki, Astro Boy|Cậu bé Astro']},
+{id:'pop-ca-si',c:'Âm nhạc',q:'Kể tên một ca sĩ Việt Nam',s:['ca si'],k:'Siu Black',t:[
+'Sơn Tùng M-TP|Sơn Tùng|Sơn Tùng MTP|MTP, Mỹ Tâm, Đen Vâu|Đen, Hòa Minzy, Đàm Vĩnh Hưng',
+'Hồ Ngọc Hà, Noo Phước Thịnh, Tóc Tiên, Bích Phương, Hà Anh Tuấn, Hoàng Thùy Linh, Jack|J97, Erik, Đức Phúc, AMEE, MONO, Phương Ly, Min',
+'Văn Mai Hương, Soobin|Soobin Hoàng Sơn, Vũ Cát Tường, Chi Pu, Đông Nhi, Tuấn Hưng, Bằng Kiều, Lam Trường, Mr Siro, Trúc Nhân, Isaac, Karik, Binz, Suboi, HIEUTHUHAI, tlinh, Hoàng Dũng, Trung Quân, Quang Hùng MasterD',
+'Thanh Lam, Hồng Nhung, Tùng Dương, Mỹ Linh, Hà Trần|Trần Thu Hà, Phương Thanh, Lệ Quyên, Quang Lê, Như Quỳnh, Cẩm Ly, Đan Trường, Ưng Hoàng Phúc, Khắc Việt, Minh Hằng, Uyên Linh, Bùi Anh Tuấn, Hương Tràm, Thùy Chi, Phan Mạnh Quỳnh',
+'Khánh Ly, Thái Thanh, Lệ Thu, Elvis Phương, Duy Khánh, Chế Linh, Tuấn Vũ, Giao Linh, Hương Lan, Thanh Thúy, Ánh Tuyết, Thu Minh, Y Moan, Trần Lập, Phạm Anh Khoa, Lynk Lee']},
+{id:'pop-son-tung',c:'Nhạc Việt',q:'Kể tên một bài hát của Sơn Tùng M-TP',s:['bai','bai hat'],k:'Ấn Nút Nhớ Thả Giấc Mơ',t:[
+'Lạc Trôi, Hãy Trao Cho Anh, Nơi Này Có Anh, Chạy Ngay Đi',
+'Em Của Ngày Hôm Qua, Chúng Ta Của Hiện Tại, Muộn Rồi Mà Sao Còn, Có Chắc Yêu Là Đây, Âm Thầm Bên Em',
+'Cơn Mưa Ngang Qua, Không Phải Dạng Vừa Đâu, Buông Đôi Tay Nhau Ra, Thái Bình Mồ Hôi Rơi, Chắc Ai Đó Sẽ Về, Making My Way, Đừng Làm Trái Tim Anh Đau',
+'Như Ngày Hôm Qua, Khuôn Mặt Đáng Thương, Anh Sai Rồi, Nắng Ấm Xa Dần, Chúng Ta Không Thuộc Về Nhau, Cơn Mưa Xa Dần, Chúng Ta Của Tương Lai',
+'Tiến Lên Việt Nam Ơi, Một Năm Mới Bình An, Đừng Về Trễ, Có Chàng Trai Viết Lên Cây']},
+{id:'pop-phim-viet',c:'Điện ảnh',q:'Kể tên một bộ phim điện ảnh Việt Nam',s:['phim'],k:'Cánh Đồng Hoang',t:[
+'Bố Già, Mai, Lật Mặt, Nhà Bà Nữ',
+'Mắt Biếc, Em Chưa 18, Hai Phượng, Tôi Thấy Hoa Vàng Trên Cỏ Xanh, Gái Già Lắm Chiêu, Đất Rừng Phương Nam, Cô Ba Sài Gòn, Tháng Năm Rực Rỡ',
+'Trạng Tí, Song Lang, Ròm, Tiệc Trăng Máu, Cua Lại Vợ Bầu, Siêu Lừa Gặp Siêu Lầy, Người Bất Tử, Dòng Máu Anh Hùng, Để Mai Tính, Bẫy Rồng, Kẻ Ăn Hồn, Đào Phở Và Piano, Quỷ Cẩu, Cám',
+'Áo Lụa Hà Đông, Mùi Đu Đủ Xanh, Chuyện Của Pao, Thương Nhớ Đồng Quê, Tèo Em, Tấm Cám Chuyện Chưa Kể, Long Ruồi, Vợ Ba, Bi Đừng Sợ, Ba Mùa',
+'Chung Một Dòng Sông, Chị Tư Hậu, Em Bé Hà Nội, Bao Giờ Cho Đến Tháng Mười, Mê Thảo Thời Vang Bóng, Thời Xa Vắng, Đời Cát, Hà Nội 12 Ngày Đêm, Chơi Vơi']},
+{id:'pop-sieu-anh-hung',c:'Giải trí',q:'Kể tên một siêu anh hùng',s:['sieu nhan'],k:'Dũng sĩ Hesman|Hesman',t:[
+'Người Nhện|Spider-Man|Spiderman, Superman|Siêu nhân, Người Dơi|Batman, Iron Man|Người Sắt',
+'Captain America|Đội trưởng Mỹ, Thor, Hulk|Người khổng lồ xanh, Wonder Woman|Nữ thần chiến binh, Black Panther|Báo Đen, Siêu nhân Gao',
+'Flash, Aquaman, Doctor Strange, Black Widow|Góa phụ đen, Deadpool, Wolverine, Ant-Man|Người Kiến, Captain Marvel, Hawkeye, Ultraman|Siêu nhân điện quang, Green Lantern|Đèn lồng xanh',
+'Cyclops, Storm, Scarlet Witch, Vision, Falcon, Shazam, Supergirl, Robin, Daredevil, Ghost Rider, Groot, Star-Lord, Moon Knight, Shang-Chi, Kamen Rider, Saitama|One Punch Man',
+'Ms Marvel, Blue Beetle, Cyborg, Nightwing, Black Canary, Hellboy, Spawn, Captain Planet, Gatchaman, Martian Manhunter']},
+{id:'pop-dien-thoai',c:'Công nghệ',q:'Kể tên một hãng điện thoại',s:['hang','dien thoai'],k:'Mobiistar',t:[
+'Apple|iPhone, Samsung, Oppo',
+'Xiaomi, Vivo, Nokia, Realme',
+'Huawei, Sony, Vsmart, Google Pixel|Pixel, OnePlus, LG, Bphone|Bkav',
+'Motorola, Honor, Asus, Tecno, Infinix, Nothing, Masstel, BlackBerry, HTC, Lenovo, ZTE',
+'Q-Mobile|QMobile, Siemens, Alcatel, Meizu, Philips, Wiko, Itel, Sony Ericsson, Palm']},
+{id:'pop-game',c:'Trò chơi',q:'Kể tên một trò chơi điện tử',s:['game','tro choi'],k:'Ragnarok',t:[
+'Liên Quân|Liên Quân Mobile, Free Fire, PUBG, Minecraft',
+'Liên Minh Huyền Thoại|LOL|League of Legends, Đột Kích|Crossfire, Gunny, Valorant, Roblox, FC Online|FIFA Online|FIFA',
+'Võ Lâm Truyền Kỳ|Võ Lâm, Audition, Mario|Super Mario, Xếp gạch|Tetris, Pokémon|Pokemon, Genshin Impact, Among Us, Counter-Strike|CS, Dota|Dota 2, GTA, Plants vs Zombies, Angry Birds, Flappy Bird',
+'MU Online|MU, Gunbound, Boom|Đặt bom|Bomberman, Contra, Rắn săn mồi, Pikachu nối hình|Pikachu, StarCraft, Warcraft, Đế Chế|Age of Empires|AOE, The Sims, Zelda, Tekken, Mortal Kombat, Call of Duty, Fortnite, Clash of Clans',
+'Kiếm Thế, Cửu Âm Chân Kinh, Pac-Man, Space Invaders, Half-Life, Street Fighter, Diablo, Final Fantasy, Elden Ring, Hollow Knight']},
+{id:'pop-banh-keo',c:'Ăn uống',q:'Kể tên một nhãn bánh kẹo đóng gói',s:['banh','keo'],k:'Big Babol',t:[
+'Oreo, Chocopie|Choco Pie, Kitkat|Kit Kat, Oishi',
+'Poca, Cosy, AFC, Alpenliebe, Mentos, Lay\'s|Lays, One One, Danisa',
+'Solite, Custas, Hura, Goute, Swing, Pringles, Snickers, M&M|M&Ms, Chupa Chups, Haribo, Ritz, Tic Tac',
+'Toblerone, Ferrero Rocher|Ferrero, Marie, Dynamite, Hải Hà, Bibica, Kinh Đô, Richy, Slide, Pocky, Glico',
+'Twix, Bounty, Mars, Hershey\'s, Mikado, Doublemint, Lotus Biscoff|Biscoff, Tim Tam, Fisherman\'s Friend']},
+{id:'pop-danh-hai',c:'Giải trí',q:'Kể tên một danh hài Việt Nam',s:['nghe si'],k:'Văn Chung',t:[
+'Hoài Linh, Trấn Thành, Trường Giang, Xuân Bắc',
+'Tự Long, Công Lý, Việt Hương, Thu Trang, Chí Tài, Vân Dung, Quang Thắng, Thúy Nga',
+'Bảo Chung, Minh Nhí, Hồng Vân, Lê Giang, Tiến Luật, Lâm Vỹ Dạ, Hứa Minh Đạt, Huỳnh Lập, Mạc Văn Khoa, Long Đẹp Trai, Hải Triều, Bảo Quốc',
+'Văn Hiệp, Thành Lộc, Hữu Châu, Phước Sang, Duy Phương, Kiều Oanh, Hoàng Sơn, Quốc Khánh, Hán Văn Tình, Chiến Thắng, Vượng Râu, Quang Teo, Giang Còi, Trung Ruồi',
+'Tấn Beo, Tấn Hoàng, Hoài Tâm, Phi Phụng, Hiếu Hiền, Kiều Linh, Nhật Cường, Minh Vượng']},
+{id:'pop-xe-may',c:'Đường phố',q:'Kể tên một mẫu xe máy',s:['xe'],k:'Babetta',t:[
+'Wave|Wave Alpha, Vision, Air Blade|Airblade, SH',
+'Dream, Exciter, Sirius, Lead, Vespa',
+'Future, Winner, Jupiter, Janus, Grande, Cub|Super Cub, Liberty, Vario, PCX',
+'Attila, Nouvo, Spacy, Click, Raider, Satria, Sonic, Luvias, Nozza, Acruzo, Freego, Latte, SH Mode, Lambretta, Viva',
+'Chaly, Dylan, Honda @|A còng, Simson, Minsk, Mobylette, Cub 81, Cub 82']},
 ];

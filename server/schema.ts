@@ -99,4 +99,6 @@ create table if not exists meta (
 );
 
 create index if not exists runs_day_alt on runs (day, mode, altitude desc);
+alter table runs add column if not exists dev text;
+alter table runs add column if not exists fresh boolean;
 `;

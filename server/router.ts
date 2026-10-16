@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickReferee, type Referee } from './referee.js';
@@ -22,7 +23,7 @@ export interface Req extends IncomingMessage {
   query?: Record<string, string | string[] | undefined>;
 }
 
-type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean }) => Promise<unknown>;
+type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean; dev: string }) => Promise<unknown>;
 
 function mode(v: unknown): S.Mode {
   return v === 'night' ? 'night' : 'daily';
@@ -76,8 +77,8 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
   },
   finish: {
     method: 'POST',
-    async run({ db, body }) {
-      return S.finish(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), name: body.name as string | undefined });
+    async run({ db, body, dev }) {
+      return S.finish(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), name: body.name as string | undefined, dev, since: typeof body.since === 'string' ? body.since : undefined });
     },
   },
   board: {
@@ -160,7 +161,10 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
     const body = req.method === 'POST' ? await readBody(req) : {};
     const db = opts.db ?? (await getDb());
     if (!opts.db) await ensureReady(db);
-    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin });
+    // A coarse device mark (network address and browser), hashed, so a replay in a private tab stays off the board.
+    const ip = String(req.headers['x-forwarded-for'] ?? req.socket?.remoteAddress ?? '').split(',')[0].trim();
+    const dev = createHash('sha256').update(`${ip}|${req.headers['user-agent'] ?? ''}`).digest('hex').slice(0, 24);
+    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev });
     send(res, 200, data);
   } catch (e) {
     if (e instanceof S.GameError) return send(res, e.status, { error: e.message });

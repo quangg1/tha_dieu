@@ -1,10 +1,16 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { TIERS, TIERS_BY_RANK, formatAlt } from '../../shared/scoring.js';
+import { MILESTONES, TIERS, TIERS_BY_RANK, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
-import { msToNextDay, stats, today, vnDay } from '../store';
+import { readChallenge } from '../shareCard';
+import { SKINS, needLabel, skinById, unlocked } from '../skins';
+import { album, krillFound, msToNextDay, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
+
+/** A friend's result from a challenge link, read once and kept for this visit. */
+const CHALLENGE = typeof location !== 'undefined' ? readChallenge(location.search) : null;
+if (CHALLENGE && typeof history !== 'undefined') history.replaceState(null, '', location.pathname);
 
 const WEEKDAY = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -20,6 +26,8 @@ function useCountdown() {
 
 export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyScene; soundButton: ReactNode; onPlay: (m: 'daily' | 'night') => void; onReview: (s: Summary) => void }) {
   const [howto, setHowto] = useState(false);
+  const [bag, setBag] = useState(false);
+  const [skin, setSkin] = useState(prefs.skin);
   const st = stats();
   const rec = today();
   const done = rec && rec.day === vnDay() && rec.result ? rec : null;
@@ -51,6 +59,17 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
         </div>
         <span className="hud-sound">{soundButton}</span>
       </div>
+
+      {CHALLENGE && (
+        <div className="challenge">
+          <span className="challenge-k">Lời thách đấu</span>
+          <p>
+            <b>{CHALLENGE.n}</b> đã thả diều tới <b>{formatAlt(CHALLENGE.a)}</b>
+            {CHALLENGE.t ? ` (${CHALLENGE.t})` : ''}
+            {CHALLENGE.d === vnDay() ? ' hôm nay. Bạn bay được cao hơn không?' : ` ngày ${CHALLENGE.d.slice(8, 10)}/${CHALLENGE.d.slice(5, 7)}. Thử sức với chuyến bay hôm nay nhé!`}
+          </p>
+        </div>
+      )}
 
       <div className="home-hero">
         <span className="home-kicker">Đố chữ mỗi ngày</span>
@@ -99,7 +118,72 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             Cách chơi
           </button>
         </div>
+        <button className="bag-btn" onClick={() => setBag(true)} aria-haspopup="dialog">
+          <span>Bộ sưu tập</span>
+          <b>
+            {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án Cung Trăng
+          </b>
+        </button>
       </section>
+
+      {bag && (
+        <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Bộ sưu tập" onClick={() => setBag(false)}>
+          <section className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <h2>Bộ sưu tập</h2>
+              <button className="sheet-x" onClick={() => setBag(false)} aria-label="Đóng">
+                ✕
+              </button>
+            </div>
+            <div className="card-k" style={{ margin: '12px 0 8px' }}>Cánh diều</div>
+            <div className="skins">
+              {SKINS.map((k) => {
+                const open = unlocked(k, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak });
+                return (
+                  <button
+                    key={k.id}
+                    className={`skin${skin === k.id ? ' on' : ''}${open ? '' : ' locked'}`}
+                    disabled={!open}
+                    onClick={() => {
+                      prefs.skin = k.id;
+                      setSkin(k.id);
+                      sky.setSkin(skinById(k.id));
+                    }}
+                  >
+                    <svg width="44" height="60" viewBox="0 0 120 220" aria-hidden="true">
+                      <path d="M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z" fill={open ? k.body : '#c9d0da'} stroke="#1f1b16" strokeWidth="5" />
+                      <path d="M60 60 C 82 76, 86 118, 60 170 C 34 118, 38 76, 60 60 Z" fill={open ? k.inner : '#e6eaf0'} />
+                    </svg>
+                    <b>{k.name}</b>
+                    <span>{open ? (skin === k.id ? 'Đang dùng' : 'Chọn') : needLabel(k)}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="card-k" style={{ margin: '16px 0 8px' }}>Tầng trời đã chạm</div>
+            <div className="layers">
+              {MILESTONES.filter((m) => m.alt > 0).map((m) => (
+                <span key={m.name} className={Math.max(st.best, st.nightBest) >= m.alt ? 'on' : ''}>
+                  {m.name}
+                </span>
+              ))}
+            </div>
+            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án Cung Trăng · {krillFound()} đã tìm ra</div>
+            <div className="album">
+              {Object.values(album()).length === 0 && <p className="row-q">Chơi xong một chuyến bay để mở các đáp án Cung Trăng.</p>}
+              {Object.values(album())
+                .sort((a, b) => (a.day < b.day ? 1 : -1))
+                .slice(0, 60)
+                .map((e) => (
+                  <div key={e.day + e.prompt} className={`album-row${e.found ? ' found' : ''}`}>
+                    <span>{e.prompt}</span>
+                    <b>{e.krill}</b>
+                  </div>
+                ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {howto && (
         <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Cách chơi" onClick={() => setHowto(false)}>

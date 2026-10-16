@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { TIERS, type Milestone } from '../shared/scoring.js';
-import type { Crowd } from './api';
 
 export function Seal({ tier, small, strike, extra, className = '' }: { tier: number; small?: boolean; strike?: boolean; extra?: string; className?: string }) {
   const t = TIERS[tier];
@@ -35,41 +34,6 @@ export function Wind({ left, total }: { left: number; total: number }) {
         {Math.max(0, Math.ceil(left))}s
       </span>
     </div>
-  );
-}
-
-export function CrowdBars({ crowd, mine }: { crowd: Crowd; mine: string | null }) {
-  if (crowd.estimated) {
-    return (
-      <p className="gd-msg" style={{ margin: 0 }}>
-        Mới có {crowd.total.toLocaleString('vi-VN')} người trả lời câu này, nên độ hiếm đang được ước tính. Càng nhiều người chơi, con số càng chính xác.
-      </p>
-    );
-  }
-  const max = Math.max(...crowd.top.map((t) => t.pct), crowd.mine, 1);
-  const rows = crowd.top.filter((t) => !t.mine);
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="gd-label">{crowd.total.toLocaleString('vi-VN')} người đã trả lời câu này</span>
-      <div className="gd-crowd">
-        {rows.slice(0, 4).map((r) => (
-          <CrowdRow key={r.display} label={r.display} pct={r.pct} max={max} />
-        ))}
-        {mine && <CrowdRow label={`${mine} · bạn`} pct={crowd.mine} max={max} me />}
-      </div>
-    </div>
-  );
-}
-
-function CrowdRow({ label, pct, max, me }: { label: string; pct: number; max: number; me?: boolean }) {
-  return (
-    <>
-      <span className={me ? 'gd-crowd__me' : undefined}>{label}</span>
-      <div className="gd-crowd__bar">
-        <div className="gd-crowd__fill" style={{ width: `${Math.max(me ? 4 : 2, (pct / max) * 100)}%` }} />
-      </div>
-      <span className="gd-crowd__pct">{pct.toLocaleString('vi-VN')}%</span>
-    </>
   );
 }
 

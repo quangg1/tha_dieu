@@ -13,13 +13,23 @@ export interface PublicQuestion {
 
 export interface Crowd {
   total: number;
-  top: { display: string; pct: number; mine: boolean }[];
-  mine: number;
+  /** pct is null while the list is the book's guess rather than real counts. */
+  top: { display: string; pct: number | null; mine: boolean }[];
+  mine: number | null;
   estimated: boolean;
 }
 
+export interface Reveal {
+  questionId: string;
+  prompt: string;
+  krill: string;
+  top: string;
+  mine: string | null;
+  tier: number;
+}
+
 export interface AnswerResult {
-  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
+  status: 'landed' | 'retry' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;
@@ -29,6 +39,7 @@ export interface AnswerResult {
   bonus?: number;
   judged?: boolean;
   share?: number | null;
+  crowd?: Crowd;
 }
 
 export interface FinishResult {
@@ -38,6 +49,11 @@ export interface FinishResult {
   rank: number;
   players: number;
   beaten: number;
+  /** A second run from this device today: it stays off the board. */
+  replay?: boolean;
+  /** The day is over and the scores are final. */
+  settled?: boolean;
+  reveal?: Reveal[];
 }
 
 export interface BoardRow {
@@ -77,8 +93,8 @@ export const api = {
     call<{ startedAt: string; now: string; answered: boolean }>('start', b),
   answer: (b: { playerId: string; day: string; mode: string; questionId: string; input: string }) => call<AnswerResult>('answer', b),
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
-  finish: (b: { playerId: string; day: string; mode: string; name?: string }) => call<FinishResult>('finish', b),
-  board: (mode: string, playerId: string) => call<{ players: number; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
+  finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string }) => call<FinishResult>('finish', b),
+  board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
   admin: {
     pending: (token: string) => call<{ stats: Record<string, number>; pending: { question_id: string; prompt: string; key: string; display: string; plays: number }[] }>('admin/pending', undefined, { 'x-admin-token': token }),
     review: (token: string, b: { questionId: string; key: string; decision: 'approve' | 'reject'; tier?: number }) =>

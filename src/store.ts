@@ -25,8 +25,15 @@ export function playerId(): string {
   if (!id) {
     id = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).replace(/[^A-Za-z0-9]/g, '').slice(0, 32);
     write('player', id);
+    write('since', vnDay());
   }
   return id;
+}
+
+/** The day this device first played, so the server can tell a private-tab replay from a long-time player. */
+export function playerSince(): string {
+  playerId();
+  return read<string>('since', '2020-01-01');
 }
 
 export const prefs = {
@@ -42,7 +49,47 @@ export const prefs = {
   set name(v: string) {
     write('name', v);
   },
+  /** The first-flight tips have been shown. */
+  get coached() {
+    return read('coached', false);
+  },
+  set coached(v: boolean) {
+    write('coached', v);
+  },
+  get skin() {
+    return read('skin', 'son');
+  },
+  set skin(v: string) {
+    write('skin', v);
+  },
 };
+
+/* ---------------------------------------------------------------- collection */
+
+export interface AlbumEntry {
+  day: string;
+  prompt: string;
+  krill: string;
+  found: boolean;
+}
+
+/** Every hidden Cung Trăng answer seen at the end of a daily flight, keyed by day and question. */
+export function album(): Record<string, AlbumEntry> {
+  return read<Record<string, AlbumEntry>>('album', {});
+}
+
+export function addToAlbum(day: string, items: { questionId: string; prompt: string; krill: string; found: boolean }[]) {
+  const a = album();
+  for (const it of items) {
+    const k = `${day}:${it.questionId}`;
+    a[k] = { day, prompt: it.prompt, krill: it.krill, found: it.found || !!a[k]?.found };
+  }
+  write('album', a);
+}
+
+export function krillFound(): number {
+  return Object.values(album()).filter((e) => e.found).length;
+}
 
 export interface LocalRow {
   questionId: string;

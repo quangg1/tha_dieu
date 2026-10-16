@@ -16,7 +16,7 @@ Không cần cơ sở dữ liệu thật khi chạy thử. Không có `ANTHROPIC
 
 1. Tạo project Vercel từ repo này (framework: Vite).
 2. Vào tab **Storage**, thêm một cơ sở dữ liệu Postgres (Neon). Vercel tự thêm `DATABASE_URL`.
-3. Thêm biến môi trường: `ANTHROPIC_API_KEY`, `ADMIN_TOKEN` (một chuỗi ngẫu nhiên dài), tùy chọn `CLAUDE_MODEL`.
+3. Thêm biến môi trường: `ADMIN_TOKEN` (một chuỗi ngẫu nhiên dài) và khóa trọng tài: `ANTHROPIC_API_KEY` hoặc `GEMINI_API_KEY` (tùy chọn `CLAUDE_MODEL`, `GEMINI_MODEL`). Không có khóa nào thì đáp án lạ chỉ được nhắc thử lại, không bị mất lượt.
 4. Deploy, mở `https://<tên-miền>/#admin`, nhập `ADMIN_TOKEN`, bấm **Cài đặt / cập nhật kho câu hỏi**.
 
 ## Cấu trúc

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { flute } from './audio/flute';
 import { SkyScene } from './scene/sky';
 import { prefs } from './store';
+import { skinById } from './skins';
 import { SoundIcon } from './ui';
 import Home from './screens/Home';
 import Game, { type Summary } from './screens/Game';
@@ -18,6 +19,7 @@ export default function App() {
 
   useEffect(() => {
     const s = new SkyScene(canvas.current!);
+    s.setSkin(skinById(prefs.skin));
     setSky(s);
     if (import.meta.env.DEV) (window as unknown as { __sky: SkyScene }).__sky = s;
     return () => s.destroy();

@@ -13,11 +13,12 @@ import {
   formatAltParts,
   type Milestone,
 } from '../../shared/scoring.js';
-import { api, ApiError, type AnswerResult, type FinishResult, type PublicQuestion } from '../api';
+import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
+import { buzz } from '../haptics';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
-import { playerId, prefs, recordFlight, saveToday, today, vnDay, type LocalRow } from '../store';
+import { playerId, playerSince, prefs, recordFlight, saveToday, today, vnDay, type LocalRow } from '../store';
 import { BackIcon } from '../ui';
 
 export interface Summary {
@@ -40,6 +41,7 @@ interface Outcome {
   reason?: string;
   altitude: number;
   milestone?: Milestone | null;
+  crowd?: Crowd;
 }
 
 interface Reveal {
@@ -133,6 +135,36 @@ function Ladder({ step, tier, fell, side, done }: { step: number; tier: number |
   );
 }
 
+/** What the rest of the village answered: real shares once enough people have played, the book's guess before that. */
+function CrowdPanel({ crowd, mine }: { crowd: Crowd; mine: string }) {
+  if (crowd.estimated) {
+    // Not enough players yet: the book's guess of the common answers, as one compact line.
+    return (
+      <div className="crowd">
+        <span className="crowd-k">Sổ làng đoán cả làng hay nói</span>
+        <span className="crowd-guess">{crowd.top.map((t) => t.display).join(' · ')}</span>
+      </div>
+    );
+  }
+  const max = Math.max(1, ...crowd.top.map((t) => t.pct ?? 0));
+  const top = crowd.top.slice(0, 3);
+  const inTop = top.some((t) => t.mine);
+  const row = (label: string, pct: number, isMine: boolean) => (
+    <div key={label} className={`crowd-row${isMine ? ' mine' : ''}`}>
+      <span className="crowd-name">{label}</span>
+      <span className="crowd-bar"><i style={{ width: `${Math.max(4, (pct / max) * 100)}%` }} /></span>
+      <span className="crowd-pct">{pct.toLocaleString('vi-VN')}%</span>
+    </div>
+  );
+  return (
+    <div className="crowd">
+      <span className="crowd-k">Cả làng nói gì · {crowd.total.toLocaleString('vi-VN')} người</span>
+      {top.map((t) => row(t.display, t.pct ?? 0, t.mine))}
+      {!inTop && row(`${mine} · bạn`, crowd.mine ?? 0, true)}
+    </div>
+  );
+}
+
 export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: SkyScene; mode: 'daily' | 'night'; soundButton: ReactNode; onExit: () => void; onDone: (s: Summary) => void }) {
   const pid = useRef(playerId()).current;
   const [day, setDay] = useState(vnDay());
@@ -162,6 +194,9 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const finishing = useRef(false);
   const timers = useRef<number[]>([]);
   const skipReveal = useRef<(() => void) | null>(null);
+  const [coach, setCoach] = useState(false);
+  const coachDone = useRef<(() => void) | null>(null);
+  const [shake, setShake] = useState(0);
 
   const altitude = altitudeFor(score);
   const shownScore = useRoll(score);
@@ -210,7 +245,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     finishing.current = true;
     setPhase('loading');
     try {
-      const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined });
+      const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined, since: playerSince() });
       recordFlight(day, mode, result.altitude);
       if (mode === 'daily') saveToday({ day, rows: rowsRef.current, result });
       onDone({ mode, rows: rowsRef.current, result });
@@ -287,6 +322,13 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       setNotice('');
       setQ(question);
       setPhase('intro');
+      // The very first flight on this device opens with three short tips; the clock waits for them.
+      if (!prefs.coached) {
+        setCoach(true);
+        await new Promise<void>((res) => (coachDone.current = res));
+        prefs.coached = true;
+        setCoach(false);
+      }
       for (let s = INTRO_SECONDS; s > 0; s--) {
         setIntro(s);
         await new Promise((r) => setTimeout(r, 800));
@@ -450,8 +492,20 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       setTimeout(() => inputRef.current?.focus(), 30);
       return;
     }
-    if (r.status === 'late') return showNothing(q, 'late', text);
-    if (r.status === 'nothing') return showNothing(q, 'nothing', text, r.reason);
+    if (r.status === 'retry' || r.status === 'nothing') {
+      // Not an answer the village knows: no penalty, just another try while the wind lasts.
+      setNotice(r.reason ?? 'Làng chưa biết đáp án này. Thử một đáp án khác nhé.');
+      setShake((k) => k + 1);
+      buzz(60);
+      flute.wrong();
+      setPhase('asking');
+      setTimeout(() => inputRef.current?.select(), 30);
+      return;
+    }
+    if (r.status === 'late') {
+      buzz([40, 60, 40]);
+      return showNothing(q, 'late', text);
+    }
 
     const tier = r.tier!;
     const before = altitudeFor(scoreRef.current);
@@ -470,9 +524,10 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     sky.setFlutes(bestTier.current >= 3 ? 3 : bestTier.current >= 2 ? 2 : 1);
     sky.boost(0.8 + rank * 0.12);
     sky.celebrate(rank);
+    buzz(rank >= 5 ? [30, 40, 30, 40, 120] : rank >= 3 ? [30, 50, 60] : rank === 1 ? [80, 40, 20] : 25);
     flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
     flute.setLevel(musicLevel(after));
-    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after, milestone: m });
+    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after, milestone: m, crowd: r.crowd });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2600);
   };
@@ -609,10 +664,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 <p className="out-line">{TIERS[outcome.tier!].line}</p>
                 <div className="chips">
                   {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
-                  {outcome.share != null && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
+                  {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
                   {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
                   {outcome.milestone && <span className="chip mile">Vượt mốc · {outcome.milestone.name}</span>}
                 </div>
+                {outcome.crowd && outcome.crowd.top.length > 0 && <CrowdPanel crowd={outcome.crowd} mine={outcome.display ?? ''} />}
               </>
             ) : (
               <>
@@ -627,6 +683,31 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           </div>
         )}
       </section>
+
+      {coach && (
+        <div className="coach-wrap" role="dialog" aria-modal="true" aria-label="Cách thả diều">
+          <section className="coach">
+            <span className="coach-k">Chuyến bay đầu tiên</span>
+            <h2>Thả diều thế nào?</h2>
+            <ol>
+              <li><b>Gõ một đáp án đúng</b> cho câu hỏi. Gõ không dấu cũng được.</li>
+              <li><b>Càng ít người nghĩ ra, diều càng cao</b>: từ Tà tà lên tới Cung Trăng.</li>
+              <li>Làng chưa biết đáp án của bạn? <b>Cứ thử đáp án khác</b>. Chỉ hết gió mới mất lượt.</li>
+            </ol>
+            <div className="coach-tiers" aria-hidden="true">
+              {LADDER.map((t) => (
+                <span key={t}>
+                  <TierIcon tier={t} size={30} />
+                  <small>{TIERS[t].points}</small>
+                </span>
+              ))}
+            </div>
+            <button className="next-btn" onClick={() => coachDone.current?.()} autoFocus>
+              Hiểu rồi, thả diều!
+            </button>
+          </section>
+        </div>
+      )}
 
       <div className="play-dock">
         {(phase === 'intro' || phase === 'loading') && (
@@ -643,7 +724,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
               </div>
             )}
             {notice && <div className="toast-pill bad" role="status">{notice}</div>}
-            <form className="answer-bar" onSubmit={submit}>
+            <form className={`answer-bar${shake ? ' shake' : ''}`} key={shake} onSubmit={submit}>
               <WindDial left={left} total={mode === 'night' ? total : QUESTION_SECONDS} />
               <label htmlFor="answer" className="sr">Đáp án của bạn</label>
               <input
@@ -656,7 +737,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   if (suggest && e.target.value !== suggest.to) setSuggest(null);
                   if (notice) setNotice('');
                 }}
-                placeholder="Gõ một đáp án…"
+                placeholder="Gõ đáp án, không dấu cũng được…"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}

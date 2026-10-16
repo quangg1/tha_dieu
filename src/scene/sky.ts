@@ -35,6 +35,8 @@ function makeArt() {
 }
 
 const INK = '#1f1b16';
+/** Modest phones (few cores or little memory) draw at a lower resolution and skip some effects. */
+const LITE = (navigator.hardwareConcurrency ?? 8) <= 4 || ((navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8) <= 3;
 const PAPER = '#f4ead2';
 const SON = '#c0392b';
 const HOE = '#e2a72e';
@@ -181,11 +183,29 @@ export class SkyScene {
     this.ro.observe(canvas);
     this.resize();
     this.raf = requestAnimationFrame((t) => this.frame(t));
+    // No drawing while the tab is in the background.
+    document.addEventListener('visibilitychange', this.onVisible);
   }
+
+  private onVisible = () => {
+    cancelAnimationFrame(this.raf);
+    if (!document.hidden) {
+      this.last = 0;
+      this.raf = requestAnimationFrame((t) => this.frame(t));
+    }
+  };
 
   destroy() {
     cancelAnimationFrame(this.raf);
     this.ro.disconnect();
+    document.removeEventListener('visibilitychange', this.onVisible);
+  }
+
+  private skin = { body: SON, inner: HOE, tail: SON };
+
+  /** Colours of the player's kite. */
+  setSkin(s: { body: string; inner: string; tail: string }) {
+    this.skin = { body: s.body, inner: s.inner, tail: s.tail };
   }
 
   setLayout(l: SkyLayout) {
@@ -282,7 +302,7 @@ export class SkyScene {
 
   private resize() {
     const r = this.canvas.getBoundingClientRect();
-    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.dpr = Math.min(LITE ? 1.25 : 2, window.devicePixelRatio || 1);
     this.W = r.width;
     this.H = r.height;
     this.canvas.width = Math.round(r.width * this.dpr);
@@ -342,7 +362,7 @@ export class SkyScene {
   private step(dt: number) {
     const { W, H } = this;
     const speed = this.camVel * H * this.layout.decade;
-    if (speed > 260 && !this.reduce) {
+    if (speed > 260 && !this.reduce && !LITE) {
       const n = Math.min(3, speed * dt * 0.025);
       for (let i = 0; i < n; i++) this.streaks.push({ x: Math.random() * W, y: -40 - Math.random() * 60, len: 30 + Math.random() * 70, a: 0.12 + Math.random() * 0.22 });
     }
@@ -1183,7 +1203,7 @@ export class SkyScene {
     ctx.lineJoin = 'round';
     // Tail ribbon with bows, streaming harder while the kite climbs.
     const climb = clamp(this.camVel * 0.8);
-    ctx.strokeStyle = moon ? TRANG : SON;
+    ctx.strokeStyle = moon ? TRANG : this.skin.tail;
     ctx.lineWidth = 2.4;
     ctx.beginPath();
     const pts: [number, number][] = [];
@@ -1196,7 +1216,7 @@ export class SkyScene {
       else ctx.moveTo(px, py);
     }
     ctx.stroke();
-    ctx.fillStyle = moon ? TRANG : HOE;
+    ctx.fillStyle = moon ? TRANG : this.skin.inner;
     for (let i = 3; i < pts.length; i += 3) {
       const [px, py] = pts[i];
       ctx.beginPath();
@@ -1226,12 +1246,12 @@ export class SkyScene {
     ctx.fillStyle = 'rgba(20,30,60,.18)';
     ctx.fill(LEAF);
     ctx.restore();
-    ctx.fillStyle = moon ? CHAM_DEEP : SON;
+    ctx.fillStyle = moon && this.skin.body === SON ? CHAM_DEEP : this.skin.body;
     ctx.fill(LEAF);
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = moon ? PAPER : INK;
     ctx.stroke(LEAF);
-    ctx.fillStyle = moon ? TRANG : HOE;
+    ctx.fillStyle = moon && this.skin.body === SON ? TRANG : this.skin.inner;
     ctx.fill(INNER);
     ctx.strokeStyle = moon ? PAPER : INK;
     ctx.lineWidth = 2;
@@ -1241,7 +1261,7 @@ export class SkyScene {
     ctx.moveTo(18, 100);
     ctx.quadraticCurveTo(60, 84, 102, 100);
     ctx.stroke();
-    ctx.fillStyle = moon ? TRANG : SON;
+    ctx.fillStyle = moon && this.skin.body === SON ? TRANG : this.skin.tail;
     disc(ctx, 60, 104, 7);
     ctx.stroke();
     ctx.restore();

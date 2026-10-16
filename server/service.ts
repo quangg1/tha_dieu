@@ -92,6 +92,9 @@ function seeded(seed: string) {
 
 /** Difficulty plan for the seven daily questions: warm up, build, end on the hardest. */
 const LEVEL_PLAN = [1, 2, 1, 2, 3, 2, 3];
+/** Slots held for pop-culture questions (films, songs, snacks, apps), which make the rare answers worth showing off. */
+const POP_SLOTS = [1, 4];
+const isPop = (id: string) => id.startsWith('pop-');
 
 /**
  * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
@@ -113,8 +116,10 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
     const cutoff = new Date(new Date(day + 'T00:00:00Z').getTime() - window * 86400_000).toISOString().slice(0, 10);
     const recent = new Set(recentRows.filter((r) => r.day >= cutoff).flatMap((r) => r.question_ids));
     for (const level of LEVEL_PLAN.slice(pick.length)) {
+      const slot = pick.length;
       const ok = (q: (typeof pool)[number], strictLevel: boolean) =>
         !recent.has(q.id) &&
+        isPop(q.id) === POP_SLOTS.includes(slot) &&
         !pick.includes(q) &&
         (!strictLevel || (q.level ?? 2) === level) &&
         !pick.some((p) => p.category === q.category || p.family === q.family);
@@ -294,7 +299,7 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
      on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls`,
     [playerId, day],
   );
-  if (usage.calls > REFEREE_CALLS_PER_DAY) return { key: null, reason: 'Hôm nay trọng tài đã xem quá nhiều đáp án lạ của bạn.' };
+  if (usage.calls > REFEREE_CALLS_PER_DAY) return { key: null, reason: 'Hôm nay trọng tài đã xem quá nhiều đáp án lạ của bạn. Thử một đáp án quen hơn nhé.' };
   let v;
   try {
     v = await referee(q.prompt, q.note ?? undefined, input);
@@ -308,7 +313,7 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
        on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
       [q.id, inputKey, input.slice(0, 60)],
     );
-    return { key: null, reason: 'Chưa có trong sổ của làng. Đáp án đã được gửi để trưởng làng xem lại.' };
+    return { key: null, reason: 'Làng chưa biết đáp án này. Thử một đáp án khác nhé, đáp án đã được gửi cho trưởng làng xem.' };
   }
   if (!v.valid) {
     await db.query(
@@ -340,9 +345,10 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
 }
 
 export interface AnswerResult {
-  /** landed: scored · nothing: not a valid answer, the prompt is over · late: the wind ran out · confirm: a near match to accept
-   *  vague: too general ("chim" for a bird), try again · empty: nothing typed */
-  status: 'landed' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
+  /** landed: scored · retry: not an answer the village or the referee accepts, try another while the wind lasts
+   *  late: the wind ran out · confirm: a near match to accept · vague: too general ("chim" for a bird) · empty: nothing typed
+   *  nothing: kept for older clients, no longer sent */
+  status: 'landed' | 'retry' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;
@@ -353,6 +359,38 @@ export interface AnswerResult {
   judged?: boolean;
   /** Percentage of today's players who gave the same answer, once enough people have played. */
   share?: number | null;
+  /** What the rest of the village answered. */
+  crowd?: Crowd;
+}
+
+export interface Crowd {
+  /** Players who have answered this prompt. */
+  total: number;
+  /** Most given answers; pct is null while the list is the book's guess rather than real counts. */
+  top: { display: string; pct: number | null; mine: boolean }[];
+  /** This player's share, when known. */
+  mine: number | null;
+  estimated: boolean;
+}
+
+/** Players needed before the crowd panel shows real percentages instead of the book's guess. */
+const CROWD_MIN = 20;
+
+export async function crowdFor(db: Db, q: LoadedQuestion, key: string | null): Promise<Crowd> {
+  const rows = await db.query<{ answer_key: string; n: number }>(`select answer_key, n from counts where question_id=$1 order by n desc`, [q.id]);
+  const total = rows.reduce((t, r) => t + r.n, 0);
+  if (total >= CROWD_MIN) {
+    const pct = (n: number) => Math.round((n / total) * 1000) / 10;
+    const top = rows.slice(0, 4).map((r) => ({ display: q.answers.get(r.answer_key)?.display ?? r.answer_key, pct: pct(r.n), mine: r.answer_key === key }));
+    const mineRow = rows.find((r) => r.answer_key === key);
+    return { total, top, mine: mineRow ? pct(mineRow.n) : 0, estimated: false };
+  }
+  const guess = [...q.answers.entries()]
+    .filter(([k, a]) => a.status === 'approved' && k !== q.krillKey)
+    .sort((a, b) => a[1].prior - b[1].prior)
+    .slice(0, 4)
+    .map(([k, a]) => ({ display: a.display, pct: null, mine: k === key }));
+  return { total, top: guess, mine: null, estimated: true };
 }
 
 /** Minimum players before the crowd can call an answer Khôn lỏi on its own. */
@@ -409,10 +447,8 @@ export async function answer(
   let judged = false;
   if (!key) {
     const j = await judge(db, q, input, a.playerId, a.day, referee);
-    if (!j.key) {
-      await closeTurn(db, a);
-      return { status: 'nothing', input, reason: j.reason };
-    }
+    // Nobody loses a prompt to an answer the village does not know: they try again while the wind lasts.
+    if (!j.key) return { status: 'retry', input, reason: j.reason };
     key = j.key;
     judged = true;
   }
@@ -436,7 +472,8 @@ export async function answer(
   }
   const after = await countsFor(db, q.id, key);
   const share = after.total >= 30 ? Math.round((after.count / after.total) * 1000) / 10 : null;
-  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share };
+  dayCache.delete(a.day);
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: await crowdFor(db, q, key) };
 }
 
 /** Records a question the wind ran out on. Nothing about the answers is revealed. */
@@ -447,19 +484,140 @@ export async function miss(db: Db, a: { playerId: string; day: string; mode: Mod
 
 /* ------------------------------------------------------------------ runs and board */
 
-export async function finish(db: Db, a: { playerId: string; day: string; mode: Mode; name?: string }) {
+/**
+ * Daily scores, recomputed from everyone's answers. An answer's tier is not fixed at the moment it is given:
+ * every player of the day is scored with the same crowd data, so playing early or late makes no difference,
+ * and the board settles when the day ends.
+ */
+const dayCache = new Map<string, { at: number; scores: Map<string, { score: number; grid: string }> }>();
+const DAY_CACHE_MS = 30_000;
+
+export async function scoreDay(db: Db, day: string, fresh = false) {
+  const hit = dayCache.get(day);
+  if (!fresh && hit && Date.now() - hit.at < DAY_CACHE_MS) return hit.scores;
+  const set = await dailySet(db, day);
+  const qs = new Map(await Promise.all(set.map(async (id) => [id, await loadQuestion(db, id)] as const)));
+  const countRows = await db.query<{ question_id: string; answer_key: string; n: number }>(
+    `select question_id, answer_key, n from counts where question_id = any($1::text[])`,
+    [set],
+  );
+  const counts = new Map<string, Map<string, number>>();
+  const totals = new Map<string, number>();
+  for (const r of countRows) {
+    if (!counts.has(r.question_id)) counts.set(r.question_id, new Map());
+    counts.get(r.question_id)!.set(r.answer_key, r.n);
+    totals.set(r.question_id, (totals.get(r.question_id) ?? 0) + r.n);
+  }
+  const turns = await db.query<{ player_id: string; question_id: string; answer_key: string | null; tier: number | null }>(
+    `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null order by answered_at`,
+    [day],
+  );
+  const by = new Map<string, { streak: number; score: number; tiers: Map<string, number> }>();
+  for (const t of turns) {
+    const p = by.get(t.player_id) ?? { streak: 0, score: 0, tiers: new Map() };
+    by.set(t.player_id, p);
+    const q = qs.get(t.question_id);
+    if (!q || !t.answer_key || t.tier == null || t.tier < 0) {
+      p.streak = 0;
+      p.tiers.set(t.question_id, -1);
+      continue;
+    }
+    const entry = q.answers.get(t.answer_key);
+    const c = counts.get(q.id)?.get(t.answer_key) ?? 1;
+    // The player's own answer is in the counts; score it as the crowd minus themselves, as at answer time.
+    const tier = entry ? tierFor(q, t.answer_key, entry.prior, Math.max(0, c - 1), Math.max(0, (totals.get(q.id) ?? 1) - 1)) : t.tier;
+    p.streak = isRare(tier) ? p.streak + 1 : 0;
+    p.score += TIERS[tier].points + streakBonus(p.streak);
+    p.tiers.set(t.question_id, tier);
+  }
+  const scores = new Map<string, { score: number; grid: string }>();
+  for (const [pid, p] of by) {
+    scores.set(pid, { score: p.score, grid: set.map((id) => { const t = p.tiers.get(id); return t == null || t < 0 ? 'x' : String(t); }).join('') });
+  }
+  dayCache.set(day, { at: Date.now(), scores });
+  return scores;
+}
+
+interface Standing {
+  player_id: string;
+  name: string | null;
+  score: number;
+  altitude: number;
+  grid: string;
+  replay: boolean;
+}
+
+/** The day's runs ranked by settled score. A second run from the same device on the same day stays off the board. */
+async function standings(db: Db, day: string, mode: Mode, fresh = false): Promise<Standing[]> {
+  const runs = await db.query<{ player_id: string; name: string | null; score: number; altitude: number; grid: string; dev: string | null; fresh: boolean | null }>(
+    `select player_id, name, score, altitude, grid, dev, fresh from runs where day=$1::date and mode=$2 order by created_at asc`,
+    [day, mode],
+  );
+  const scores = mode === 'daily' ? await scoreDay(db, day, fresh) : null;
+  const seenDev = new Set<string>();
+  const out: Standing[] = runs.map((r) => {
+    // Only a player first seen today counts as a replay: a family sharing a network and a phone model keeps its runs.
+    const replay = !!r.dev && !!r.fresh && seenDev.has(r.dev);
+    if (r.dev) seenDev.add(r.dev);
+    const s = scores?.get(r.player_id);
+    const score = s ? s.score : r.score;
+    return { player_id: r.player_id, name: r.name, score, altitude: s ? altitudeFor(score) : r.altitude, grid: s ? s.grid : r.grid, replay };
+  });
+  return out.sort((a, b) => b.altitude - a.altitude);
+}
+
+export interface Reveal {
+  questionId: string;
+  prompt: string;
+  /** The hidden Cung Trăng answer. */
+  krill: string;
+  /** What most of the village answered. */
+  top: string;
+  mine: string | null;
+  tier: number;
+}
+
+async function revealDay(db: Db, day: string, playerId: string, grid: string): Promise<Reveal[]> {
+  const set = await dailySet(db, day);
+  const mineRows = await db.query<{ question_id: string; answer_key: string | null }>(
+    `select question_id, answer_key from turns where player_id=$1 and day=$2::date and mode='daily'`,
+    [playerId, day],
+  );
+  const mine = new Map(mineRows.map((r) => [r.question_id, r.answer_key]));
+  return Promise.all(
+    set.map(async (id, i) => {
+      const q = await loadQuestion(db, id);
+      const c = await crowdFor(db, q, null);
+      const k = mine.get(id);
+      return {
+        questionId: id,
+        prompt: q.prompt,
+        krill: q.answers.get(q.krillKey)?.display ?? q.krillKey,
+        top: c.top[0]?.display ?? '',
+        mine: k ? q.answers.get(k)?.display ?? null : null,
+        tier: grid[i] === 'x' || grid[i] == null ? -1 : Number(grid[i]),
+      };
+    }),
+  );
+}
+
+async function flightDone(db: Db, day: string, playerId: string) {
+  const set = await dailySet(db, day);
+  const [r] = await db.query<{ n: number }>(
+    `select count(*)::int as n from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null and question_id = any($3::text[])`,
+    [playerId, day, set],
+  );
+  return r.n >= set.length;
+}
+
+export async function finish(db: Db, a: { playerId: string; day: string; mode: Mode; name?: string; dev?: string; since?: string }) {
   const name = typeof a.name === 'string' ? a.name.replace(/\s+/g, ' ').trim().slice(0, 24) || null : null;
   let grid: string;
   let score: number;
   if (a.mode === 'daily') {
-    const set = await dailySet(db, a.day);
-    const rows = await db.query<{ question_id: string; tier: number | null; points: number | null }>(
-      `select question_id, tier, points from turns where player_id=$1 and day=$2::date and mode='daily'`,
-      [a.playerId, a.day],
-    );
-    const by = new Map(rows.map((r) => [r.question_id, r]));
-    score = set.reduce((s, id) => s + (by.get(id)?.points ?? 0), 0);
-    grid = set.map((id) => { const t = by.get(id)?.tier; return t == null || t < 0 ? 'x' : String(t); }).join('');
+    const s = (await scoreDay(db, a.day, true)).get(a.playerId);
+    score = s?.score ?? 0;
+    grid = s?.grid ?? 'x'.repeat(DAILY_COUNT);
   } else {
     const rows = await db.query<{ tier: number | null; points: number | null }>(
       `select tier, points from turns where player_id=$1 and day=$2::date and mode='night' and answered_at is not null order by answered_at`,
@@ -470,31 +628,42 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
   }
   const altitude = altitudeFor(score);
   await db.query(
-    `insert into runs (player_id, day, mode, name, score, altitude, grid) values ($1,$2::date,$3,$4,$5,$6,$7)
+    `insert into runs (player_id, day, mode, name, score, altitude, grid, dev, fresh) values ($1,$2::date,$3,$4,$5,$6,$7,$8,$9)
      on conflict (player_id, day, mode) do update set
        name = coalesce(excluded.name, runs.name),
-       score = greatest(runs.score, excluded.score),
-       altitude = greatest(runs.altitude, excluded.altitude),
-       grid = case when excluded.score >= runs.score then excluded.grid else runs.grid end`,
-    [a.playerId, a.day, a.mode, name, score, altitude, grid],
+       score = case when runs.mode = 'daily' then excluded.score else greatest(runs.score, excluded.score) end,
+       altitude = case when runs.mode = 'daily' then excluded.altitude else greatest(runs.altitude, excluded.altitude) end,
+       grid = case when runs.mode = 'daily' or excluded.score >= runs.score then excluded.grid else runs.grid end`,
+    [a.playerId, a.day, a.mode, name, score, altitude, grid, a.dev ?? null, !!a.since && a.since >= a.day],
   );
-  const [r] = await db.query<{ above: number; total: number }>(
-    `select count(*) filter (where altitude > $3)::int as above, count(*)::int as total from runs where day=$1::date and mode=$2`,
-    [a.day, a.mode, altitude],
-  );
-  const beaten = r.total > 1 ? Math.round(((r.total - r.above - 1) / (r.total - 1)) * 100) : 100;
-  return { score, altitude, grid, rank: r.above + 1, players: r.total, beaten };
+  const all = await standings(db, a.day, a.mode);
+  const me = all.find((r) => r.player_id === a.playerId);
+  const ranked = all.filter((r) => !r.replay);
+  const above = ranked.filter((r) => r.altitude > altitude).length;
+  const total = ranked.length + (me?.replay ? 1 : 0);
+  const beaten = total > 1 ? Math.round(((total - above - 1) / (total - 1)) * 100) : 100;
+  const settled = a.day < vnToday();
+  return {
+    score,
+    altitude,
+    grid,
+    rank: above + 1,
+    players: total,
+    beaten,
+    replay: !!me?.replay,
+    settled,
+    // The hidden answers are shown only once the whole flight is done, so they cannot be scouted for another account.
+    reveal: a.mode === 'daily' && (await flightDone(db, a.day, a.playerId)) ? await revealDay(db, a.day, a.playerId, grid) : undefined,
+  };
 }
 
 export async function board(db: Db, day: string, mode: Mode, playerId?: string) {
-  const rows = await db.query<{ player_id: string; name: string | null; altitude: number; score: number }>(
-    `select player_id, name, altitude, score from runs where day=$1::date and mode=$2 order by altitude desc, created_at asc limit 20`,
-    [day, mode],
-  );
-  const [{ n }] = await db.query<{ n: number }>(`select count(*)::int as n from runs where day=$1::date and mode=$2`, [day, mode]);
+  const all = await standings(db, day, mode);
+  const ranked = all.filter((r) => !r.replay);
   return {
-    players: n,
-    rows: rows.map((r, i) => ({ rank: i + 1, name: r.name || 'Người thả diều', altitude: r.altitude, score: r.score, me: r.player_id === playerId })),
+    players: ranked.length,
+    settled: day < vnToday(),
+    rows: ranked.slice(0, 20).map((r, i) => ({ rank: i + 1, name: r.name || 'Người thả diều', altitude: r.altitude, score: r.score, me: r.player_id === playerId })),
   };
 }
 
