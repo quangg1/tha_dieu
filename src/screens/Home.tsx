@@ -55,11 +55,19 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   const d = new Date(Date.now() + 7 * 3600_000);
 
   useEffect(() => {
-    sky.setLayout(LAYOUTS.home);
+    // Phones: the flyer stands just above the card and the kite sits clear of the title.
+    const fit = () => {
+      const card = document.querySelector('.home-card');
+      const narrow = window.innerWidth < 600;
+      sky.setLayout(narrow && card ? { ...LAYOUTS.home, kiteX: 0.76, kiteY: 0.39, kiteSize: 0.2, stand: Math.round(card.getBoundingClientRect().top) } : LAYOUTS.home);
+    };
+    fit();
+    window.addEventListener('resize', fit);
     sky.setAltitude(0, false);
     sky.setFlutes(2);
     sky.setNervous(false);
     flute.setLevel(1);
+    return () => window.removeEventListener('resize', fit);
   }, [sky]);
 
   useEffect(() => {

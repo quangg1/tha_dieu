@@ -117,6 +117,8 @@ export interface SkyLayout {
   text?: [number, number];
   /** Pixels at the bottom covered by the page's controls. */
   bottom?: number;
+  /** On phones, the highest the dyke may sit (pixels from the top), so the flyer stands above the page's card. */
+  stand?: number;
 }
 
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
@@ -523,6 +525,15 @@ export class SkyScene {
     const L = this.layout;
     const size = Math.min(Math.min(this.W, this.H) * L.kiteSize, L.kiteMax ?? Infinity);
     return Math.max(this.H * L.kiteY, (L.top ?? 0) + size * 0.9 + 6);
+  }
+
+  /** Where the village sits on the log scale, lifted on phones so the dyke shows above the page's card. */
+  private get groundL() {
+    const L = this.layout;
+    const g = L.ground ?? -0.55;
+    if (!L.stand || this.wide || !this.P) return g;
+    const target = L.stand - this.P.fields.dyke - 6;
+    return Math.max(g, g + (this.y(g) - target) / (this.H * L.decade));
   }
 
   private y(L: number) {
@@ -1283,12 +1294,18 @@ export class SkyScene {
   private drawGroundInner() {
     const { ctx, W, H, layout } = this;
     const A = ART!;
-    const yg = this.y(layout.ground ?? -0.55);
+    const yg = this.y(this.groundL);
     const yk = this.yk;
     const P = this.P;
     const pd = Math.min(this.dpr, 1.5);
-    const bx = this.wide ? W / 2 - Math.min(300, W * 0.18) : W * (layout.kiteX > 0.55 ? 0.22 : 0.2);
     const bw = Math.min(this.U * 0.24, 120);
+    // On wide screens the flyer stands in the left margin, clear of the page column (the play screen keeps it nearer the middle, away from its side panels).
+    const col = layout.column ?? 0;
+    const bx = !this.wide
+      ? W * (layout.kiteX > 0.55 ? 0.22 : 0.2)
+      : layout.ruler
+        ? W / 2 - Math.min(300, W * 0.18)
+        : Math.max(bw / 2 + 24, (W - col) / 2 - 36 - bw / 2);
     const bh = (bw * A.kids.h) / A.kids.w;
     const dyke = yg + P.fields.dyke;
     this.hand = { x: bx - bw / 2 + A.hand.x * bw, y: dyke + 3 - bh + A.hand.y * bh };
@@ -1402,7 +1419,7 @@ export class SkyScene {
     ctx.textAlign = 'right';
     const halo = !wide;
     for (const m of MILESTONES) {
-      const L = m.alt <= 0 ? this.layout.ground ?? -0.55 : log(m.alt);
+      const L = m.alt <= 0 ? this.groundL : log(m.alt);
       const y = this.y(L);
       if (y < top || y > r1) continue;
       const a = fade(y);
