@@ -46,6 +46,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   }, []);
   const canSupport = !!support && !!(support.momo || support.qr || support.card || support.account);
   const [copied, setCopied] = useState(false);
+  const [payTab, setPayTab] = useState<'bank' | 'qr'>('bank');
 
 
   const st = stats();
@@ -266,7 +267,13 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             </div>
             <p className="sup-note">{support.note || 'Thả Diều miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
             <div className="sup-opts">
-              {support.account && support.bank && (
+              {support.account && support.bank && support.qr && (
+                <div className="sup-tabs" role="tablist" aria-label="Cách ủng hộ">
+                  <button role="tab" aria-selected={payTab === 'bank'} className={payTab === 'bank' ? 'on' : ''} onClick={() => setPayTab('bank')}>Ngân hàng</button>
+                  <button role="tab" aria-selected={payTab === 'qr'} className={payTab === 'qr' ? 'on' : ''} onClick={() => setPayTab('qr')}>MoMo / ví</button>
+                </div>
+              )}
+              {support.account && support.bank && (payTab === 'bank' || !support.qr) && (
                 <div className="sup-bank">
                   <img className="sup-qr" src={vietQr(support.bank, support.account, support.holder)} alt={`Mã VietQR chuyển khoản ${bankName(support.bank)}`} />
                   <span className="sup-bname">{bankName(support.bank)}</span>
@@ -283,7 +290,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                   </button>
                 </div>
               )}
-              {support.qr && <img className="sup-qr" src={support.qr} alt="Mã QR để ủng hộ" />}
+              {support.qr && (payTab === 'qr' || !(support.account && support.bank)) && <img className="sup-qr sup-qr-own" src={support.qr} alt="Mã QR để ủng hộ qua ví điện tử" />}
               {support.momo && (
                 <a className="next-btn sup-momo" href={support.momo} target="_blank" rel="noopener noreferrer" onClick={() => track('support', { via: 'momo' })}>
                   Ủng hộ qua MoMo

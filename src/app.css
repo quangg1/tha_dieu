@@ -458,3 +458,8 @@ button{font:inherit;color:inherit}
 .sup-copy{margin-top:6px}
 .sup-bank .sup-qr{aspect-ratio:540/640;width:230px}
 .dial-k{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap;color:#5b6678}
+.sup-tabs{display:flex;gap:6px;padding:4px;border-radius:999px;background:#eef2f7;width:100%;box-sizing:border-box}
+.sup-tabs button{flex:1;height:40px;border:0;border-radius:999px;background:transparent;font:inherit;font-weight:700;font-size:15px;color:#5b6678;cursor:pointer}
+.sup-tabs button.on{background:#fff;color:#0f2747;box-shadow:0 2px 8px rgba(20,30,60,.12)}
+.sup-bank .sup-qr{width:min(300px,78vw);aspect-ratio:540/640}
+.sup-qr-own{width:min(320px,80vw);aspect-ratio:auto;height:auto;max-height:58vh}
