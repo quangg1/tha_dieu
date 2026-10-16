@@ -73,7 +73,7 @@ export interface AlbumEntry {
   found: boolean;
 }
 
-/** Every hidden Cung Trăng answer seen at the end of a daily flight, keyed by day and question. */
+/** Every hidden Độc nhất answer seen at the end of a daily flight, keyed by day and question. */
 export function album(): Record<string, AlbumEntry> {
   return read<Record<string, AlbumEntry>>('album', {});
 }

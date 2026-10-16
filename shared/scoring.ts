@@ -4,7 +4,7 @@ export interface Tier {
   index: TierIndex;
   name: string;
   points: number;
-  /** Order by rarity; Khôn lỏi sits between Tà tà and Lưng chừng. */
+  /** Order by rarity; Khôn lỏi sits between Thường and Khá hiếm. */
   rank: number;
   /** Number of flutes that sing when this tier is struck. */
   flutes: number;
@@ -19,12 +19,12 @@ export interface Tier {
 
 /** Indices are stored in the database, so a new tier gets a new index rather than shifting the others. */
 export const TIERS: readonly Tier[] = [
-  { index: 0, name: 'Tà tà', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '🌾', meaning: 'ai cũng nghĩ ra', line: 'Câu ai cũng buột miệng.' },
-  { index: 1, name: 'Lưng chừng', points: 25, rank: 2, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🎋', meaning: 'khá phổ biến', line: 'Ổn. Bay cùng cả làng.' },
-  { index: 2, name: 'Bay bổng', points: 45, rank: 3, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🕊️', meaning: 'ít người nghĩ tới', line: 'Ít ai nghĩ tới. Gió đẹp.' },
-  { index: 3, name: 'Chót vót', points: 65, rank: 4, flutes: 7, wind: 8, css: 'sao-bay', emoji: '⛰️', meaning: 'hiếm', line: 'Hiếm thật. Cả xóm ngước nhìn.' },
-  { index: 4, name: 'Tít mây xanh', points: 80, rank: 5, flutes: 9, wind: 10, css: 'sao-chin', emoji: '☁️', meaning: 'rất hiếm', line: 'Hiếm có khó tìm. Ít ai bay tới đây.' },
-  { index: 5, name: 'Cung Trăng', points: 100, rank: 6, flutes: 9, wind: 14, css: 'cung-trang', emoji: '🌕', meaning: 'đáp án làng giấu', line: 'Đáp án làng giấu kỹ. Đỉnh trời.' },
+  { index: 0, name: 'Thường', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '⚪', meaning: 'ai cũng nghĩ ra', line: 'Câu ai cũng buột miệng.' },
+  { index: 1, name: 'Khá hiếm', points: 25, rank: 2, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🟢', meaning: 'khá nhiều người nghĩ ra', line: 'Ổn, nhưng nhiều người cũng nghĩ ra.' },
+  { index: 2, name: 'Hiếm', points: 45, rank: 3, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🔵', meaning: 'ít người nghĩ tới', line: 'Ít ai nghĩ tới. Hay đấy.' },
+  { index: 3, name: 'Rất hiếm', points: 65, rank: 4, flutes: 7, wind: 8, css: 'sao-bay', emoji: '🟣', meaning: 'rất ít người nghĩ tới', line: 'Hiếm thật. Cả xóm phải nể.' },
+  { index: 4, name: 'Cực hiếm', points: 80, rank: 5, flutes: 9, wind: 10, css: 'sao-chin', emoji: '🔴', meaning: 'gần như không ai nghĩ tới', line: 'Hiếm có khó tìm. Gần như không ai nghĩ tới.' },
+  { index: 5, name: 'Độc nhất', points: 100, rank: 6, flutes: 9, wind: 14, css: 'cung-trang', emoji: '🟡', meaning: 'đáp án làng giấu', line: 'Đáp án làng giấu kỹ. Bạn tìm ra rồi.' },
   { index: 6, name: 'Khôn lỏi', points: 15, rank: 1, flutes: 1, wind: 3, css: 'khon-loi', emoji: '🤡', meaning: 'tưởng độc, ai cũng nghĩ', line: 'Tưởng độc, ai dè cả làng cùng nghĩ.' },
 ];
 
@@ -39,7 +39,7 @@ export function rankOf(tier: number | null | undefined): number {
   return tier == null || tier < 0 ? -1 : TIERS[tier]?.rank ?? -1;
 }
 
-/** Bay bổng or rarer: counts toward the rare streak and lifts the kite's flutes. */
+/** Hiếm or rarer: counts toward the rare streak and lifts the kite's flutes. */
 export function isRare(tier: number | null | undefined): boolean {
   return rankOf(tier) >= TIERS[2].rank;
 }

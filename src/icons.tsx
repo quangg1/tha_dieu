@@ -1,5 +1,5 @@
 // Tier emblems: a rounded tile in the tier's colour with a simple white glyph, the way games badge rarity
-// (grey, green, blue, purple, red, gold). Khôn lỏi gets a cheeky pink face; a miss gets a falling kite.
+// (grey dot, one to three stars, a gem, a crown). Khôn lỏi gets a cheeky pink face; a miss gets a falling kite.
 import { TIERS } from '../shared/scoring.js';
 
 /** Tile colour of each tier, by tier index. */
@@ -7,70 +7,41 @@ export const TIER_COLOR = ['#94a69a', '#5fae5a', '#3a8fd8', '#8a5cd6', '#e5533d'
 const MISS = '#6b7280';
 const W = '#ffffff';
 
-function Grass() {
+const STAR = 'M0 -10 L2.9 -3.6 L9.5 -3.1 L4.5 1.3 L5.9 8.1 L0 4.5 L-5.9 8.1 L-4.5 1.3 L-9.5 -3.1 L-2.9 -3.6 Z';
+
+function Stars({ n }: { n: number }) {
+  const xs = n === 1 ? [32] : n === 2 ? [22, 42] : [16, 32, 48];
+  const k = n === 1 ? 1.9 : n === 2 ? 1.35 : 1.1;
   return (
     <g fill={W}>
-      <path d="M32 50 C 30 40, 26 32, 18 26 C 26 28, 32 36, 34 50 Z" />
-      <path d="M32 50 C 33 38, 36 28, 44 20 C 40 30, 37 40, 36 50 Z" />
-      <path d="M28 50 C 24 44, 18 42, 13 42 C 20 40, 26 43, 31 50 Z" />
-      <path d="M36 50 C 40 44, 46 42, 51 42 C 44 40, 38 43, 34 50 Z" />
-      {[[18, 24], [21, 21], [44, 18], [41, 15]].map(([x, y], i) => <ellipse key={i} cx={x} cy={y} rx={2.6} ry={3.8} transform={`rotate(${x < 32 ? 35 : -35} ${x} ${y})`} />)}
+      {xs.map((x, i) => (
+        <path key={i} d={STAR} transform={`translate(${x} ${n === 3 && i === 1 ? 28 : 32}) scale(${k})`} />
+      ))}
     </g>
   );
 }
 
-function Bamboo() {
-  return (
-    <g fill={W}>
-      <rect x="22" y="14" width="7" height="38" rx="3" />
-      <rect x="35" y="20" width="7" height="32" rx="3" />
-      <g fill="rgba(0,0,0,.18)">
-        <rect x="22" y="26" width="7" height="2.4" />
-        <rect x="22" y="39" width="7" height="2.4" />
-        <rect x="35" y="32" width="7" height="2.4" />
-        <rect x="35" y="44" width="7" height="2.4" />
-      </g>
-      <path d="M29 22 C 36 16, 44 16, 50 19 C 44 23, 36 24, 29 22 Z" />
-      <path d="M22 18 C 16 14, 10 14, 7 17 C 11 20, 17 20, 22 18 Z" />
-      <path d="M42 30 C 48 27, 54 28, 57 31 C 52 33, 46 33, 42 30 Z" />
-    </g>
-  );
+function Dot() {
+  return <circle cx="32" cy="32" r="9" fill={W} />;
 }
 
-function Bird() {
-  return (
-    <g fill={W}>
-      <path d="M8 26 C 18 26, 26 30, 31 36 L 35 36 C 40 28, 48 20, 58 18 C 50 28, 44 36, 38 42 L 28 42 C 22 36, 14 30, 8 26 Z" />
-      <path d="M38 40 C 44 39, 48 36, 50 33 L 58 34 L 50 36 C 48 40, 44 42, 38 43 Z" />
-    </g>
-  );
-}
-
-function Balloon() {
+function Gem() {
   return (
     <g>
-      <path d="M32 9 C 46 9, 52 20, 51 28 C 50 37, 40 44, 37 48 L 27 48 C 24 44, 14 37, 13 28 C 12 20, 18 9, 32 9 Z" fill={W} />
-      <path d="M32 9 C 26 18, 25 36, 28 48 L 36 48 C 39 36, 38 18, 32 9 Z" fill="rgba(0,0,0,.14)" />
-      <rect x="27" y="51" width="10" height="6" rx="1.5" fill={W} />
+      <path d="M20 22 L28 14 L36 14 L44 22 L32 48 Z" fill={W} />
+      <path d="M20 22 L44 22 M28 14 L26 22 L32 48 L38 22 L36 14" fill="none" stroke="rgba(0,0,0,.18)" strokeWidth="2" />
     </g>
   );
 }
 
-function Cloud() {
-  return <path d="M15 44 C 8 44, 7 33, 15 32 C 15 22, 28 19, 32 26 C 36 17, 52 19, 50 31 C 58 31, 59 44, 50 44 Z" fill={W} />;
-}
-
-function Moon() {
+function Crown() {
   return (
-    <g>
-      <circle cx="32" cy="32" r="19" fill="#fff8dc" />
-      <g fill="rgba(176,128,46,.55)">
-        <circle cx="32" cy="27" r="6.5" />
-        <circle cx="26" cy="30" r="5" />
-        <circle cx="38" cy="30" r="5" />
-        <path d="M30.5 32 L 29.6 44 L 34.4 44 L 33.5 32 Z" />
-        <ellipse cx="32" cy="45" rx="12" ry="3" />
-      </g>
+    <g fill={W}>
+      <path d="M14 42 L12 20 L23 30 L32 14 L41 30 L52 20 L50 42 Z" />
+      <rect x="14" y="44" width="36" height="6" rx="2" />
+      <circle cx="12" cy="19" r="3" />
+      <circle cx="32" cy="13" r="3" />
+      <circle cx="52" cy="19" r="3" />
     </g>
   );
 }
@@ -100,7 +71,7 @@ function Fall() {
   );
 }
 
-const GLYPH = [Grass, Bamboo, Bird, Balloon, Cloud, Moon, Grin];
+const GLYPH = [Dot, () => <Stars n={1} />, () => <Stars n={2} />, () => <Stars n={3} />, Gem, Crown, Grin];
 
 export function TierIcon({ tier, size = 56, className = '' }: { tier: number | null; size?: number; className?: string }) {
   const miss = tier === null || tier < 0;

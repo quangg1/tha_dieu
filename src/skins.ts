@@ -25,7 +25,7 @@ export const SKINS: Skin[] = [
 export function needLabel(s: Skin) {
   if (!s.need) return 'Có sẵn';
   if (s.need.alt) return `Bay tới ${formatAlt(s.need.alt)}`;
-  if (s.need.krill) return `Tìm ${s.need.krill} đáp án Cung Trăng`;
+  if (s.need.krill) return `Tìm ${s.need.krill} đáp án độc nhất`;
   return `Chuỗi ${s.need.streak} ngày`;
 }
 

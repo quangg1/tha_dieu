@@ -121,7 +121,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
         <button className="bag-btn" onClick={() => setBag(true)} aria-haspopup="dialog">
           <span>Bộ sưu tập</span>
           <b>
-            {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án Cung Trăng
+            {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất
           </b>
         </button>
       </section>
@@ -168,9 +168,9 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                 </span>
               ))}
             </div>
-            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án Cung Trăng · {krillFound()} đã tìm ra</div>
+            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án độc nhất · {krillFound()} đã tìm ra</div>
             <div className="album">
-              {Object.values(album()).length === 0 && <p className="row-q">Chơi xong một chuyến bay để mở các đáp án Cung Trăng.</p>}
+              {Object.values(album()).length === 0 && <p className="row-q">Chơi xong một chuyến bay để mở các đáp án độc nhất.</p>}
               {Object.values(album())
                 .sort((a, b) => (a.day < b.day ? 1 : -1))
                 .slice(0, 60)

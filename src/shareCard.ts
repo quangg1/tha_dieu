@@ -16,6 +16,8 @@ export interface CardData {
   grid: string;
   link: string;
   kite: { body: string; inner: string; tail: string };
+  /** The scene at the player's altitude, painted by the sky at the card's size. */
+  scene?: HTMLCanvasElement;
 }
 
 function kite(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, c: CardData['kite']) {
@@ -78,57 +80,25 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   if (!ctx) return null;
   const L = Math.log10(Math.max(1, d.altitude));
   const night = L >= 4.3;
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  if (night) {
-    g.addColorStop(0, '#070b1e');
-    g.addColorStop(0.6, '#13285a');
-    g.addColorStop(1, '#2c5e9a');
+  if (d.scene) {
+    ctx.drawImage(d.scene, 0, 0, W, H);
   } else {
-    g.addColorStop(0, '#3a7fbc');
-    g.addColorStop(0.6, '#7dbde4');
-    g.addColorStop(1, '#d9eef3');
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, night ? '#070b1e' : '#3a7fbc');
+    g.addColorStop(1, night ? '#2c5e9a' : '#d9eef3');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    kite(ctx, 800, 360, 1.7, d.kite);
   }
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  if (night) {
-    for (let i = 0; i < 220; i++) {
-      ctx.fillStyle = `rgba(255,250,235,${0.3 + rnd() * 0.7})`;
-      const r = rnd() * 2.4 + 0.6;
-      ctx.beginPath();
-      ctx.arc(rnd() * W, rnd() * H * 0.8, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    if (L >= 8.4) {
-      const mg = ctx.createRadialGradient(830, 260, 60, 830, 260, 300);
-      mg.addColorStop(0, 'rgba(255,240,190,.95)');
-      mg.addColorStop(0.35, 'rgba(255,226,150,.9)');
-      mg.addColorStop(0.36, 'rgba(255,220,140,.25)');
-      mg.addColorStop(1, 'rgba(255,220,140,0)');
-      ctx.fillStyle = mg;
-      ctx.fillRect(500, 0, 580, 600);
-    }
-  } else {
-    ctx.fillStyle = 'rgba(255,255,255,.92)';
-    for (const [x, y, s] of [[160, 300, 1], [880, 520, 1.3], [300, 760, 0.8]]) {
-      ctx.beginPath();
-      ctx.ellipse(x, y, 120 * s, 46 * s, 0, 0, Math.PI * 2);
-      ctx.ellipse(x - 70 * s, y + 10 * s, 70 * s, 34 * s, 0, 0, Math.PI * 2);
-      ctx.ellipse(x + 80 * s, y + 8 * s, 80 * s, 36 * s, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  // String from the bottom corner up to the kite.
-  ctx.strokeStyle = night ? 'rgba(255,255,255,.5)' : 'rgba(15,39,71,.45)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(W + 20, H - 380);
-  ctx.quadraticCurveTo(980, 700, 812, 478);
-  ctx.stroke();
-  kite(ctx, 800, 360, 1.7, d.kite);
+  // A soft shade under the text so it reads over any layer of the sky.
+  const shade = ctx.createLinearGradient(0, H * 0.36, 0, H);
+  shade.addColorStop(0, 'rgba(6,12,32,0)');
+  shade.addColorStop(0.25, 'rgba(6,12,32,.55)');
+  shade.addColorStop(1, 'rgba(6,12,32,.82)');
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, H * 0.36, W, H * 0.64);
 
-  const ink = night ? '#ffffff' : '#0f2747';
+  const ink = '#ffffff';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#e5533d';
   ctx.beginPath();
@@ -145,15 +115,14 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   ctx.fillText(d.title, 72, 640);
   ctx.shadowColor = 'transparent';
   ctx.font = "600 44px 'Be Vietnam Pro', system-ui, sans-serif";
-  ctx.fillStyle = night ? 'rgba(255,255,255,.85)' : 'rgba(15,39,71,.82)';
+  ctx.fillStyle = 'rgba(255,255,255,.88)';
   ctx.fillText(d.subtitle, 76, 712);
 
   ctx.font = "800 96px 'Baloo 2', system-ui, sans-serif";
   ctx.fillStyle = '#ffd66b';
-  if (!night) ctx.fillStyle = '#0f2747';
   ctx.fillText(formatAlt(d.altitude), 72, 860);
   ctx.font = "600 38px 'Be Vietnam Pro', system-ui, sans-serif";
-  ctx.fillStyle = night ? 'rgba(255,255,255,.8)' : 'rgba(15,39,71,.8)';
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
   ctx.fillText([d.milestone ? `qua ${d.milestone}` : '', d.beaten != null ? `cao hơn ${d.beaten}% người chơi` : ''].filter(Boolean).join(' · '), 76, 920);
 
   const cells = d.grid.split('').slice(0, 7);
@@ -179,7 +148,7 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
     }
   });
 
-  ctx.fillStyle = night ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.75)';
+  ctx.fillStyle = 'rgba(255,255,255,.14)';
   ctx.beginPath();
   ctx.roundRect(72, 1176, W - 144, 104, 52);
   ctx.fill();

@@ -54,7 +54,7 @@ interface Reveal {
 }
 
 const INTRO_SECONDS = 3;
-/** Rungs of the rarity ladder from the bottom: Tà tà, Lưng chừng, Bay bổng, Chót vót, Tít mây xanh, Cung Trăng. */
+/** Rungs of the rarity ladder from the bottom: Thường, Khá hiếm, Hiếm, Rất hiếm, Cực hiếm, Độc nhất. */
 const LADDER = [0, 1, 2, 3, 4, 5];
 const LEVELS = ['', 'gió nhẹ', 'gió vừa', 'gió mạnh'];
 
@@ -104,7 +104,7 @@ function useRoll(value: number) {
   return shown;
 }
 
-/** The rarity ladder: six rungs from Tà tà to Cung Trăng, lit one by one as an answer climbs. */
+/** The rarity ladder: six rungs from Thường to Độc nhất, lit one by one as an answer climbs. */
 function Ladder({ step, tier, fell, side, done }: { step: number; tier: number | null; fell: boolean; side?: boolean; done?: boolean }) {
   const khon = tier === KHON_LOI;
   return (
@@ -691,7 +691,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             <h2>Thả diều thế nào?</h2>
             <ol>
               <li><b>Gõ một đáp án đúng</b> cho câu hỏi. Gõ không dấu cũng được.</li>
-              <li><b>Càng ít người nghĩ ra, diều càng cao</b>: từ Tà tà lên tới Cung Trăng.</li>
+              <li><b>Càng ít người nghĩ ra, đáp án càng hiếm</b> (từ Thường tới Độc nhất) và <b>diều càng được đẩy cao</b>. Điểm cộng dồn qua 7 câu quyết định diều bay tới tầng trời nào.</li>
               <li>Làng chưa biết đáp án của bạn? <b>Cứ thử đáp án khác</b>. Chỉ hết gió mới mất lượt.</li>
             </ol>
             <div className="coach-tiers" aria-hidden="true">

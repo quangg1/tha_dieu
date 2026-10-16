@@ -203,6 +203,39 @@ export class SkyScene {
 
   private skin = { body: SON, inner: HOE, tail: SON };
 
+  /**
+   * Paints the scene at an altitude onto a fresh canvas of the given size, for the share picture: the same sky,
+   * objects and kite the player saw at that height. The live view is left untouched.
+   */
+  snapshot(w: number, h: number, alt: number, layout: SkyLayout): HTMLCanvasElement {
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const keep = { ctx: this.ctx, W: this.W, H: this.H, dpr: this.dpr, layout: this.layout, camL: this.camL, alt: this.alt, paints: this.paints, village: this.village, kite: { ...this.kite }, parts: this.parts, rings: this.rings, rays: this.rays, flash: this.flash, streaks: this.streaks, meteors: this.meteors, hand: this.hand };
+    try {
+      this.ctx = c.getContext('2d')!;
+      this.W = w;
+      this.H = h;
+      this.dpr = 1;
+      this.layout = layout;
+      this.camL = log(alt);
+      this.alt = alt;
+      this.paints = null;
+      this.village = null;
+      this.kite = { y: 0, vy: 0, a: 0, va: 0, x: 0, sy: 0 };
+      this.parts = [];
+      this.rings = [];
+      this.rays = 0;
+      this.flash = 0;
+      this.streaks = [];
+      this.meteors = [];
+      this.draw();
+    } finally {
+      Object.assign(this, keep);
+    }
+    return c;
+  }
+
   /** Colours of the player's kite. */
   setSkin(s: { body: string; inner: string; tail: string }) {
     this.skin = { body: s.body, inner: s.inner, tail: s.tail };
@@ -252,7 +285,7 @@ export class SkyScene {
     this.kite.va += (Math.random() < 0.5 ? -1 : 1) * 4 * strength;
   }
 
-  /** Confetti around the kite, growing with the rarity rank (0 Tà tà … 6 Cung Trăng); rank 1 is the Khôn lỏi puff. */
+  /** Confetti around the kite, growing with the rarity rank (0 Thường … 6 Độc nhất); rank 1 is the Khôn lỏi puff. */
   celebrate(rank: number) {
     if (this.reduce) return;
     const { x, sy: y } = this.kite;

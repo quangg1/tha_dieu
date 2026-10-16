@@ -76,7 +76,7 @@ describe('scoring', () => {
     expect(crossed(12000, 13000)).toBeNull();
   });
   it('orders tiers by rarity with Khôn lỏi second', () => {
-    expect(TIERS_BY_RANK.map((t) => t.name)).toEqual(['Tà tà', 'Khôn lỏi', 'Lưng chừng', 'Bay bổng', 'Chót vót', 'Tít mây xanh', 'Cung Trăng']);
+    expect(TIERS_BY_RANK.map((t) => t.name)).toEqual(['Thường', 'Khôn lỏi', 'Khá hiếm', 'Hiếm', 'Rất hiếm', 'Cực hiếm', 'Độc nhất']);
     expect(isRare(6)).toBe(false);
     expect(isRare(2)).toBe(true);
   });

@@ -104,6 +104,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         grid: result.grid,
         link,
         kite: skinById(prefs.skin),
+        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.72, kiteY: 0.24, decade: 0.3, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36 }),
       });
       if (!blob) throw new Error();
       const how = await shareCard(blob, text, link);
@@ -174,7 +175,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           {mode === 'daily' && (
             <div>
               <b>{krills}/7</b>
-              <span>đáp án Cung Trăng</span>
+              <span>đáp án độc nhất</span>
             </div>
           )}
         </div>
@@ -207,7 +208,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
         {mode === 'daily' && result.reveal && (
           <section className="card reveal-card">
-            <div className="card-k">Đáp án Cung Trăng hôm nay</div>
+            <div className="card-k">Đáp án độc nhất hôm nay</div>
             {result.reveal.map((r) => (
               <div key={r.questionId} className="rv">
                 <span className="rv-q">{r.prompt}</span>
