@@ -1288,7 +1288,7 @@ export class SkyScene {
     const P = this.P;
     const pd = Math.min(this.dpr, 1.5);
     const bx = this.wide ? W / 2 - Math.min(300, W * 0.18) : W * (layout.kiteX > 0.55 ? 0.22 : 0.2);
-    const bw = Math.min(this.U * 0.2, 104);
+    const bw = Math.min(this.U * 0.24, 120);
     const bh = (bw * A.kids.h) / A.kids.w;
     const dyke = yg + P.fields.dyke;
     this.hand = { x: bx - bw / 2 + A.hand.x * bw, y: dyke + 3 - bh + A.hand.y * bh };

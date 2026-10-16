@@ -164,44 +164,53 @@ export function houseSvg(variant: 0 | 1) {
 /* ---------------------------------------------------------------- the kids */
 
 /** Two kids on the dyke: the older one holds the kite string up high, the younger points at the kite. */
-/** The kite flyer, the game's mascot: a village kid with a hair tuft, a red shirt with a kite on it and a bamboo reel. */
+/** The kite flyer, the game's mascot: a chibi village kid with a curly tuft, a red shirt with a kite on it and a bamboo reel. */
 export function kidsSvg() {
   const W = 120;
   const H = 150;
-  const ink = '#1f1b16';
-  const skin = '#f6cfa3';
-  const hair = '#2b2420';
-  const o = `stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"`;
-  // A limb drawn as an inked stroke with a skin stroke on top.
-  const limb = (d: string, w = 8) => `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${w + 4.5}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${skin}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const ink = '#3a2a22';
+  const skin = '#ffd9b8';
+  const hair = '#3b2a25';
+  const o = `stroke="${ink}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
+  const limb = (d: string, w: number) =>
+    `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${w + 4.4}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${skin}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
   let b = '';
-  b += `<ellipse cx="58" cy="145" rx="34" ry="4" fill="rgba(30,60,20,.28)"/>`;
-  // Legs and red sandals.
-  b += limb('M51 112 L 50 136', 8) + limb('M64 112 L 66 136', 8);
-  b += `<rect x="42" y="135" width="15" height="7" rx="3.5" fill="#e5533d" ${o}/><rect x="60" y="135" width="15" height="7" rx="3.5" fill="#e5533d" ${o}/>`;
+  b += `<ellipse cx="58" cy="145" rx="26" ry="3.6" fill="rgba(30,60,20,.25)"/>`;
+  // Stubby legs and round red sandals.
+  b += limb('M51 120 L 50 134', 8.5) + limb('M64 120 L 65 134', 8.5);
+  b += `<ellipse cx="48.5" cy="138.5" rx="8.5" ry="4.6" fill="#e5533d" ${o}/><ellipse cx="66.5" cy="138.5" rx="8.5" ry="4.6" fill="#e5533d" ${o}/>`;
   // Shorts.
-  b += `<path d="M41 100 L 75 100 L 77 118 L 60 118 L 58 110 L 56 118 L 39 118 Z" fill="#2f5d9e" ${o}/>`;
-  // Arm on the hip, behind the shirt.
-  b += limb('M43 80 L 31 94 L 41 104', 7.5);
-  // Shirt with the kite on the chest.
-  b += `<path d="M44 71 C 50 68, 64 68, 70 71 L 76 80 L 74 104 C 64 107, 50 107, 40 104 L 38 80 Z" fill="#e5533d" ${o}/>`;
-  b += `<path d="M57 79 L 64 88 L 57 98 L 50 88 Z" fill="#f5c242" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/><path d="M57 79 L 57 98 M50 88 L 64 88" stroke="${ink}" stroke-width="1.1"/>`;
-  b += `<path d="M57 98 q -3 4 0 7 q 3 3 0 6" fill="none" stroke="${ink}" stroke-width="1.2" stroke-linecap="round"/>`;
+  b += `<path d="M42 110 L 73 110 L 75 124 Q 66 126 59 123 Q 51 126 40 124 Z" fill="#3c72c4" ${o}/>`;
+  // Waving arm with an open hand.
+  b += limb('M44 92 Q 34 92 28 82', 7);
+  b += `<circle cx="27" cy="80" r="5" fill="${skin}" ${o}/>`;
+  // Round red shirt with a white collar and the kite on the chest.
+  b += `<path d="M45 84 Q 58 80 71 84 Q 77 98 75 112 Q 58 116 40 112 Q 38 98 45 84 Z" fill="#ef5b45" ${o}/>`;
+  b += `<path d="M50 84 Q 58 90 66 84" fill="none" stroke="#fff6ea" stroke-width="3" stroke-linecap="round"/>`;
+  b += `<path d="M58 93 L 63.5 100 L 58 107.5 L 52.5 100 Z" fill="#ffd25a" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  b += `<path d="M58 93 L 58 107.5 M52.5 100 L 63.5 100" stroke="${ink}" stroke-width="1"/>`;
   // Arm raised to the kite, holding the bamboo reel.
-  b += limb('M70 78 L 85 60 L 96 36', 7.5);
-  b += `<g transform="rotate(-25 98 30)"><rect x="89" y="25" width="18" height="10" rx="3" fill="#c99b4a" ${o}/><path d="M93 25 L 93 35 M103 25 L 103 35" stroke="${ink}" stroke-width="1.4"/></g>`;
-  b += `<circle cx="97" cy="33" r="5.2" fill="${skin}" ${o}/>`;
-  // Head.
-  b += `<circle cx="33" cy="50" r="5.5" fill="${skin}" ${o}/>`;
-  b += `<circle cx="57" cy="46" r="24" fill="${skin}" ${o}/>`;
-  b += `<path d="M33 45 C 31 27, 44 19, 58 19 C 72 19, 83 28, 81 44 C 76 34, 67 30, 57 31 C 47 31, 39 36, 33 45 Z" fill="${hair}" ${o}/>`;
-  // The tuft, the mascot's signature.
-  b += `<path d="M54 21 C 49 11, 57 3, 65 7 C 60 9, 58 13, 61 20 Z" fill="${hair}" ${o}/>`;
-  b += `<path d="M45 40 q 4 -3 8 -1 M62 39 q 4 -2 8 1" fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>`;
-  b += `<ellipse cx="50" cy="48" rx="4.2" ry="4.8" fill="#fff" stroke="${ink}" stroke-width="1.6"/><ellipse cx="66" cy="48" rx="4.2" ry="4.8" fill="#fff" stroke="${ink}" stroke-width="1.6"/>`;
-  b += `<circle cx="51.4" cy="46.6" r="2.6" fill="${ink}"/><circle cx="67.4" cy="46.6" r="2.6" fill="${ink}"/>`;
-  b += `<circle cx="52.3" cy="45.6" r=".9" fill="#fff"/><circle cx="68.3" cy="45.6" r=".9" fill="#fff"/>`;
-  b += `<ellipse cx="43" cy="56" rx="4" ry="2.6" fill="#f08a7a" opacity=".55"/><ellipse cx="72" cy="56" rx="4" ry="2.6" fill="#f08a7a" opacity=".55"/>`;
-  b += `<path d="M51 57 Q 58 66 66 57 Z" fill="#8a2c22" stroke="${ink}" stroke-width="1.8" stroke-linejoin="round"/><path d="M55 61.5 Q 58.5 59.5 62 61.5 Q 58.5 64 55 61.5 Z" fill="#e5735f"/>`;
-  return { svg: svg(W, H, b), w: W, h: H, hand: { x: 100 / W, y: 27 / H } };
+  b += limb('M70 90 Q 84 82 94 46', 7);
+  b += `<g transform="rotate(-20 98 38)"><rect x="89.5" y="33" width="17" height="10" rx="3.5" fill="#d9a85a" ${o}/><path d="M94 33 L 94 43 M102 33 L 102 43" stroke="${ink}" stroke-width="1.3"/></g>`;
+  b += `<circle cx="95" cy="43" r="5.2" fill="${skin}" ${o}/>`;
+  // Big head, tilted a little toward the kite.
+  b += `<g transform="rotate(-5 58 80)">`;
+  b += `<circle cx="29.5" cy="56" r="5.5" fill="${skin}" ${o}/><circle cx="86.5" cy="56" r="5.5" fill="${skin}" ${o}/>`;
+  b += `<ellipse cx="58" cy="52" rx="29" ry="27" fill="${skin}" ${o}/>`;
+  // Bowl haircut with soft bangs.
+  b += `<path d="M29.5 50 C 28 30, 42 22, 58 22 C 74 22, 88 30, 86.5 50 C 84 44, 80 40, 76 39 Q 73 45 67 42 Q 63 47 57 42 Q 52 47 46 42 Q 41 45 38 40 C 34 42, 31 46, 29.5 50 Z" fill="${hair}" ${o}/>`;
+  b += `<path d="M42 29 Q 52 24 64 26" fill="none" stroke="#6a4c42" stroke-width="2.4" stroke-linecap="round"/>`;
+  // The curly tuft, the mascot's signature.
+  b += `<path d="M56 23 C 52 14, 57 7, 64 8 C 70 9, 70 16, 65 17 C 62 17.5, 61 14, 63.5 13" fill="none" stroke="${ink}" stroke-width="6.6" stroke-linecap="round"/>`;
+  b += `<path d="M56 23 C 52 14, 57 7, 64 8 C 70 9, 70 16, 65 17 C 62 17.5, 61 14, 63.5 13" fill="none" stroke="${hair}" stroke-width="3.2" stroke-linecap="round"/>`;
+  // Big shiny eyes.
+  for (const x of [47, 69]) {
+    b += `<ellipse cx="${x}" cy="56" rx="5.8" ry="7.2" fill="#2b1d18"/>`;
+    b += `<circle cx="${x + 1.8}" cy="53.2" r="2.1" fill="#fff"/><circle cx="${x - 1.6}" cy="59" r="1" fill="#fff"/>`;
+  }
+  b += `<ellipse cx="39.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/><ellipse cx="76.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/>`;
+  b += `<path d="M53.5 64 Q 58 70.5 62.5 64 Z" fill="#a8372c" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/>`;
+  b += `<path d="M55.6 66.4 Q 58 65 60.4 66.4 Q 58 68.6 55.6 66.4 Z" fill="#ff8a7a"/>`;
+  b += `</g>`;
+  return { svg: svg(W, H, b), w: W, h: H, hand: { x: 99 / W, y: 34 / H } };
 }
