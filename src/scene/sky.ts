@@ -221,7 +221,17 @@ export class SkyScene {
     this.raf = requestAnimationFrame((t) => this.frame(t));
     // No drawing while the tab is in the background.
     document.addEventListener('visibilitychange', this.onVisible);
+    // Nor while a sheet or menu covers the sky: redrawing under a blurred overlay makes scrolling it stutter.
+    const check = () => {
+      this.held = !!document.querySelector('.sheet-wrap, .drawer-wrap, .coach-wrap');
+    };
+    this.mo = new MutationObserver(check);
+    this.mo.observe(document.body, { childList: true, subtree: true });
+    check();
   }
+
+  private held = false;
+  private mo: MutationObserver;
 
   private onVisible = () => {
     cancelAnimationFrame(this.raf);
@@ -234,6 +244,7 @@ export class SkyScene {
   destroy() {
     cancelAnimationFrame(this.raf);
     this.ro.disconnect();
+    this.mo.disconnect();
     document.removeEventListener('visibilitychange', this.onVisible);
   }
 
@@ -444,6 +455,11 @@ export class SkyScene {
   }
 
   private frame(now: number) {
+    if (this.held) {
+      this.last = 0;
+      this.raf = requestAnimationFrame((t) => this.frame(t));
+      return;
+    }
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.t += dt;

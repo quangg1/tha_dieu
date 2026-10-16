@@ -498,3 +498,4 @@ button{font:inherit;color:inherit}
   .home-hero{margin-top:calc(8vh + 54px)}
 }
 .chip.pend{background:#fff4d6;color:#8a5a00;border:1px dashed #e0a800}
+.sheet,.drawer{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
