@@ -7,7 +7,6 @@ import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
 import { bankName, vietQr } from '../../shared/banks.js';
 import { THEME_ART } from '../themeArt';
-import { isNight } from '../scene/daylight';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
@@ -118,7 +117,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   };
 
   return (
-    <main className={`stage home${isNight() ? ' night' : ''}`}>
+    <main className="stage home">
       <div className="home-top">
         <button className="icon-btn menu-btn" onClick={() => setMenu(true)} aria-label="Mở menu" aria-haspopup="dialog">
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>

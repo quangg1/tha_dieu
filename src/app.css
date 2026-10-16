@@ -498,5 +498,3 @@ button{font:inherit;color:inherit}
   .home-hero{margin-top:calc(8vh + 54px)}
 }
 .chip.pend{background:#fff4d6;color:#8a5a00;border:1px dashed #e0a800}
-.stage.home.night{--ink:#ffffff;--glow:0 1px 0 rgba(4,8,24,.6),0 0 14px rgba(4,8,24,.8),0 0 30px rgba(4,8,24,.5)}
-.stage.home.night .home-sub b{color:#ffb3a6}
