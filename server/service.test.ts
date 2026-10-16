@@ -3,6 +3,7 @@ import { pglite, type Db } from './db.js';
 import type { Referee } from './referee.js';
 import * as S from './service.js';
 import { soft } from '../shared/normalize.js';
+import { setWikiFetch } from './wikidata.js';
 
 let db: Db;
 const day = S.vnToday();
@@ -14,6 +15,7 @@ const referee: Referee = async (_p, _n, input) => {
 };
 
 beforeAll(async () => {
+  setWikiFetch(async () => new Response('', { status: 503 }));
   db = await pglite();
   const r = await S.setup(db);
   expect(r.questions).toBeGreaterThan(30);
@@ -188,34 +190,83 @@ describe('admin', () => {
   });
 });
 
-describe('review queue without a referee', () => {
-  it('logs unknown answers, and an accepted one scores from then on', async () => {
+describe('new answers without a referee', () => {
+  it('lets an unknown answer stand as a new one, and the village head can accept it', async () => {
     const { nullReferee } = await import('./referee.js');
-    const p = 'player_test_0005';
     const qid = 'loai-hoa';
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
-    expect(r.status).toBe('retry');
-    expect(r.reason).toMatch(/trưởng làng/);
-    await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa bảy màu thần kỳ' }, nullReferee);
-    const queue = await S.submissions(db);
-    const item = queue.find((x) => x.question_id === qid && x.input_key === soft('Hoa bảy màu thần kỳ'))!;
-    expect(item.n).toBe(2);
+    await S.startTurn(db, { playerId: 'player_test_0005', day, mode: 'night', questionId: qid });
+    const r = await S.answer(db, { playerId: 'player_test_0005', day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
+    expect(r.status).toBe('landed');
+    expect(r.pending).toBe(true);
+    expect(r.tier).toBe(2);
+    const item = (await S.submissions(db)).find((x) => x.question_id === qid && x.input_key === soft('Hoa bảy màu thần kỳ'))!;
+    expect(item.n).toBe(1);
     await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa bảy màu thần kỳ', tier: 3 });
-    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
+    await S.startTurn(db, { playerId: 'player_test_0005b', day, mode: 'night', questionId: qid });
+    const ok = await S.answer(db, { playerId: 'player_test_0005b', day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
     expect(ok.status).toBe('landed');
-    expect(ok.tier).toBe(3);
-    expect((await S.submissions(db)).some((x) => x.input_key === soft('Hoa bảy màu thần kỳ'))).toBe(false);
+    expect(ok.pending).toBeFalsy();
   });
 
-  it('a dismissed answer is refused without queuing again', async () => {
+  it('a dismissed new answer is refused afterwards', async () => {
     const { nullReferee } = await import('./referee.js');
-    const p = 'player_test_0006';
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau' });
-    await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    await S.startTurn(db, { playerId: 'player_test_0006', day, mode: 'night', questionId: 'loai-rau' });
+    const first = await S.answer(db, { playerId: 'player_test_0006', day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    expect(first.pending).toBe(true);
     await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: soft('rau gì đó'), decision: 'dismiss' });
-    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    await S.startTurn(db, { playerId: 'player_test_0006b', day, mode: 'night', questionId: 'loai-rau' });
+    const r = await S.answer(db, { playerId: 'player_test_0006b', day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
+    expect(r.status).toBe('retry');
     expect(r.reason).toMatch(/không công nhận/);
+  });
+
+  it('three networks giving the same new answer confirm it', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const qid = 'trai-cay';
+    const ask = async (p: string, net: string) => {
+      await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
+      return S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Quả thanh long ruột tím', net }, nullReferee);
+    };
+    expect((await ask('vote_p1', 'net-a')).pending).toBe(true);
+    expect((await ask('vote_p2', 'net-a')).pending).toBe(true);
+    expect((await ask('vote_p3', 'net-b')).pending).toBe(true);
+    const third = await ask('vote_p4', 'net-c');
+    expect(third.status).toBe('landed');
+    expect(third.pending).toBe(false);
+    expect((await ask('vote_p5', 'net-d')).pending).toBe(false);
+  });
+
+  it('allows two new answers a run, then asks for a known one; nonsense is refused', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const p = 'limit_player';
+    const qs = ['loai-ca', 'con-trung', 'nhac-cu'];
+    const out = [];
+    for (const [i, qid] of qs.entries()) {
+      await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
+      out.push(await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: `Tên lạ thứ ${['một', 'hai', 'ba'][i]}` }, nullReferee));
+    }
+    expect(out.map((r) => r.status)).toEqual(['landed', 'landed', 'retry']);
+    await S.startTurn(db, { playerId: 'junk_player', day, mode: 'night', questionId: 'the-thao' });
+    const junk = await S.answer(db, { playerId: 'junk_player', day, mode: 'night', questionId: 'the-thao', input: 'aaaaaaa' }, nullReferee);
+    expect(junk.status).toBe('retry');
+  });
+
+  it('accepts an answer Wikidata confirms is of the right kind', async () => {
+    const { nullReferee } = await import('./referee.js');
+    setWikiFetch(async (url) => {
+      const u = String(url);
+      if (u.includes('wbsearchentities')) return new Response(JSON.stringify({ search: [{ id: 'Q999', label: 'sáo nâu đỏ', match: { language: 'vi', text: 'sáo nâu đỏ' } }] }));
+      return new Response(JSON.stringify({ results: { bindings: [{ x: { value: 'http://www.wikidata.org/entity/Q999' } }] } }));
+    });
+    try {
+      await S.startTurn(db, { playerId: 'wiki_player', day, mode: 'night', questionId: 'loai-chim' });
+      const r = await S.answer(db, { playerId: 'wiki_player', day, mode: 'night', questionId: 'loai-chim', input: 'chim sáo nâu đỏ' }, nullReferee);
+      expect(r.status).toBe('landed');
+      expect(r.pending).toBeFalsy();
+      expect(r.display).toBe('Sáo nâu đỏ');
+    } finally {
+      setWikiFetch(async () => new Response('', { status: 503 }));
+    }
   });
 });
 

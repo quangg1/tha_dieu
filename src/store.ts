@@ -97,6 +97,8 @@ export interface LocalRow {
   display: string | null;
   tier: number;
   points: number;
+  /** A new answer still waiting for the village to confirm it. */
+  pending?: boolean;
   /** What the player typed when the kite did not lift. */
   input?: string;
 }

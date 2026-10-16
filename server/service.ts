@@ -17,6 +17,7 @@ import {
 import type { Db } from './db.js';
 import { nullReferee, type Referee } from './referee.js';
 import { SCHEMA } from './schema.js';
+import { wikiCheck } from './wikidata.js';
 
 export class GameError extends Error {
   constructor(public status: number, message: string) {
@@ -32,6 +33,12 @@ const REFEREE_CALLS_PER_DAY = 40;
 const REFEREE_CALLS_PER_NET = 300;
 /** Players from one network whose answers count towards the day's rarity. A school or a café shares an address; a script does too. */
 const NET_PLAYERS_COUNTED = 60;
+/** New answers a player may leave for the village to confirm in one run, beyond which they must try a known one. */
+const PENDING_PER_RUN = 2;
+/** Networks that must give the same new answer before it joins the book on its own. */
+const CONFIRM_VOTES = 3;
+/** Rarity a new answer starts at while it waits: rare, but not the top tiers until the crowd backs it. */
+const PENDING_PRIOR = 2;
 
 /* ------------------------------------------------------------------ setup */
 
@@ -99,6 +106,28 @@ function seeded(seed: string) {
   };
 }
 
+const OPEN_PER_DAY = 2;
+
+/**
+ * Prompts whose answers the book often does not know: by the share of unknown answers players typed, or, before
+ * anyone has played them, by a very large answer space.
+ */
+async function openPrompts(db: Db, pool: readonly { id: string; answers: readonly unknown[] }[]) {
+  const rows = await db.query<{ id: string; known: number; unknown: number }>(
+    `select q.id, coalesce(t.n, 0)::int as known, coalesce(s.n, 0)::int as unknown from questions q
+     left join (select question_id, count(*) as n from turns where answered_at is not null and tier >= 0 group by 1) t on t.question_id = q.id
+     left join (select question_id, sum(n) as n from submissions group by 1) s on s.question_id = q.id`,
+  );
+  const stats = new Map(rows.map((r) => [r.id, r]));
+  const open = new Set<string>();
+  for (const q of pool) {
+    const r = stats.get(q.id);
+    const seen = r ? r.known + r.unknown : 0;
+    if (seen >= 15 ? r!.unknown / seen > 0.2 : q.answers.length > 160) open.add(q.id);
+  }
+  return open;
+}
+
 /** Difficulty plan for the seven daily questions: warm up, build, end on the hardest. */
 const LEVEL_PLAN = [1, 2, 1, 2, 3, 2, 3];
 /** Slots held for pop-culture questions (films, songs, snacks, apps), which make the rare answers worth showing off. */
@@ -125,6 +154,9 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
     `select to_char(day, 'YYYY-MM-DD') as day, question_ids from daily_sets where day < $1::date and day >= $1::date - 42`,
     [day],
   );
+  // Open prompts (many answers the book does not know yet) still come round, so players can fill them in,
+  // but at most OPEN_PER_DAY a day, so a day is never mostly answers waiting for confirmation.
+  const open = await openPrompts(db, pool);
   const rnd = seeded('tha-dieu-' + day);
   const order = pool.map((q) => ({ q, r: rnd() })).sort((a, b) => a.r - b.r).map((x) => x.q);
   const pick: typeof pool = [];
@@ -137,6 +169,7 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
         !recent.has(q.id) &&
         isPop(q.id) === POP_SLOTS.includes(slot) &&
         !pick.includes(q) &&
+        (!open.has(q.id) || pick.filter((p) => open.has(p.id)).length < OPEN_PER_DAY) &&
         (!strictLevel || (q.level ?? 2) === level) &&
         !pick.some((p) => p.category === q.category || p.family === q.family);
       const next = order.find((q) => ok(q, true)) ?? order.find((q) => ok(q, false));
@@ -162,7 +195,7 @@ export interface LoadedQuestion {
   krillKey: string;
   strip: string[];
   level: number;
-  answers: Map<string, { display: string; prior: number; status: string }>;
+  answers: Map<string, { display: string; prior: number; status: string; source?: string }>;
   matcher: Matcher;
   vague: Set<string>;
   traps: Set<string>;
@@ -181,7 +214,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.q;
   const base = BOOK_BY_ID.get(id);
   if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
-  const answers = new Map(base.answers.map((a) => [a.key, { display: a.display, prior: a.priorTier, status: 'approved' }]));
+  const answers = new Map<string, { display: string; prior: number; status: string; source?: string }>(base.answers.map((a) => [a.key, { display: a.display, prior: a.priorTier, status: 'approved', source: 'seed' }]));
   const entries = base.answers.map((a) => ({ key: a.key, aliases: [...a.aliases], priorTier: a.priorTier }));
   const learned = await db.query<{ key: string; display: string; prior_tier: number; status: string; source: string }>(
     `select key, display, prior_tier, status, source from answers where question_id=$1 and (source <> 'seed' or status = 'rejected')`,
@@ -196,7 +229,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
       continue;
     }
     if (!answers.has(key)) {
-      answers.set(key, { display: l.display, prior: l.prior_tier, status: l.status });
+      answers.set(key, { display: l.display, prior: l.prior_tier, status: l.status, source: l.source });
       entries.push({ key, aliases: [l.display], priorTier: l.prior_tier });
     }
   }
@@ -378,7 +411,46 @@ function tierFromTally(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: strin
 }
 
 /** Uses the cached verdict, or asks the referee (within the player's daily budget), for an answer the bank does not know. */
-async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string) {
+/** Looks like a name: letters, at most a few words, not a run of one key. */
+function plausible(input: string) {
+  const t = input.trim();
+  if (norm(t).length < 2 || t.length > 40 || t.split(/\s+/).length > 6) return false;
+  if (!/\p{L}/u.test(t) || /(.)\1{3,}/u.test(norm(t))) return false;
+  return /^[\p{L}\p{N}\s'’.\-&+#]+$/u.test(t);
+}
+
+/** Capital first letter, single spaces. */
+const tidy = (s: string) => {
+  const t = s.trim().replace(/\s+/g, ' ').slice(0, 60);
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
+/** Adds an answer to the question's book (or reuses a matching one) and remembers the typed form as an alias. */
+async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: string, source: string, status: 'approved' | 'pending', prior: number, reason: string | null) {
+  const inputKey = soft(input);
+  const known = q.matcher.match(display);
+  const key = known?.key ?? soft(display);
+  if (!known) {
+    await db.query(
+      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,$5,$6)
+       on conflict (question_id, key) do nothing`,
+      [q.id, key, display, prior, source, status],
+    );
+    if (!q.answers.has(key)) q.answers.set(key, { display, prior, status, source });
+  }
+  await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`, [q.id, inputKey, key, soft(display)]);
+  q.matcher.addAlias(input, key);
+  q.matcher.addAlias(display, key);
+  if (status === 'approved') {
+    await db.query(
+      `insert into verdicts (question_id, input_key, valid, canonical_key, reason) values ($1,$2,true,$3,$4) on conflict do nothing`,
+      [q.id, inputKey, key, reason],
+    );
+  }
+  return { key, reason: '' };
+}
+
+async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string, mode: Mode = 'daily') {
   const inputKey = soft(input);
   if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
   const cached = await db.query<{ valid: boolean; canonical_key: string | null; reason: string | null }>(
@@ -390,6 +462,11 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     if (c.valid && c.canonical_key && q.answers.has(c.canonical_key)) return { key: c.canonical_key, reason: '' };
     if (!c.valid) return { key: null, reason: c.reason || 'Trọng tài không công nhận đáp án này.' };
   }
+  // Wikidata first: free, and certain for prompts that name a kind of thing.
+  const t0 = Date.now();
+  const wiki = await wikiCheck(q.id, input).catch(() => null);
+  if (process.env.VERCEL) console.log('wiki', q.id, JSON.stringify(input), wiki ? wiki.id : '-', Date.now() - t0, 'ms');
+  if (wiki) return learnAnswer(db, q, input, wiki.display, 'wiki', 'approved', 3, `Wikidata ${wiki.id}`);
   const hasReferee = referee !== nullReferee;
   const [usage] = !hasReferee ? [{ calls: 0 }] : await db.query<{ calls: number }>(
     `insert into referee_usage (player_id, day, calls) values ($1,$2::date,1)
@@ -410,13 +487,17 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     v = null;
   }
   if (!v) {
-    // No referee available: log the answer so the village head can review it, the way Krillion grows its list.
+    // No referee: log it for the village head, and let it stand as a new answer the village will confirm.
     await db.query(
       `insert into submissions (question_id, input_key, display) values ($1,$2,$3)
        on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
       [q.id, inputKey, input.slice(0, 60)],
     );
-    return { key: null, reason: 'Làng chưa biết đáp án này. Thử một đáp án khác nhé, đáp án đã được gửi cho trưởng làng xem.' };
+    if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
+    if (!(await hit(db, `pend:${mode}:${playerId}`, day, PENDING_PER_RUN))) {
+      return { key: null, reason: `Bạn đã có ${PENDING_PER_RUN} đáp án mới đang chờ làng xét. Câu này thử một đáp án quen hơn nhé.` };
+    }
+    return learnAnswer(db, q, input, tidy(input), 'crowd', 'pending', PENDING_PRIOR, null);
   }
   if (!v.valid) {
     await db.query(
@@ -464,6 +545,8 @@ export interface AnswerResult {
   share?: number | null;
   /** What the rest of the village answered. */
   crowd?: Crowd;
+  /** A new answer the village has not confirmed yet: it scores today, and keeps its points only once confirmed. */
+  pending?: boolean;
 }
 
 export interface Crowd {
@@ -559,13 +642,15 @@ export async function answer(
   let key = m?.key ?? null;
   let judged = false;
   if (!key) {
-    const j = await judge(db, q, input, a.playerId, a.day, referee, a.net);
+    const j = await judge(db, q, input, a.playerId, a.day, referee, a.net, a.mode);
     // Nobody loses a prompt to an answer the village does not know: they try again while the wind lasts.
     if (!j.key) return { status: 'retry', input, reason: j.reason };
     key = j.key;
     judged = true;
   }
   const entry = q.answers.get(key)!;
+  const waiting = entry.status === 'pending' && entry.source === 'crowd';
+  if (waiting) await vote(db, q, key, entry, a.net ?? a.playerId);
   const tally = (await tallies(db, a.day, [q.id])).get(q.id)!;
   const tier = tierFromTally(q, key, entry.prior, tally);
   const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
@@ -594,7 +679,18 @@ export async function answer(
     tally.todayTotal = todayTotal;
   }
   const share = todayTotal >= 30 ? Math.round((mineCount / todayTotal) * 1000) / 10 : null;
-  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: crowdFrom(q, key, tally) };
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged: judged && !waiting, share, crowd: crowdFrom(q, key, tally), pending: waiting && entry.status === 'pending' };
+}
+
+/** One vote for a new answer from this network; enough networks and it joins the book. */
+async function vote(db: Db, q: LoadedQuestion, key: string, entry: { status: string }, voter: string) {
+  await db.query(`insert into pending_votes (question_id, key, voter) values ($1,$2,$3) on conflict do nothing`, [q.id, key, voter.slice(0, 64)]);
+  const [r] = await db.query<{ n: number }>(`select count(*)::int as n from pending_votes where question_id=$1 and key=$2`, [q.id, key]);
+  if ((r?.n ?? 0) >= CONFIRM_VOTES) {
+    await db.query(`update answers set status='approved', source='crowd' where question_id=$1 and key=$2 and status='pending'`, [q.id, key]);
+    entry.status = 'approved';
+    forgetQuestion(q.id);
+  }
 }
 
 /** Adds one to a counter for this window and says whether it is still within the limit. */
@@ -908,8 +1004,8 @@ export async function computeScores(db: Db, day: string, playerId?: string): Pro
       continue;
     }
     const entry = q.answers.get(t.answer_key);
-    // An answer removed from the book after it was given no longer scores.
-    if (!entry) {
+    // An answer removed from the book no longer scores; a new answer still unconfirmed when its day is over scores nothing.
+    if (!entry || (entry.status === 'pending' && entry.source === 'crowd' && day < vnToday())) {
       p.streak = 0;
       p.tiers.set(t.question_id, -1);
       continue;
@@ -1134,6 +1230,9 @@ export async function decideSubmission(
   if (!rows.length) throw new GameError(404, 'Không tìm thấy đáp án này trong hàng chờ.');
   if (a.decision === 'dismiss') {
     await db.query(`update submissions set status='dismissed' where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
+    // A new answer the village was still weighing goes too.
+    await db.query(`update answers set status='rejected' where question_id=$1 and key=$2 and source='crowd' and status='pending'`, [a.questionId, a.inputKey]);
+    forgetQuestion(a.questionId);
     await db.query(
       `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,'Trưởng làng đã xem và không công nhận đáp án này.')
        on conflict (question_id, input_key) do update set valid=false, reason=excluded.reason`,
@@ -1158,6 +1257,8 @@ export async function decideSubmission(
     `insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`,
     [a.questionId, a.inputKey, key, soft(display)],
   );
+  // A new answer the village was still weighing is confirmed by the village head.
+  await db.query(`update answers set status='approved', prior_tier=$3 where question_id=$1 and key=$2 and status='pending'`, [a.questionId, key, tier]);
   await db.query(`update submissions set status='accepted' where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
   await db.query(`delete from verdicts where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
   forgetQuestion(a.questionId);

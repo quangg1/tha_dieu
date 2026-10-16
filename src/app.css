@@ -497,3 +497,4 @@ button{font:inherit;color:inherit}
   .home-hero .beta-tag{align-self:center}
   .home-hero{margin-top:calc(8vh + 54px)}
 }
+.chip.pend{background:#fff4d6;color:#8a5a00;border:1px dashed #e0a800}

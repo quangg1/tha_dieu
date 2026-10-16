@@ -198,6 +198,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           )}
         </div>
         <span className="result-note">
+          {rows.some((r) => r.pending) ? `${rows.filter((r) => r.pending).length} đáp án mới đang chờ làng xác nhận, điểm chốt lúc 0 giờ. ` : ''}
           {result.replay
             ? 'Lượt chơi lại trên thiết bị này không lên bảng diều. '
             : mode === 'daily' && !result.settled

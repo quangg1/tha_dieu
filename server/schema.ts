@@ -82,6 +82,15 @@ create table if not exists runs (
   primary key (player_id, day, mode)
 );
 
+-- New answers the village has not confirmed yet: one vote per network; three networks confirm one.
+create table if not exists pending_votes (
+  question_id text not null,
+  key text not null,
+  voter text not null,
+  at timestamptz not null default now(),
+  primary key (question_id, key, voter)
+);
+
 create table if not exists submissions (
   question_id text not null,
   input_key text not null,

@@ -36,6 +36,8 @@ export interface AnswerResult {
   points?: number;
   bonus?: number;
   judged?: boolean;
+  /** A new answer waiting for the village to confirm it. */
+  pending?: boolean;
   share?: number | null;
   crowd?: Crowd;
 }
