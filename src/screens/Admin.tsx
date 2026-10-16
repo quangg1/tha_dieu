@@ -170,6 +170,7 @@ const STEPS: [string, string][] = [
   ['start', 'Bắt đầu bay'],
   ['finish', 'Bay xong'],
   ['share', 'Chia sẻ ảnh'],
+  ['invite', 'Mời bạn'],
   ['challenge', 'Gửi thách đấu'],
   ['challenge_open', 'Mở từ thách đấu'],
   ['retry', 'Bị hỏi lại'],

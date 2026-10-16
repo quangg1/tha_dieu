@@ -360,3 +360,6 @@ button{font:inherit;color:inherit}
 .flag-btn:hover{color:#b23a26;border-color:#e8b9b0}
 .flag-btn.on{color:#3a8a4a;border-color:#bfe0c4;cursor:default}
 .row:not(:has(.flag-btn))::after{content:'';width:30px}
+
+.invite-btn{width:100%;margin-top:10px;min-height:44px;border-radius:14px;border:1.5px dashed #e5533d;background:#fff5f2;color:#c2412d;font:inherit;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.invite-btn:hover{background:#ffe9e3}

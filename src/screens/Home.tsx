@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { MILESTONES, TIERS, TIERS_BY_RANK, formatAlt } from '../../shared/scoring.js';
+import { MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
-import { readChallenge } from '../shareCard';
+import { challengeLink, readChallenge } from '../shareCard';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
 import { track } from '../track';
 import { album, krillFound, msToNextDay, prefs, stats, today, vnDay } from '../store';
@@ -29,6 +29,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   const [howto, setHowto] = useState(false);
   const [bag, setBag] = useState(false);
   const [skin, setSkin] = useState(prefs.skin);
+  const [invited, setInvited] = useState('');
   const st = stats();
   const rec = today();
   const done = rec && rec.day === vnDay() && rec.result ? rec : null;
@@ -47,6 +48,29 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     track('open', { challenge: !!CHALLENGE, returning: stats().best > 0 });
     if (CHALLENGE) track('challenge_open', { a: CHALLENGE.a });
   }, []);
+
+  /** Invites friends: a challenge with today's height once the flight is done, otherwise a plain invite. */
+  const invite = async () => {
+    const r = done?.result;
+    const title = r ? bandFor(r.score).verdict.split('. ')[0] : '';
+    const url = r ? challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title }) : location.origin;
+    const text = r
+      ? `Mình thả diều tới ${formatAlt(r.altitude)} hôm nay (${title}). Bạn bay được cao hơn không?`
+      : 'Chơi Thả Diều với mình nhé: đố chữ mỗi ngày, đáp án càng hiếm diều càng bay cao!';
+    track(r ? 'challenge' : 'invite', { from: 'home' });
+    try {
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        await navigator.share({ text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      setInvited('Đã chép lời mời, dán vào Zalo hay Messenger nhé!');
+    } catch {
+      setInvited('');
+      return;
+    }
+    setTimeout(() => setInvited(''), 3000);
+  };
 
   const go = (m: 'daily' | 'night') => {
     flute.unlock();
@@ -124,6 +148,9 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             Cách chơi
           </button>
         </div>
+        <button className="invite-btn" onClick={invite}>
+          <span aria-hidden="true">✉</span> {invited || (done ? 'Thách bạn bè bay cao hơn' : 'Mời bạn bè cùng chơi')}
+        </button>
         <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
           <span>Bộ sưu tập</span>
           <b>
