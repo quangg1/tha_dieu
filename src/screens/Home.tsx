@@ -237,10 +237,11 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
               </button>
             </div>
             <ol className="rules">
-              <li>Mỗi câu chỉ được <b>thả một đáp án</b>. Không có đúng sai, chỉ có đáp án hợp lệ và đáp án hiếm.</li>
-              <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm, diều càng bay cao. Độ hiếm tính từ câu trả lời của mọi người chơi.</li>
-              <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn.</li>
-              <li>Sổ làng có hơn 18.000 đáp án cho hơn 260 câu hỏi. Cứ 65 điểm, diều bay cao gấp mười lần.</li>
+              <li>Mỗi câu hỏi, bạn chỉ được <b>thả một đáp án</b>. Không có đúng sai, chỉ có đáp án hợp lệ và đáp án hiếm.</li>
+              <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm tính theo câu trả lời của mọi người chơi trong ngày, và chốt lúc nửa đêm.</li>
+              <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Làng chưa biết đáp án của bạn thì bạn được trả lời lại khi gió còn.</li>
+              <li>Mỗi câu có <b>một đáp án làng giấu</b>, tìm ra là độc nhất. Nhưng coi chừng: đáp án tưởng độc mà cả làng cùng nghĩ chỉ được hạng <b>Khôn lỏi</b>.</li>
+              <li>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, Cung Trăng, rồi tới những vì sao.</li>
               <li><b>Thả đêm</b>: 45 giây gió chung, đáp án hiếm nạp thêm gió, diều lên nhanh hơn. Vượt qua rìa vũ trụ, diều chui qua lỗ giun sang <b>vòng 2</b> (trời hoàng hôn) rồi <b>vòng 3</b> (đêm hội), mở khóa diều phượng hoàng và diều rồng ngọc.</li>
             </ol>
             <div className="tier-list">

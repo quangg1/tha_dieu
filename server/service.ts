@@ -212,7 +212,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
 }
 
 export function publicQuestion(q: LoadedQuestion) {
-  return { id: q.id, category: q.category, prompt: q.prompt, note: q.note, pool: q.answers.size, level: q.level };
+  return { id: q.id, category: q.category, prompt: q.prompt, note: q.note, level: q.level };
 }
 
 /* ------------------------------------------------------------------ turns */

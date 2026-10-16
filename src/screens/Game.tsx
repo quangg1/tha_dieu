@@ -648,14 +648,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             </div>
             <h2 className="prompt">{q.prompt}</h2>
             {q.note && <p className="prompt-note">{q.note}</p>}
-            <p className="prompt-sub">
-              {q.pool ? (
-                <>
-                  Sổ làng có <b>{q.pool.toLocaleString('vi-VN')}</b> đáp án ·{' '}
-                </>
-              ) : null}
-              càng hiếm, diều càng cao
-            </p>
+            <p className="prompt-sub">Càng ít người nghĩ tới, diều càng bay cao</p>
           </div>
         )}
 
