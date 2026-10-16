@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { DAY_BANDS, TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
 import { api, type BoardRow, type FinishResult } from '../api';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, renderCard, shareCard } from '../shareCard';
+import { bragLine, momentLine, seedOf, tauntLine } from '../quips';
 import { skinById } from '../skins';
 import { addToAlbum, krillFound, playerId, playerSince, prefs, saveToday, stats, today, vnDay } from '../store';
 import { musicLevel, type Summary } from './Game';
@@ -83,6 +84,14 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const [title, ...rest] = verdict.split('. ');
   const subtitle = rest.join('. ');
   const krills = result.reveal?.filter((r) => r.tier === 5).length ?? 0;
+  const band = DAY_BANDS.indexOf(bandFor(result.score));
+  const seed = seedOf(day, mode, result.score);
+  const brag = bragLine(band, { krills, beaten: result.beaten, players: result.players, seed });
+  // The flight's rarest answer, if it is rare enough to be worth a screenshot.
+  const moment = rows
+    .map((r, i) => ({ r, i, rank: r.tier >= 0 ? TIERS[r.tier].rank : -1 }))
+    .filter((x) => x.rank >= TIERS[3].rank && x.r.display)
+    .sort((a, b) => b.rank - a.rank)[0];
   const link = useMemo(
     () => challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: result.altitude, d: day, t: title }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +101,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
     const head = mode === 'daily' ? `🪁 Thả Diều ${dayLabel}` : '🪁 Thả Diều · Thả đêm';
     const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
-    return [head, verdict, height, grid].join('\n');
+    return [head, verdict, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
@@ -103,6 +112,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         dayLabel: mode === 'daily' ? dayLabel : 'Thả đêm',
         title: `${title}.`,
         subtitle,
+        quote: brag,
         altitude: result.altitude,
         milestone: reached.alt ? reached.name : '',
         beaten: result.players > 1 ? result.beaten : null,
@@ -122,7 +132,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   };
 
   const shareLink = async () => {
-    const msg = `Mình thả diều tới ${formatAlt(result.altitude)} hôm nay (${title}). Bạn bay được tới đâu?`;
+    const msg = `🪁 ${tauntLine(band, result.altitude, seed)}`;
     try {
       track('challenge', { mode });
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -170,6 +180,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <span className="result-kicker">{mode === 'daily' ? `Chuyến bay ${dayLabel}` : 'Thả đêm'}</span>
         <span className="result-title">{title}.</span>
         <span className="result-sub">{subtitle}</span>
+        <span className="result-brag">“{brag}”</span>
         <div className="result-stats">
           <div>
             <b>{formatAlt(shown)}</b>
@@ -212,6 +223,19 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
             <button className="pill-btn ghost" onClick={copy}>Chép kết quả</button>
           </div>
         </section>
+
+        {moment && (
+          <section className="card moment-card" style={{ '--c': TIER_COLOR[moment.r.tier] } as CSSProperties}>
+            <div className="card-k">Khoảnh khắc “Ủa?”</div>
+            <span className="moment-q">Câu {moment.i + 1}: {moment.r.prompt}</span>
+            <div className="moment-a">
+              <TierIcon tier={moment.r.tier} size={30} />
+              <b>“{moment.r.display}”</b>
+              <span>{TIERS[moment.r.tier].name}</span>
+            </div>
+            <p className="moment-line">{momentLine(moment.r.tier, seed)}</p>
+          </section>
+        )}
 
         <section className="card beta-card">
           <div>

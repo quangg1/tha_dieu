@@ -10,6 +10,8 @@ export interface CardData {
   dayLabel: string;
   title: string;
   subtitle: string;
+  /** A cheeky line in a speech bubble above the title. */
+  quote?: string;
   altitude: number;
   milestone: string;
   beaten: number | null;
@@ -108,6 +110,8 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   ctx.font = "700 30px 'Be Vietnam Pro', system-ui, sans-serif";
   ctx.fillText(`Thả Diều · ${d.dayLabel}`, 96, 126);
 
+  if (d.quote) quoteBubble(ctx, d.quote);
+
   ctx.fillStyle = ink;
   ctx.font = "800 130px 'Baloo 2', system-ui, sans-serif";
   ctx.shadowColor = '#e5533d';
@@ -159,6 +163,43 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   ctx.fillStyle = '#e5533d';
   ctx.fillText(d.link.replace(/^https?:\/\//, '').split(/[/?]/)[0], 110, 1262);
   return new Promise((res) => c.toBlob((b) => res(b), 'image/png'));
+}
+
+/** A white speech bubble with the quote, wrapped to two lines, sitting above the title. */
+function quoteBubble(ctx: CanvasRenderingContext2D, text: string) {
+  ctx.save();
+  ctx.font = "700 40px 'Be Vietnam Pro', system-ui, sans-serif";
+  const max = 560;
+  const lines: string[] = [];
+  let line = '';
+  for (const word of `“${text}”`.split(' ')) {
+    const next = line ? `${line} ${word}` : word;
+    if (ctx.measureText(next).width > max && line) {
+      lines.push(line);
+      line = word;
+    } else line = next;
+  }
+  if (line) lines.push(line);
+  const shown = lines.slice(0, 3);
+  const w = Math.max(...shown.map((l) => ctx.measureText(l).width)) + 64;
+  const h = shown.length * 54 + 40;
+  const x = 72;
+  const y = 470 - h;
+  ctx.shadowColor = 'rgba(0,0,0,.25)';
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 8;
+  ctx.fillStyle = '#fffdf6';
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 28);
+  ctx.moveTo(x + 60, y + h - 12);
+  ctx.lineTo(x + 52, y + h + 34);
+  ctx.lineTo(x + 104, y + h - 12);
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#2a2018';
+  ctx.textBaseline = 'alphabetic';
+  shown.forEach((l, i) => ctx.fillText(l, x + 32, y + 62 + i * 54));
+  ctx.restore();
 }
 
 /** Shares through the phone's share sheet (Zalo, Messenger, Facebook…), or downloads the picture where that is not possible. */

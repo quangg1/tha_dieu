@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { DAY_BANDS, MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { api, type Support } from '../api';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
+import { challengeBanner, seedOf, tauntLine } from '../quips';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
 import { FeedbackSheet } from '../components/FeedbackSheet';
@@ -70,7 +71,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     if (!r) return;
     const title = bandFor(r.score).verdict.split('. ')[0];
     const url = challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title });
-    const text = `Mình thả diều tới ${formatAlt(r.altitude)} hôm nay (${title}). Bạn bay được cao hơn không?`;
+    const text = `🪁 ${tauntLine(DAY_BANDS.indexOf(bandFor(r.score)), r.altitude, seedOf(done!.day, r.score))}`;
     track('challenge', { from: 'home' });
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -110,7 +111,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <p>
             <b>{CHALLENGE.n}</b> đã thả diều tới <b>{formatAlt(CHALLENGE.a)}</b>
             {CHALLENGE.t ? ` (${CHALLENGE.t})` : ''}
-            {CHALLENGE.d === vnDay() ? ' hôm nay. Bạn bay được cao hơn không?' : ` ngày ${CHALLENGE.d.slice(8, 10)}/${CHALLENGE.d.slice(5, 7)}. Thử sức với chuyến bay hôm nay nhé!`}
+            {CHALLENGE.d === vnDay() ? ` hôm nay và ${challengeBanner(seedOf(CHALLENGE.n, CHALLENGE.a))}` : ` ngày ${CHALLENGE.d.slice(8, 10)}/${CHALLENGE.d.slice(5, 7)}. Thử sức với chuyến bay hôm nay nhé!`}
           </p>
         </div>
       )}

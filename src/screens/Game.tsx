@@ -15,6 +15,7 @@ import {
   CEILING_L,
   type Milestone,
 } from '../../shared/scoring.js';
+import { answerQuip, seedOf } from '../quips';
 import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
 import { buzz } from '../haptics';
 import { track } from '../track';
@@ -671,7 +672,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   <span className="pts-badge">+{outcome.points} điểm</span>
                   <span>diều lên {formatAlt(outcome.altitude)}</span>
                 </p>
-                <p className="out-line">{TIERS[outcome.tier!].line}</p>
+                <p className="out-line">{answerQuip(outcome.tier!, seedOf(outcome.display ?? '', outcome.altitude))}</p>
                 <div className="chips">
                   {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
                   {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
