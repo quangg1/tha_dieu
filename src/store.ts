@@ -121,13 +121,27 @@ export interface Stats {
   streak: number;
   lastDay: string | null;
   flights: number;
+  /** Longest run of days in a row. */
+  bestStreak: number;
+  /** Sum of daily scores, for the average. */
+  total: number;
+  /** Best daily score. */
+  bestScore: number;
+  /** How many answers landed in each tier (index = tier), and how many prompts ran out of wind. */
+  tiers: number[];
+  misses: number;
 }
+
+const EMPTY: Stats = { best: 0, nightBest: 0, streak: 0, lastDay: null, flights: 0, bestStreak: 0, total: 0, bestScore: 0, tiers: [0, 0, 0, 0, 0, 0, 0], misses: 0 };
 
 export function stats(): Stats {
-  return read<Stats>('stats', { best: 0, nightBest: 0, streak: 0, lastDay: null, flights: 0 });
+  const s = { ...EMPTY, ...read<Partial<Stats>>('stats', {}) };
+  s.bestStreak = Math.max(s.bestStreak, s.streak);
+  if (!Array.isArray(s.tiers) || s.tiers.length < 7) s.tiers = [0, 0, 0, 0, 0, 0, 0];
+  return s;
 }
 
-export function recordFlight(day: string, mode: 'daily' | 'night', altitude: number) {
+export function recordFlight(day: string, mode: 'daily' | 'night', altitude: number, score = 0, grid = '') {
   const s = stats();
   if (mode === 'night') {
     s.nightBest = Math.max(s.nightBest, altitude);
@@ -135,9 +149,16 @@ export function recordFlight(day: string, mode: 'daily' | 'night', altitude: num
     const y = new Date(day + 'T00:00:00Z');
     y.setUTCDate(y.getUTCDate() - 1);
     s.streak = s.lastDay === y.toISOString().slice(0, 10) ? s.streak + 1 : 1;
+    s.bestStreak = Math.max(s.bestStreak, s.streak);
     s.lastDay = day;
     s.flights++;
     s.best = Math.max(s.best, altitude);
+    s.total += score;
+    s.bestScore = Math.max(s.bestScore, score);
+    for (const c of grid) {
+      if (c === 'x') s.misses++;
+      else if (s.tiers[Number(c)] !== undefined) s.tiers[Number(c)]++;
+    }
   } else {
     s.best = Math.max(s.best, altitude);
   }

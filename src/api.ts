@@ -52,6 +52,8 @@ export interface FinishResult {
   /** The day is over and the scores are final. */
   settled?: boolean;
   reveal?: Reveal[];
+  /** The day's scores in buckets of w points, for the curve. */
+  dist?: { w: number; counts: number[] };
 }
 
 export interface BoardRow {

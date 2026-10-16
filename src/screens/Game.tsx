@@ -258,7 +258,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     setPhase('loading');
     try {
       const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined, since: playerSince() });
-      recordFlight(day, mode, result.altitude);
+      recordFlight(day, mode, result.altitude, result.score, result.grid);
       track('finish', { mode, score: result.score, alt: result.altitude, lap: lapOf(result.altitude).lap, replay: !!result.replay });
       if (mode === 'daily') saveToday({ day, rows: rowsRef.current, result });
       onDone({ mode, rows: rowsRef.current, result });

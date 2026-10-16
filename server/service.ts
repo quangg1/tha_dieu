@@ -734,6 +734,12 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
   const total = ranked.length + (me?.replay ? 1 : 0);
   const beaten = total > 1 ? Math.round(((total - above - 1) / (total - 1)) * 100) : 100;
   const settled = a.day < vnToday();
+  // How the day's scores spread, for the curve on the result screen: counts per bucket of points, no names.
+  const top = Math.max(score, ...ranked.map((r) => r.score));
+  const w = a.mode === 'daily' ? 20 : Math.max(20, Math.ceil(top / 40 / 10) * 10);
+  const counts = new Array(Math.max(42, Math.ceil((top + 1) / w))).fill(0);
+  for (const r of ranked) counts[Math.min(counts.length - 1, Math.floor(Math.max(0, r.score) / w))]++;
+  if (me?.replay) counts[Math.min(counts.length - 1, Math.floor(score / w))]++;
   return {
     score,
     altitude,
@@ -741,6 +747,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     rank: above + 1,
     players: total,
     beaten,
+    dist: { w, counts },
     replay: !!me?.replay,
     settled,
     // The hidden answers are shown only once the whole flight is done, so they cannot be scouted for another account.

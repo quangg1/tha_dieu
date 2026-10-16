@@ -6,9 +6,10 @@ import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, renderCard, shareCard } from '../shareCard';
 import { skinById } from '../skins';
-import { addToAlbum, playerId, playerSince, prefs, saveToday, today, vnDay } from '../store';
+import { addToAlbum, krillFound, playerId, playerSince, prefs, saveToday, stats, today, vnDay } from '../store';
 import { musicLevel, type Summary } from './Game';
 import { track } from '../track';
+import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/PlayerStats';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
@@ -210,6 +211,11 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
         </section>
 
+        <section className="card">
+          <div className="card-k">So với cả làng</div>
+          <DayCurve dist={result.dist} score={result.score} beaten={result.beaten} players={result.players} mode={mode} />
+        </section>
+
         {mode === 'daily' && result.reveal && (
           <section className="card reveal-card">
             <div className="card-k">Đáp án độc nhất hôm nay</div>
@@ -232,6 +238,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
         <section className="card">
           <div className="card-k">{mode === 'daily' ? 'Bảy cú gió của bạn' : 'Những cú gió của bạn'}</div>
+          {mode === 'daily' && <RarityStrings rows={rows} />}
           <div className="rows">
             {rows.map((r) => (
               <div className="row" key={r.questionId + r.points + r.display}>
@@ -291,6 +298,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
             )}
             {!board && <p className="row-q" style={{ margin: 0 }}>Chưa tải được bảng diều.</p>}
           </div>
+        </section>
+
+        {mode === 'daily' && (
+          <section className="card">
+            <div className="card-k">Bậc của ngày</div>
+            <DayBands score={result.score} />
+          </section>
+        )}
+
+        <section className="card">
+          <div className="card-k">Thành tích của bạn</div>
+          <MyRecord s={stats()} krill={krillFound()} />
         </section>
 
         <div className="home-row">
