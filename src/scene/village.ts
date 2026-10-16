@@ -184,6 +184,8 @@ export function kidsSvg() {
   // Waving arm with an open hand.
   b += limb('M44 92 Q 34 92 28 82', 7);
   b += `<circle cx="27" cy="80" r="5" fill="${skin}" ${o}/>`;
+  // A short neck, so the head sits on the body.
+  b += `<rect x="51" y="74" width="14" height="14" rx="5" fill="${skin}" ${o}/>`;
   // Round red shirt with a white collar and the kite on the chest.
   b += `<path d="M45 84 Q 58 80 71 84 Q 77 98 75 112 Q 58 116 40 112 Q 38 98 45 84 Z" fill="#ef5b45" ${o}/>`;
   b += `<path d="M50 84 Q 58 90 66 84" fill="none" stroke="#fff6ea" stroke-width="3" stroke-linecap="round"/>`;
@@ -194,10 +196,8 @@ export function kidsSvg() {
   b += `<g transform="rotate(-20 107 48)"><rect x="98.5" y="43" width="17" height="10" rx="3.5" fill="#d9a85a" ${o}/><path d="M103 43 L 103 53 M111 43 L 111 53" stroke="${ink}" stroke-width="1.3"/></g>`;
   b += `<circle cx="104" cy="53" r="5.2" fill="${skin}" ${o}/>`;
   // Big head, tilted a little toward the kite.
-  b += `<g transform="rotate(-5 58 80)">`;
+  b += `<g transform="translate(0 5) rotate(-4 58 80)">`;
   b += `<circle cx="29.5" cy="56" r="5.5" fill="${skin}" ${o}/><circle cx="86.5" cy="56" r="5.5" fill="${skin}" ${o}/>`;
-  // The hat's red chin strap, showing just under the chin.
-  b += `<path d="M34 60 Q 42 84 58 84 Q 74 84 82 60" fill="none" stroke="#d8473a" stroke-width="2" stroke-linecap="round"/>`;
   b += `<ellipse cx="58" cy="52" rx="29" ry="27" fill="${skin}" ${o}/>`;
   // Bowl haircut with soft bangs.
   b += `<path d="M29.5 50 C 28 30, 42 22, 58 22 C 74 22, 88 30, 86.5 50 C 84 44, 80 40, 76 39 Q 73 45 67 42 Q 63 47 57 42 Q 52 47 46 42 Q 41 45 38 40 C 34 42, 31 46, 29.5 50 Z" fill="${hair}" ${o}/>`;
