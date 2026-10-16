@@ -10,6 +10,7 @@ import { addToAlbum, krillFound, playerId, playerSince, prefs, saveToday, stats,
 import { musicLevel, type Summary } from './Game';
 import { track } from '../track';
 import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/PlayerStats';
+import { FeedbackSheet } from '../components/FeedbackSheet';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
@@ -17,6 +18,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const [result, setResult] = useState<FinishResult>(summary.result);
   const [shown, setShown] = useState(0);
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
+  const [feedback, setFeedback] = useState(false);
   const [name, setName] = useState(prefs.name);
   const [saved, setSaved] = useState(!!prefs.name);
   const [board, setBoard] = useState<{ players: number; settled?: boolean; rows: BoardRow[] } | null>(null);
@@ -211,6 +213,14 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
         </section>
 
+        <section className="card beta-card">
+          <div>
+            <b>Đây là bản chơi thử</b>
+            <span>Bạn thấy thế nào? Một câu góp ý giúp game hay hơn rất nhiều.</span>
+          </div>
+          <button className="pill-btn" onClick={() => { setFeedback(true); track('report', { kind: 'feedback_open' }); }}>Góp ý</button>
+        </section>
+
         <section className="card">
           <div className="card-k">So với cả làng</div>
           <DayCurve dist={result.dist} score={result.score} beaten={result.beaten} players={result.players} mode={mode} />
@@ -318,6 +328,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         </div>
       </div>
       {toast && <div className="toast" role="status">{toast}</div>}
+      {feedback && <FeedbackSheet onClose={() => setFeedback(false)} intro="Cảm ơn bạn đã chơi thử! Chỗ nào khó hiểu, câu hỏi nào dở, đáp án nào bị chấm sai, cứ nói thẳng nhé." />}
     </main>
   );
 }

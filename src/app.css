@@ -435,3 +435,11 @@ button{font:inherit;color:inherit}
 .sup-qr{width:220px;max-width:70vw;aspect-ratio:1;object-fit:contain;border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(20,30,60,.12)}
 .sup-momo{background:#a50064;text-decoration:none;display:flex;align-items:center;justify-content:center;width:100%}
 .sup-card{text-decoration:none;display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box}
+
+/* ---------- beta */
+.beta-tag{align-self:flex-start;margin-top:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.85);color:#c2412d;font-size:12px;font-weight:700;letter-spacing:.04em}
+.beta-card{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;background:#fff7e6}
+.beta-card div{display:flex;flex-direction:column;gap:2px}
+.beta-card b{font-size:15px;color:#0f2747}
+.beta-card span{font-size:13px;color:#5b6778}
+.beta-card .pill-btn{flex:none}
