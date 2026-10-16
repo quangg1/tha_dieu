@@ -60,9 +60,11 @@ const SKY: [number, string, string, string][] = [
   [9, '#06081a', '#0a0f26', '#0e1734'],
   [16, '#080820', '#0b0b26', '#10102e'],
   [21, '#100b2a', '#170f38', '#0c0a26'],
-  [23, '#090718', '#0e0a24', '#140c2c'],
-  [25, '#0c0618', '#160a26', '#24102e'],
-  [26.7, '#24081a', '#3a1022', '#5a1a24'],
+  [22.3, '#0a0d34', '#16185a', '#2a1660'],
+  [23.7, '#1a0a3a', '#341258', '#4a1a5e'],
+  [24.7, '#06162e', '#0e2c4e', '#1c2a5c'],
+  [25.8, '#1c0a30', '#3a1240', '#5a1c42'],
+  [26.7, '#3a1428', '#7a2c34', '#c0643a'],
 ];
 
 /** Lap 2: the same climb at sunset. Lap 3: a festival dusk in violet. Space above stays the same. */
@@ -162,6 +164,8 @@ interface Paints {
   cluster: Land.Paint;
   web: Land.Paint;
   firstLight: Land.Paint;
+  nebulaA: Land.Paint;
+  nebulaB: Land.Paint;
   cloudTones: Land.Paint[][];
 }
 
@@ -410,7 +414,9 @@ export class SkyScene {
       neptune: Sp.paintPlanet('neptune', Math.round(U * 0.3), dpr),
       moon: Sp.paintMoon(Math.round(Math.min(U * 0.86, H * 0.48)), dpr),
       comet: Sp.paintComet(Math.round(U * 0.62), dpr),
-      andromeda: Sp.paintAndromeda(Math.round(Math.min(W * 0.9, 620)), pd),
+      andromeda: Sp.paintAndromeda(Math.round(Math.min(Math.max(W * 1.15, H * 0.75), 1100)), pd),
+      nebulaA: Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 11, ['120,90,255', '70,140,255', '255,90,180', '90,200,255']),
+      nebulaB: Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 29, ['255,120,80', '255,80,140', '160,90,255', '255,190,90']),
       cluster: Sp.paintCluster(W, Math.round(H * 0.7), pd),
       web: Sp.paintWeb(W, Math.round(H * 0.9), pd),
       firstLight: Sp.paintFirstLight(W, Math.round(H * 0.9), pd),
@@ -722,59 +728,131 @@ export class SkyScene {
   /** Beyond the Milky Way: Andromeda, the Virgo cluster, the cosmic web, and the first light with the wormhole at the top. */
   private drawFarUniverse() {
     const { ctx, W, H } = this;
+    if (this.camL < 20.6) return;
     const P = this.P;
     const pd = Math.min(this.dpr, 1.5);
-    if (this.visible(22.37, H * 0.6)) {
+    // Nebula backdrop, tiled with a slower parallax so the clouds feel far behind the galaxies.
+    const fade = clamp((this.camL - 20.6) / 1.2);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [paint, from, to, par] of [[P.nebulaA, 20.6, 24.2, 0.35], [P.nebulaB, 24.0, 27, 0.35]] as const) {
+      const a = 0.85 * fade * clamp((this.camL - from) / 0.8) * clamp((to - this.camL) / 0.8);
+      if (a <= 0) continue;
+      const th = paint.height / pd;
+      const off = ((((this.camL - from) * H * this.layout.decade * par) % th) + th) % th;
+      ctx.globalAlpha = a;
+      for (let y = off - th; y < H; y += th) ctx.drawImage(paint, 0, y, W, th);
+    }
+    ctx.globalAlpha = 1;
+    // Twinkling foreground stars with cross spikes.
+    for (let i = 0; i < 26; i++) {
+      const x = W * ((i * 0.618 + 0.11) % 1);
+      const base = ((i * 0.37) % 1) * H;
+      const y = (base + (this.camL * H * this.layout.decade * 0.6)) % (H + 40) - 20;
+      const tw = 0.5 + 0.5 * Math.sin(this.t * (1.3 + (i % 5) * 0.4) + i * 2.1);
+      const s = (1 + (i % 4) * 0.7) * (0.6 + tw * 0.6);
+      const col = i % 3 === 0 ? '255,220,180' : i % 3 === 1 ? '190,215,255' : '255,255,255';
+      const g = ctx.createRadialGradient(x, y, 0, x, y, s * 5);
+      g.addColorStop(0, `rgba(${col},${0.9 * fade})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - s * 5, y - s * 5, s * 10, s * 10);
+      ctx.fillStyle = `rgba(${col},${0.5 * tw * fade})`;
+      ctx.fillRect(x - s * 9, y - 0.5, s * 18, 1);
+      ctx.fillRect(x - 0.5, y - s * 9, 1, s * 18);
+    }
+    ctx.restore();
+
+    if (this.visible(22.37, H * 1.4)) {
       const w = P.andromeda.width / pd;
       const h = P.andromeda.height / pd;
-      ctx.drawImage(P.andromeda, (this.wide ? this.gx(0.3) : W * 0.45) - w / 2, this.y(22.37) - h / 2, w, h);
-    }
-    if (this.visible(23.71, H * 0.6)) {
-      const h = P.cluster.height / pd;
-      ctx.drawImage(P.cluster, 0, this.y(23.71) - h / 2, W, h);
-    }
-    if (this.visible(24.67, H * 0.7)) {
-      const h = P.web.height / pd;
-      ctx.drawImage(P.web, 0, this.y(24.67) - h / 2, W, h);
-    }
-    if (this.visible(26.2, H)) {
-      const h = P.firstLight.height / pd;
-      ctx.globalAlpha = clamp((this.camL - 25.2) / 0.8);
-      ctx.drawImage(P.firstLight, 0, this.y(26.2) - h / 2, W, h);
-      ctx.globalAlpha = 1;
-    }
-    // The wormhole: a swirl of light at the very top of the sky.
-    if (this.visible(CEILING_L, H * 0.6)) {
-      const cx = W / 2;
-      const cy = this.y(CEILING_L);
-      const R = Math.min(W, H) * 0.32;
       ctx.save();
-      ctx.translate(cx, cy);
       ctx.globalCompositeOperation = 'lighter';
-      const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 1.4);
-      glow.addColorStop(0, 'rgba(255,255,255,.95)');
-      glow.addColorStop(0.2, 'rgba(200,180,255,.6)');
-      glow.addColorStop(1, 'rgba(120,80,255,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(0, 0, R * 1.4, 0, Math.PI * 2);
-      ctx.fill();
-      for (let k = 0; k < 6; k++) {
-        ctx.rotate(this.t * 0.6 + k);
-        ctx.strokeStyle = k % 2 ? 'rgba(255,214,107,.45)' : 'rgba(170,150,255,.5)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        for (let a = 0; a < Math.PI * 4; a += 0.15) {
-          const rr = R * (1 - a / (Math.PI * 4));
-          const x = Math.cos(a) * rr;
-          const y = Math.sin(a) * rr * 0.55;
-          if (a === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
+      ctx.drawImage(P.andromeda, (this.wide ? this.gx(0.4) : W * 0.5) - w / 2, this.y(22.37) + H * 0.32 - h / 2, w, h);
       ctx.restore();
     }
+    if (this.visible(23.71, H * 1.1)) {
+      const h = P.cluster.height / pd;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.drawImage(P.cluster, 0, this.y(23.71) + H * 0.3 - h / 2, W, h);
+      ctx.restore();
+    }
+    if (this.visible(24.67, H * 1.2)) {
+      const h = P.web.height / pd;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.85 + 0.15 * Math.sin(this.t * 0.8);
+      ctx.drawImage(P.web, 0, this.y(24.67) + H * 0.3 - h / 2, W, h);
+      ctx.restore();
+    }
+    if (this.visible(26.1, H)) {
+      const h = P.firstLight.height / pd;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = clamp((this.camL - 25.2) / 0.6);
+      ctx.drawImage(P.firstLight, 0, this.y(26.1) - h / 2, W, h);
+      ctx.restore();
+    }
+    if (this.visible(CEILING_L, H * 0.8)) this.drawWormhole(W / 2, this.y(CEILING_L), Math.min(W * 0.4, H * 0.3));
+  }
+
+  /** The wormhole at the edge of everything: a black sphere ringed by a blazing, lensed disc of light. */
+  private drawWormhole(cx: number, cy: number, R: number) {
+    const ctx = this.ctx;
+    const t = this.t;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.globalCompositeOperation = 'lighter';
+    // Wide glow.
+    const halo = ctx.createRadialGradient(0, 0, R * 0.3, 0, 0, R * 2.6);
+    halo.addColorStop(0, 'rgba(255,200,120,.55)');
+    halo.addColorStop(0.35, 'rgba(255,120,80,.18)');
+    halo.addColorStop(1, 'rgba(160,80,255,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    // Back half of the disc, bent over the top of the hole by gravity.
+    const ring = (rx: number, ry: number, lw: number, col: string, a0: number, a1: number) => {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, ry, 0, a0, a1);
+      ctx.stroke();
+    };
+    for (const [k, col] of [[1.0, 'rgba(255,170,90,.35)'], [0.86, 'rgba(255,220,150,.55)'], [0.74, 'rgba(255,250,220,.8)']] as const) {
+      ring(R * k * 0.62, R * k * 0.62, R * 0.08 * k, col, 0, Math.PI * 2);
+    }
+    // The disc itself, seen nearly edge-on.
+    for (const [k, lw, col] of [[1.9, 0.1, 'rgba(255,120,60,.25)'], [1.6, 0.07, 'rgba(255,170,90,.45)'], [1.3, 0.05, 'rgba(255,220,160,.7)'], [1.05, 0.03, 'rgba(255,250,235,.95)']] as const) {
+      ring(R * k, R * k * 0.16, R * lw, col, 0, Math.PI * 2);
+    }
+    // Sparks streaming around the disc.
+    for (let i = 0; i < 90; i++) {
+      const rr = R * (0.95 + ((i * 0.137) % 1) * 1.1);
+      const a = t * (1.6 - rr / R * 0.5) + i * 2.4;
+      const x = Math.cos(a) * rr;
+      const y = Math.sin(a) * rr * 0.16;
+      ctx.fillStyle = i % 3 ? 'rgba(255,230,170,.8)' : 'rgba(255,150,90,.8)';
+      ctx.fillRect(x, y, 2, 2);
+    }
+    // The black sphere, then the front half of the disc passing in front of it.
+    ctx.globalCompositeOperation = 'source-over';
+    const hole = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 0.58);
+    hole.addColorStop(0, 'rgba(0,0,0,1)');
+    hole.addColorStop(0.85, 'rgba(0,0,0,1)');
+    hole.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = hole;
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.58, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'lighter';
+    ring(R * 0.5, R * 0.5, R * 0.02, 'rgba(255,240,210,.9)', 0, Math.PI * 2);
+    for (const [k, lw, col] of [[1.6, 0.07, 'rgba(255,170,90,.5)'], [1.3, 0.05, 'rgba(255,220,160,.75)'], [1.05, 0.035, 'rgba(255,250,235,1)']] as const) {
+      ring(R * k, R * k * 0.16, R * lw, col, 0, Math.PI);
+    }
+    ctx.restore();
   }
 
   /** Lap rewards in the low sky: sky lanterns from lap 2, fireflies and coloured lanterns from lap 3. */

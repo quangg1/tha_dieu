@@ -495,121 +495,361 @@ export function paintGalaxy(W: number, h: number, dpr: number): Paint {
 
 /* ================================================================ beyond the Milky Way */
 
-/** Andromeda: a tilted spiral galaxy with a warm core and bluish arms. */
-export function paintAndromeda(size: number, dpr: number): Paint {
-  const w = size;
-  const h = size * 0.6;
-  const [cv, ctx] = canvas(w, h, dpr);
-  const r = rng(77);
-  ctx.translate(w / 2, h / 2);
-  ctx.rotate(-0.35);
-  ctx.scale(1, 0.38);
+function gauss(r: () => number) {
+  return (r() + r() + r() + r() - 2) / 2;
+}
+
+function star(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, col: string) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, size * 4);
+  g.addColorStop(0, `rgba(${col},1)`);
+  g.addColorStop(0.25, `rgba(${col},.35)`);
+  g.addColorStop(1, `rgba(${col},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(x - size * 4, y - size * 4, size * 8, size * 8);
+  ctx.fillStyle = `rgba(${col},.55)`;
+  ctx.fillRect(x - size * 7, y - 0.5, size * 14, 1);
+  ctx.fillRect(x - 0.5, y - size * 7, 1, size * 14);
+}
+
+/** Fades a painting out towards its top and bottom edges so it melts into the sky. */
+function fadeEdges(ctx: CanvasRenderingContext2D, w: number, h: number, frac = 0.25) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const H = ctx.canvas.height;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(frac, 'rgba(0,0,0,1)');
+  g.addColorStop(1 - frac, 'rgba(0,0,0,1)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, ctx.canvas.width, H);
+  ctx.restore();
+  void w;
+  void h;
+}
+
+/** A tall backdrop of colourful nebulae and layered stars for deep space, tiled as the camera climbs. */
+export function paintNebulaField(W: number, h: number, dpr: number, seed: number, hues: string[]): Paint {
+  const [cv, ctx] = canvas(W, h, dpr);
+  const r = rng(seed);
+  // Every blob is drawn three times, a tile apart, so stacked tiles meet without a seam.
+  const wrap = (fn: (dy: number) => void) => [-h, 0, h].forEach(fn);
   ctx.globalCompositeOperation = 'lighter';
-  const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.48);
-  halo.addColorStop(0, 'rgba(255,236,200,.55)');
-  halo.addColorStop(0.25, 'rgba(200,190,255,.25)');
-  halo.addColorStop(1, 'rgba(120,140,255,0)');
-  ctx.fillStyle = halo;
-  ctx.beginPath();
-  ctx.arc(0, 0, w * 0.48, 0, Math.PI * 2);
-  ctx.fill();
-  for (let arm = 0; arm < 2; arm++) {
-    for (let i = 0; i < 260; i++) {
-      const t = i / 260;
-      const a = arm * Math.PI + t * Math.PI * 3.2;
-      const rad = w * (0.04 + t * 0.42);
-      const x = Math.cos(a) * rad + (r() - 0.5) * w * 0.05;
-      const y = Math.sin(a) * rad + (r() - 0.5) * w * 0.05;
-      ctx.fillStyle = r() < 0.15 ? 'rgba(255,190,220,.55)' : `rgba(170,200,255,${0.25 + r() * 0.5})`;
-      ctx.beginPath();
-      ctx.arc(x, y, 1 + r() * 2.6, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  // Big soft clouds, then smaller bright wisps.
+  for (let i = 0; i < 70; i++) {
+    const x = r() * W;
+    const y = r() * h;
+    const rad = (0.2 + r() * 0.35) * Math.min(Math.max(W, 420), 760);
+    const col = hues[Math.floor(r() * hues.length)];
+    const al = 0.025 + r() * 0.035;
+    wrap((dy) => {
+      const g = ctx.createRadialGradient(x, y + dy, 0, x, y + dy, rad);
+      g.addColorStop(0, `rgba(${col},${al})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - rad, y + dy - rad, rad * 2, rad * 2);
+    });
   }
-  const core = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.1);
-  core.addColorStop(0, 'rgba(255,250,235,1)');
-  core.addColorStop(1, 'rgba(255,220,170,0)');
-  ctx.fillStyle = core;
-  ctx.beginPath();
-  ctx.arc(0, 0, w * 0.1, 0, Math.PI * 2);
-  ctx.fill();
+  for (let i = 0; i < 140; i++) {
+    const x = r() * W;
+    const y = r() * h;
+    const rad = 20 + r() * 90;
+    const col = hues[Math.floor(r() * hues.length)];
+    const rot = r() * Math.PI;
+    const sq = 0.3 + r() * 0.45;
+    const al = 0.04 + r() * 0.06;
+    wrap((dy) => {
+      ctx.save();
+      ctx.translate(x, y + dy);
+      ctx.rotate(rot);
+      ctx.scale(1, sq);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rad);
+      g.addColorStop(0, `rgba(${col},${al})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(-rad, -rad, rad * 2, rad * 2);
+      ctx.restore();
+    });
+  }
+  // Dark dust that gives the clouds shape.
+  ctx.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 40; i++) {
+    const x = r() * W;
+    const y = r() * h;
+    const rad = 30 + r() * 120;
+    const rot = r() * Math.PI;
+    const sq = 0.45 + r() * 0.4;
+    wrap((dy) => {
+      ctx.save();
+      ctx.translate(x, y + dy);
+      ctx.rotate(rot);
+      ctx.scale(1, sq);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rad);
+      g.addColorStop(0, 'rgba(4,2,12,.22)');
+      g.addColorStop(1, 'rgba(4,2,12,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(-rad, -rad, rad * 2, rad * 2);
+      ctx.restore();
+    });
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  const n = Math.round((W * h) / 480);
+  for (let i = 0; i < n; i++) {
+    const b = Math.pow(r(), 6);
+    ctx.fillStyle = `rgba(${r() < 0.2 ? '255,220,190' : r() < 0.4 ? '190,215,255' : '255,255,255'},${0.25 + r() * 0.6})`;
+    const sz = 0.6 + b * 1.6;
+    ctx.fillRect(r() * W, r() * h, sz, sz);
+  }
+  for (let i = 0; i < Math.round(n / 300); i++) star(ctx, r() * W, r() * h, 1 + r() * 1.6, r() < 0.5 ? '255,240,220' : '200,220,255');
   return cv;
 }
 
-/** The Virgo cluster: a crowd of small galaxies, spirals and ellipticals. */
+/** A spiral galaxy built from thousands of stars on logarithmic arms, with dust lanes and a blazing core. */
+function spiral(ctx: CanvasRenderingContext2D, R: number, r: () => number, opt: { arms: number; twist: number; stars: number; armCol: string; coreCol: string; pink: boolean }) {
+  ctx.globalCompositeOperation = 'lighter';
+  const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 1.1);
+  halo.addColorStop(0, `rgba(${opt.coreCol},.5)`);
+  halo.addColorStop(0.3, `rgba(${opt.armCol},.14)`);
+  halo.addColorStop(1, `rgba(${opt.armCol},0)`);
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 1.1, 0, Math.PI * 2);
+  ctx.fill();
+  const disc = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+  disc.addColorStop(0, `rgba(${opt.coreCol},.35)`);
+  disc.addColorStop(0.35, `rgba(${opt.armCol},.12)`);
+  disc.addColorStop(0.8, `rgba(${opt.armCol},.04)`);
+  disc.addColorStop(1, `rgba(${opt.armCol},0)`);
+  ctx.fillStyle = disc;
+  ctx.beginPath();
+  ctx.arc(0, 0, R, 0, Math.PI * 2);
+  ctx.fill();
+  for (let i = 0; i < opt.stars; i++) {
+    const t = Math.min(1, -Math.log(1 - r() * 0.93) / 2.2);
+    const arm = Math.floor(r() * opt.arms);
+    const inArm = r() < 0.6;
+    const a = (arm * Math.PI * 2) / opt.arms + opt.twist * Math.log(1 + t * 9) + (inArm ? gauss(r) * (0.5 - t * 0.2) : r() * Math.PI * 2);
+    const rad = R * t + gauss(r) * R * 0.03;
+    const x = Math.cos(a) * rad;
+    const y = Math.sin(a) * rad;
+    const inner = t < 0.22;
+    const col = inner ? opt.coreCol : opt.pink && r() < 0.05 ? '255,140,200' : opt.armCol;
+    ctx.fillStyle = `rgba(${col},${(inArm ? 0.2 : 0.08) + r() * 0.4})`;
+    const sz = r() < 0.015 ? 2.2 : 0.8 + r() * 0.8;
+    ctx.fillRect(x, y, sz, sz);
+  }
+  // Pink star-forming knots strung along the arms.
+  if (opt.pink) {
+    for (let i = 0; i < 40; i++) {
+      const t = 0.3 + r() * 0.6;
+      const arm = Math.floor(r() * opt.arms);
+      const a = (arm * Math.PI * 2) / opt.arms + opt.twist * Math.log(1 + t * 9) + gauss(r) * 0.12;
+      const x = Math.cos(a) * R * t;
+      const y = Math.sin(a) * R * t;
+      const k = R * (0.012 + r() * 0.02);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, k * 3);
+      g.addColorStop(0, 'rgba(255,150,200,.45)');
+      g.addColorStop(1, 'rgba(255,120,190,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - k * 3, y - k * 3, k * 6, k * 6);
+    }
+  }
+  // Dust lanes along the inner edge of each arm.
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.strokeStyle = 'rgba(10,6,20,.4)';
+  ctx.lineCap = 'round';
+  for (let arm = 0; arm < opt.arms; arm++) {
+    ctx.lineWidth = R * 0.035;
+    ctx.beginPath();
+    for (let t = 0.12; t < 0.9; t += 0.01) {
+      const a = (arm * Math.PI * 2) / opt.arms + opt.twist * Math.log(1 + t * 9) - 0.18;
+      const x = Math.cos(a) * R * t;
+      const y = Math.sin(a) * R * t;
+      if (t === 0.12) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  const core = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 0.22);
+  core.addColorStop(0, 'rgba(255,252,240,1)');
+  core.addColorStop(0.3, `rgba(${opt.coreCol},.8)`);
+  core.addColorStop(1, `rgba(${opt.coreCol},0)`);
+  ctx.fillStyle = core;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.22, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Andromeda, big enough to fill the sky: tilted spiral, dust lanes, two little companion galaxies. */
+export function paintAndromeda(size: number, dpr: number): Paint {
+  const w = size;
+  const h = size * 0.7;
+  const [cv, ctx] = canvas(w, h, dpr);
+  const r = rng(77);
+  ctx.save();
+  ctx.translate(w / 2, h / 2);
+  ctx.rotate(-0.42);
+  ctx.scale(1, 0.5);
+  spiral(ctx, w * 0.47, r, { arms: 2, twist: 2.8, stars: 20000, armCol: '170,200,255', coreCol: '255,226,180', pink: true });
+  ctx.restore();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [x, y, s] of [[0.68, 0.3, 0.05], [0.3, 0.74, 0.07]]) {
+    const g = ctx.createRadialGradient(w * x, h * y, 0, w * x, h * y, w * s);
+    g.addColorStop(0, 'rgba(255,240,220,.9)');
+    g.addColorStop(1, 'rgba(255,220,180,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(w * (x - s), h * y - w * s, w * s * 2, w * s * 2);
+  }
+  return cv;
+}
+
+/** The Virgo cluster: the giant elliptical M87 with its blue jet, a few grand spirals and a swarm of small galaxies. */
 export function paintCluster(W: number, h: number, dpr: number): Paint {
   const [cv, ctx] = canvas(W, h, dpr);
   const r = rng(91);
   ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < 110; i++) {
     const x = r() * W;
-    const y = h * 0.5 + (r() - 0.5) * h * 0.8 * Math.sqrt(r());
-    const s = 4 + Math.pow(r(), 3) * 30;
+    const y = h * 0.5 + gauss(r) * h * 0.5;
+    const s = 3 + Math.pow(r(), 3) * 16;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(r() * Math.PI);
     ctx.scale(1, 0.3 + r() * 0.6);
     const g = ctx.createRadialGradient(0, 0, 0, 0, 0, s);
-    const warm = r() < 0.5;
-    g.addColorStop(0, warm ? 'rgba(255,236,200,.9)' : 'rgba(210,225,255,.9)');
-    g.addColorStop(0.35, warm ? 'rgba(255,200,150,.35)' : 'rgba(150,180,255,.35)');
-    g.addColorStop(1, 'rgba(120,140,255,0)');
+    g.addColorStop(0, r() < 0.5 ? 'rgba(255,236,205,.9)' : 'rgba(210,225,255,.9)');
+    g.addColorStop(1, 'rgba(150,170,255,0)');
     ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, s, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(-s, -s, s * 2, s * 2);
     ctx.restore();
   }
+  const spirals: [number, number, number, number, string][] = [[0.18, 0.28, 0.13, 0.5, '190,215,255'], [0.84, 0.66, 0.11, 2.1, '255,210,190'], [0.22, 0.8, 0.08, 1.2, '200,190,255']];
+  for (const [x, y, s, rot, col] of spirals) {
+    ctx.save();
+    ctx.translate(W * x, h * y);
+    ctx.rotate(rot);
+    ctx.scale(1, 0.55);
+    spiral(ctx, Math.min(W, 520) * s, r, { arms: 3, twist: 2, stars: 2600, armCol: col, coreCol: '255,236,200', pink: true });
+    ctx.restore();
+  }
+  // M87: a giant glowing ball of old stars with a jet.
+  const cx = W * 0.38;
+  const cy = h * 0.55;
+  const R = Math.min(W, 520) * 0.2;
+  ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
+  g.addColorStop(0, 'rgba(255,248,230,1)');
+  g.addColorStop(0.12, 'rgba(255,226,180,.75)');
+  g.addColorStop(0.45, 'rgba(255,190,140,.18)');
+  g.addColorStop(1, 'rgba(255,170,120,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 1.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-0.6);
+  for (const [lw, al] of [[14, 0.08], [6, 0.2], [2, 0.8]] as const) {
+    const jg = ctx.createLinearGradient(0, 0, R * 1.8, 0);
+    jg.addColorStop(0, `rgba(150,200,255,${al})`);
+    jg.addColorStop(1, 'rgba(150,200,255,0)');
+    ctx.strokeStyle = jg;
+    ctx.lineWidth = lw;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(R * 1.8, 0);
+    ctx.stroke();
+  }
+  for (let k = 1; k <= 4; k++) {
+    ctx.fillStyle = 'rgba(210,235,255,.8)';
+    ctx.beginPath();
+    ctx.arc(R * 0.35 * k, 0, 2.4 - k * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+  fadeEdges(ctx, W, h);
   return cv;
 }
 
-/** The cosmic web: glowing filaments of galaxies joining bright knots. */
+/** The cosmic web: filaments made of countless faint galaxies, meeting in bright knots. */
 export function paintWeb(W: number, h: number, dpr: number): Paint {
   const [cv, ctx] = canvas(W, h, dpr);
   const r = rng(123);
-  const nodes = Array.from({ length: Math.max(14, Math.round(W / 40)) }, () => ({ x: r() * W, y: r() * h }));
+  const nodes = Array.from({ length: Math.max(10, Math.round(W / 55)) }, () => ({ x: r() * W, y: r() * h, m: 0.5 + r() }));
   ctx.globalCompositeOperation = 'lighter';
-  for (const a of nodes) {
+  const done = new Set<string>();
+  for (const [ai, a] of nodes.entries()) {
     const near = nodes
-      .filter((b) => b !== a)
-      .sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y))
+      .map((b, bi) => ({ b, bi, d: Math.hypot(b.x - a.x, b.y - a.y) }))
+      .filter((o) => o.bi !== ai)
+      .sort((p, q) => p.d - q.d)
       .slice(0, 3);
-    for (const b of near) {
-      for (const [lw, al] of [[10, 0.05], [4, 0.12], [1.4, 0.4]] as const) {
-        ctx.strokeStyle = `rgba(150,170,255,${al})`;
+    for (const { b, bi } of near) {
+      const key = ai < bi ? `${ai}-${bi}` : `${bi}-${ai}`;
+      if (done.has(key)) continue;
+      done.add(key);
+      const mx = (a.x + b.x) / 2 + gauss(r) * 60;
+      const my = (a.y + b.y) / 2 + gauss(r) * 60;
+      for (const [lw, al] of [[46, 0.035], [22, 0.05], [8, 0.07]] as const) {
+        ctx.strokeStyle = `rgba(150,140,255,${al})`;
         ctx.lineWidth = lw;
+        ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
-        ctx.quadraticCurveTo((a.x + b.x) / 2 + (r() - 0.5) * 40, (a.y + b.y) / 2 + (r() - 0.5) * 40, b.x, b.y);
+        ctx.quadraticCurveTo(mx, my, b.x, b.y);
         ctx.stroke();
+      }
+      const count = 700;
+      for (let i = 0; i < count; i++) {
+        const t = r();
+        const m = 1 - t;
+        const sp = r() < 0.6 ? 6 : 18;
+        const x = m * m * a.x + 2 * m * t * mx + t * t * b.x + gauss(r) * sp;
+        const y = m * m * a.y + 2 * m * t * my + t * t * b.y + gauss(r) * sp;
+        const hue = t < 0.5 ? '190,170,255' : '140,210,255';
+        ctx.fillStyle = `rgba(${hue},${0.1 + r() * 0.3})`;
+        ctx.fillRect(x, y, 1.2, 1.2);
       }
     }
   }
   for (const n of nodes) {
-    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 26);
-    g.addColorStop(0, 'rgba(255,240,255,.9)');
-    g.addColorStop(1, 'rgba(180,140,255,0)');
+    const s = 40 * n.m;
+    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, s);
+    g.addColorStop(0, 'rgba(255,240,220,.85)');
+    g.addColorStop(0.25, 'rgba(255,190,240,.3)');
+    g.addColorStop(1, 'rgba(160,120,255,0)');
     ctx.fillStyle = g;
-    ctx.fillRect(n.x - 26, n.y - 26, 52, 52);
+    ctx.fillRect(n.x - s, n.y - s, s * 2, s * 2);
+    for (let i = 0; i < 60; i++) {
+      ctx.fillStyle = 'rgba(255,245,230,.7)';
+      ctx.fillRect(n.x + gauss(r) * s * 0.3, n.y + gauss(r) * s * 0.3, 1.4, 1.4);
+    }
   }
+  fadeEdges(ctx, W, h);
   return cv;
 }
 
-/** The edge of the observable universe: the mottled orange glow of the first light. */
+/** The first light: a fabric of warm and cool patches, like the sky maps of the cosmic background. */
 export function paintFirstLight(W: number, h: number, dpr: number): Paint {
   const [cv, ctx] = canvas(W, h, dpr);
   const r = rng(321);
   ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 160; i++) {
-    const x = r() * W;
-    const y = r() * h;
-    const s = 20 + r() * 60;
-    const g = ctx.createRadialGradient(x, y, 0, x, y, s);
-    const hot = r() < 0.5;
-    g.addColorStop(0, hot ? 'rgba(255,150,80,.16)' : 'rgba(120,150,255,.12)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(x - s, y - s, s * 2, s * 2);
+  for (const [n, smin, smax, al] of [[50, 60, 140, 0.07], [220, 18, 50, 0.09], [600, 5, 16, 0.12]] as const) {
+    for (let i = 0; i < n; i++) {
+      const x = r() * W;
+      const y = r() * h;
+      const s = smin + r() * (smax - smin);
+      const v = r();
+      const col = v < 0.35 ? '255,120,60' : v < 0.6 ? '255,200,90' : v < 0.8 ? '110,150,255' : '255,90,120';
+      const g = ctx.createRadialGradient(x, y, 0, x, y, s);
+      g.addColorStop(0, `rgba(${col},${al})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - s, y - s, s * 2, s * 2);
+    }
   }
+  fadeEdges(ctx, W, h);
   return cv;
 }
