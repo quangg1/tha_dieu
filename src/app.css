@@ -407,3 +407,13 @@ button{font:inherit;color:inherit}
 .pst-bar>b{text-align:right;font-variant-numeric:tabular-nums}
 .pst-track{height:10px;border-radius:5px;background:#eef1f6;overflow:hidden}
 .pst-track span{display:block;height:100%;border-radius:5px;min-width:2px}
+
+/* ---------- admin dashboard */
+.adm-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.adm-tabs .gd-chip.on{background:#0f2747;color:#fff}
+.adm-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.adm-tiles div{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:rgba(15,39,71,.06)}
+.adm-tiles b{font-size:30px;line-height:1.05}
+.adm-tiles span{font-size:13px;font-weight:600}
+.adm-tiles em{font-size:12px;font-style:normal;opacity:.7}
+.adm-bar{display:block;height:8px;border-radius:4px;background:#3a8fd8;min-width:2px}

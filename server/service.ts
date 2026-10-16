@@ -554,17 +554,65 @@ export async function closeReport(db: Db, a: { questionId: string; inputKey: str
   return { ok: true };
 }
 
-/** The last week at a glance: how many players reached each step, and the latest errors. */
+/** The admin dashboard: daily funnel, scores, retention, today's questions and the latest errors. */
 export async function insights(db: Db) {
+  const today = vnToday();
   const funnel = await db.query<{ day: string; name: string; players: number; n: number }>(
     `select to_char(day,'YYYY-MM-DD') as day, name, count(distinct player_id)::int as players, count(*)::int as n
-     from events where day >= current_date - 7 group by day, name order by day desc, name`,
+     from events where day >= $1::date - 7 group by day, name order by day desc, name`,
+    [today],
+  );
+  const days = await db.query<{ day: string; opens: number; starts: number; finishes: number; sharers: number; invited: number; fresh: number }>(
+    `with f as (select player_id, min(day) as d0 from events group by player_id)
+     select to_char(e.day,'YYYY-MM-DD') as day,
+       count(distinct e.player_id) filter (where e.name='open')::int as opens,
+       count(distinct e.player_id) filter (where e.name='start')::int as starts,
+       count(distinct e.player_id) filter (where e.name='finish')::int as finishes,
+       count(distinct e.player_id) filter (where e.name in ('share','challenge'))::int as sharers,
+       count(distinct e.player_id) filter (where e.name='challenge_open')::int as invited,
+       count(distinct e.player_id) filter (where f.d0 = e.day)::int as fresh
+     from events e left join f using (player_id)
+     where e.day >= $1::date - 13 group by e.day order by e.day desc`,
+    [today],
+  );
+  const scores = await db.query<{ day: string; players: number; avg: number; best: number }>(
+    `select to_char(day,'YYYY-MM-DD') as day, count(*)::int as players, round(avg(score))::int as avg, max(score)::int as best
+     from runs where mode='daily' and day >= $1::date - 13 group by day order by day desc`,
+    [today],
+  );
+  const retention = await db.query<{ day: string; cohort: number; d1: number; d7: number }>(
+    `with f as (select player_id, min(day) as d0 from events group by player_id)
+     select to_char(f.d0,'YYYY-MM-DD') as day, count(*)::int as cohort,
+       count(*) filter (where exists (select 1 from events e where e.player_id=f.player_id and e.day=f.d0+1))::int as d1,
+       count(*) filter (where exists (select 1 from events e where e.player_id=f.player_id and e.day between f.d0+1 and f.d0+7))::int as d7
+     from f where f.d0 >= $1::date - 14 and f.d0 < $1::date group by f.d0 order by f.d0 desc`,
+    [today],
+  );
+  const questions = await db.query<{ id: string; prompt: string; answered: number; misses: number; krill: number; clever: number; avg: number; retries: number }>(
+    `select q.id, q.prompt,
+       count(t.*) filter (where t.answered_at is not null and t.tier >= 0)::int as answered,
+       count(t.*) filter (where t.tier = -1)::int as misses,
+       count(t.*) filter (where t.tier = 5)::int as krill,
+       count(t.*) filter (where t.tier = 6)::int as clever,
+       coalesce(round(avg(t.points) filter (where t.tier >= 0)),0)::int as avg,
+       (select count(*) from events e where e.day=$1::date and e.name='retry' and e.props->>'q' = q.id)::int as retries
+     from daily_sets d cross join unnest(d.question_ids) with ordinality as u(qid, ord)
+     join questions q on q.id = u.qid
+     left join turns t on t.question_id = q.id and t.day = d.day and t.mode = 'daily'
+     where d.day = $1::date group by q.id, q.prompt, u.ord order by u.ord`,
+    [today],
+  );
+  const [totals] = await db.query<{ players: number; runs: number; answers: number }>(
+    `select (select count(distinct player_id) from events)::int as players,
+            (select count(*) from runs where mode='daily')::int as runs,
+            (select count(*) from turns where answered_at is not null)::int as answers`,
   );
   const errors = await db.query<{ message: string; n: number; last: Date }>(
     `select coalesce(props->>'m','?') as message, count(*)::int as n, max(at) as last
-     from events where name='error' and day >= current_date - 7 group by 1 order by n desc limit 30`,
+     from events where name='error' and day >= $1::date - 7 group by 1 order by n desc limit 30`,
+    [today],
   );
-  return { funnel, errors };
+  return { today, funnel, days, scores, retention, questions, totals, errors };
 }
 
 /** Records a question the wind ran out on. Nothing about the answers is revealed. */

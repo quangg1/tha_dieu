@@ -14,6 +14,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   const [queue, setQueue] = useState<Queued[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [ins, setIns] = useState<Awaited<ReturnType<typeof api.admin.insights>> | null>(null);
+  const [tab, setTab] = useState<Tab>('overview');
 
   const load = async () => {
     setMsg('');
@@ -76,13 +77,23 @@ export default function Admin({ onExit }: { onExit: () => void }) {
         </section>
         {data && (
           <>
+            <nav className="adm-tabs" aria-label="Mục quản trị">
+              {TABS.map(([k, l]) => (
+                <button key={k} className={`gd-chip${tab === k ? ' on' : ''}`} aria-pressed={tab === k} onClick={() => setTab(k)}>
+                  {l}
+                </button>
+              ))}
+              <button className="gd-chip" onClick={load}>Tải lại</button>
+            </nav>
+            {tab !== 'book' && ins && <Insights tab={tab} ins={ins} token={token} onClosed={(k) => setIns({ ...ins, reports: ins.reports.filter((r) => r.question_id + r.input_key + r.kind !== k) })} />}
+            {tab === 'book' && (
+              <>
             <section className="gd-paper">
               <div className="gd-label">Hôm nay</div>
               <p style={{ margin: '6px 0 0' }}>
                 {data.stats.players} người đã hoàn thành chuyến bay · {data.stats.answers} câu trả lời · {data.stats.questions} câu hỏi đang dùng · {data.stats.queued} đáp án người chơi chờ xem · {data.stats.pending} đáp án Claude chờ duyệt
               </p>
             </section>
-            {ins && <Insights ins={ins} token={token} onClosed={(k) => setIns({ ...ins, reports: ins.reports.filter((r) => r.question_id + r.input_key + r.kind !== k) })} />}
             <section className="gd-paper">
               <div className="gd-label" style={{ marginBottom: 4 }}>Đáp án người chơi gõ mà sổ chưa có</div>
               <p className="gd-msg" style={{ margin: '0 0 8px' }}>
@@ -158,6 +169,8 @@ export default function Admin({ onExit }: { onExit: () => void }) {
                 </div>
               )}
             </section>
+              </>
+            )}
           </>
         )}
       </div>
@@ -165,52 +178,143 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   );
 }
 
-const STEPS: [string, string][] = [
-  ['open', 'Mở game'],
-  ['start', 'Bắt đầu bay'],
-  ['finish', 'Bay xong'],
-  ['share', 'Chia sẻ ảnh'],
-  ['invite', 'Mời bạn'],
-  ['challenge', 'Gửi thách đấu'],
-  ['challenge_open', 'Mở từ thách đấu'],
-  ['retry', 'Bị hỏi lại'],
-  ['report', 'Báo sai'],
-  ['error', 'Lỗi'],
+type Tab = 'overview' | 'questions' | 'reports' | 'book';
+const TABS: [Tab, string][] = [
+  ['overview', 'Tổng quan'],
+  ['questions', 'Câu hỏi hôm nay'],
+  ['reports', 'Báo cáo & lỗi'],
+  ['book', 'Sổ làng'],
 ];
 
-function Insights({ ins, token, onClosed }: { ins: Awaited<ReturnType<typeof api.admin.insights>>; token: string; onClosed: (key: string) => void }) {
-  const days = [...new Set(ins.funnel.map((f) => f.day))];
-  const cell = (day: string, name: string) => ins.funnel.find((f) => f.day === day && f.name === name);
+type Ins = Awaited<ReturnType<typeof api.admin.insights>>;
+const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+const dm = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+
+function Insights({ tab, ins, token, onClosed }: { tab: Tab; ins: Ins; token: string; onClosed: (key: string) => void }) {
+  if (tab === 'overview') return <Overview ins={ins} />;
+  if (tab === 'questions') return <Questions ins={ins} />;
+  return <Reports ins={ins} token={token} onClosed={onClosed} />;
+}
+
+function Overview({ ins }: { ins: Ins }) {
+  const t = ins.days.find((d) => d.day === ins.today) ?? { opens: 0, starts: 0, finishes: 0, sharers: 0, invited: 0, fresh: 0 };
+  const sc = ins.scores.find((d) => d.day === ins.today);
+  const ret = ins.retention.find((r) => r.cohort > 0);
+  const tiles: [string, string, string?][] = [
+    [String(t.opens), 'người mở game hôm nay', `${t.fresh} người mới`],
+    [String(t.finishes), 'bay xong chuyến hôm nay', `${pct(t.finishes, t.starts)} người bắt đầu đã bay xong`],
+    [String(t.sharers), 'chia sẻ hoặc thách đấu', `${pct(t.sharers, t.finishes)} người bay xong`],
+    [String(t.invited), 'vào từ link thách đấu'],
+    [sc ? String(sc.avg) : '—', 'điểm trung bình hôm nay', sc ? `cao nhất ${sc.best}` : undefined],
+    [ret ? pct(ret.d1, ret.cohort) : '—', 'quay lại hôm sau', ret ? `nhóm ngày ${dm(ret.day)}: ${ret.d1}/${ret.cohort}` : 'chưa đủ dữ liệu'],
+  ];
+  const peak = Math.max(1, ...ins.days.map((d) => d.opens));
   return (
     <>
       <section className="gd-paper">
-        <div className="gd-label" style={{ marginBottom: 4 }}>Bảy ngày qua · số người chơi ở từng bước</div>
-        {days.length === 0 ? (
+        <div className="gd-label" style={{ marginBottom: 10 }}>Hôm nay · {dm(ins.today)}</div>
+        <div className="adm-tiles">
+          {tiles.map(([v, l, sub]) => (
+            <div key={l}>
+              <b>{v}</b>
+              <span>{l}</span>
+              {sub && <em>{sub}</em>}
+            </div>
+          ))}
+        </div>
+        <p className="gd-msg" style={{ margin: '10px 0 0' }}>
+          Từ trước tới nay: {ins.totals.players.toLocaleString('vi-VN')} người chơi · {ins.totals.runs.toLocaleString('vi-VN')} chuyến bay ngày · {ins.totals.answers.toLocaleString('vi-VN')} câu trả lời
+        </p>
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 8 }}>14 ngày qua</div>
+        {ins.days.length === 0 ? (
           <p className="gd-msg" style={{ margin: 0 }}>Chưa có dữ liệu.</p>
         ) : (
           <div className="tbl">
             <table>
               <thead>
-                <tr><th>Ngày</th>{STEPS.map(([, l]) => <th key={l}>{l}</th>)}</tr>
+                <tr><th>Ngày</th><th>Mở game</th><th /><th>Người mới</th><th>Bắt đầu</th><th>Bay xong</th><th>Hoàn thành</th><th>Chia sẻ</th><th>Từ thách đấu</th><th>Điểm TB</th></tr>
               </thead>
               <tbody>
-                {days.map((d) => (
-                  <tr key={d}>
-                    <td>{d.slice(8, 10)}/{d.slice(5, 7)}</td>
-                    {STEPS.map(([k]) => {
-                      const c = cell(d, k);
-                      return <td key={k} title={c ? `${c.n} lượt` : ''}>{c ? c.players : '·'}</td>;
-                    })}
-                  </tr>
-                ))}
+                {ins.days.map((d) => {
+                  const s = ins.scores.find((x) => x.day === d.day);
+                  return (
+                    <tr key={d.day}>
+                      <td>{dm(d.day)}</td>
+                      <td>{d.opens}</td>
+                      <td style={{ width: 120 }}><span className="adm-bar" style={{ width: `${(d.opens / peak) * 100}%` }} /></td>
+                      <td>{d.fresh}</td>
+                      <td>{d.starts}</td>
+                      <td>{d.finishes}</td>
+                      <td>{pct(d.finishes, d.starts)}</td>
+                      <td>{d.sharers}</td>
+                      <td>{d.invited}</td>
+                      <td>{s ? s.avg : '—'}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
       <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Giữ chân người chơi</div>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Mỗi dòng là nhóm người chơi lần đầu mở game trong ngày đó, và bao nhiêu người quay lại.</p>
+        {ins.retention.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa đủ dữ liệu: cần ít nhất một ngày trọn vẹn.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Ngày đầu</th><th>Số người</th><th>Quay lại hôm sau</th><th>Quay lại trong 7 ngày</th></tr></thead>
+              <tbody>
+                {ins.retention.map((r) => (
+                  <tr key={r.day}><td>{dm(r.day)}</td><td>{r.cohort}</td><td>{pct(r.d1, r.cohort)} ({r.d1})</td><td>{pct(r.d7, r.cohort)} ({r.d7})</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+function Questions({ ins }: { ins: Ins }) {
+  return (
+    <section className="gd-paper">
+      <div className="gd-label" style={{ marginBottom: 4 }}>Bảy câu hôm nay</div>
+      <p className="gd-msg" style={{ margin: '0 0 8px' }}>“Bị hỏi lại” cao nghĩa là người chơi hay gõ đáp án sổ chưa có: nên xem hàng chờ ở Sổ làng. “Hết gió” cao nghĩa là câu khó hoặc mơ hồ.</p>
+      <div className="tbl">
+        <table>
+          <thead><tr><th>#</th><th>Câu hỏi</th><th>Trả lời</th><th>Hết gió</th><th>Bị hỏi lại</th><th>Tìm ra độc nhất</th><th>Khôn lỏi</th><th>Điểm TB</th></tr></thead>
+          <tbody>
+            {ins.questions.map((q, i) => (
+              <tr key={q.id}>
+                <td>{i + 1}</td>
+                <td>{q.prompt}</td>
+                <td>{q.answered}</td>
+                <td>{q.misses} {q.answered + q.misses ? `(${pct(q.misses, q.answered + q.misses)})` : ''}</td>
+                <td>{q.retries}</td>
+                <td>{q.krill}</td>
+                <td>{q.clever}</td>
+                <td>{q.avg}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function Reports({ ins, token, onClosed }: { ins: Ins; token: string; onClosed: (key: string) => void }) {
+  return (
+    <>
+      <section className="gd-paper">
         <div className="gd-label" style={{ marginBottom: 4 }}>Người chơi báo trọng tài chấm sai</div>
-        <p className="gd-msg" style={{ margin: '0 0 8px' }}>“Bị từ chối” là đáp án người chơi cho là đúng mà làng không nhận: thêm vào sổ ở hàng chờ bên dưới nếu hợp lệ. “Được tính” là đáp án người chơi cho là không nên tính.</p>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>“Bị từ chối” là đáp án người chơi cho là đúng mà làng không nhận: thêm vào sổ ở tab Sổ làng nếu hợp lệ. “Được tính” là đáp án người chơi cho là không nên tính.</p>
         {ins.reports.length === 0 ? (
           <p className="gd-msg" style={{ margin: 0 }}>Chưa có báo cáo nào.</p>
         ) : (
@@ -239,9 +343,11 @@ function Insights({ ins, token, onClosed }: { ins: Awaited<ReturnType<typeof api
           </div>
         )}
       </section>
-      {ins.errors.length > 0 && (
-        <section className="gd-paper">
-          <div className="gd-label" style={{ marginBottom: 8 }}>Lỗi trên máy người chơi</div>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 8 }}>Lỗi trên máy người chơi · 7 ngày</div>
+        {ins.errors.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Không có lỗi nào.</p>
+        ) : (
           <div className="tbl">
             <table>
               <thead><tr><th>Thông báo</th><th>Lượt</th></tr></thead>
@@ -250,8 +356,8 @@ function Insights({ ins, token, onClosed }: { ins: Awaited<ReturnType<typeof api
               </tbody>
             </table>
           </div>
-        </section>
-      )}
+        )}
+      </section>
     </>
   );
 }

@@ -99,6 +99,12 @@ export const api = {
   admin: {
     insights: (token: string) =>
       call<{
+        today: string;
+        days: { day: string; opens: number; starts: number; finishes: number; sharers: number; invited: number; fresh: number }[];
+        scores: { day: string; players: number; avg: number; best: number }[];
+        retention: { day: string; cohort: number; d1: number; d7: number }[];
+        questions: { id: string; prompt: string; answered: number; misses: number; krill: number; clever: number; avg: number; retries: number }[];
+        totals: { players: number; runs: number; answers: number };
         funnel: { day: string; name: string; players: number; n: number }[];
         errors: { message: string; n: number; last: string }[];
         reports: { question_id: string; prompt: string; input_key: string; display: string; kind: string; n: number; note: string | null }[];
