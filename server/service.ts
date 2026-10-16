@@ -626,7 +626,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     score = rows.reduce((s, r) => s + (r.points ?? 0), 0);
     grid = rows.map((r) => (r.tier == null || r.tier < 0 ? 'x' : String(r.tier))).join('').slice(0, 60);
   }
-  const altitude = altitudeFor(score);
+  const altitude = altitudeFor(score, a.mode);
   await db.query(
     `insert into runs (player_id, day, mode, name, score, altitude, grid, dev, fresh) values ($1,$2::date,$3,$4,$5,$6,$7,$8,$9)
      on conflict (player_id, day, mode) do update set

@@ -90,17 +90,30 @@ export function streakBonus(streak: number): number {
   return Math.min(20, Math.max(0, 5 * (streak - 1)));
 }
 
-/** Altitude in metres for a score: ten times higher every 65 points. */
-export function altitudeFor(points: number): number {
+/** Thả đêm climbs faster, so that a long night can pass the edge of the universe and start a new lap. */
+export const NIGHT_POINTS_PER_DECADE = 30;
+
+/** Altitude in metres for a score: ten times higher every 65 points (every 30 in Thả đêm). */
+export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily'): number {
   if (points <= 0) return 0;
-  return Math.pow(10, points / POINTS_PER_DECADE);
+  return Math.pow(10, points / (mode === 'night' ? NIGHT_POINTS_PER_DECADE : POINTS_PER_DECADE));
+}
+
+/** log10 of the edge of the observable universe (46,5 tỷ năm ánh sáng): the top of the sky. Past it, a wormhole leads back to the meadow. */
+export const CEILING_L = Math.log10(4.4e26);
+
+/** Which lap of the sky an altitude is on (1 = the first), and the height within that lap. */
+export function lapOf(alt: number): { lap: number; inner: number } {
+  const L = Math.log10(Math.max(1, alt));
+  const lap = Math.floor(L / CEILING_L) + 1;
+  return { lap, inner: Math.pow(10, L - (lap - 1) * CEILING_L) };
 }
 
 export interface Milestone {
   alt: number;
   name: string;
   note?: string;
-  kind: 'ground' | 'bamboo' | 'stork' | 'cloud' | 'balloon' | 'plane' | 'strato' | 'edge' | 'station' | 'satellite' | 'moon' | 'planet' | 'cloud-oort' | 'river';
+  kind: 'ground' | 'bamboo' | 'stork' | 'cloud' | 'balloon' | 'plane' | 'strato' | 'edge' | 'station' | 'satellite' | 'moon' | 'planet' | 'cloud-oort' | 'river' | 'galaxy' | 'cluster' | 'web' | 'universe' | 'lap';
 }
 
 const LY = 9.4607e15;
@@ -123,34 +136,43 @@ export const MILESTONES: readonly Milestone[] = [
   { alt: 4.5e12, name: 'Sao Hải Vương', kind: 'planet' },
   { alt: LY, name: 'Sao chổi', note: 'đám mây Oort', kind: 'cloud-oort' },
   { alt: 26000 * LY, name: 'Sông Ngân', note: 'nơi Ngưu Lang gặp Chức Nữ', kind: 'river' },
+  { alt: 2.5e6 * LY, name: 'Thiên hà Tiên Nữ', note: 'hàng xóm của Ngân Hà', kind: 'galaxy' },
+  { alt: 5.4e7 * LY, name: 'Cụm thiên hà Xử Nữ', kind: 'cluster' },
+  { alt: 5e8 * LY, name: 'Mạng vũ trụ', note: 'những sợi tơ thiên hà', kind: 'web' },
+  { alt: 4.4e26, name: 'Rìa vũ trụ', note: 'lỗ giun về lại bãi cỏ', kind: 'universe' },
 ];
 
 export function lastMilestone(alt: number): Milestone {
+  const { inner } = lapOf(alt);
   let m = MILESTONES[0];
-  for (const x of MILESTONES) if (alt >= x.alt) m = x;
+  for (const x of MILESTONES) if (inner >= x.alt) m = x;
   return m;
 }
 
 export function nextMilestone(alt: number): Milestone | null {
-  return MILESTONES.find((x) => x.alt > alt) ?? null;
+  const { inner } = lapOf(alt);
+  return MILESTONES.find((x) => x.alt > inner) ?? null;
 }
 
-/** Highest milestone crossed when going from one altitude to another, if any. */
+/** Highest milestone crossed when going from one altitude to another, if any; passing the edge of the universe is a new lap. */
 export function crossed(from: number, to: number): Milestone | null {
+  const a = lapOf(from);
+  const b = lapOf(to);
+  if (b.lap > a.lap) return { alt: 0, name: `Vòng ${b.lap}`, note: 'qua lỗ giun về lại bãi cỏ', kind: 'lap' };
   let hit: Milestone | null = null;
-  for (const x of MILESTONES) if (x.alt > from && x.alt <= to && x.alt > 0) hit = x;
+  for (const x of MILESTONES) if (x.alt > a.inner && x.alt <= b.inner && x.alt > 0) hit = x;
   return hit;
 }
 
 /** Vietnamese-formatted altitude: metres under 10 km, then km, then triệu/tỷ km, then năm ánh sáng. */
-/** Altitude split into number and unit, for displays that set the unit smaller. */
+/** Height within the lap, split into number and unit, for displays that set the unit smaller. */
 export function formatAltParts(alt: number): [string, string] {
-  const s = formatAlt(alt);
+  const s = formatInner(lapOf(alt).inner);
   const i = s.indexOf(' ');
   return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + 1)];
 }
 
-export function formatAlt(alt: number): string {
+function formatInner(alt: number): string {
   const vi = (n: number, d = 0) => n.toLocaleString('vi-VN', { maximumFractionDigits: d, minimumFractionDigits: 0 });
   if (alt < 1) return '0 m';
   if (alt < 10000) return `${vi(Math.round(alt))} m`;
@@ -158,7 +180,16 @@ export function formatAlt(alt: number): string {
   if (km < 1e6) return `${vi(Math.round(km))} km`;
   if (km < 1e9) return `${vi(km / 1e6, km < 1e7 ? 1 : 0)} triệu km`;
   if (alt < 0.1 * LY) return `${vi(km / 1e9, km < 1e10 ? 1 : 0)} tỷ km`;
-  return `${vi(alt / LY, alt < 10 * LY ? 1 : 0)} năm ánh sáng`;
+  const ly = alt / LY;
+  if (ly < 1e6) return `${vi(ly, ly < 10 ? 1 : 0)} năm ánh sáng`;
+  if (ly < 1e9) return `${vi(ly / 1e6, ly < 1e7 ? 1 : 0)} triệu năm ánh sáng`;
+  return `${vi(ly / 1e9, 1)} tỷ năm ánh sáng`;
+}
+
+/** Vietnamese-formatted altitude: metres, km, triệu/tỷ km, năm ánh sáng; past the first lap, "Vòng 2 · 3 km". */
+export function formatAlt(alt: number): string {
+  const { lap, inner } = lapOf(alt);
+  return lap > 1 ? `Vòng ${lap} · ${formatInner(inner)}` : formatInner(inner);
 }
 
 export const MAX_DAILY_POINTS = TIERS[5].points * 7 + 20 * 6;

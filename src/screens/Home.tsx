@@ -142,7 +142,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                 return (
                   <button
                     key={k.id}
-                    className={`skin${skin === k.id ? ' on' : ''}${open ? '' : ' locked'}`}
+                    className={`skin${skin === k.id ? ' on' : ''}${open ? '' : ' locked'}${k.prize ? ' prize' : ''}`}
                     disabled={!open}
                     onClick={() => {
                       prefs.skin = k.id;
@@ -151,7 +151,15 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                     }}
                   >
                     <svg width="44" height="60" viewBox="0 0 120 220" aria-hidden="true">
-                      <path d="M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z" fill={open ? k.body : '#c9d0da'} stroke="#1f1b16" strokeWidth="5" />
+                      {k.gradient && (
+                        <defs>
+                          <linearGradient id={`g-${k.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" stopColor={k.gradient[0]} />
+                            <stop offset="1" stopColor={k.gradient[1]} />
+                          </linearGradient>
+                        </defs>
+                      )}
+                      <path d="M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z" fill={open ? (k.gradient ? `url(#g-${k.id})` : k.body) : '#c9d0da'} stroke="#1f1b16" strokeWidth="5" />
                       <path d="M60 60 C 82 76, 86 118, 60 170 C 34 118, 38 76, 60 60 Z" fill={open ? k.inner : '#e6eaf0'} />
                     </svg>
                     <b>{k.name}</b>
@@ -199,7 +207,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
               <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm, diều càng bay cao. Độ hiếm tính từ câu trả lời của mọi người chơi.</li>
               <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn.</li>
               <li>Sổ làng có hơn 18.000 đáp án cho hơn 260 câu hỏi. Cứ 65 điểm, diều bay cao gấp mười lần.</li>
-              <li><b>Thả đêm</b>: 45 giây gió chung, đáp án hiếm nạp thêm gió. Bay tới khi tắt gió.</li>
+              <li><b>Thả đêm</b>: 45 giây gió chung, đáp án hiếm nạp thêm gió, diều lên nhanh hơn. Vượt qua rìa vũ trụ, diều chui qua lỗ giun sang <b>vòng 2</b> (trời hoàng hôn) rồi <b>vòng 3</b> (đêm hội), mở khóa diều phượng hoàng và diều rồng ngọc.</li>
             </ol>
             <div className="tier-list">
               {TIERS_BY_RANK.map((t) => (

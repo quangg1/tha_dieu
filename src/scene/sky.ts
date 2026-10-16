@@ -1,7 +1,7 @@
 // The living sky of Thả Diều: a smooth sky that darkens into space, objects placed at their real altitude on a
 // log scale, the village at the foot of the sky, the altitude ruler, wind streaks while climbing, celebration
 // confetti, and a kite that sways, leaps and dips.
-import { MILESTONES, formatAlt } from '../../shared/scoring.js';
+import { CEILING_L, MILESTONES, formatAlt, lapOf } from '../../shared/scoring.js';
 import * as Art from './art';
 import * as Land from './land';
 import * as Sp from './space';
@@ -60,13 +60,35 @@ const SKY: [number, string, string, string][] = [
   [9, '#06081a', '#0a0f26', '#0e1734'],
   [16, '#080820', '#0b0b26', '#10102e'],
   [21, '#100b2a', '#170f38', '#0c0a26'],
+  [23, '#090718', '#0e0a24', '#140c2c'],
+  [25, '#0c0618', '#160a26', '#24102e'],
+  [26.7, '#24081a', '#3a1022', '#5a1a24'],
 ];
 
-function skyAt(L: number): [Rgb, Rgb, Rgb] {
+/** Lap 2: the same climb at sunset. Lap 3: a festival dusk in violet. Space above stays the same. */
+const SKY2: typeof SKY = [
+  [0, '#e9875a', '#f5b47e', '#fde0b8'],
+  [2, '#df7b5c', '#f0a577', '#f8cfa2'],
+  [3.2, '#b9607a', '#e08f7c', '#f2b98f'],
+  [4.4, '#4f3474', '#8c5288', '#cc7f86'],
+  [5.2, '#1a1236', '#35215a', '#63386a'],
+  ...SKY.slice(5),
+];
+const SKY3: typeof SKY = [
+  [0, '#4351ad', '#8b84dc', '#e8b6e3'],
+  [2, '#3c4aa3', '#7c78d4', '#d6a6e2'],
+  [3.2, '#32408c', '#6a68c6', '#b998de'],
+  [4.4, '#1d2265', '#3a3994', '#7766bd'],
+  [5.2, '#0b0e30', '#1d1d58', '#3a3388'],
+  ...SKY.slice(5),
+];
+
+function skyAt(L: number, lap = 1): [Rgb, Rgb, Rgb] {
+  const T = lap >= 3 ? SKY3 : lap === 2 ? SKY2 : SKY;
   let i = 0;
-  while (i < SKY.length - 2 && L > SKY[i + 1][0]) i++;
-  const a = SKY[i];
-  const b = SKY[Math.min(i + 1, SKY.length - 1)];
+  while (i < T.length - 2 && L > T[i + 1][0]) i++;
+  const a = T[i];
+  const b = T[Math.min(i + 1, T.length - 1)];
   const t = b[0] === a[0] ? 0 : clamp((L - a[0]) / (b[0] - a[0]));
   return [1, 2, 3].map((k) => mix(hex(a[k] as string), hex(b[k] as string), t)) as [Rgb, Rgb, Rgb];
 }
@@ -136,6 +158,11 @@ interface Paints {
   neptune: Land.Paint;
   moon: ReturnType<typeof Sp.paintMoon>;
   comet: Land.Paint;
+  andromeda: Land.Paint;
+  cluster: Land.Paint;
+  web: Land.Paint;
+  firstLight: Land.Paint;
+  cloudTones: Land.Paint[][];
 }
 
 export class SkyScene {
@@ -201,7 +228,7 @@ export class SkyScene {
     document.removeEventListener('visibilitychange', this.onVisible);
   }
 
-  private skin = { body: SON, inner: HOE, tail: SON };
+  private skin: { body: string; inner: string; tail: string; gradient?: [string, string]; pattern?: 'feather' | 'scale' | 'stars'; aura?: string } = { body: SON, inner: HOE, tail: SON };
 
   /**
    * Paints the scene at an altitude onto a fresh canvas of the given size, for the share picture: the same sky,
@@ -211,14 +238,16 @@ export class SkyScene {
     const c = document.createElement('canvas');
     c.width = w;
     c.height = h;
-    const keep = { ctx: this.ctx, W: this.W, H: this.H, dpr: this.dpr, layout: this.layout, camL: this.camL, alt: this.alt, paints: this.paints, village: this.village, kite: { ...this.kite }, parts: this.parts, rings: this.rings, rays: this.rays, flash: this.flash, streaks: this.streaks, meteors: this.meteors, hand: this.hand };
+    const keep = { ctx: this.ctx, W: this.W, H: this.H, dpr: this.dpr, layout: this.layout, camL: this.camL, alt: this.alt, paints: this.paints, village: this.village, kite: { ...this.kite }, parts: this.parts, rings: this.rings, rays: this.rays, flash: this.flash, streaks: this.streaks, meteors: this.meteors, hand: this.hand, lap: this.lap, warp: this.warp, tween: this.tween };
     try {
       this.ctx = c.getContext('2d')!;
       this.W = w;
       this.H = h;
       this.dpr = 1;
       this.layout = layout;
-      this.camL = log(alt);
+      const at = lapOf(alt);
+      this.camL = log(at.inner);
+      this.lap = at.lap;
       this.alt = alt;
       this.paints = null;
       this.village = null;
@@ -237,8 +266,8 @@ export class SkyScene {
   }
 
   /** Colours of the player's kite. */
-  setSkin(s: { body: string; inner: string; tail: string }) {
-    this.skin = { body: s.body, inner: s.inner, tail: s.tail };
+  setSkin(s: { body: string; inner: string; tail: string; gradient?: [string, string]; pattern?: 'feather' | 'scale' | 'stars'; aura?: string }) {
+    this.skin = { body: s.body, inner: s.inner, tail: s.tail, gradient: s.gradient, pattern: s.pattern, aura: s.aura };
   }
 
   setLayout(l: SkyLayout) {
@@ -248,13 +277,29 @@ export class SkyScene {
   /** Moves the camera to an altitude: the world slides past while the kite stays near its spot. With a duration, the climb follows a set ease. */
   setAltitude(alt: number, animate = true, dur?: number) {
     this.alt = alt;
-    this.targetL = log(alt);
+    const { lap, inner } = lapOf(alt);
+    this.targetL = log(inner);
     this.tween = null;
-    if (!animate || this.reduce) {
+    this.warp = null;
+    if (!animate || this.reduce || lap < this.lap) {
+      this.lap = lap;
       this.camL = this.targetL;
       return;
     }
+    if (lap > this.lap) {
+      // Up to the edge of the universe, through the wormhole, and out above the meadow of the next lap.
+      this.warp = { lap, to: this.targetL, dur: dur ? dur * 0.5 : 1.2 };
+      this.tween = { from: this.camL, to: CEILING_L + 0.05, t0: this.t, dur: dur ? dur * 0.55 : 1.4 };
+      return;
+    }
     if (dur) this.tween = { from: this.camL, to: this.targetL, t0: this.t, dur };
+  }
+
+  /** The lap of the sky being shown: 1, then 2, 3… after each pass through the wormhole. */
+  private lap = 1;
+  private warp: { lap: number; to: number; dur: number } | null = null;
+  private get innerL() {
+    return log(lapOf(this.alt).inner);
   }
 
   setFlutes(n: number) {
@@ -365,6 +410,11 @@ export class SkyScene {
       neptune: Sp.paintPlanet('neptune', Math.round(U * 0.3), dpr),
       moon: Sp.paintMoon(Math.round(Math.min(U * 0.86, H * 0.48)), dpr),
       comet: Sp.paintComet(Math.round(U * 0.62), dpr),
+      andromeda: Sp.paintAndromeda(Math.round(Math.min(W * 0.9, 620)), pd),
+      cluster: Sp.paintCluster(W, Math.round(H * 0.7), pd),
+      web: Sp.paintWeb(W, Math.round(H * 0.9), pd),
+      firstLight: Sp.paintFirstLight(W, Math.round(H * 0.9), pd),
+      cloudTones: ([1, 2] as const).map((tone) => [1, 2, 3].map((seed) => Land.paintCloud(U * 0.6, pd, seed, tone))),
     };
     return this.paints;
   }
@@ -377,7 +427,18 @@ export class SkyScene {
     if (this.tween) {
       const p = clamp((this.t - this.tween.t0) / this.tween.dur);
       this.camL = this.tween.from + (this.tween.to - this.tween.from) * easeInOut(p);
-      if (p >= 1) this.tween = null;
+      if (p >= 1) {
+        this.tween = null;
+        if (this.warp) {
+          const w = this.warp;
+          this.warp = null;
+          this.lap = w.lap;
+          this.flash = 0.9;
+          this.rings.push({ r: 10, v: 900, life: 1.2, color: '#c8b6ff' }, { r: 10, v: 600, life: 1.4, color: '#ffd66b' });
+          this.camL = Math.min(w.to, -0.6);
+          this.tween = { from: this.camL, to: w.to, t0: this.t, dur: w.dur + 0.6 };
+        }
+      }
     } else this.camL += (this.targetL - this.camL) * (1 - Math.exp(-dt * 2.4));
     this.camVel = dt > 0 ? (this.camL - prev) / dt : 0;
     // Kite spring.
@@ -451,7 +512,7 @@ export class SkyScene {
   private draw() {
     const { ctx, W, H } = this;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    const [top, mid, low] = skyAt(this.camL);
+    const [top, mid, low] = skyAt(this.camL, this.lap);
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, css(top));
     g.addColorStop(0.55, css(mid));
@@ -464,7 +525,9 @@ export class SkyScene {
     this.drawDeepSpace();
     this.drawOrbit();
     this.drawAir();
+    this.drawFarUniverse();
     this.drawGround();
+    this.drawLapExtras();
     this.drawStreaks();
     if (this.layout.ruler) this.drawRuler();
     this.drawRays();
@@ -656,6 +719,106 @@ export class SkyScene {
     }
   }
 
+  /** Beyond the Milky Way: Andromeda, the Virgo cluster, the cosmic web, and the first light with the wormhole at the top. */
+  private drawFarUniverse() {
+    const { ctx, W, H } = this;
+    const P = this.P;
+    const pd = Math.min(this.dpr, 1.5);
+    if (this.visible(22.37, H * 0.6)) {
+      const w = P.andromeda.width / pd;
+      const h = P.andromeda.height / pd;
+      ctx.drawImage(P.andromeda, (this.wide ? this.gx(0.3) : W * 0.45) - w / 2, this.y(22.37) - h / 2, w, h);
+    }
+    if (this.visible(23.71, H * 0.6)) {
+      const h = P.cluster.height / pd;
+      ctx.drawImage(P.cluster, 0, this.y(23.71) - h / 2, W, h);
+    }
+    if (this.visible(24.67, H * 0.7)) {
+      const h = P.web.height / pd;
+      ctx.drawImage(P.web, 0, this.y(24.67) - h / 2, W, h);
+    }
+    if (this.visible(26.2, H)) {
+      const h = P.firstLight.height / pd;
+      ctx.globalAlpha = clamp((this.camL - 25.2) / 0.8);
+      ctx.drawImage(P.firstLight, 0, this.y(26.2) - h / 2, W, h);
+      ctx.globalAlpha = 1;
+    }
+    // The wormhole: a swirl of light at the very top of the sky.
+    if (this.visible(CEILING_L, H * 0.6)) {
+      const cx = W / 2;
+      const cy = this.y(CEILING_L);
+      const R = Math.min(W, H) * 0.32;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 1.4);
+      glow.addColorStop(0, 'rgba(255,255,255,.95)');
+      glow.addColorStop(0.2, 'rgba(200,180,255,.6)');
+      glow.addColorStop(1, 'rgba(120,80,255,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, R * 1.4, 0, Math.PI * 2);
+      ctx.fill();
+      for (let k = 0; k < 6; k++) {
+        ctx.rotate(this.t * 0.6 + k);
+        ctx.strokeStyle = k % 2 ? 'rgba(255,214,107,.45)' : 'rgba(170,150,255,.5)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let a = 0; a < Math.PI * 4; a += 0.15) {
+          const rr = R * (1 - a / (Math.PI * 4));
+          const x = Math.cos(a) * rr;
+          const y = Math.sin(a) * rr * 0.55;
+          if (a === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  /** Lap rewards in the low sky: sky lanterns from lap 2, fireflies and coloured lanterns from lap 3. */
+  private drawLapExtras() {
+    if (this.lap < 2) return;
+    const { ctx, W } = this;
+    if (this.visible(2, 900)) {
+      const n = this.lap >= 3 ? 12 : 8;
+      for (let i = 0; i < n; i++) {
+        const L = 0.6 + ((i * 0.37 + this.t * 0.02 * (1 + (i % 3) * 0.3)) % 3.2);
+        const x = W * ((i * 0.29 + 0.07) % 1) + Math.sin(this.t * 0.6 + i) * 10;
+        const y = this.y(L);
+        const s = 9 + (i % 3) * 4;
+        const col = this.lap >= 3 ? ['255,120,170', '255,210,110', '140,220,255', '190,150,255'][i % 4] : '255,190,110';
+        const g = ctx.createRadialGradient(x, y, 0, x, y, s * 3);
+        g.addColorStop(0, `rgba(${col},.6)`);
+        g.addColorStop(1, `rgba(${col},0)`);
+        ctx.fillStyle = g;
+        ctx.fillRect(x - s * 3, y - s * 3, s * 6, s * 6);
+        ctx.fillStyle = `rgba(${col},.95)`;
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.55, y - s * 0.7);
+        ctx.lineTo(x + s * 0.55, y - s * 0.7);
+        ctx.lineTo(x + s * 0.42, y + s * 0.7);
+        ctx.lineTo(x - s * 0.42, y + s * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,230,.9)';
+        ctx.fillRect(x - s * 0.18, y + s * 0.35, s * 0.36, s * 0.3);
+      }
+    }
+    if (this.lap >= 3 && this.visible(0.8, 500)) {
+      for (let i = 0; i < 30; i++) {
+        const x = W * ((i * 0.137) % 1) + Math.sin(this.t * 0.9 + i * 2) * 18;
+        const y = this.y(-0.4 + ((i * 0.071) % 1.6)) + Math.cos(this.t * 1.1 + i) * 10;
+        const a = 0.4 + 0.6 * Math.abs(Math.sin(this.t * 2 + i));
+        ctx.fillStyle = `rgba(230,255,160,${a})`;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
   private blitDpr(p: Land.Paint) {
     return p.width / this.W > 0 ? p.width / this.W : 1;
   }
@@ -824,7 +987,7 @@ export class SkyScene {
     // Drifting clouds.
     for (const [i, c] of this.clouds.entries()) {
       if (!this.visible(c.L, 260)) continue;
-      const img = P.clouds[i % 3];
+      const img = this.lap >= 2 ? P.cloudTones[this.lap >= 3 ? 1 : 0][i % 3] : P.clouds[i % 3];
       const w = c.w * this.U * 1.5;
       const h = (w * img.height) / img.width;
       const x = ((c.x * (W + w) + this.t * c.v) % (W + w)) - w / 2;
@@ -903,13 +1066,23 @@ export class SkyScene {
     g.addColorStop(1, 'rgba(255,236,170,0)');
     ctx.fillStyle = g;
     ctx.fillRect(x - size * 2.6, y - size * 2.6, size * 5.2, size * 5.2);
-    const d = ctx.createRadialGradient(x - size * 0.2, y - size * 0.2, 0, x, y, size * 0.6);
+    if (this.lap >= 3) {
+      // Festival dusk: a pale crescent moon instead of the sun.
+      ctx.fillStyle = `rgba(255,246,220,${a})`;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.55, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.25, y - size * 0.12, size * 0.5, 0, Math.PI * 2, true);
+      ctx.fill('evenodd');
+      return;
+    }
+    const big = this.lap === 2 ? 1.5 : 1;
+    const d = ctx.createRadialGradient(x - size * 0.2, y - size * 0.2, 0, x, y, size * 0.6 * big);
     d.addColorStop(0, `rgba(255,252,232,${a})`);
-    d.addColorStop(0.7, `rgba(255,224,130,${a})`);
-    d.addColorStop(1, `rgba(255,206,100,${a})`);
+    d.addColorStop(0.7, this.lap === 2 ? `rgba(255,170,90,${a})` : `rgba(255,224,130,${a})`);
+    d.addColorStop(1, this.lap === 2 ? `rgba(240,110,70,${a})` : `rgba(255,206,100,${a})`);
     ctx.fillStyle = d;
     ctx.beginPath();
-    ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+    ctx.arc(x, y, size * 0.6 * big, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -943,7 +1116,38 @@ export class SkyScene {
     return items;
   }
 
+  private groundLayer: HTMLCanvasElement | null = null;
+
+  /** Later laps tint the land: warm sunset light on lap 2, violet festival dusk from lap 3. */
   private drawGround() {
+    if (this.lap < 2) return this.drawGroundInner();
+    const main = this.ctx;
+    const c = (this.groundLayer ??= document.createElement('canvas'));
+    if (c.width !== main.canvas.width || c.height !== main.canvas.height) {
+      c.width = main.canvas.width;
+      c.height = main.canvas.height;
+    }
+    const g = c.getContext('2d')!;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, c.width, c.height);
+    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.ctx = g;
+    try {
+      this.drawGroundInner();
+      g.globalCompositeOperation = 'source-atop';
+      g.fillStyle = this.lap >= 3 ? 'rgba(96,78,200,.32)' : 'rgba(255,128,70,.26)';
+      g.fillRect(0, 0, this.W, this.H);
+      g.globalCompositeOperation = 'source-over';
+    } finally {
+      this.ctx = main;
+    }
+    main.save();
+    main.setTransform(1, 0, 0, 1, 0, 0);
+    main.drawImage(c, 0, 0);
+    main.restore();
+  }
+
+  private drawGroundInner() {
     const { ctx, W, H, layout } = this;
     const A = ART!;
     const yg = this.y(layout.ground ?? -0.55);
@@ -985,6 +1189,7 @@ export class SkyScene {
       ctx.fillRect(0, yg + fh - 1, W, H - yg - fh + 2);
     }
     this.put(A.kids, bx, dyke + 3, bw, 0.5, 1);
+
   }
 
   private drawStreaks() {
@@ -1010,7 +1215,7 @@ export class SkyScene {
   private drawRuler() {
     const { ctx, W, H } = this;
     const wide = this.wide;
-    const dark = wide || this.camL >= 4.3;
+    const dark = wide || this.camL >= 4.3 || this.lap >= 3;
     const r0 = this.top + (wide ? 24 : 14);
     const r1 = H - (this.layout.bottom ?? 0) - (wide ? 24 : 16);
     const yk = this.yk;
@@ -1068,7 +1273,7 @@ export class SkyScene {
       const y = this.y(L);
       if (y < top || y > r1) continue;
       const a = fade(y);
-      const passed = log(this.alt) >= L;
+      const passed = this.innerL >= L;
       ctx.globalAlpha = a;
       ctx.fillStyle = passed ? '#ffd66b' : '#ffffff';
       ctx.strokeStyle = dark ? 'rgba(255,255,255,.9)' : '#0f2747';
@@ -1249,6 +1454,23 @@ export class SkyScene {
       else ctx.moveTo(px, py);
     }
     ctx.stroke();
+    // One gold star on the tail for every lap of the sky completed.
+    for (let k = 0; k < Math.min(5, this.lap - 1); k++) {
+      const [px, py] = pts[Math.min(pts.length - 1, 2 + k * 2)];
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(this.t * 1.5 + k);
+      ctx.fillStyle = '#ffd66b';
+      ctx.beginPath();
+      for (let j = 0; j < 10; j++) {
+        const a = -Math.PI / 2 + (j * Math.PI) / 5;
+        const rr = j % 2 ? 4 : 9;
+        ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
     ctx.fillStyle = moon ? TRANG : this.skin.inner;
     for (let i = 3; i < pts.length; i += 3) {
       const [px, py] = pts[i];
@@ -1273,14 +1495,63 @@ export class SkyScene {
     ctx.moveTo(60, 26);
     ctx.lineTo(60, 30);
     ctx.stroke();
+    if (this.skin.aura) {
+      const pulse = 0.75 + 0.25 * Math.sin(this.t * 2.2);
+      const g = ctx.createRadialGradient(60, 120, 10, 60, 120, 150);
+      g.addColorStop(0, `rgba(${this.skin.aura},${0.55 * pulse})`);
+      g.addColorStop(1, `rgba(${this.skin.aura},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(-90, -30, 300, 300);
+    }
     // Soft drop shadow.
     ctx.save();
     ctx.translate(5, 6);
     ctx.fillStyle = 'rgba(20,30,60,.18)';
     ctx.fill(LEAF);
     ctx.restore();
-    ctx.fillStyle = moon && this.skin.body === SON ? CHAM_DEEP : this.skin.body;
+    if (this.skin.gradient) {
+      const g = ctx.createLinearGradient(0, 30, 0, 214);
+      g.addColorStop(0, this.skin.gradient[0]);
+      g.addColorStop(1, this.skin.gradient[1]);
+      ctx.fillStyle = g;
+    } else ctx.fillStyle = moon && this.skin.body === SON ? CHAM_DEEP : this.skin.body;
     ctx.fill(LEAF);
+    if (this.skin.pattern) {
+      ctx.save();
+      ctx.clip(LEAF);
+      ctx.strokeStyle = 'rgba(255,240,200,.55)';
+      ctx.fillStyle = 'rgba(255,245,215,.85)';
+      ctx.lineWidth = 2.2;
+      if (this.skin.pattern === 'feather') {
+        for (let y = 50; y < 214; y += 16) {
+          ctx.beginPath();
+          ctx.moveTo(20, y + 12);
+          ctx.quadraticCurveTo(60, y - 10, 100, y + 12);
+          ctx.stroke();
+        }
+      } else if (this.skin.pattern === 'scale') {
+        for (let y = 40; y < 214; y += 14) {
+          for (let x = (y / 14) % 2 ? 14 : 24; x < 110; x += 20) {
+            ctx.beginPath();
+            ctx.arc(x, y, 9, 0, Math.PI);
+            ctx.stroke();
+          }
+        }
+      } else {
+        const r = mulberry(3);
+        for (let i = 0; i < 26; i++) {
+          const x = 22 + r() * 76;
+          const y = 40 + r() * 170;
+          const tw = 0.5 + 0.5 * Math.sin(this.t * 3 + i);
+          ctx.globalAlpha = 0.4 + 0.6 * tw;
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2 + r() * 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    }
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = moon ? PAPER : INK;
     ctx.stroke(LEAF);

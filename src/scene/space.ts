@@ -492,3 +492,124 @@ export function paintGalaxy(W: number, h: number, dpr: number): Paint {
   }
   return cv;
 }
+
+/* ================================================================ beyond the Milky Way */
+
+/** Andromeda: a tilted spiral galaxy with a warm core and bluish arms. */
+export function paintAndromeda(size: number, dpr: number): Paint {
+  const w = size;
+  const h = size * 0.6;
+  const [cv, ctx] = canvas(w, h, dpr);
+  const r = rng(77);
+  ctx.translate(w / 2, h / 2);
+  ctx.rotate(-0.35);
+  ctx.scale(1, 0.38);
+  ctx.globalCompositeOperation = 'lighter';
+  const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.48);
+  halo.addColorStop(0, 'rgba(255,236,200,.55)');
+  halo.addColorStop(0.25, 'rgba(200,190,255,.25)');
+  halo.addColorStop(1, 'rgba(120,140,255,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(0, 0, w * 0.48, 0, Math.PI * 2);
+  ctx.fill();
+  for (let arm = 0; arm < 2; arm++) {
+    for (let i = 0; i < 260; i++) {
+      const t = i / 260;
+      const a = arm * Math.PI + t * Math.PI * 3.2;
+      const rad = w * (0.04 + t * 0.42);
+      const x = Math.cos(a) * rad + (r() - 0.5) * w * 0.05;
+      const y = Math.sin(a) * rad + (r() - 0.5) * w * 0.05;
+      ctx.fillStyle = r() < 0.15 ? 'rgba(255,190,220,.55)' : `rgba(170,200,255,${0.25 + r() * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(x, y, 1 + r() * 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  const core = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.1);
+  core.addColorStop(0, 'rgba(255,250,235,1)');
+  core.addColorStop(1, 'rgba(255,220,170,0)');
+  ctx.fillStyle = core;
+  ctx.beginPath();
+  ctx.arc(0, 0, w * 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  return cv;
+}
+
+/** The Virgo cluster: a crowd of small galaxies, spirals and ellipticals. */
+export function paintCluster(W: number, h: number, dpr: number): Paint {
+  const [cv, ctx] = canvas(W, h, dpr);
+  const r = rng(91);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 70; i++) {
+    const x = r() * W;
+    const y = h * 0.5 + (r() - 0.5) * h * 0.8 * Math.sqrt(r());
+    const s = 4 + Math.pow(r(), 3) * 30;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(r() * Math.PI);
+    ctx.scale(1, 0.3 + r() * 0.6);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, s);
+    const warm = r() < 0.5;
+    g.addColorStop(0, warm ? 'rgba(255,236,200,.9)' : 'rgba(210,225,255,.9)');
+    g.addColorStop(0.35, warm ? 'rgba(255,200,150,.35)' : 'rgba(150,180,255,.35)');
+    g.addColorStop(1, 'rgba(120,140,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  return cv;
+}
+
+/** The cosmic web: glowing filaments of galaxies joining bright knots. */
+export function paintWeb(W: number, h: number, dpr: number): Paint {
+  const [cv, ctx] = canvas(W, h, dpr);
+  const r = rng(123);
+  const nodes = Array.from({ length: Math.max(14, Math.round(W / 40)) }, () => ({ x: r() * W, y: r() * h }));
+  ctx.globalCompositeOperation = 'lighter';
+  for (const a of nodes) {
+    const near = nodes
+      .filter((b) => b !== a)
+      .sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y))
+      .slice(0, 3);
+    for (const b of near) {
+      for (const [lw, al] of [[10, 0.05], [4, 0.12], [1.4, 0.4]] as const) {
+        ctx.strokeStyle = `rgba(150,170,255,${al})`;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.quadraticCurveTo((a.x + b.x) / 2 + (r() - 0.5) * 40, (a.y + b.y) / 2 + (r() - 0.5) * 40, b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  }
+  for (const n of nodes) {
+    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 26);
+    g.addColorStop(0, 'rgba(255,240,255,.9)');
+    g.addColorStop(1, 'rgba(180,140,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(n.x - 26, n.y - 26, 52, 52);
+  }
+  return cv;
+}
+
+/** The edge of the observable universe: the mottled orange glow of the first light. */
+export function paintFirstLight(W: number, h: number, dpr: number): Paint {
+  const [cv, ctx] = canvas(W, h, dpr);
+  const r = rng(321);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 160; i++) {
+    const x = r() * W;
+    const y = r() * h;
+    const s = 20 + r() * 60;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, s);
+    const hot = r() < 0.5;
+    g.addColorStop(0, hot ? 'rgba(255,150,80,.16)' : 'rgba(120,150,255,.12)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - s, y - s, s * 2, s * 2);
+  }
+  return cv;
+}

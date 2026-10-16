@@ -91,3 +91,16 @@ describe('scoring', () => {
     expect(streakBonus(9)).toBe(20);
   });
 });
+
+describe('laps of the sky', () => {
+  it('wraps past the edge of the universe and names the lap', async () => {
+    const { lapOf, formatAlt, crossed, CEILING_L, altitudeFor } = await import('./scoring.js');
+    const lap2 = Math.pow(10, CEILING_L + 3);
+    expect(lapOf(lap2).lap).toBe(2);
+    expect(Math.round(lapOf(lap2).inner)).toBe(1000);
+    expect(formatAlt(lap2)).toBe('Vòng 2 · 1.000 m');
+    expect(crossed(Math.pow(10, CEILING_L - 1), lap2)?.name).toBe('Vòng 2');
+    expect(lapOf(altitudeFor(800, 'night')).lap).toBe(2);
+    expect(lapOf(altitudeFor(820, 'daily')).lap).toBe(1);
+  });
+});

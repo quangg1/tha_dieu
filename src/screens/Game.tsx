@@ -11,6 +11,7 @@ import {
   crossed,
   formatAlt,
   formatAltParts,
+  lapOf,
   type Milestone,
 } from '../../shared/scoring.js';
 import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
@@ -198,10 +199,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const coachDone = useRef<(() => void) | null>(null);
   const [shake, setShake] = useState(0);
 
-  const altitude = altitudeFor(score);
+  const altitude = altitudeFor(score, mode);
   const shownScore = useRoll(score);
   const shownAlt = useRoll(altitude);
-  const dark = Math.log10(Math.max(1, altitudeFor(shownScore))) >= 4.3;
+  const lap = lapOf(shownAlt).lap;
+  const dark = lap >= 3 || Math.log10(Math.max(1, lapOf(altitudeFor(shownScore, mode)).inner)) >= 4.3;
   const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const hudRef = useRef<HTMLElement>(null);
@@ -262,7 +264,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     else flute.wrong();
     sky.dip(kind === 'late' ? 1.4 : 1);
     pushRow({ questionId: question.id, prompt: question.prompt, display: null, tier: -1, points: 0, input: inputText });
-    setOutcome({ kind, input: inputText, reason, altitude: altitudeFor(scoreRef.current) });
+    setOutcome({ kind, input: inputText, reason, altitude: altitudeFor(scoreRef.current, mode) });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2400);
   };
@@ -408,7 +410,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         const s = prev.reduce((a, r) => a + r.points, 0);
         scoreRef.current = s;
         setScore(s);
-        sky.setAltitude(altitudeFor(s), false);
+        sky.setAltitude(altitudeFor(s, mode), false);
         const done = new Set(prev.map((r) => r.questionId));
         const from = questions.findIndex((x) => !done.has(x.id));
         await openDaily(questions, from < 0 ? questions.length : from, d);
@@ -508,8 +510,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     }
 
     const tier = r.tier!;
-    const before = altitudeFor(scoreRef.current);
-    const after = altitudeFor(scoreRef.current + r.points!);
+    const before = altitudeFor(scoreRef.current, mode);
+    const after = altitudeFor(scoreRef.current + r.points!, mode);
     const rank = rankOf(tier);
     const m = crossed(before, after);
     if (mode === 'night') {
@@ -571,7 +573,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           <BackIcon />
         </button>
         <div className="hud-panel">
-          <span className="k">Độ cao</span>
+          <span className="k">{lap > 1 ? `Độ cao · vòng ${lap}` : 'Độ cao'}</span>
           <span className="v">
             {altNum}
             <small>{altUnit}</small>

@@ -202,7 +202,8 @@ export function paintFields(W: number, h: number, dpr: number, unit: number): Fi
 /* ---------------------------------------------------------------- clouds */
 
 /** A soft, flat-bottomed cumulus: white on top, a cool shadow underneath, no outline. */
-export function paintCloud(w: number, dpr: number, seed: number, warm = false): Paint {
+/** tone: 0 day, 1 sunset (lap 2), 2 festival dusk (lap 3). */
+export function paintCloud(w: number, dpr: number, seed: number, tone: 0 | 1 | 2 = 0): Paint {
   const h = w * 0.5;
   const [c, ctx] = canvas(w, h, dpr);
   const r = rng(seed);
@@ -217,14 +218,16 @@ export function paintCloud(w: number, dpr: number, seed: number, warm = false): 
     shape.arc(cx, base - rad * 0.55, rad, 0, Math.PI * 2);
   }
   shape.roundRect(w * 0.08, base - h * 0.22, w * 0.84, h * 0.22, h * 0.11);
-  ctx.fillStyle = warm ? '#fff8ec' : '#ffffff';
+  ctx.fillStyle = ['#ffffff', '#ffe9d2', '#f6e8ff'][tone];
   ctx.fill(shape);
   ctx.save();
   ctx.clip(shape);
   const g = ctx.createLinearGradient(0, base - h * 0.42, 0, base);
-  g.addColorStop(0, 'rgba(196,220,236,0)');
-  g.addColorStop(0.55, 'rgba(196,220,236,.75)');
-  g.addColorStop(1, 'rgba(170,200,224,1)');
+  const sh = ['196,220,236', '240,160,140', '170,150,230'][tone];
+  const sh2 = ['170,200,224', '214,120,120', '130,110,210'][tone];
+  g.addColorStop(0, `rgba(${sh},0)`);
+  g.addColorStop(0.55, `rgba(${sh},.75)`);
+  g.addColorStop(1, `rgba(${sh2},1)`);
   ctx.fillStyle = g;
   ctx.fillRect(0, base - h * 0.42, w, h * 0.42);
   ctx.restore();

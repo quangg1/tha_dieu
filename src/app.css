@@ -349,3 +349,7 @@ button{font:inherit;color:inherit}
 .album-row b{color:#33415a;text-align:right}
 .album-row.found{background:#fff4d1}
 .album-row.found b{color:#b07d10}
+
+.skin.prize{background:linear-gradient(160deg,#fff7df,#f3ecff);border-color:#f2b63066}
+.skin.prize.on{border-color:#e5533d}
+.skin.prize b::after{content:' ★';color:#f2b630}
