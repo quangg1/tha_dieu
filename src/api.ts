@@ -93,7 +93,7 @@ async function call<T>(path: string, body?: unknown, headers: Record<string, str
     throw new ApiError(0, 'Mất kết nối mạng. Kiểm tra mạng rồi thử lại.');
   }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(res.status, data.error || 'Máy chủ gặp lỗi.');
+  if (!res.ok) throw new ApiError(res.status, data.error || `Máy chủ gặp lỗi (mã ${res.status}).`);
   return data as T;
 }
 

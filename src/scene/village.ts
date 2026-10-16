@@ -190,9 +190,9 @@ export function kidsSvg() {
   b += `<path d="M58 93 L 63.5 100 L 58 107.5 L 52.5 100 Z" fill="#ffd25a" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round"/>`;
   b += `<path d="M58 93 L 58 107.5 M52.5 100 L 63.5 100" stroke="${ink}" stroke-width="1"/>`;
   // Arm raised to the kite, holding the bamboo reel.
-  b += limb('M70 90 Q 84 82 94 46', 7);
-  b += `<g transform="rotate(-20 98 38)"><rect x="89.5" y="33" width="17" height="10" rx="3.5" fill="#d9a85a" ${o}/><path d="M94 33 L 94 43 M102 33 L 102 43" stroke="${ink}" stroke-width="1.3"/></g>`;
-  b += `<circle cx="95" cy="43" r="5.2" fill="${skin}" ${o}/>`;
+  b += limb('M70 90 Q 88 84 103 56', 7);
+  b += `<g transform="rotate(-20 107 48)"><rect x="98.5" y="43" width="17" height="10" rx="3.5" fill="#d9a85a" ${o}/><path d="M103 43 L 103 53 M111 43 L 111 53" stroke="${ink}" stroke-width="1.3"/></g>`;
+  b += `<circle cx="104" cy="53" r="5.2" fill="${skin}" ${o}/>`;
   // Big head, tilted a little toward the kite.
   b += `<g transform="rotate(-5 58 80)">`;
   b += `<circle cx="29.5" cy="56" r="5.5" fill="${skin}" ${o}/><circle cx="86.5" cy="56" r="5.5" fill="${skin}" ${o}/>`;
@@ -208,16 +208,16 @@ export function kidsSvg() {
     b += `<circle cx="${x + 1.8}" cy="53.2" r="2.1" fill="#fff"/><circle cx="${x - 1.6}" cy="59" r="1" fill="#fff"/>`;
   }
   // A nón lá, tipped a little toward the kite.
-  b += `<g transform="rotate(-9 58 34)">`;
-  b += `<path d="M14 36 L 58 1 L 102 36 Q 58 46 14 36 Z" fill="#f3d98f" ${o}/>`;
+  b += `<g transform="translate(0 6) rotate(-4 58 34)">`;
+  b += `<path d="M12 36 L 58 2 L 104 36 Q 58 46 12 36 Z" fill="#f3d98f" ${o}/>`;
   b += `<path d="M58 1 L 36 39 M58 1 L 48 41 M58 1 L 60 42 M58 1 L 72 41 M58 1 L 84 39" stroke="#d6b260" stroke-width="1.3" stroke-linecap="round"/>`;
   b += `<path d="M24 31 Q 58 39 92 31" fill="none" stroke="#d6b260" stroke-width="1.3"/><path d="M36 21 Q 58 27 80 21" fill="none" stroke="#d6b260" stroke-width="1.2"/>`;
   b += `<path d="M58 4 L 46 22" stroke="#fff6d8" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>`;
-  b += `<path d="M14 36 Q 58 46 102 36" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`;
+  b += `<path d="M12 36 Q 58 46 104 36" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`;
   b += `</g>`;
   b += `<ellipse cx="39.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/><ellipse cx="76.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/>`;
   b += `<path d="M53.5 64 Q 58 70.5 62.5 64 Z" fill="#a8372c" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/>`;
   b += `<path d="M55.6 66.4 Q 58 65 60.4 66.4 Q 58 68.6 55.6 66.4 Z" fill="#ff8a7a"/>`;
   b += `</g>`;
-  return { svg: svg(W, H, b), w: W, h: H, hand: { x: 99 / W, y: 34 / H } };
+  return { svg: svg(W, H, b), w: W, h: H, hand: { x: 108 / W, y: 44 / H } };
 }
