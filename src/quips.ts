@@ -13,10 +13,10 @@ const pick = <T,>(list: readonly T[], seed: number): T => list[seed % list.lengt
 /** After each answer, by tier index (see TIERS). */
 const ANSWER: Record<number, readonly string[]> = {
   0: [
-    'Đúng nhịp với cả làng. Muốn bay cao thì lệch nhịp một chút.',
-    'Cả làng cùng nghĩ vậy, diều bay theo đàn.',
-    'Chắc ăn rồi. Câu sau thử nghĩ khác đi xem.',
-    'Hòa nhịp với số đông. An toàn, nhưng chưa cao.',
+    'Đúng rồi, nhưng nửa làng cũng gõ y chang.',
+    'An toàn tuyệt đối. Hơi bị an toàn.',
+    'Đầu óc hôm nay đang hòa nhịp chung với cả làng.',
+    'Câu quốc dân. Diều bay theo đàn.',
   ],
   6: [
     'Tưởng độc chiêu, ai dè cả làng cũng biết chiêu này.',
