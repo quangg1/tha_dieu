@@ -1,3 +1,4 @@
+import { mascotSvg } from './mascot';
 // The countryside at the foot of the sky, in a flat, rounded, modern style: a bamboo hedge, areca palms,
 // a banyan, today's village houses, and the kite flyer on the dyke.
 
@@ -164,60 +165,8 @@ export function houseSvg(variant: 0 | 1) {
 /* ---------------------------------------------------------------- the kids */
 
 /** Two kids on the dyke: the older one holds the kite string up high, the younger points at the kite. */
-/** The kite flyer, the game's mascot: a chibi village kid in a nón lá, a red shirt with a kite on it and a bamboo reel. */
+/** The kite flyer, the game's mascot (see mascot.ts). */
 export function kidsSvg() {
-  const W = 120;
-  const H = 150;
-  const ink = '#3a2a22';
-  const skin = '#ffd9b8';
-  const hair = '#3b2a25';
-  const o = `stroke="${ink}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"`;
-  const limb = (d: string, w: number) =>
-    `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${w + 4.4}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${skin}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  let b = '';
-  b += `<ellipse cx="58" cy="145" rx="26" ry="3.6" fill="rgba(30,60,20,.25)"/>`;
-  // Stubby legs and round red sandals.
-  b += limb('M51 120 L 50 134', 8.5) + limb('M64 120 L 65 134', 8.5);
-  b += `<ellipse cx="48.5" cy="138.5" rx="8.5" ry="4.6" fill="#e5533d" ${o}/><ellipse cx="66.5" cy="138.5" rx="8.5" ry="4.6" fill="#e5533d" ${o}/>`;
-  // Shorts.
-  b += `<path d="M42 110 L 73 110 L 75 124 Q 66 126 59 123 Q 51 126 40 124 Z" fill="#3c72c4" ${o}/>`;
-  // Waving arm with an open hand.
-  b += limb('M44 92 Q 34 92 28 82', 7);
-  b += `<circle cx="27" cy="80" r="5" fill="${skin}" ${o}/>`;
-  // A short neck, so the head sits on the body.
-  b += `<rect x="51" y="74" width="14" height="14" rx="5" fill="${skin}" ${o}/>`;
-  // Round red shirt with a white collar and the kite on the chest.
-  b += `<path d="M45 84 Q 58 80 71 84 Q 77 98 75 112 Q 58 116 40 112 Q 38 98 45 84 Z" fill="#ef5b45" ${o}/>`;
-  b += `<path d="M50 84 Q 58 90 66 84" fill="none" stroke="#fff6ea" stroke-width="3" stroke-linecap="round"/>`;
-  b += `<path d="M58 93 L 63.5 100 L 58 107.5 L 52.5 100 Z" fill="#ffd25a" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round"/>`;
-  b += `<path d="M58 93 L 58 107.5 M52.5 100 L 63.5 100" stroke="${ink}" stroke-width="1"/>`;
-  // Arm raised to the kite, holding the bamboo reel.
-  b += limb('M70 90 Q 88 84 103 56', 7);
-  b += `<g transform="rotate(-20 107 48)"><rect x="98.5" y="43" width="17" height="10" rx="3.5" fill="#d9a85a" ${o}/><path d="M103 43 L 103 53 M111 43 L 111 53" stroke="${ink}" stroke-width="1.3"/></g>`;
-  b += `<circle cx="104" cy="53" r="5.2" fill="${skin}" ${o}/>`;
-  // Big head, tilted a little toward the kite.
-  b += `<g transform="translate(0 5) rotate(-4 58 80)">`;
-  b += `<circle cx="29.5" cy="56" r="5.5" fill="${skin}" ${o}/><circle cx="86.5" cy="56" r="5.5" fill="${skin}" ${o}/>`;
-  b += `<ellipse cx="58" cy="52" rx="29" ry="27" fill="${skin}" ${o}/>`;
-  // Bowl haircut with soft bangs.
-  b += `<path d="M29.5 50 C 28 30, 42 22, 58 22 C 74 22, 88 30, 86.5 50 C 84 44, 80 40, 76 39 Q 73 45 67 42 Q 63 47 57 42 Q 52 47 46 42 Q 41 45 38 40 C 34 42, 31 46, 29.5 50 Z" fill="${hair}" ${o}/>`;
-  b += `<path d="M42 29 Q 52 24 64 26" fill="none" stroke="#6a4c42" stroke-width="2.4" stroke-linecap="round"/>`;
-  // Big shiny eyes.
-  for (const x of [47, 69]) {
-    b += `<ellipse cx="${x}" cy="56" rx="5.8" ry="7.2" fill="#2b1d18"/>`;
-    b += `<circle cx="${x + 1.8}" cy="53.2" r="2.1" fill="#fff"/><circle cx="${x - 1.6}" cy="59" r="1" fill="#fff"/>`;
-  }
-  // A nón lá, tipped a little toward the kite.
-  b += `<g transform="translate(0 6) rotate(-4 58 34)">`;
-  b += `<path d="M12 36 L 58 2 L 104 36 Q 58 46 12 36 Z" fill="#f3d98f" ${o}/>`;
-  b += `<path d="M58 1 L 36 39 M58 1 L 48 41 M58 1 L 60 42 M58 1 L 72 41 M58 1 L 84 39" stroke="#d6b260" stroke-width="1.3" stroke-linecap="round"/>`;
-  b += `<path d="M24 31 Q 58 39 92 31" fill="none" stroke="#d6b260" stroke-width="1.3"/><path d="M36 21 Q 58 27 80 21" fill="none" stroke="#d6b260" stroke-width="1.2"/>`;
-  b += `<path d="M58 4 L 46 22" stroke="#fff6d8" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>`;
-  b += `<path d="M12 36 Q 58 46 104 36" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`;
-  b += `</g>`;
-  b += `<ellipse cx="39.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/><ellipse cx="76.5" cy="64" rx="5" ry="3.2" fill="#ff9e9e" opacity=".7"/>`;
-  b += `<path d="M53.5 64 Q 58 70.5 62.5 64 Z" fill="#a8372c" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/>`;
-  b += `<path d="M55.6 66.4 Q 58 65 60.4 66.4 Q 58 68.6 55.6 66.4 Z" fill="#ff8a7a"/>`;
-  b += `</g>`;
-  return { svg: svg(W, H, b), w: W, h: H, hand: { x: 108 / W, y: 44 / H } };
+  const m = mascotSvg('village');
+  return { svg: m.svg, w: m.w, h: m.h, hand: m.hand };
 }
