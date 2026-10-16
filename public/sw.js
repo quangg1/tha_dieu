@@ -1,5 +1,5 @@
 // Offline shell for Thả Diều: caches the app files; the game itself always talks to the live server.
-const CACHE = 'thadieu-v1';
+const CACHE = 'thadieu-v2';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/icon.svg', '/manifest.webmanifest'])));
   self.skipWaiting();
@@ -10,7 +10,7 @@ self.addEventListener('activate', (e) => {
 });
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.origin !== location.origin) return;
+  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/audio/') || url.origin !== location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

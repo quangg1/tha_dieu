@@ -32,6 +32,8 @@ class FluteEngine {
   private level = 1;
   private _on = true;
   private playing = false;
+  /** The recorded bamboo-flute track that plays under everything. */
+  private track?: { el: HTMLAudioElement; gain: GainNode };
 
   get on() {
     return this._on;
@@ -93,7 +95,8 @@ class FluteEngine {
     if (!ctx) return;
     const t = ctx.currentTime;
     const sp = this.space;
-    this.droneGain?.gain.setTargetAtTime((0.018 + 0.008 * Math.min(4, this.level)) * (1 - sp * 0.6), t, 1.5);
+    this.droneGain?.gain.setTargetAtTime(0, t, 1.5);
+    this.track?.gain.gain.setTargetAtTime(this.playing ? this.trackLevel : 0, t, 2);
     if (this.wind) {
       this.wind.filter.frequency.setTargetAtTime(this.level >= 3 ? 280 : 650, t, 2);
       // No wind in space: the rush of air fades out as the kite leaves the atmosphere.
@@ -271,7 +274,7 @@ class FluteEngine {
     o.stop(at + 0.15);
   }
 
-  /** Background music: wind, a low drone and a wandering pentatonic flute line. */
+  /** Background music: the recorded flute track, a breath of wind, and a pad that rises in space. */
   start() {
     const ctx = this.ctx;
     if (!ctx || this.playing) return;
@@ -296,7 +299,7 @@ class FluteEngine {
 
     this.droneGain = ctx.createGain();
     this.droneGain.gain.value = 0;
-    this.droneGain.gain.setTargetAtTime(0.026, ctx.currentTime, 2);
+    this.droneGain.gain.setTargetAtTime(0, ctx.currentTime, 2);
     this.droneGain.connect(this.dry);
     this.droneGain.connect(this.wet);
     for (const hz of [BASE_HZ / 2, (BASE_HZ / 2) * 1.5]) {
@@ -308,9 +311,30 @@ class FluteEngine {
       this.drone.push(o);
     }
     if (!this.pad) this.startPad();
+    this.startTrack();
     this.setLevel(this.level);
-    this.nextAt = ctx.currentTime + 0.6;
-    this.timer = window.setInterval(() => this.schedule(), 120);
+  }
+
+  /** The background flute track, looping through the master gain so the sound button mutes it too. */
+  private startTrack() {
+    const ctx = this.ctx!;
+    if (!this.track) {
+      const el = new Audio('/audio/sao.mp3');
+      el.loop = true;
+      el.preload = 'auto';
+      el.crossOrigin = 'anonymous';
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      ctx.createMediaElementSource(el).connect(gain).connect(this.master);
+      this.track = { el, gain };
+    }
+    this.track.gain.gain.setTargetAtTime(this.trackLevel, ctx.currentTime, 1.2);
+    void this.track.el.play().catch(() => {});
+  }
+
+  /** The track softens as the kite climbs into space, where the shimmering pad takes over. */
+  private get trackLevel() {
+    return 0.55 * (1 - this.space * 0.45);
   }
 
   stop() {
@@ -321,34 +345,14 @@ class FluteEngine {
     this.droneGain?.gain.setTargetAtTime(0, t, 0.6);
     this.wind?.gain.gain.setTargetAtTime(0, t, 0.6);
     this.pad?.gain.gain.setTargetAtTime(0, t, 0.8);
+    if (this.track) {
+      this.track.gain.gain.setTargetAtTime(0, t, 0.6);
+      const el = this.track.el;
+      setTimeout(() => !this.playing && el.pause(), 2500);
+    }
     const drones = this.drone;
     this.drone = [];
     setTimeout(() => drones.forEach((o) => o.stop()), 3000);
-  }
-
-  private schedule() {
-    const ctx = this.ctx!;
-    const beat = 60 / 66;
-    while (this.nextAt < ctx.currentTime + 0.4) {
-      if (this.phraseLeft <= 0) {
-        this.nextAt += beat * (2 + Math.floor(Math.random() * 3));
-        this.phraseLeft = 5 + Math.floor(Math.random() * 5);
-        continue;
-      }
-      const sp = this.space;
-      const step = [-2, -1, -1, 0, 1, 1, 2][Math.floor(Math.random() * 7)];
-      this.degree = Math.max(3, Math.min(11, this.degree + step));
-      // In space the flute plays slower and sparser, a lone voice far away, and stars chime around it.
-      const len = [0.5, 0.5, 1, 1, 1, 1.5, 2][Math.floor(Math.random() * 7)] * beat * (1 + sp * 0.8);
-      if (Math.random() > sp * 0.45) {
-        this.note(degreeHz(this.degree), this.nextAt, len * 0.95, 0.32 * (1 - sp * 0.35), 0.5 + sp * 0.4);
-        if (this.level === 3 && Math.random() < 0.5) this.note(degreeHz(this.degree + 2), this.nextAt + 0.02, len * 0.9, 0.16);
-      }
-      if (this.level === 4 && Math.random() < 0.18) this.bell(degreeHz(this.degree + 5), this.nextAt + len * 0.5, 0.25);
-      if (sp > 0 && Math.random() < 0.35 * sp) this.sparkle(this.nextAt + Math.random() * len, 0.5 + Math.random() * 0.5);
-      this.nextAt += len;
-      this.phraseLeft--;
-    }
   }
 
   /** The flutes of a tier join the music: 1 flute for Thường up to 9 in harmony for Cực hiếm and Độc nhất. */
