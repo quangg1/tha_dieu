@@ -1,7 +1,8 @@
 // Every question in the game: the handcrafted bank (extended with the village book) plus questions generated from book labels.
 import { BANK } from '../bank.js';
 import { parseRaw, type QuestionDef } from '../match.js';
-import { buildSpec, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { addMore, buildSpec, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { MORE } from './more.js';
 import { LEXICONS } from './index.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
@@ -363,14 +364,16 @@ function assemble() {
   for (const raw of BANK) {
     const base = parseRaw(raw);
     const ext = EXTEND[raw.id];
-    const qd0 = ext ? extendQuestion(base, ext, LEXICONS) : base;
+    const qd00 = ext ? extendQuestion(base, ext, LEXICONS) : base;
+    const qd0 = MORE[raw.id] ? addMore(qd00, MORE[raw.id]) : qd00;
     const qd = { ...qd0, traps: resolveTraps(qd0.answers, TRAPS[raw.id]) };
     const strong = qd.answers.filter((a) => a.priorTier <= 1).length;
     out.push({ ...qd, level: qd.answers.length >= 60 && strong >= 3 ? 1 : 2, family: qd.family ?? raw.id });
   }
   const dropped: string[] = [];
   for (const spec of SPECS) {
-    const b = buildSpec(TRAPS[spec.id] ? { ...spec, traps: TRAPS[spec.id] } : spec, LEXICONS);
+    const b0 = buildSpec(TRAPS[spec.id] ? { ...spec, traps: TRAPS[spec.id] } : spec, LEXICONS);
+    const b = b0 && MORE[spec.id] ? { ...b0, ...addMore(b0, MORE[spec.id]) } : b0;
     if (b) out.push(b);
     else dropped.push(spec.id);
   }

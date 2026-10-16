@@ -288,3 +288,32 @@ export function extendQuestion(q: QuestionDef, srcs: Source[], lex: Record<strin
     family: lexes.join('+'),
   };
 }
+
+/**
+ * Adds hand-written answers to a question: five tier lines in the bank's format ("A|alias, B"). A name that already
+ * belongs to an answer only adds its spellings to that answer; new names become answers at the line's tier.
+ */
+export function addMore(q: QuestionDef, tiers: string[]): QuestionDef {
+  const answers = q.answers.map((a) => ({ ...a, aliases: [...a.aliases] }));
+  const byName = new Map<string, AnswerEntry>();
+  for (const a of answers) for (const n of a.aliases) byName.set(soft(n), a);
+  tiers.forEach((line, tier) => {
+    for (const group of line.split(',')) {
+      const names = group.split('|').map((x) => x.trim()).filter(Boolean);
+      if (!names.length) continue;
+      const hit = names.map((n) => byName.get(soft(n))).find(Boolean);
+      if (hit) {
+        for (const n of names) if (!byName.has(soft(n))) {
+          hit.aliases.push(n);
+          byName.set(soft(n), hit);
+        }
+        continue;
+      }
+      const entry: AnswerEntry = { key: soft(names[0]), display: names[0], priorTier: tier, aliases: names };
+      if (!entry.key) continue;
+      answers.push(entry);
+      for (const n of names) byName.set(soft(n), entry);
+    }
+  });
+  return { ...q, answers };
+}
