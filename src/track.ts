@@ -4,15 +4,39 @@ import { playerId } from './store';
 
 let errors = 0;
 
-export function track(name: string, props?: Record<string, unknown>) {
+// Events wait in a small queue and go out together: when the page is hidden, every 20 seconds, or at ten.
+let queue: { name: string; props?: Record<string, unknown> }[] = [];
+let timer: number | null = null;
+
+function flush() {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  if (!queue.length) return;
+  const events = queue.slice(0, 20);
+  queue = queue.slice(20);
   try {
-    const body = JSON.stringify({ name, playerId: playerId(), props });
+    const body = JSON.stringify({ playerId: playerId(), events });
     const blob = new Blob([body], { type: 'application/json' });
-    if (navigator.sendBeacon?.('/api/event', blob)) return;
-    fetch('/api/event', { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    if (!navigator.sendBeacon?.('/api/event', blob)) {
+      fetch('/api/event', { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    }
   } catch {
     /* analytics never breaks the game */
   }
+  if (queue.length) flush();
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && flush());
+  window.addEventListener('pagehide', flush);
+}
+
+export function track(name: string, props?: Record<string, unknown>) {
+  queue.push({ name, props });
+  if (queue.length >= 10) flush();
+  else timer ??= window.setTimeout(flush, 20_000);
 }
 
 /** Reports uncaught errors, at most a few per visit. */

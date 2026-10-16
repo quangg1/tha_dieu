@@ -287,12 +287,93 @@ async function currentStreak(db: Db, a: { playerId: string; day: string; mode: M
   return s;
 }
 
-async function countsFor(db: Db, questionId: string, key: string) {
-  const [r] = await db.query<{ c: number; t: number }>(
-    `select coalesce(sum(n) filter (where answer_key=$2),0)::int as c, coalesce(sum(n),0)::int as t from counts where question_id=$1`,
-    [questionId, key],
-  );
-  return { count: r.c, total: r.t };
+/* ------------------------------------------------------------------ the hidden answer, day by day */
+
+const krillCache = new Map<string, string>();
+
+/**
+ * The hidden answer for a prompt on a day. The first time a prompt is asked it is the book's; every later
+ * appearance picks a new one among the rarest answers nobody has given and that was never hidden before,
+ * because yesterday's hidden answer was shown to everyone who finished.
+ */
+export async function krillFor(db: Db, day: string, q: LoadedQuestion): Promise<string> {
+  const ck = `${day}:${q.id}`;
+  const c = krillCache.get(ck);
+  if (c) return c;
+  let [row] = await db.query<{ krill_key: string }>(`select krill_key from daily_krill where day=$1::date and question_id=$2`, [day, q.id]);
+  if (!row) {
+    const [seen] = await db.query<{ seen: boolean }>(
+      `select exists (select 1 from daily_sets where day < $1::date and $2 = any(question_ids))
+           or exists (select 1 from daily_krill where day < $1::date and question_id = $2) as seen`,
+      [day, q.id],
+    );
+    let pick = q.krillKey;
+    if (seen?.seen) {
+      const used = new Set((await db.query<{ krill_key: string }>(`select krill_key from daily_krill where question_id=$1`, [q.id])).map((r) => r.krill_key));
+      used.add(q.krillKey);
+      const t = (await tallies(db, day, [q.id])).get(q.id)!;
+      const cands = [...q.answers.entries()]
+        .filter(([k, a]) => a.status === 'approved' && a.prior >= 4 && !used.has(k) && !q.traps.has(k))
+        .map(([k]) => ({ k, n: (t.hist.get(k) ?? 0) + (t.today.get(k) ?? 0) }));
+      if (cands.length) {
+        const least = Math.min(...cands.map((x) => x.n));
+        const pool = cands.filter((x) => x.n === least).map((x) => x.k).sort();
+        const h = createHash('sha256').update(`${day}:${q.id}`).digest().readUInt32BE(0);
+        pick = pool[h % pool.length];
+      }
+    }
+    await db.query(`insert into daily_krill (day, question_id, krill_key) values ($1::date,$2,$3) on conflict do nothing`, [day, q.id, pick]);
+    [row] = await db.query<{ krill_key: string }>(`select krill_key from daily_krill where day=$1::date and question_id=$2`, [day, q.id]);
+  }
+  krillCache.set(ck, row.krill_key);
+  return row.krill_key;
+}
+
+/** The prompt as it is played on a day: the same book, with that day's hidden answer. */
+export async function dayQuestion(db: Db, day: string, id: string): Promise<LoadedQuestion> {
+  const q = await loadQuestion(db, id);
+  const krillKey = await krillFor(db, day, q);
+  return krillKey === q.krillKey ? q : { ...q, krillKey };
+}
+
+/** One prompt's counts: today's players, and every earlier day (history), answer by answer. */
+export interface Tally {
+  today: Map<string, number>;
+  todayTotal: number;
+  hist: Map<string, number>;
+  histTotal: number;
+}
+
+export async function tallies(db: Db, day: string, ids: string[]): Promise<Map<string, Tally>> {
+  const [all, today] = await Promise.all([
+    db.query<{ question_id: string; answer_key: string; n: number }>(`select question_id, answer_key, n from counts where question_id = any($1::text[])`, [ids]),
+    db.query<{ question_id: string; answer_key: string; n: number }>(`select question_id, answer_key, n from day_counts where day=$1::date and question_id = any($2::text[])`, [day, ids]),
+  ]);
+  const out = new Map<string, Tally>(ids.map((id) => [id, { today: new Map(), todayTotal: 0, hist: new Map(), histTotal: 0 }]));
+  for (const r of today) {
+    const t = out.get(r.question_id)!;
+    t.today.set(r.answer_key, r.n);
+    t.todayTotal += r.n;
+  }
+  for (const r of all) {
+    const t = out.get(r.question_id)!;
+    const h = Math.max(0, r.n - (t.today.get(r.answer_key) ?? 0));
+    if (!h) continue;
+    t.hist.set(r.answer_key, h);
+    t.histTotal += h;
+  }
+  return out;
+}
+
+/** Earlier days count only once they hold enough players to say something. */
+const HIST_MIN = 30;
+
+/** The tier of an answer against a tally, leaving the player's own answer out when it is already counted. */
+function tierFromTally(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, t: Tally, self = 0): TierIndex {
+  const count = Math.max(0, (t.today.get(key) ?? 0) - self);
+  const total = Math.max(0, t.todayTotal - self);
+  const histShare = t.histTotal >= HIST_MIN ? (t.hist.get(key) ?? 0) / t.histTotal : undefined;
+  return tierFor(q, key, prior, count, total, histShare);
 }
 
 /** Uses the cached verdict, or asks the referee (within the player's daily budget), for an answer the bank does not know. */
@@ -397,22 +478,26 @@ export interface Crowd {
 /** Players needed before the crowd panel shows real percentages instead of the book's guess. */
 const CROWD_MIN = 20;
 
-export async function crowdFor(db: Db, q: LoadedQuestion, key: string | null): Promise<Crowd> {
-  const rows = await db.query<{ answer_key: string; n: number }>(`select answer_key, n from counts where question_id=$1 order by n desc`, [q.id]);
-  const total = rows.reduce((t, r) => t + r.n, 0);
+/** What the village answered today once enough have played; before that, earlier days or the book's guess. */
+export function crowdFrom(q: LoadedQuestion, key: string | null, t: Tally): Crowd {
+  const rows = [...t.today.entries()].sort((x, y) => y[1] - x[1]);
+  const total = t.todayTotal;
   if (total >= CROWD_MIN) {
     const pct = (n: number) => Math.round((n / total) * 1000) / 10;
-    const top = rows.slice(0, 4).map((r) => ({ display: q.answers.get(r.answer_key)?.display ?? r.answer_key, pct: pct(r.n), mine: r.answer_key === key }));
-    const mineRow = rows.find((r) => r.answer_key === key);
-    return { total, top, mine: mineRow ? pct(mineRow.n) : 0, estimated: false };
+    const top = rows.slice(0, 4).map(([k, n]) => ({ display: q.answers.get(k)?.display ?? k, pct: pct(n), mine: k === key }));
+    const mineRow = rows.find(([k]) => k === key);
+    return { total, top, mine: mineRow ? pct(mineRow[1]) : 0, estimated: false };
   }
-  const guess = [...q.answers.entries()]
-    .filter(([k, a]) => a.status === 'approved' && k !== q.krillKey)
-    .sort((a, b) => a[1].prior - b[1].prior)
-    .slice(0, 4)
-    .map(([k, a]) => ({ display: a.display, pct: null, mine: k === key }));
+  const fromHistory = t.histTotal >= CROWD_MIN
+    ? [...t.hist.entries()].filter(([k]) => k !== q.krillKey && q.answers.has(k)).sort((x, y) => y[1] - x[1]).map(([k]) => k)
+    : [...q.answers.entries()].filter(([k, a]) => a.status === 'approved' && k !== q.krillKey).sort((x, y) => x[1].prior - y[1].prior).map(([k]) => k);
+  const guess = fromHistory.slice(0, 4).map((k) => ({ display: q.answers.get(k)!.display, pct: null, mine: k === key }));
   return { total, top: guess, mine: null, estimated: true };
 }
+
+/** The hidden answer loses its 100 points once more than this share of the day's players give it. */
+const KRILL_MAX_SHARE = 0.02;
+const KRILL_MIN_PLAYERS = 20;
 
 /** Minimum players before the crowd can call an answer Khôn lỏi on its own. */
 const KHON_LOI_MIN_PLAYERS = 30;
@@ -421,9 +506,15 @@ const KHON_LOI_MIN_PLAYERS = 30;
  * The tier an answer lands at. Besides plain rarity, an answer the book expected to be uncommon but that many
  * players give is Khôn lỏi: the pick that feels clever but that half the village reaches for.
  */
-export function tierFor(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, count: number, total: number): TierIndex {
-  if (key === q.krillKey) return CUNG_TRANG;
-  const base = tierFromCounts(prior, count, total);
+export function tierFor(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, count: number, total: number, histShare?: number): TierIndex {
+  if (key === q.krillKey) {
+    // The hidden answer stays hidden only while few of today's players reach it; once it leaks, it scores as what it is.
+    const leaked = total >= KRILL_MIN_PLAYERS && count / total > KRILL_MAX_SHARE;
+    if (!leaked) return CUNG_TRANG;
+    const t = tierFromCounts(4, count, total);
+    return t <= 1 ? KHON_LOI : t;
+  }
+  const base = tierFromCounts(prior, count, total, histShare);
   const enough = total >= KHON_LOI_MIN_PLAYERS;
   if (q.traps.has(key) && (!enough || base <= 2)) return KHON_LOI;
   if (enough && prior >= 2 && base <= 1) return KHON_LOI;
@@ -451,7 +542,7 @@ export async function answer(
   if (!input) return { status: 'empty' };
   await ensureInSet(db, a.mode, a.day, a.questionId);
   const { late } = await openTurn(db, a, now);
-  const q = await loadQuestion(db, a.questionId);
+  const q = await dayQuestion(db, a.day, a.questionId);
   if (late) {
     await closeTurn(db, a);
     return { status: 'late', input };
@@ -474,8 +565,8 @@ export async function answer(
     judged = true;
   }
   const entry = q.answers.get(key)!;
-  const { count, total } = await countsFor(db, q.id, key);
-  const tier = tierFor(q, key, entry.prior, count, total);
+  const tally = (await tallies(db, a.day, [q.id])).get(q.id)!;
+  const tier = tierFromTally(q, key, entry.prior, tally);
   const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
   const bonus = streakBonus(streak);
   const points = TIERS[tier].points + bonus;
@@ -485,15 +576,24 @@ export async function answer(
     [a.playerId, a.day, a.mode, a.questionId, key, tier, points],
   );
   if (!updated.length) throw new GameError(409, 'Bạn đã trả lời câu này rồi.');
+  let mineCount = tally.today.get(key) ?? 0;
+  let todayTotal = tally.todayTotal;
   if (a.mode === 'daily' && (await countable(db, a.net, a.day, a.playerId))) {
     await db.query(
       `insert into counts (question_id, answer_key, n) values ($1,$2,1) on conflict (question_id, answer_key) do update set n = counts.n + 1`,
       [q.id, key],
     );
+    await db.query(
+      `insert into day_counts (day, question_id, answer_key, n) values ($1::date,$2,$3,1) on conflict (day, question_id, answer_key) do update set n = day_counts.n + 1`,
+      [a.day, q.id, key],
+    );
+    mineCount++;
+    todayTotal++;
+    tally.today.set(key, mineCount);
+    tally.todayTotal = todayTotal;
   }
-  const after = await countsFor(db, q.id, key);
-  const share = after.total >= 30 ? Math.round((after.count / after.total) * 1000) / 10 : null;
-  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: await crowdFor(db, q, key) };
+  const share = todayTotal >= 30 ? Math.round((mineCount / todayTotal) * 1000) / 10 : null;
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: crowdFrom(q, key, tally) };
 }
 
 /** Adds one to a counter for this window and says whether it is still within the limit. */
@@ -539,6 +639,21 @@ export async function logEvent(db: Db, a: { day: string; name: string; playerId?
   }
   await db.query(`insert into events (day, name, player_id, props) values ($1::date,$2,$3,$4::jsonb)`, [a.day, a.name, a.playerId?.slice(0, 64) ?? null, props]);
   return { ok: true };
+}
+
+/** Several events in one insert; unknown names are skipped rather than failing the batch. */
+export async function logEvents(db: Db, day: string, playerId: string | undefined, events: { name: string; props?: unknown }[]) {
+  const ok = events.filter((e) => EVENT_NAMES.has(e.name));
+  if (!ok.length) return;
+  const props = ok.map((e) => {
+    if (!e.props || typeof e.props !== 'object') return null;
+    const j = JSON.stringify(e.props);
+    return j.length > 800 ? JSON.stringify({ cut: j.slice(0, 780) }) : j;
+  });
+  await db.query(
+    `insert into events (day, name, player_id, props) select $1::date, n, $2, p::jsonb from unnest($3::text[], $4::text[]) as x(n, p)`,
+    [day, playerId?.slice(0, 64) ?? null, ok.map((e) => e.name), props],
+  );
 }
 
 /** A player says the referee got it wrong: an answer that should count, or one that should not. */
@@ -706,9 +821,9 @@ export async function miss(db: Db, a: { playerId: string; day: string; mode: Mod
  * and the board settles when the day ends.
  */
 type DayScores = Map<string, { score: number; grid: string }>;
-const dayCache = new Map<string, { at: number; scores: DayScores }>();
+const dayCache = new Map<string, { at: number; scores: DayScores; stamp: string }>();
 /** How long one server instance trusts what it last read. */
-const MEM_MS = 10_000;
+const MEM_MS = 15_000;
 /** How often the day is recomputed, by whichever instance claims it first. */
 const DB_FRESH_S = 30;
 
@@ -720,17 +835,21 @@ export async function scoreDay(db: Db, day: string): Promise<DayScores> {
   const hit = dayCache.get(day);
   if (hit && Date.now() - hit.at < MEM_MS) return hit.scores;
   await db.query(`insert into day_scores (day) values ($1::date) on conflict do nothing`, [day]);
-  const [row] = await db.query<{ data: Record<string, [number, string]> | string; age: number; final: boolean }>(
-    `select data, extract(epoch from now() - computed_at)::float8 as age, final from day_scores where day=$1::date`,
+  // Read only the stamp first: the scores themselves travel again only when another instance has recomputed them.
+  const [row] = await db.query<{ stamp: string; age: number; final: boolean }>(
+    `select computed_at::text as stamp, extract(epoch from now() - computed_at)::float8 as age, final from day_scores where day=$1::date`,
     [day],
   );
-  const parse = (d: Record<string, [number, string]> | string): DayScores => {
-    const o = (typeof d === 'string' ? JSON.parse(d) : d) as Record<string, [number, string]>;
-    return new Map(Object.entries(o ?? {}).map(([k, v]) => [k, { score: v[0], grid: v[1] }]));
+  const load = async (): Promise<DayScores> => {
+    if (hit && hit.stamp === row?.stamp) return hit.scores;
+    const [d] = await db.query<{ data: Record<string, [number, string]> | string }>(`select data from day_scores where day=$1::date`, [day]);
+    const o = (typeof d?.data === 'string' ? JSON.parse(d.data) : d?.data ?? {}) as Record<string, [number, string]>;
+    return new Map(Object.entries(o).map(([k, v]) => [k, { score: v[0], grid: v[1] }]));
   };
   let scores: DayScores;
+  let stamp = row?.stamp ?? '';
   if (row && (row.final || row.age < DB_FRESH_S)) {
-    scores = parse(row.data);
+    scores = await load();
   } else {
     const claimed = await db.query(
       `update day_scores set claimed_at = now() where day=$1::date and claimed_at < now() - interval '15 seconds' returning 1`,
@@ -739,31 +858,25 @@ export async function scoreDay(db: Db, day: string): Promise<DayScores> {
     if (claimed.length || !row || row.age > 3600) {
       scores = await computeScores(db, day);
       const data = Object.fromEntries([...scores].map(([k, v]) => [k, [v.score, v.grid]]));
-      await db.query(`update day_scores set data=$2::jsonb, computed_at=now(), final=$3 where day=$1::date`, [day, JSON.stringify(data), day < vnToday()]);
+      const [u] = await db.query<{ stamp: string }>(
+        `update day_scores set data=$2::jsonb, computed_at=now(), final=$3 where day=$1::date returning computed_at::text as stamp`,
+        [day, JSON.stringify(data), day < vnToday()],
+      );
+      stamp = u?.stamp ?? '';
     } else {
       // Another instance is recomputing right now: the last result, at most a minute old, will do.
-      scores = parse(row.data);
+      scores = await load();
     }
   }
-  dayCache.set(day, { at: Date.now(), scores });
+  dayCache.set(day, { at: Date.now(), scores, stamp });
   return scores;
 }
 
 /** Scores from the day's answers and current counts; for one player only when an id is given (cheap). */
 export async function computeScores(db: Db, day: string, playerId?: string): Promise<DayScores> {
   const set = await dailySet(db, day);
-  const qs = new Map(await Promise.all(set.map(async (id) => [id, await loadQuestion(db, id)] as const)));
-  const countRows = await db.query<{ question_id: string; answer_key: string; n: number }>(
-    `select question_id, answer_key, n from counts where question_id = any($1::text[])`,
-    [set],
-  );
-  const counts = new Map<string, Map<string, number>>();
-  const totals = new Map<string, number>();
-  for (const r of countRows) {
-    if (!counts.has(r.question_id)) counts.set(r.question_id, new Map());
-    counts.get(r.question_id)!.set(r.answer_key, r.n);
-    totals.set(r.question_id, (totals.get(r.question_id) ?? 0) + r.n);
-  }
+  const qs = new Map(await Promise.all(set.map(async (id) => [id, await dayQuestion(db, day, id)] as const)));
+  const tl = await tallies(db, day, set);
   const turns = await db.query<{ player_id: string; question_id: string; answer_key: string | null; tier: number | null }>(
     playerId
       ? `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null and player_id=$2 order by answered_at`
@@ -787,9 +900,10 @@ export async function computeScores(db: Db, day: string, playerId?: string): Pro
       p.tiers.set(t.question_id, -1);
       continue;
     }
-    const c = counts.get(q.id)?.get(t.answer_key) ?? 1;
-    // The player's own answer is in the counts; score it as the crowd minus themselves, as at answer time.
-    const tier = tierFor(q, t.answer_key, entry.prior, Math.max(0, c - 1), Math.max(0, (totals.get(q.id) ?? 1) - 1));
+    // The player's own answer is in today's counts; score it as the crowd minus themselves, as at answer time.
+    const tally = tl.get(q.id)!;
+    const self = (tally.today.get(t.answer_key) ?? 0) > 0 ? 1 : 0;
+    const tier = tierFromTally(q, t.answer_key, entry.prior, tally, self);
     p.streak = isRare(tier) ? p.streak + 1 : 0;
     p.score += TIERS[tier].points + streakBonus(p.streak);
     p.tiers.set(t.question_id, tier);
@@ -848,10 +962,11 @@ async function revealDay(db: Db, day: string, playerId: string, grid: string): P
     [playerId, day],
   );
   const mine = new Map(mineRows.map((r) => [r.question_id, r.answer_key]));
+  const tl = await tallies(db, day, set);
   return Promise.all(
     set.map(async (id, i) => {
-      const q = await loadQuestion(db, id);
-      const c = await crowdFor(db, q, null);
+      const q = await dayQuestion(db, day, id);
+      const c = crowdFrom(q, null, tl.get(id)!);
       const k = mine.get(id);
       return {
         questionId: id,

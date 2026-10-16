@@ -117,8 +117,12 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     method: 'POST',
     async run({ db, body, net }) {
       const day = S.vnToday();
-      if (!(await S.hit(db, `ev:${net}`, day, 3000))) return { ok: false };
-      return S.logEvent(db, { day, name: String(body.name ?? ''), playerId: typeof body.playerId === 'string' ? body.playerId : undefined, props: body.props });
+      const pid = typeof body.playerId === 'string' ? body.playerId : undefined;
+      // Batches from the client queue; a single event is still accepted from older pages.
+      const list = (Array.isArray(body.events) ? body.events : [{ name: body.name, props: body.props }]).slice(0, 20) as { name?: unknown; props?: unknown }[];
+      if (!(await S.hit(db, `ev:${net}`, day, 300))) return { ok: false };
+      await S.logEvents(db, day, pid, list.map((e) => ({ name: String(e?.name ?? ''), props: e?.props })));
+      return { ok: true };
     },
   },
   report: {

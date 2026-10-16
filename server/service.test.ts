@@ -150,8 +150,12 @@ describe('Khôn lỏi', () => {
     expect(S.tierFor(q, 'common', 0, 60, 400)).toBe(0);
     expect(S.tierFor(q, 'other', 3, 0, 10)).toBe(4);
   });
-  it('never touches the hidden answer', () => {
-    expect(S.tierFor({ krillKey: 'tesla', traps: new Set(['tesla']) }, 'tesla', 4, 300, 400)).toBe(5);
+  it('keeps the hidden answer hidden while few reach it, and drops it once it leaks', () => {
+    const q = { krillKey: 'tesla', traps: new Set(['tesla']) };
+    expect(S.tierFor(q, 'tesla', 4, 0, 10)).toBe(5);
+    expect(S.tierFor(q, 'tesla', 4, 4, 400)).toBe(5);
+    expect(S.tierFor(q, 'tesla', 4, 300, 400)).toBe(6);
+    expect(S.tierFor(q, 'tesla', 4, 12, 400)).not.toBe(5);
   });
   it('lands a trap from the book in play', async () => {
     const p = 'player_test_0010';
@@ -281,5 +285,30 @@ describe('launch guards', () => {
     await expect(S.logEvent(db, { day, name: 'hack', playerId: 'x' })).rejects.toThrow();
     const ins = await S.insights(db);
     expect(ins.funnel.some((f) => f.name === 'open')).toBe(true);
+  });
+});
+
+describe('day by day', () => {
+  it('picks a new hidden answer when a prompt comes back, never one shown before', async () => {
+    const d1 = '2032-05-01';
+    const d2 = '2032-07-01';
+    const [qid] = await S.dailySet(db, d1);
+    const q = await S.loadQuestion(db, qid);
+    expect(await S.krillFor(db, d1, q)).toBe(q.krillKey);
+    // The same prompt asked again later.
+    await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict do nothing`, [d2, [qid]]);
+    const k2 = await S.krillFor(db, d2, q);
+    expect(k2).not.toBe(q.krillKey);
+    expect(q.answers.get(k2)!.prior).toBeGreaterThanOrEqual(4);
+    const dq = await S.dayQuestion(db, d2, qid);
+    expect(S.tierFor(dq, k2, 4, 0, 5)).toBe(5);
+    expect(S.tierFor(dq, q.krillKey, 4, 0, 5)).not.toBe(5);
+  });
+
+  it('measures rarity among the day\'s players, with earlier days as the starting guess', async () => {
+    // An answer the book thought rare but that earlier days gave everywhere is not rare today either.
+    expect([0, 1, 6]).toContain(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 1, 40, 0.9));
+    // Without history the book's guess is used.
+    expect(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 0, 40)).toBe(4);
   });
 });

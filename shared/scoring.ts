@@ -75,8 +75,9 @@ export const PRIOR_SHARE = [0.12, 0.05, 0.02, 0.008, 0.003] as const;
 export const PRIOR_WEIGHT = 15;
 
 /** Tier from crowd counts blended with the editorial prior. */
-export function tierFromCounts(priorTier: number, count: number, total: number): TierIndex {
-  const prior = PRIOR_SHARE[Math.max(0, Math.min(4, priorTier))];
+export function tierFromCounts(priorTier: number, count: number, total: number, priorShare?: number): TierIndex {
+  // The expected share before today's players: what earlier days measured, else the book's estimate.
+  const prior = priorShare ?? PRIOR_SHARE[Math.max(0, Math.min(4, priorTier))];
   const share = (count + prior * PRIOR_WEIGHT) / (total + PRIOR_WEIGHT);
   if (share >= 0.08) return 0;
   if (share >= 0.035) return 1;

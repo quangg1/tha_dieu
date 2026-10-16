@@ -126,6 +126,21 @@ create table if not exists events (
 );
 create index if not exists events_day on events (day, name);
 
+create table if not exists day_counts (
+  day date not null,
+  question_id text not null,
+  answer_key text not null,
+  n int not null default 0,
+  primary key (day, question_id, answer_key)
+);
+
+create table if not exists daily_krill (
+  day date not null,
+  question_id text not null,
+  krill_key text not null,
+  primary key (day, question_id)
+);
+
 create table if not exists day_scores (
   day date primary key,
   computed_at timestamptz not null default 'epoch',
