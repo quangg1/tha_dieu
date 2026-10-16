@@ -99,7 +99,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   );
   const text = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
-    const head = mode === 'daily' ? `🪁 Thả Diều ${dayLabel}` : '🪁 Thả Diều · Thả vô tận';
+    const head = mode === 'daily' ? `🪁 Bilion · Thả Diều ${dayLabel}` : '🪁 Bilion · Thả vô tận';
     const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
     return [head, verdict, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps

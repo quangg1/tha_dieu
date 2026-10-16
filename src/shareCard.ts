@@ -103,12 +103,13 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   const ink = '#ffffff';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#e5533d';
+  ctx.font = "700 30px 'Be Vietnam Pro', system-ui, sans-serif";
+  const tag = `Bilion · Thả Diều · ${d.dayLabel}`;
   ctx.beginPath();
-  ctx.roundRect(72, 86, 300, 58, 29);
+  ctx.roundRect(72, 86, ctx.measureText(tag).width + 48, 58, 29);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = "700 30px 'Be Vietnam Pro', system-ui, sans-serif";
-  ctx.fillText(`Thả Diều · ${d.dayLabel}`, 96, 126);
+  ctx.fillText(tag, 96, 126);
 
   if (d.quote) quoteBubble(ctx, d.quote);
 

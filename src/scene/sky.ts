@@ -119,6 +119,8 @@ export interface SkyLayout {
   bottom?: number;
   /** On phones, the highest the dyke may sit (pixels from the top), so the flyer stands above the page's card. */
   stand?: number;
+  /** On phones, where the flyer stands across the width (fraction). */
+  flyerX?: number;
 }
 
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
@@ -586,7 +588,7 @@ export class SkyScene {
     const { W } = this;
     if (!col || W < col + 420) return W * fx;
     // Keep clear of the side panels that the play screen stands on the left and right edges.
-    const inset = this.layout.ruler ? 270 : 40;
+    const inset = this.layout.ruler ? 90 : 40;
     const left = fx < 0.5;
     const lo = left ? inset : (W + col) / 2 + 20;
     const hi = left ? (W - col) / 2 - 20 : W - inset;
@@ -1302,10 +1304,8 @@ export class SkyScene {
     // On wide screens the flyer stands in the left margin, clear of the page column (the play screen keeps it nearer the middle, away from its side panels).
     const col = layout.column ?? 0;
     const bx = !this.wide
-      ? W * (layout.kiteX > 0.55 ? 0.22 : 0.2)
-      : layout.ruler
-        ? W / 2 - Math.min(300, W * 0.18)
-        : Math.max(bw / 2 + 24, (W - col) / 2 - 36 - bw / 2);
+      ? W * (layout.flyerX ?? (layout.kiteX > 0.55 ? 0.22 : 0.2))
+      : Math.max(bw / 2 + 24, (W - col) / 2 - 36 - bw / 2);
     const bh = (bw * A.kids.h) / A.kids.w;
     const dyke = yg + P.fields.dyke;
     this.hand = { x: bx - bw / 2 + A.hand.x * bw, y: dyke + 3 - bh + A.hand.y * bh };
@@ -1365,28 +1365,15 @@ export class SkyScene {
   private drawRuler() {
     const { ctx, W, H } = this;
     const wide = this.wide;
-    const dark = wide || this.camL >= 4.3 || this.lap >= 3;
+    const dark = this.camL >= 4.3 || this.lap >= 3;
     const r0 = this.top + (wide ? 24 : 14);
     const r1 = H - (this.layout.bottom ?? 0) - (wide ? 24 : 16);
     const yk = this.yk;
     // On wide screens the ruler stands in a glass column that mirrors the rarity ladder on the left.
-    const pw = 236;
-    const x = wide ? W - 24 - 70 : W - 14;
-    if (wide) {
-      ctx.fillStyle = 'rgba(13,26,48,.36)';
-      ctx.strokeStyle = 'rgba(255,255,255,.2)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(W - 24 - pw, r0 - 10, pw, r1 - r0 + 20, 18);
-      ctx.fill();
-      ctx.stroke();
-      ctx.font = "700 10px 'Be Vietnam Pro', system-ui, sans-serif";
-      ctx.fillStyle = 'rgba(255,255,255,.72)';
-      ctx.textAlign = 'left';
-      ctx.fillText('ĐỘ CAO', W - 24 - pw + 16, r0 + 10);
-    }
+    // A slim line at the right edge, without a panel, so the sky stays open.
+    const x = wide ? W - 40 : W - 14;
     const quiet = !wide && this.layout.text ? [H * this.layout.text[0], H * this.layout.text[1]] : null;
-    const top = r0 + (wide ? 22 : 0);
+    const top = r0;
     const fade = (y: number) => clamp(Math.min(y - top, r1 - y) / 40);
     const ink = dark ? '255,255,255' : '15,39,71';
     ctx.lineWidth = 2;
@@ -1417,7 +1404,7 @@ export class SkyScene {
     }
     ctx.globalAlpha = 1;
     ctx.textAlign = 'right';
-    const halo = !wide;
+    const halo = true;
     for (const m of MILESTONES) {
       const L = m.alt <= 0 ? this.groundL : log(m.alt);
       const y = this.y(L);

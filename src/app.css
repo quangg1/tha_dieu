@@ -165,7 +165,7 @@ button{font:inherit;color:inherit}
   .hud{grid-template-columns:54px 236px 1fr 236px 54px;grid-template-areas:"back alt mid score sound";gap:10px;padding:18px 24px 0}
   .hud-btn,.hud-sound .icon-btn{width:54px;height:60px}
   .hud-panel{height:60px;padding:0 16px}
-  .hud-panel.mid{justify-self:center;min-width:250px;height:60px;flex-direction:column;gap:5px;border-radius:14px}
+  .hud-panel.mid{justify-self:center;height:44px;flex-direction:row;gap:10px;border-radius:999px;align-self:center}
   .hud-panel .v{font-size:28px}
   .hud .pip{width:16px;height:16px}
   .ladder--side{display:flex;position:absolute;z-index:2;left:24px;top:92px;bottom:106px;width:236px;padding:12px 12px 14px;border-radius:18px;background:rgba(13,26,48,.36);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);--glass:rgba(255,255,255,.08);--ink:#fff}
@@ -485,3 +485,9 @@ button{font:inherit;color:inherit}
 .theme-body b{font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1.1}
 .theme-body p{margin:0;font-size:14px;line-height:1.5;color:rgba(244,241,232,.88)}
 .theme-body small{font-size:12px;font-weight:600;color:rgba(244,241,232,.65)}
+.logo-bi{color:#e5533d;text-shadow:0 5px 0 #0f2747,var(--glow)}
+.logo-i{position:relative;display:inline-block}
+.logo-hat{position:absolute;left:50%;top:.02em;width:.62em;height:auto;transform:translate(-50%,0) rotate(-8deg);filter:drop-shadow(0 3px 0 rgba(15,39,71,.35))}
+.home-sub{margin:10px 0 0;font-size:15px;font-weight:600;color:var(--ink);text-shadow:var(--glow)}
+.home-sub b{color:#c0412d}
+.logo-bi-s{color:#e5533d}

@@ -607,8 +607,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
                 })}
               </div>
-              <span className="k">
-                Câu {Math.min(idx + 1, count)} / {count}
+              <span className="k pips-n">
+                {Math.min(idx + 1, count)}/{count}
               </span>
             </>
           ) : (
@@ -626,7 +626,6 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         {quitArmed && <span className="quit-tag">Bấm lần nữa để rời</span>}
       </header>
 
-      <Ladder side step={sideStep} tier={sideTier} fell={sideFell} done={phase === 'result'} />
 
       <section className="play-center" aria-live="polite">
         {phase === 'error' && (
@@ -643,14 +642,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           <div className="block prompt-block" key={q.id}>
             <div className="cue">
               <span className="cue-cat">{q.category}</span>
-              <span className="cue-meta">
-                {mode === 'daily' ? `Câu ${idx + 1}/${count}` : 'Thả vô tận'}
-                {q.level ? ` · ${LEVELS[q.level]}` : ''}
-              </span>
+              {q.level ? <span className="cue-meta">{LEVELS[q.level]}</span> : null}
             </div>
             <h2 className="prompt">{q.prompt}</h2>
             {q.note && <p className="prompt-note">{q.note}</p>}
-            <p className="prompt-sub">Càng ít người nghĩ tới, diều càng bay cao</p>
+            {(mode === 'daily' ? idx === 0 : rows.length === 0) && <p className="prompt-sub">Càng ít người nghĩ tới, diều càng bay cao</p>}
           </div>
         )}
 

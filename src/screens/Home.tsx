@@ -70,7 +70,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     const fit = () => {
       const card = document.querySelector('.home-card');
       const narrow = window.innerWidth < 600;
-      sky.setLayout(narrow && card ? { ...LAYOUTS.home, kiteX: 0.76, kiteY: 0.39, kiteSize: 0.2, stand: Math.round(card.getBoundingClientRect().top) } : LAYOUTS.home);
+      sky.setLayout(narrow && card ? { ...LAYOUTS.home, kiteX: 0.84, kiteY: 0.39, kiteSize: 0.18, flyerX: 0.6, stand: Math.round(card.getBoundingClientRect().top) } : LAYOUTS.home);
     };
     fit();
     window.addEventListener('resize', fit);
@@ -143,7 +143,13 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
       <div className="home-hero">
         <span className="home-kicker">Đố chữ mỗi ngày</span>
         <span className="beta-tag">Bản chơi thử</span>
-        <h1 className="home-title">Thả Diều</h1>
+        <h1 className="home-title" aria-label="Bilion">
+          <span className="logo-bi" aria-hidden="true">
+            B<span className="logo-i">ı<svg className="logo-hat" viewBox="0 0 40 18" aria-hidden="true"><path d="M2 15 L20 2 L38 15 Q20 19 2 15 Z" fill="#f3d98f" stroke="#3a2a22" strokeWidth="2.4" strokeLinejoin="round" /><path d="M20 2 L13 16 M20 2 L27 16" stroke="#d6b260" strokeWidth="1.4" /></svg></span>
+          </span>
+          <span aria-hidden="true">lion</span>
+        </h1>
+        <p className="home-sub">cùng bé <b>Bi</b> · gói <b>Thả Diều</b></p>
         <p className="home-tag">Đáp án càng hiếm, diều càng bay cao.</p>
       </div>
 
@@ -214,7 +220,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
         <div className="drawer-wrap" role="dialog" aria-modal="true" aria-label="Menu" onClick={() => setMenu(false)}>
           <nav className="drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-head">
-              <b>Thả Diều</b>
+              <b><span className="logo-bi-s">Bi</span>lion</b>
               <button className="sheet-x" onClick={() => setMenu(false)} aria-label="Đóng menu">✕</button>
             </div>
             {(
@@ -335,7 +341,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
               <h2>Ủng hộ tác giả</h2>
               <button className="sheet-x" onClick={() => setSheet(null)} aria-label="Đóng">✕</button>
             </div>
-            <p className="sup-note">{support.note || 'Thả Diều miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
+            <p className="sup-note">{support.note || 'Bilion miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
             <div className="sup-opts">
               {support.account && support.bank && support.qr && (
                 <div className="sup-tabs" role="tablist" aria-label="Cách ủng hộ">
