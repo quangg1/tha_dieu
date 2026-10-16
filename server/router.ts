@@ -7,6 +7,9 @@ import { BOOK_VERSION } from '../shared/book/questions.js';
 
 let ready: Promise<void> | null = null;
 
+/** Requests one network may send in a minute. A player sends about three per question; a busy café a few dozen. */
+const BURST_PER_MINUTE = Number(process.env.BURST_PER_MINUTE) || 240;
+
 /** Creates the tables, or resyncs the questions table, the first time a server instance meets a database from another book version. */
 function ensureReady(db: Db) {
   ready ??= (async () => {
@@ -23,7 +26,7 @@ export interface Req extends IncomingMessage {
   query?: Record<string, string | string[] | undefined>;
 }
 
-type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean; dev: string }) => Promise<unknown>;
+type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean; dev: string; net: string }) => Promise<unknown>;
 
 function mode(v: unknown): S.Mode {
   return v === 'night' ? 'night' : 'daily';
@@ -54,10 +57,10 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
   },
   answer: {
     method: 'POST',
-    async run({ db, body, referee }) {
+    async run({ db, body, referee, net }) {
       return S.answer(
         db,
-        { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionId: String(body.questionId), input: String(body.input ?? '') },
+        { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionId: String(body.questionId), input: String(body.input ?? ''), net },
         referee,
       );
     },
@@ -85,6 +88,35 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
     method: 'GET',
     async run({ db, query }) {
       return S.board(db, S.vnToday(), mode(query.get('mode')), query.get('playerId') ?? undefined);
+    },
+  },
+  event: {
+    method: 'POST',
+    async run({ db, body, net }) {
+      const day = S.vnToday();
+      if (!(await S.hit(db, `ev:${net}`, day, 3000))) return { ok: false };
+      return S.logEvent(db, { day, name: String(body.name ?? ''), playerId: typeof body.playerId === 'string' ? body.playerId : undefined, props: body.props });
+    },
+  },
+  report: {
+    method: 'POST',
+    async run({ db, body, net }) {
+      if (!(await S.hit(db, `rp:${net}`, S.vnToday(), 60))) throw new S.GameError(429, 'Bạn đã gửi nhiều báo cáo hôm nay rồi. Cảm ơn bạn!');
+      return S.report(db, { questionId: String(body.questionId), input: String(body.input ?? ''), kind: body.kind === 'accepted' ? 'accepted' : 'rejected', note: typeof body.note === 'string' ? body.note : undefined });
+    },
+  },
+  'admin/insights': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return { ...(await S.insights(db)), reports: await S.reports(db) };
+    },
+  },
+  'admin/report': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.closeReport(db, { questionId: String(body.questionId), inputKey: String(body.inputKey), kind: String(body.kind) });
     },
   },
   setup: {
@@ -164,7 +196,14 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
     // A coarse device mark (network address and browser), hashed, so a replay in a private tab stays off the board.
     const ip = String(req.headers['x-forwarded-for'] ?? req.socket?.remoteAddress ?? '').split(',')[0].trim();
     const dev = createHash('sha256').update(`${ip}|${req.headers['user-agent'] ?? ''}`).digest('hex').slice(0, 24);
-    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev });
+    const net = createHash('sha256').update(`net|${ip}`).digest('hex').slice(0, 24);
+    // A burst limit per network on everything players send, so a script cannot flood the counts or the referee.
+    if (req.method === 'POST' && !r.admin && !admin) {
+      const minute = new Date().toISOString().slice(0, 16);
+      if (!(await S.hit(db, `b:${net}`, minute, BURST_PER_MINUTE))) return send(res, 429, { error: 'Bạn thao tác nhanh quá. Chờ một chút rồi thử lại nhé.' });
+      if (Math.random() < 0.005) S.sweepLimits(db).catch(() => {});
+    }
+    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev, net });
     send(res, 200, data);
   } catch (e) {
     if (e instanceof S.GameError) return send(res, e.status, { error: e.message });

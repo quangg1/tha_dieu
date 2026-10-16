@@ -16,6 +16,7 @@ import {
 } from '../../shared/scoring.js';
 import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
 import { buzz } from '../haptics';
+import { track } from '../track';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
@@ -188,6 +189,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [quitArmed, setQuitArmed] = useState(false);
   const [notice, setNotice] = useState('');
+  /** The answer the village just turned away, so the player can say the referee got it wrong. */
+  const [rejected, setRejected] = useState<{ questionId: string; input: string; sent: boolean } | null>(null);
   const seen = useRef<string[]>([]);
   const bestTier = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -241,6 +244,10 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     if (mode === 'daily') saveToday({ day, rows: rowsRef.current });
   };
 
+  useEffect(() => {
+    track('start', { mode });
+  }, [mode]);
+
   /* ------------------------------------------------ finishing */
   const finish = useCallback(async () => {
     if (finishing.current) return;
@@ -249,6 +256,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     try {
       const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined, since: playerSince() });
       recordFlight(day, mode, result.altitude);
+      track('finish', { mode, score: result.score, alt: result.altitude, lap: lapOf(result.altitude).lap, replay: !!result.replay });
       if (mode === 'daily') saveToday({ day, rows: rowsRef.current, result });
       onDone({ mode, rows: rowsRef.current, result });
     } catch (e) {
@@ -461,6 +469,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       return;
     }
     setPhase('judging');
+    track('miss', { q: q.id, mode });
     await api.miss({ playerId: pid, day, mode, questionId: q.id }).catch(() => {});
     showNothing(q, 'late');
   };
@@ -497,6 +506,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     if (r.status === 'retry' || r.status === 'nothing') {
       // Not an answer the village knows: no penalty, just another try while the wind lasts.
       setNotice(r.reason ?? 'Làng chưa biết đáp án này. Thử một đáp án khác nhé.');
+      setRejected({ questionId: q.id, input: text, sent: false });
+      track('retry', { q: q.id, mode });
       setShake((k) => k + 1);
       buzz(60);
       flute.wrong();
@@ -514,6 +525,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     const after = altitudeFor(scoreRef.current + r.points!, mode);
     const rank = rankOf(tier);
     const m = crossed(before, after);
+    if (lapOf(after).lap > lapOf(before).lap) track('lap', { lap: lapOf(after).lap, mode });
     if (mode === 'night') {
       leftRef.current = Math.min(NIGHT_MAX_SECONDS, leftRef.current + TIERS[tier].wind);
       setLeft(leftRef.current);
@@ -725,7 +737,25 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 <span>bấm Thả lần nữa để chốt, hoặc sửa lại</span>
               </div>
             )}
-            {notice && <div className="toast-pill bad" role="status">{notice}</div>}
+            {notice && (
+              <div className="toast-pill bad" role="status">
+                {notice}
+                {rejected && (
+                  <button
+                    type="button"
+                    className="toast-link"
+                    disabled={rejected.sent}
+                    onClick={() => {
+                      setRejected({ ...rejected, sent: true });
+                      track('report', { kind: 'rejected', q: rejected.questionId });
+                      api.report({ questionId: rejected.questionId, input: rejected.input, kind: 'rejected' }).catch(() => {});
+                    }}
+                  >
+                    {rejected.sent ? 'Đã gửi trưởng làng xem, cảm ơn bạn!' : `“${rejected.input}” là đáp án đúng? Báo trưởng làng`}
+                  </button>
+                )}
+              </div>
+            )}
             <form className={`answer-bar${shake ? ' shake' : ''}`} key={shake} onSubmit={submit}>
               <WindDial left={left} total={mode === 'night' ? total : QUESTION_SECONDS} />
               <label htmlFor="answer" className="sr">Đáp án của bạn</label>
@@ -738,6 +768,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   setInput(e.target.value);
                   if (suggest && e.target.value !== suggest.to) setSuggest(null);
                   if (notice) setNotice('');
+                  if (rejected) setRejected(null);
                 }}
                 placeholder="Gõ đáp án, không dấu cũng được…"
                 autoComplete="off"

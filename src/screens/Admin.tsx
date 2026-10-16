@@ -13,6 +13,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   const [tiers, setTiers] = useState<Record<string, number>>({});
   const [queue, setQueue] = useState<Queued[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [ins, setIns] = useState<Awaited<ReturnType<typeof api.admin.insights>> | null>(null);
 
   const load = async () => {
     setMsg('');
@@ -20,6 +21,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
       sessionStorage.setItem('thadieu.admin', token);
       setData(await api.admin.pending(token));
       setQueue((await api.admin.queue(token)).queue);
+      setIns(await api.admin.insights(token));
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Lỗi');
     }
@@ -80,6 +82,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
                 {data.stats.players} người đã hoàn thành chuyến bay · {data.stats.answers} câu trả lời · {data.stats.questions} câu hỏi đang dùng · {data.stats.queued} đáp án người chơi chờ xem · {data.stats.pending} đáp án Claude chờ duyệt
               </p>
             </section>
+            {ins && <Insights ins={ins} token={token} onClosed={(k) => setIns({ ...ins, reports: ins.reports.filter((r) => r.question_id + r.input_key + r.kind !== k) })} />}
             <section className="gd-paper">
               <div className="gd-label" style={{ marginBottom: 4 }}>Đáp án người chơi gõ mà sổ chưa có</div>
               <p className="gd-msg" style={{ margin: '0 0 8px' }}>
@@ -159,5 +162,95 @@ export default function Admin({ onExit }: { onExit: () => void }) {
         )}
       </div>
     </main>
+  );
+}
+
+const STEPS: [string, string][] = [
+  ['open', 'Mở game'],
+  ['start', 'Bắt đầu bay'],
+  ['finish', 'Bay xong'],
+  ['share', 'Chia sẻ ảnh'],
+  ['challenge', 'Gửi thách đấu'],
+  ['challenge_open', 'Mở từ thách đấu'],
+  ['retry', 'Bị hỏi lại'],
+  ['report', 'Báo sai'],
+  ['error', 'Lỗi'],
+];
+
+function Insights({ ins, token, onClosed }: { ins: Awaited<ReturnType<typeof api.admin.insights>>; token: string; onClosed: (key: string) => void }) {
+  const days = [...new Set(ins.funnel.map((f) => f.day))];
+  const cell = (day: string, name: string) => ins.funnel.find((f) => f.day === day && f.name === name);
+  return (
+    <>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Bảy ngày qua · số người chơi ở từng bước</div>
+        {days.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa có dữ liệu.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead>
+                <tr><th>Ngày</th>{STEPS.map(([, l]) => <th key={l}>{l}</th>)}</tr>
+              </thead>
+              <tbody>
+                {days.map((d) => (
+                  <tr key={d}>
+                    <td>{d.slice(8, 10)}/{d.slice(5, 7)}</td>
+                    {STEPS.map(([k]) => {
+                      const c = cell(d, k);
+                      return <td key={k} title={c ? `${c.n} lượt` : ''}>{c ? c.players : '·'}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Người chơi báo trọng tài chấm sai</div>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>“Bị từ chối” là đáp án người chơi cho là đúng mà làng không nhận: thêm vào sổ ở hàng chờ bên dưới nếu hợp lệ. “Được tính” là đáp án người chơi cho là không nên tính.</p>
+        {ins.reports.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa có báo cáo nào.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead>
+                <tr><th>Câu hỏi</th><th>Đáp án</th><th>Loại</th><th>Lượt báo</th><th /></tr>
+              </thead>
+              <tbody>
+                {ins.reports.map((r) => {
+                  const k = r.question_id + r.input_key + r.kind;
+                  return (
+                    <tr key={k}>
+                      <td>{r.prompt}</td>
+                      <td><b>{r.display}</b></td>
+                      <td>{r.kind === 'rejected' ? 'Bị từ chối' : 'Được tính'}</td>
+                      <td>{r.n}</td>
+                      <td>
+                        <button className="gd-chip" onClick={() => api.admin.closeReport(token, { questionId: r.question_id, inputKey: r.input_key, kind: r.kind }).then(() => onClosed(k))}>Đã xử lý</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      {ins.errors.length > 0 && (
+        <section className="gd-paper">
+          <div className="gd-label" style={{ marginBottom: 8 }}>Lỗi trên máy người chơi</div>
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Thông báo</th><th>Lượt</th></tr></thead>
+              <tbody>
+                {ins.errors.map((e) => <tr key={e.message}><td style={{ wordBreak: 'break-word' }}>{e.message}</td><td>{e.n}</td></tr>)}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </>
   );
 }

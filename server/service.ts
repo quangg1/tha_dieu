@@ -25,7 +25,11 @@ export class GameError extends Error {
 export const DAILY_COUNT = 7;
 /** Seconds a daily turn may stay open: the wind, the referee's think time and network slack. */
 const TURN_GRACE_SECONDS = QUESTION_SECONDS + 10 + 15;
-const REFEREE_CALLS_PER_DAY = 25;
+const REFEREE_CALLS_PER_DAY = 40;
+/** Referee calls one network may spend in a day, whatever player ids it invents. */
+const REFEREE_CALLS_PER_NET = 300;
+/** Players from one network whose answers count towards the day's rarity. A school or a café shares an address; a script does too. */
+const NET_PLAYERS_COUNTED = 60;
 
 /* ------------------------------------------------------------------ setup */
 
@@ -281,7 +285,7 @@ async function countsFor(db: Db, questionId: string, key: string) {
 }
 
 /** Uses the cached verdict, or asks the referee (within the player's daily budget), for an answer the bank does not know. */
-async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee) {
+async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string) {
   const inputKey = soft(input);
   if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
   const cached = await db.query<{ valid: boolean; canonical_key: string | null; reason: string | null }>(
@@ -300,6 +304,12 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     [playerId, day],
   );
   if (usage.calls > REFEREE_CALLS_PER_DAY) return { key: null, reason: 'Hôm nay trọng tài đã xem quá nhiều đáp án lạ của bạn. Thử một đáp án quen hơn nhé.' };
+  if (hasReferee && net && !(await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) {
+    return { key: null, reason: 'Trọng tài đang quá tải với mạng của bạn. Thử một đáp án quen hơn nhé.' };
+  }
+  if (hasReferee && !(await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 5000))) {
+    return { key: null, reason: 'Hôm nay trọng tài đã làm việc hết sức. Thử một đáp án quen hơn nhé.' };
+  }
   let v;
   try {
     v = await referee(q.prompt, q.note ?? undefined, input);
@@ -422,7 +432,7 @@ async function closeTurn(db: Db, a: { playerId: string; day: string; mode: Mode;
  */
 export async function answer(
   db: Db,
-  a: { playerId: string; day: string; mode: Mode; questionId: string; input: string },
+  a: { playerId: string; day: string; mode: Mode; questionId: string; input: string; net?: string },
   referee: Referee,
   now = new Date(),
 ): Promise<AnswerResult> {
@@ -446,7 +456,7 @@ export async function answer(
   let key = m?.key ?? null;
   let judged = false;
   if (!key) {
-    const j = await judge(db, q, input, a.playerId, a.day, referee);
+    const j = await judge(db, q, input, a.playerId, a.day, referee, a.net);
     // Nobody loses a prompt to an answer the village does not know: they try again while the wind lasts.
     if (!j.key) return { status: 'retry', input, reason: j.reason };
     key = j.key;
@@ -464,7 +474,7 @@ export async function answer(
     [a.playerId, a.day, a.mode, a.questionId, key, tier, points],
   );
   if (!updated.length) throw new GameError(409, 'Bạn đã trả lời câu này rồi.');
-  if (a.mode === 'daily') {
+  if (a.mode === 'daily' && (await countable(db, a.net, a.day, a.playerId))) {
     await db.query(
       `insert into counts (question_id, answer_key, n) values ($1,$2,1) on conflict (question_id, answer_key) do update set n = counts.n + 1`,
       [q.id, key],
@@ -474,6 +484,87 @@ export async function answer(
   const share = after.total >= 30 ? Math.round((after.count / after.total) * 1000) / 10 : null;
   dayCache.delete(a.day);
   return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: await crowdFor(db, q, key) };
+}
+
+/** Adds one to a counter for this window and says whether it is still within the limit. */
+export async function hit(db: Db, k: string, win: string, limit: number) {
+  const [r] = await db.query<{ n: number }>(
+    `insert into limits (k, win, n) values ($1,$2,1) on conflict (k, win) do update set n = limits.n + 1 returning n`,
+    [k, win],
+  );
+  return r.n <= limit;
+}
+
+/** Old counters go after a day. */
+export async function sweepLimits(db: Db) {
+  await db.query(`delete from limits where day < current_date - 1`);
+  await db.query(`delete from net_players where day < current_date - 2`);
+}
+
+/** Whether this player's answers move the day's counts: the first players from each network do. */
+async function countable(db: Db, net: string | undefined, day: string, playerId: string) {
+  if (!net) return true;
+  const known = await db.query(`select 1 from net_players where net=$1 and day=$2::date and player_id=$3`, [net, day, playerId]);
+  if (known.length) return true;
+  const [{ c }] = await db.query<{ c: number }>(`select count(*)::int as c from net_players where net=$1 and day=$2::date`, [net, day]);
+  if (c >= NET_PLAYERS_COUNTED) return false;
+  await db.query(`insert into net_players (net, day, player_id) values ($1,$2::date,$3) on conflict do nothing`, [net, day, playerId]);
+  return true;
+}
+
+/* ------------------------------------------------------------------ events and reports */
+
+export const EVENT_NAMES = new Set(['open', 'start', 'retry', 'miss', 'finish', 'share', 'challenge', 'challenge_open', 'lap', 'report', 'error', 'howto', 'bag']);
+
+export async function logEvent(db: Db, a: { day: string; name: string; playerId?: string; props?: unknown }) {
+  if (!EVENT_NAMES.has(a.name)) throw new GameError(400, 'Sự kiện không hợp lệ.');
+  let props: string | null = null;
+  if (a.props && typeof a.props === 'object') {
+    props = JSON.stringify(a.props);
+    if (props.length > 800) props = JSON.stringify({ cut: props.slice(0, 780) });
+  }
+  await db.query(`insert into events (day, name, player_id, props) values ($1::date,$2,$3,$4::jsonb)`, [a.day, a.name, a.playerId?.slice(0, 64) ?? null, props]);
+  return { ok: true };
+}
+
+/** A player says the referee got it wrong: an answer that should count, or one that should not. */
+export async function report(db: Db, a: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) {
+  const input = String(a.input ?? '').trim().slice(0, 60);
+  if (!input) throw new GameError(400, 'Thiếu đáp án.');
+  const exists = await db.query(`select 1 from questions where id=$1`, [a.questionId]);
+  if (!exists.length) throw new GameError(404, 'Không có câu hỏi này.');
+  await db.query(
+    `insert into reports (question_id, input_key, display, kind, note) values ($1,$2,$3,$4,$5)
+     on conflict (question_id, input_key, kind) do update set n = reports.n + 1, last_at = now(), status = 'open', note = coalesce($5, reports.note)`,
+    [a.questionId, norm(input), input, a.kind, a.note?.slice(0, 200) || null],
+  );
+  return { ok: true };
+}
+
+export async function reports(db: Db) {
+  return db.query<{ question_id: string; prompt: string; input_key: string; display: string; kind: string; n: number; note: string | null }>(
+    `select r.question_id, q.prompt, r.input_key, r.display, r.kind, r.n, r.note
+     from reports r join questions q on q.id = r.question_id
+     where r.status = 'open' order by r.n desc, r.last_at desc limit 200`,
+  );
+}
+
+export async function closeReport(db: Db, a: { questionId: string; inputKey: string; kind: string }) {
+  await db.query(`update reports set status='closed' where question_id=$1 and input_key=$2 and kind=$3`, [a.questionId, a.inputKey, a.kind]);
+  return { ok: true };
+}
+
+/** The last week at a glance: how many players reached each step, and the latest errors. */
+export async function insights(db: Db) {
+  const funnel = await db.query<{ day: string; name: string; players: number; n: number }>(
+    `select to_char(day,'YYYY-MM-DD') as day, name, count(distinct player_id)::int as players, count(*)::int as n
+     from events where day >= current_date - 7 group by day, name order by day desc, name`,
+  );
+  const errors = await db.query<{ message: string; n: number; last: Date }>(
+    `select coalesce(props->>'m','?') as message, count(*)::int as n, max(at) as last
+     from events where name='error' and day >= current_date - 7 group by 1 order by n desc limit 30`,
+  );
+  return { funnel, errors };
 }
 
 /** Records a question the wind ran out on. Nothing about the answers is revealed. */

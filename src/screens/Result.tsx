@@ -8,12 +8,14 @@ import { challengeLink, renderCard, shareCard } from '../shareCard';
 import { skinById } from '../skins';
 import { addToAlbum, playerId, playerSince, prefs, saveToday, today, vnDay } from '../store';
 import { musicLevel, type Summary } from './Game';
+import { track } from '../track';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
   const pid = playerId();
   const [result, setResult] = useState<FinishResult>(summary.result);
   const [shown, setShown] = useState(0);
+  const [flagged, setFlagged] = useState<Set<string>>(new Set());
   const [name, setName] = useState(prefs.name);
   const [saved, setSaved] = useState(!!prefs.name);
   const [board, setBoard] = useState<{ players: number; settled?: boolean; rows: BoardRow[] } | null>(null);
@@ -108,6 +110,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
       });
       if (!blob) throw new Error();
       const how = await shareCard(blob, text, link);
+      track('share', { how, mode, alt: result.altitude });
       if (how === 'downloaded') flash('Đã lưu ảnh. Đăng lên Facebook hay gửi Zalo nhé!');
     } catch {
       flash('Chưa tạo được ảnh. Thử “Chép kết quả” bên dưới.');
@@ -118,6 +121,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const shareLink = async () => {
     const msg = `Mình thả diều tới ${formatAlt(result.altitude)} hôm nay (${title}). Bạn bay được tới đâu?`;
     try {
+      track('challenge', { mode });
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
         await navigator.share({ text: msg, url: link });
         return;
@@ -237,6 +241,22 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                   <span className="row-q">{r.tier >= 0 ? `${TIERS[r.tier].name} · ` : ''}{r.prompt}</span>
                 </span>
                 <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
+                {r.display && r.tier >= 0 && (
+                  <button
+                    className={`flag-btn${flagged.has(r.questionId) ? ' on' : ''}`}
+                    disabled={flagged.has(r.questionId)}
+                    title="Đáp án này không nên được tính? Báo trưởng làng"
+                    aria-label={flagged.has(r.questionId) ? 'Đã báo' : `Báo chấm sai: ${r.display}`}
+                    onClick={() => {
+                      setFlagged((f) => new Set(f).add(r.questionId));
+                      track('report', { kind: 'accepted', q: r.questionId });
+                      api.report({ questionId: r.questionId, input: r.display!, kind: 'accepted' }).catch(() => {});
+                      flash('Đã báo trưởng làng xem lại đáp án này. Cảm ơn bạn!');
+                    }}
+                  >
+                    {flagged.has(r.questionId) ? '✓' : '⚑'}
+                  </button>
+                )}
               </div>
             ))}
           </div>

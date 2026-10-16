@@ -101,4 +101,40 @@ create table if not exists meta (
 create index if not exists runs_day_alt on runs (day, mode, altitude desc);
 alter table runs add column if not exists dev text;
 alter table runs add column if not exists fresh boolean;
+
+create table if not exists limits (
+  k text not null,
+  win text not null,
+  n int not null default 0,
+  day date not null default current_date,
+  primary key (k, win)
+);
+
+create table if not exists net_players (
+  net text not null,
+  day date not null,
+  player_id text not null,
+  primary key (net, day, player_id)
+);
+
+create table if not exists events (
+  day date not null,
+  name text not null,
+  player_id text,
+  props jsonb,
+  at timestamptz not null default now()
+);
+create index if not exists events_day on events (day, name);
+
+create table if not exists reports (
+  question_id text not null,
+  input_key text not null,
+  display text not null,
+  kind text not null,
+  n int not null default 1,
+  note text,
+  last_at timestamptz not null default now(),
+  status text not null default 'open',
+  primary key (question_id, input_key, kind)
+);
 `;

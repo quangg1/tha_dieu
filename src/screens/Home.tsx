@@ -5,6 +5,7 @@ import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { readChallenge } from '../shareCard';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
+import { track } from '../track';
 import { album, krillFound, msToNextDay, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
@@ -41,6 +42,11 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     sky.setNervous(false);
     flute.setLevel(1);
   }, [sky]);
+
+  useEffect(() => {
+    track('open', { challenge: !!CHALLENGE, returning: stats().best > 0 });
+    if (CHALLENGE) track('challenge_open', { a: CHALLENGE.a });
+  }, []);
 
   const go = (m: 'daily' | 'night') => {
     flute.unlock();
@@ -114,11 +120,11 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <button className="pill-btn ghost" onClick={() => go('night')}>
             Thả đêm
           </button>
-          <button className="pill-btn ghost" onClick={() => setHowto(true)} aria-haspopup="dialog">
+          <button className="pill-btn ghost" onClick={() => { setHowto(true); track('howto'); }} aria-haspopup="dialog">
             Cách chơi
           </button>
         </div>
-        <button className="bag-btn" onClick={() => setBag(true)} aria-haspopup="dialog">
+        <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
           <span>Bộ sưu tập</span>
           <b>
             {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất

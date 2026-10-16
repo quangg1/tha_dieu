@@ -246,3 +246,40 @@ describe('settling the day', () => {
     expect(board.players).toBe(2);
   });
 });
+
+describe('launch guards', () => {
+  it('limits a counter per window', async () => {
+    expect(await S.hit(db, 'test:k', 'w1', 2)).toBe(true);
+    expect(await S.hit(db, 'test:k', 'w1', 2)).toBe(true);
+    expect(await S.hit(db, 'test:k', 'w1', 2)).toBe(false);
+    expect(await S.hit(db, 'test:k', 'w2', 2)).toBe(true);
+  });
+
+  it('stops counting answers from a network after its first sixty players', async () => {
+    const d = '2031-03-01';
+    const [qid] = await S.dailySet(db, d);
+    const q = await S.loadQuestion(db, qid);
+    const [key, entry] = [...q.answers.entries()].find(([, v]) => v.prior === 1)!;
+    const count = async () => (await db.query<{ n: number }>(`select n from counts where question_id=$1 and answer_key=$2`, [qid, key]))[0]?.n ?? 0;
+    const before = await count();
+    for (let i = 0; i < 62; i++) {
+      const p = `net_player_${String(i).padStart(3, '0')}`;
+      await S.startTurn(db, { playerId: p, day: d, mode: 'daily', questionId: qid });
+      const r = await S.answer(db, { playerId: p, day: d, mode: 'daily', questionId: qid, input: entry.display, net: 'same-cafe' }, referee);
+      expect(r.status).toBe('landed');
+    }
+    expect((await count()) - before).toBe(60);
+  });
+
+  it('collects reports and events', async () => {
+    const [qid] = await S.dailySet(db, day);
+    await S.report(db, { questionId: qid, input: 'Gì đó lạ', kind: 'rejected' });
+    await S.report(db, { questionId: qid, input: 'gi do la', kind: 'rejected' });
+    const list = await S.reports(db);
+    expect(list.find((r) => r.question_id === qid)?.n).toBe(2);
+    await S.logEvent(db, { day, name: 'open', playerId: 'player_test_0001' });
+    await expect(S.logEvent(db, { day, name: 'hack', playerId: 'x' })).rejects.toThrow();
+    const ins = await S.insights(db);
+    expect(ins.funnel.some((f) => f.name === 'open')).toBe(true);
+  });
+});

@@ -95,7 +95,15 @@ export const api = {
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
   finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
+  report: (b: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) => call<{ ok: boolean }>('report', b),
   admin: {
+    insights: (token: string) =>
+      call<{
+        funnel: { day: string; name: string; players: number; n: number }[];
+        errors: { message: string; n: number; last: string }[];
+        reports: { question_id: string; prompt: string; input_key: string; display: string; kind: string; n: number; note: string | null }[];
+      }>('admin/insights', undefined, { 'x-admin-token': token }),
+    closeReport: (token: string, b: { questionId: string; inputKey: string; kind: string }) => call<{ ok: boolean }>('admin/report', b, { 'x-admin-token': token }),
     pending: (token: string) => call<{ stats: Record<string, number>; pending: { question_id: string; prompt: string; key: string; display: string; plays: number }[] }>('admin/pending', undefined, { 'x-admin-token': token }),
     review: (token: string, b: { questionId: string; key: string; decision: 'approve' | 'reject'; tier?: number }) =>
       call<{ ok: boolean }>('admin/review', b, { 'x-admin-token': token }),
