@@ -84,7 +84,7 @@ export function RarityStrings({ rows }: { rows: LocalRow[] }) {
       <div className="pst-axis" aria-hidden="true">
         <span>Độc nhất</span>
         <span>Hiếm</span>
-        <span>Thường</span>
+        <span>Hòa nhịp</span>
       </div>
       <div className="pst-cols">
         {rows.slice(0, 7).map((r, i) => {

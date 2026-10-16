@@ -1,4 +1,4 @@
-// Cheeky one-liners: the "Ủa?" moments a player wants to screenshot and send to friends.
+// Cheeky one-liners: the surprising moments a player wants to screenshot and send to friends.
 // Picked by a seed (day + score + slot) so a line stays put on re-render yet changes from day to day.
 import { formatAlt } from '../shared/scoring.js';
 
@@ -13,10 +13,10 @@ const pick = <T,>(list: readonly T[], seed: number): T => list[seed % list.lengt
 /** After each answer, by tier index (see TIERS). */
 const ANSWER: Record<number, readonly string[]> = {
   0: [
-    'Đúng rồi, nhưng nửa làng cũng gõ y chang.',
-    'An toàn tuyệt đối. Hơi bị an toàn.',
-    'Đầu óc hôm nay đang hòa mạng chung với cả làng.',
-    'Câu quốc dân. Diều bay theo đàn.',
+    'Đúng nhịp với cả làng. Muốn bay cao thì lệch nhịp một chút.',
+    'Cả làng cùng nghĩ vậy, diều bay theo đàn.',
+    'Chắc ăn rồi. Câu sau thử nghĩ khác đi xem.',
+    'Hòa nhịp với số đông. An toàn, nhưng chưa cao.',
   ],
   6: [
     'Tưởng độc chiêu, ai dè cả làng cũng biết chiêu này.',
@@ -29,13 +29,13 @@ const ANSWER: Record<number, readonly string[]> = {
     'Không phải ai cũng nghĩ ra đâu.',
   ],
   2: [
-    'Ủa, sao nghĩ ra hay vậy?',
+    'Sao nghĩ ra hay vậy?',
     'Cả làng đang gãi đầu, bạn thả xong rồi.',
     'Đầu óc này bắt đầu khác người rồi đó.',
   ],
   3: [
     'Không ngờ có người nghĩ ra câu này!',
-    'Kể đáp án này cho bạn bè, kiểu gì cũng nghe “Ủa?”.',
+    'Kể đáp án này cho bạn bè, chắc ai cũng bất ngờ.',
     'Diều vừa vượt mấy nóc nhà hàng xóm.',
   ],
   4: [
@@ -57,7 +57,7 @@ const BRAG: readonly (readonly string[])[] = [
   ['Hôm nay diều hơi nhớ đất. Mai bay tiếp.', 'Nghĩ giống cả làng quá, gió không chịu nâng.', 'Thả nhẹ cho vui, mai mới thả thật.'],
   ['Bay vừa đủ thấy mái nhà hàng xóm.', 'Đầu óc chuẩn người Việt, chuẩn luôn cả đáp án.', 'Không cao, không thấp, hợp phong thủy.'],
   ['Bắt đầu có người ngước nhìn rồi đó.', 'Ai thả cao hơn thì lên tiếng.', 'Nghĩ khác số đông một chút là diều lên ngay.'],
-  ['Người dưới đất bắt đầu hỏi nhau: Ủa, ai vậy?', 'Đầu óc này không giống người thường.', 'Ai nghĩ ra đáp án dị hơn thì vào đây.'],
+  ['Diều này bắt đầu khó với tới rồi.', 'Đầu óc này không giống người thường.', 'Ai nghĩ ra đáp án dị hơn thì vào đây.'],
   ['Diều này phải dùng ống nhòm mới thấy.', 'Cả làng nghĩ một đằng, mình nghĩ một nẻo.', 'Vào đây xem ai mới là người hiểu người Việt nhất.'],
   ['Hết trời để bay. Ai vượt được, mình mời trà đá.', 'Lên tới Cung Trăng rồi, chị Hằng ra chào.', 'Cả làng bó tay. Mình thì không.'],
 ];
@@ -97,7 +97,7 @@ export function challengeBanner(seed: number) {
 
 /** A line for the player's rarest answer of the flight. */
 export function momentLine(tier: number, seed: number) {
-  if (tier === 5) return pick(['Cả làng không ai nghĩ ra câu này. Ủa?', 'Câu này mà kể ra, bạn bè sẽ hỏi lại hai lần.'], seed);
-  if (tier === 4) return pick(['Câu dễ vậy mà sao chẳng ai nghĩ ra?', 'Gần như chỉ mình bạn nghĩ tới.'], seed);
-  return pick(['Không ngờ có người nghĩ ra câu này!', 'Ủa, sao đáp án này cũng được tính? Được, mà còn hiếm nữa.'], seed);
+  if (tier === 5) return pick(['Cả làng không ai nghĩ ra, chỉ mình bạn.', 'Đáp án làng giấu kỹ nhất, bạn tìm ra rồi.'], seed);
+  if (tier === 4) return pick(['Gần như chỉ mình bạn nghĩ tới.', 'Câu tưởng dễ mà gần như chẳng ai nghĩ ra.'], seed);
+  return pick(['Rất ít người nghĩ ra câu này.', 'Câu này kéo diều lên cao nhất chuyến bay.'], seed);
 }

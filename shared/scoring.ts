@@ -19,7 +19,7 @@ export interface Tier {
 
 /** Indices are stored in the database, so a new tier gets a new index rather than shifting the others. */
 export const TIERS: readonly Tier[] = [
-  { index: 0, name: 'Thường', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '⚪', meaning: 'ai cũng nghĩ ra', line: 'Câu ai cũng buột miệng.' },
+  { index: 0, name: 'Hòa nhịp', points: 10, rank: 0, flutes: 1, wind: 3, css: 'sao-don', emoji: '⚪', meaning: 'nghĩ cùng nhịp với cả làng', line: 'Cùng nhịp với cả làng.' },
   { index: 1, name: 'Khá hiếm', points: 25, rank: 2, flutes: 2, wind: 4, css: 'sao-doi', emoji: '🟢', meaning: 'khá nhiều người nghĩ ra', line: 'Ổn, nhưng nhiều người cũng nghĩ ra.' },
   { index: 2, name: 'Hiếm', points: 45, rank: 3, flutes: 3, wind: 6, css: 'sao-ba', emoji: '🔵', meaning: 'ít người nghĩ tới', line: 'Ít ai nghĩ tới. Hay đấy.' },
   { index: 3, name: 'Rất hiếm', points: 65, rank: 4, flutes: 7, wind: 8, css: 'sao-bay', emoji: '🟣', meaning: 'rất ít người nghĩ tới', line: 'Hiếm thật. Cả xóm phải nể.' },

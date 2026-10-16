@@ -226,7 +226,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
         {moment && (
           <section className="card moment-card" style={{ '--c': TIER_COLOR[moment.r.tier] } as CSSProperties}>
-            <div className="card-k">Khoảnh khắc “Ủa?”</div>
+            <div className="card-k">Đáp án đắt giá nhất</div>
             <span className="moment-q">Câu {moment.i + 1}: {moment.r.prompt}</span>
             <div className="moment-a">
               <TierIcon tier={moment.r.tier} size={30} />
