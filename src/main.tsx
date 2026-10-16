@@ -5,11 +5,14 @@ import './giaydiep.css';
 import './app.css';
 import { watchErrors } from './track';
 import { inject } from '@vercel/analytics';
+import { moveIfOld, takeMoved } from './move';
 
+const leaving = moveIfOld();
+if (!leaving) takeMoved();
 watchErrors();
-if (import.meta.env.PROD) inject();
+if (import.meta.env.PROD && !leaving) inject();
 
-createRoot(document.getElementById('root')!).render(
+if (!leaving) createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,

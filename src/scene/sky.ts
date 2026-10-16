@@ -1,3 +1,4 @@
+import { daylight } from './daylight';
 // The living sky of Thả Diều: a smooth sky that darkens into space, objects placed at their real altitude on a
 // log scale, the village at the foot of the sky, the altitude ruler, wind streaks while climbing, celebration
 // confetti, and a kite that sways, leaps and dips.
@@ -545,7 +546,22 @@ export class SkyScene {
   private draw() {
     const { ctx, W, H } = this;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    const [top, mid, low] = skyAt(this.camL, this.lap);
+    let [top, mid, low] = skyAt(this.camL, this.lap);
+    // The player's clock, felt near the ground only; out in space it is always night.
+    const dl = daylight();
+    const near = this.lap === 1 ? clamp((4.6 - this.camL) / 1.2) : 0;
+    this.nightW = dl.night * near;
+    const duskW = dl.dusk * near * (1 - dl.night * 0.6);
+    if (duskW > 0) {
+      top = mix(top, hex('#5a6fb0'), duskW * 0.6);
+      mid = mix(mid, hex('#f4a46e'), duskW * 0.75);
+      low = mix(low, hex('#ffd08c'), duskW * 0.8);
+    }
+    if (this.nightW > 0) {
+      top = mix(top, hex('#081128'), this.nightW);
+      mid = mix(mid, hex('#16234a'), this.nightW);
+      low = mix(low, hex('#2c3b6c'), this.nightW);
+    }
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, css(top));
     g.addColorStop(0.55, css(mid));
@@ -560,6 +576,11 @@ export class SkyScene {
     this.drawAir();
     this.drawFarUniverse();
     this.drawGround();
+    if (this.nightW > 0) {
+      // Night falls on the village too.
+      ctx.fillStyle = `rgba(8,16,44,${0.42 * this.nightW})`;
+      ctx.fillRect(0, 0, W, H);
+    }
     this.drawLapExtras();
     this.drawStreaks();
     if (this.layout.ruler) this.drawRuler();
@@ -618,7 +639,7 @@ export class SkyScene {
 
   private drawStars() {
     const { ctx, W, H } = this;
-    const a0 = clamp((this.camL - 4.3) / 1.4);
+    const a0 = Math.max(clamp((this.camL - 4.3) / 1.4), this.nightW * 0.85);
     if (a0 <= 0) return;
     const drift = (this.camL * 41) % H;
     const t = this.t;
@@ -1206,12 +1227,27 @@ export class SkyScene {
     const size = Math.min(this.U, this.H) * (narrow && this.layout.ruler ? 0.13 : this.wide ? 0.13 : 0.16);
     const x = this.wide ? this.gx(this.layout.ruler ? 0.62 : 0.84) : this.layout.kiteX < 0.3 ? W * 0.7 : narrow && this.layout.ruler ? size * 1.1 : W * 0.82;
     const y = this.top + size * 1.2 + this.camL * 5;
+    const ga = this.lap === 1 ? a * (1 - this.nightW) : a;
     const g = ctx.createRadialGradient(x, y, size * 0.4, x, y, size * 2.6);
-    g.addColorStop(0, `rgba(255,240,190,${0.6 * a})`);
-    g.addColorStop(0.4, `rgba(255,236,170,${0.18 * a})`);
+    g.addColorStop(0, `rgba(255,240,190,${0.6 * ga})`);
+    g.addColorStop(0.4, `rgba(255,236,170,${0.18 * ga})`);
     g.addColorStop(1, 'rgba(255,236,170,0)');
     ctx.fillStyle = g;
     ctx.fillRect(x - size * 2.6, y - size * 2.6, size * 5.2, size * 5.2);
+    if (this.lap === 1 && this.nightW > 0.5) {
+      // Night on the player's clock: the moon, with a soft halo.
+      const m = ctx.createRadialGradient(x, y, size * 0.3, x, y, size * 2.2);
+      m.addColorStop(0, `rgba(220,230,255,${0.35 * a})`);
+      m.addColorStop(1, 'rgba(220,230,255,0)');
+      ctx.fillStyle = m;
+      ctx.fillRect(x - size * 2.2, y - size * 2.2, size * 4.4, size * 4.4);
+      ctx.fillStyle = `rgba(255,248,226,${a})`;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.55, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.26, y - size * 0.14, size * 0.48, 0, Math.PI * 2, true);
+      ctx.fill('evenodd');
+      return;
+    }
     if (this.lap >= 3) {
       // Festival dusk: a pale crescent moon instead of the sun.
       ctx.fillStyle = `rgba(255,246,220,${a})`;
@@ -1233,6 +1269,9 @@ export class SkyScene {
   }
 
   /* ---------------------------------------------------------------- the village */
+
+  /** How much of the player's night shows, 0 by day or up in space. */
+  private nightW = 0;
 
   private village: { key: number; items: { s: Sprite; x: number; w: number; z: number; flip: boolean }[] } | null = null;
 

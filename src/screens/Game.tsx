@@ -16,6 +16,7 @@ import {
   type Milestone,
 } from '../../shared/scoring.js';
 import { answerQuip, seedOf } from '../quips';
+import { isNight } from '../scene/daylight';
 import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
 import { buzz } from '../haptics';
 import { track } from '../track';
@@ -212,7 +213,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const shownScore = useRoll(score);
   const shownAlt = useRoll(altitude);
   const lap = lapOf(shownAlt).lap;
-  const dark = lap >= 3 || Math.log10(Math.max(1, lapOf(altitudeFor(shownScore, mode)).inner)) >= 4.3;
+  const dark = lap >= 3 || isNight() || Math.log10(Math.max(1, lapOf(altitudeFor(shownScore, mode)).inner)) >= 4.3;
   const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const hudRef = useRef<HTMLElement>(null);

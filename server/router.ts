@@ -1,3 +1,4 @@
+import { wikiCheck } from './wikidata.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
@@ -169,6 +170,16 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     admin: true,
     async run({ db, body }) {
       return S.closeFeedback(db, Number(body.id));
+    },
+  },
+  // Whether the Wikidata referee is reachable from the server, for a question that has a rule. Cheap and harmless.
+  wikicheck: {
+    method: 'GET',
+    async run({ db, query, net }) {
+      if (!(await S.hit(db, `wiki:${net}`, S.vnToday(), 30))) throw new S.GameError(429, 'Thử lại sau nhé.');
+      const t0 = Date.now();
+      const r = await wikiCheck(String(query.get('q') ?? ''), String(query.get('s') ?? '').slice(0, 60));
+      return { hit: r, ms: Date.now() - t0 };
     },
   },
   'admin/support': {
