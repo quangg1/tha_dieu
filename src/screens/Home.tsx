@@ -49,15 +49,14 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     if (CHALLENGE) track('challenge_open', { a: CHALLENGE.a });
   }, []);
 
-  /** Invites friends: a challenge with today's height once the flight is done, otherwise a plain invite. */
+  /** Challenges friends with today's height, once today's flight is done. */
   const invite = async () => {
     const r = done?.result;
-    const title = r ? bandFor(r.score).verdict.split('. ')[0] : '';
-    const url = r ? challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title }) : location.origin;
-    const text = r
-      ? `Mình thả diều tới ${formatAlt(r.altitude)} hôm nay (${title}). Bạn bay được cao hơn không?`
-      : 'Chơi Thả Diều với mình nhé: đố chữ mỗi ngày, đáp án càng hiếm diều càng bay cao!';
-    track(r ? 'challenge' : 'invite', { from: 'home' });
+    if (!r) return;
+    const title = bandFor(r.score).verdict.split('. ')[0];
+    const url = challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title });
+    const text = `Mình thả diều tới ${formatAlt(r.altitude)} hôm nay (${title}). Bạn bay được cao hơn không?`;
+    track('challenge', { from: 'home' });
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
         await navigator.share({ text, url });
@@ -148,9 +147,11 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             Cách chơi
           </button>
         </div>
-        <button className="invite-btn" onClick={invite}>
-          <span aria-hidden="true">✉</span> {invited || (done ? 'Thách bạn bè bay cao hơn' : 'Mời bạn bè cùng chơi')}
-        </button>
+        {done && (
+          <button className="invite-btn" onClick={invite}>
+            <span aria-hidden="true">✉</span> {invited || 'Thách bạn bè bay cao hơn'}
+          </button>
+        )}
         <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
           <span>Bộ sưu tập</span>
           <b>

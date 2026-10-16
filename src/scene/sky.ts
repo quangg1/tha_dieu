@@ -186,7 +186,9 @@ export class SkyScene {
   private kite = { y: 0, vy: 0, a: 0, va: 0, x: 0, sy: 0 };
   private flutes = 1;
   private nervous = false;
-  private stars: { x: number; y: number; r: number; tw: number; c: string }[] = [];
+  private stars: { x: number; y: number; r: number; tw: number; sp: number; c: string }[] = [];
+  /** A star that flares for a moment: a bright four-pointed glint somewhere in the dark. */
+  private glints: { x: number; y: number; life: number; size: number; c: string }[] = [];
   private clouds: { L: number; x: number; w: number; v: number }[] = [];
   private streaks: { x: number; y: number; len: number; a: number }[] = [];
   private meteors: { x: number; y: number; vx: number; vy: number; life: number }[] = [];
@@ -203,9 +205,9 @@ export class SkyScene {
     this.ctx = canvas.getContext('2d')!;
     ART ??= makeArt();
     const r = mulberry(5);
-    for (let i = 0; i < 170; i++) {
+    for (let i = 0; i < (LITE ? 170 : 260); i++) {
       const warm = r();
-      this.stars.push({ x: r(), y: r(), r: Math.pow(r(), 3) * 1.8 + 0.5, tw: r() * 6.28, c: warm < 0.15 ? '255,214,170' : warm < 0.3 ? '180,210,255' : '244,240,226' });
+      this.stars.push({ x: r(), y: r(), r: Math.pow(r(), 3) * 2.2 + 0.5, tw: r() * 6.28, sp: 0.6 + r() * 2.6, c: warm < 0.15 ? '255,214,170' : warm < 0.3 ? '180,210,255' : '244,240,226' });
     }
     const rc = mulberry(7);
     const levels = [1.6, 1.85, 2.15, 2.4, 2.65, 3.6, 3.8, 4.0, 4.2];
@@ -594,20 +596,61 @@ export class SkyScene {
     const a0 = clamp((this.camL - 4.3) / 1.4);
     if (a0 <= 0) return;
     const drift = (this.camL * 41) % H;
+    const t = this.t;
     for (const s of this.stars) {
-      const a = a0 * (0.55 + 0.45 * Math.sin(this.t * 1.3 + s.tw));
+      // Each star breathes at its own pace; a sharpened sine makes them sparkle rather than pulse.
+      const wave = 0.5 + 0.5 * Math.sin(t * s.sp + s.tw);
+      const tw = Math.pow(wave, 2.2);
+      const a = a0 * (0.25 + 0.75 * tw);
       const x = s.x * W;
       const y = (s.y * H + drift) % H;
-      ctx.fillStyle = `rgba(${s.c},${a})`;
-      if (s.r > 1.5) {
+      if (s.r > 1.4) {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, s.r * 4);
+        g.addColorStop(0, `rgba(${s.c},${a * 0.55})`);
+        g.addColorStop(1, `rgba(${s.c},0)`);
+        ctx.fillStyle = g;
+        ctx.fillRect(x - s.r * 4, y - s.r * 4, s.r * 8, s.r * 8);
+        ctx.fillStyle = `rgba(${s.c},${a})`;
         ctx.beginPath();
-        ctx.arc(x, y, s.r * 0.75, 0, Math.PI * 2);
+        ctx.arc(x, y, s.r * 0.7, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = `rgba(${s.c},${a * 0.35})`;
-        ctx.fillRect(x - s.r * 3, y - 0.5, s.r * 6, 1);
-        ctx.fillRect(x - 0.5, y - s.r * 3, 1, s.r * 6);
-      } else ctx.fillRect(x, y, s.r, s.r);
+        const len = s.r * (2 + tw * 5);
+        ctx.fillStyle = `rgba(${s.c},${a * 0.5})`;
+        ctx.fillRect(x - len, y - 0.5, len * 2, 1);
+        ctx.fillRect(x - 0.5, y - len, 1, len * 2);
+      } else {
+        ctx.fillStyle = `rgba(${s.c},${a})`;
+        ctx.fillRect(x, y, s.r, s.r);
+      }
     }
+    // Now and then a star flares into a four-pointed glint and fades.
+    if (!this.reduce && Math.random() < (LITE ? 0.02 : 0.05) * a0) {
+      this.glints.push({ x: Math.random() * W, y: Math.random() * H, life: 1, size: 5 + Math.random() * 9, c: Math.random() < 0.3 ? '255,226,180' : Math.random() < 0.5 ? '190,215,255' : '255,255,255' });
+    }
+    for (const g of this.glints) {
+      g.life -= 0.016;
+      const k = Math.sin(Math.max(0, g.life) * Math.PI);
+      const size = g.size * (0.4 + k);
+      const glow = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, size * 1.2);
+      glow.addColorStop(0, `rgba(${g.c},${0.8 * k * a0})`);
+      glow.addColorStop(1, `rgba(${g.c},0)`);
+      ctx.fillStyle = glow;
+      ctx.fillRect(g.x - size * 1.2, g.y - size * 1.2, size * 2.4, size * 2.4);
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(g.life * 0.6);
+      ctx.fillStyle = `rgba(${g.c},${k * a0})`;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const r = i % 2 ? size * 0.16 : size * 1.6;
+        const ang = (i * Math.PI) / 4;
+        ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    this.glints = this.glints.filter((g) => g.life > 0);
   }
 
   private drawDeepSpace() {
@@ -745,7 +788,7 @@ export class SkyScene {
     }
     ctx.globalAlpha = 1;
     // Twinkling foreground stars with cross spikes.
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < (LITE ? 26 : 48); i++) {
       const x = W * ((i * 0.618 + 0.11) % 1);
       const base = ((i * 0.37) % 1) * H;
       const y = (base + (this.camL * H * this.layout.decade * 0.6)) % (H + 40) - 20;

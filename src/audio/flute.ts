@@ -3,6 +3,8 @@
 
 const SCALE = [0, 2, 5, 7, 9];
 const BASE_HZ = 261.63; // C4
+/** Pad chords for space, as scale degrees: open fifths on hò, xự, xang and cống. */
+const PAD_CHORDS = [[-5, -2, 0, 3], [-4, -1, 1, 4], [-3, 0, 2, 5], [-6, -3, -1, 2]];
 
 function degreeHz(deg: number): number {
   const oct = Math.floor(deg / 5);
@@ -19,6 +21,10 @@ class FluteEngine {
   private wind?: { gain: GainNode; filter: BiquadFilterNode };
   private drone: OscillatorNode[] = [];
   private droneGain?: GainNode;
+  /** Space: a slow shimmering pad of open fifths that takes over from the field wind once the kite leaves the air. */
+  private pad?: { gain: GainNode; filter: BiquadFilterNode; oscs: OscillatorNode[] };
+  private padChord = 0;
+  private padTimer: number | null = null;
   private timer: number | null = null;
   private nextAt = 0;
   private degree = 5;
@@ -75,11 +81,104 @@ class FluteEngine {
     if (this.ctx) this.master.gain.setTargetAtTime(on ? 0.9 : 0, this.ctx.currentTime, 0.15);
   }
 
-  /** 1 near the ground … 4 in deep space: more voices join as the kite climbs. */
+  /** How far into space the music is: 0 in the air, 1 between the galaxies. */
+  private get space() {
+    return Math.max(0, Math.min(1, (this.level - 3) / 3));
+  }
+
+  /** 1 near the ground … 3 at the edge of space, 4 among the planets, 5 among the stars, 6 between galaxies. */
   setLevel(level: number) {
-    this.level = Math.max(1, Math.min(4, level));
-    if (this.droneGain && this.ctx) this.droneGain.gain.setTargetAtTime(0.018 + 0.008 * this.level, this.ctx.currentTime, 1.5);
-    if (this.wind && this.ctx) this.wind.filter.frequency.setTargetAtTime(this.level >= 3 ? 280 : 650, this.ctx.currentTime, 2);
+    this.level = Math.max(1, Math.min(6, level));
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const sp = this.space;
+    this.droneGain?.gain.setTargetAtTime((0.018 + 0.008 * Math.min(4, this.level)) * (1 - sp * 0.6), t, 1.5);
+    if (this.wind) {
+      this.wind.filter.frequency.setTargetAtTime(this.level >= 3 ? 280 : 650, t, 2);
+      // No wind in space: the rush of air fades out as the kite leaves the atmosphere.
+      this.wind.gain.gain.setTargetAtTime(0.035 * (1 - sp), t, 2.5);
+    }
+    if (this.pad) {
+      this.pad.gain.gain.setTargetAtTime(0.055 * sp, t, 3);
+      this.pad.filter.frequency.setTargetAtTime(500 + 900 * sp, t, 3);
+    }
+    this.wet.gain.setTargetAtTime(0.45 + 0.3 * sp, t, 2);
+  }
+
+  /** Open-fifth chords on the pentatonic, gliding from one to the next every few seconds. */
+  private startPad() {
+    const ctx = this.ctx!;
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 500;
+    filter.Q.value = 0.7;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.05;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 260;
+    lfo.connect(lfoG).connect(filter.frequency);
+    lfo.start();
+    gain.connect(filter);
+    filter.connect(this.dry);
+    filter.connect(this.wet);
+    const oscs: OscillatorNode[] = [];
+    const chord = PAD_CHORDS[0];
+    chord.forEach((deg, i) => {
+      for (const det of [-6, 6]) {
+        const o = ctx.createOscillator();
+        o.type = i === 0 ? 'sine' : 'triangle';
+        o.frequency.value = degreeHz(deg);
+        o.detune.value = det;
+        const g = ctx.createGain();
+        g.gain.value = i === 0 ? 0.5 : 0.28;
+        o.connect(g).connect(gain);
+        o.start();
+        oscs.push(o);
+      }
+    });
+    this.pad = { gain, filter, oscs };
+    this.padTimer = window.setInterval(() => {
+      if (!this.ctx || !this.pad || this.space <= 0) return;
+      this.padChord = (this.padChord + 1) % PAD_CHORDS.length;
+      const next = PAD_CHORDS[this.padChord];
+      this.pad.oscs.forEach((o, k) => o.frequency.setTargetAtTime(degreeHz(next[Math.floor(k / 2)]), this.ctx!.currentTime, 1.8));
+    }, 9000);
+  }
+
+  /** A high glassy chime, like a star ringing far away. */
+  private sparkle(at: number, vel: number) {
+    const ctx = this.ctx!;
+    const hz = degreeHz(13 + Math.floor(Math.random() * 7));
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = hz;
+    const o2 = ctx.createOscillator();
+    o2.type = 'sine';
+    o2.frequency.value = hz * 3.01;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(vel * 0.09, at + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 2.6);
+    const g2 = ctx.createGain();
+    g2.gain.value = 0.25;
+    o.connect(g);
+    o2.connect(g2).connect(g);
+    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    if (pan) {
+      pan.pan.value = Math.random() * 1.6 - 0.8;
+      g.connect(pan);
+      pan.connect(this.wet);
+      pan.connect(this.dry);
+    } else {
+      g.connect(this.wet);
+    }
+    for (const n of [o, o2]) {
+      n.start(at);
+      n.stop(at + 2.8);
+    }
   }
 
   /** One breathy bamboo-flute note with a slide into pitch and late vibrato. */
@@ -208,6 +307,8 @@ class FluteEngine {
       o.start();
       this.drone.push(o);
     }
+    if (!this.pad) this.startPad();
+    this.setLevel(this.level);
     this.nextAt = ctx.currentTime + 0.6;
     this.timer = window.setInterval(() => this.schedule(), 120);
   }
@@ -219,6 +320,7 @@ class FluteEngine {
     const t = this.ctx.currentTime;
     this.droneGain?.gain.setTargetAtTime(0, t, 0.6);
     this.wind?.gain.gain.setTargetAtTime(0, t, 0.6);
+    this.pad?.gain.gain.setTargetAtTime(0, t, 0.8);
     const drones = this.drone;
     this.drone = [];
     setTimeout(() => drones.forEach((o) => o.stop()), 3000);
@@ -233,12 +335,17 @@ class FluteEngine {
         this.phraseLeft = 5 + Math.floor(Math.random() * 5);
         continue;
       }
+      const sp = this.space;
       const step = [-2, -1, -1, 0, 1, 1, 2][Math.floor(Math.random() * 7)];
       this.degree = Math.max(3, Math.min(11, this.degree + step));
-      const len = [0.5, 0.5, 1, 1, 1, 1.5, 2][Math.floor(Math.random() * 7)] * beat;
-      this.note(degreeHz(this.degree), this.nextAt, len * 0.95, 0.32);
-      if (this.level >= 3 && Math.random() < 0.5) this.note(degreeHz(this.degree + 2), this.nextAt + 0.02, len * 0.9, 0.16);
-      if (this.level >= 4 && Math.random() < 0.18) this.bell(degreeHz(this.degree + 5), this.nextAt + len * 0.5, 0.25);
+      // In space the flute plays slower and sparser, a lone voice far away, and stars chime around it.
+      const len = [0.5, 0.5, 1, 1, 1, 1.5, 2][Math.floor(Math.random() * 7)] * beat * (1 + sp * 0.8);
+      if (Math.random() > sp * 0.45) {
+        this.note(degreeHz(this.degree), this.nextAt, len * 0.95, 0.32 * (1 - sp * 0.35), 0.5 + sp * 0.4);
+        if (this.level === 3 && Math.random() < 0.5) this.note(degreeHz(this.degree + 2), this.nextAt + 0.02, len * 0.9, 0.16);
+      }
+      if (this.level === 4 && Math.random() < 0.18) this.bell(degreeHz(this.degree + 5), this.nextAt + len * 0.5, 0.25);
+      if (sp > 0 && Math.random() < 0.35 * sp) this.sparkle(this.nextAt + Math.random() * len, 0.5 + Math.random() * 0.5);
       this.nextAt += len;
       this.phraseLeft--;
     }

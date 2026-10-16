@@ -12,6 +12,7 @@ import {
   formatAlt,
   formatAltParts,
   lapOf,
+  CEILING_L,
   type Milestone,
 } from '../../shared/scoring.js';
 import { api, ApiError, type AnswerResult, type Crowd, type FinishResult, type PublicQuestion } from '../api';
@@ -62,7 +63,9 @@ const LEVELS = ['', 'gió nhẹ', 'gió vừa', 'gió mạnh'];
 
 export function musicLevel(alt: number) {
   const L = Math.log10(Math.max(1, alt));
-  return L < 3 ? 1 : L < 5 ? 2 : L < 8.5 ? 3 : 4;
+  // Lap 2 and 3 start again from the meadow, so only the height within the lap counts.
+  const inner = L % CEILING_L;
+  return inner < 3 ? 1 : inner < 5 ? 2 : inner < 8.5 ? 3 : inner < 13 ? 4 : inner < 21 ? 5 : 6;
 }
 
 function WindDial({ left, total }: { left: number; total: number }) {
