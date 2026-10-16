@@ -36,6 +36,7 @@ function useCountdown() {
 
 /** Theme packs shown as a locked preview until they launch. */
 const THEMES = [
+  { id: 'tet', name: 'Tết', bg: '#6e1a14', color: '#ffd36b', desc: 'Mỗi đáp án làm cây mai nhà bé Bi nở thêm hoa. Càng hiếm, hoa nở càng rộ, kèm lì xì, bánh chưng và pháo hoa đêm giao thừa.', measure: 'Thước đo: lộc xuân, số hoa nở' },
   { id: 'hoadang', name: 'Hoa Đăng', bg: '#1b1530', color: '#ffcf6b', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
   { id: 'lanbien', name: 'Lặn Biển', bg: '#071a2c', color: '#7fdcff', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
   { id: 'amnhac', name: 'Âm Nhạc', bg: '#1e1036', color: '#c9a8ff', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
@@ -226,7 +227,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             {(
               [
                 ['Thả vô tận', 'Câu hỏi nối tiếp, chơi tới khi hết gió', () => go('night')],
-                ['Gói chủ đề', 'Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
+                ['Gói chủ đề', 'Tết, Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
                 ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
                 ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
                 ['Góp ý', 'Báo lỗi, đề xuất câu hỏi', () => setSheet('feedback')],
