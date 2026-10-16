@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TIERS } from '../../shared/scoring.js';
 import { api, type Support } from '../api';
+import { BANKS, vietQr } from '../../shared/banks.js';
 
 type Pending = { question_id: string; prompt: string; key: string; display: string; plays: number };
 type Queued = { question_id: string; prompt: string; input_key: string; display: string; n: number };
@@ -368,7 +369,7 @@ const KIND: Record<string, string> = { gopy: 'Góp ý', loi: 'Báo lỗi', cauho
 
 function Feedback({ token }: { token: string }) {
   const [list, setList] = useState<Awaited<ReturnType<typeof api.admin.feedback>>['feedback']>([]);
-  const [sup, setSup] = useState<Support>({ momo: '', qr: '', card: '', note: '' });
+  const [sup, setSup] = useState<Support>({ momo: '', qr: '', card: '', note: '', bank: '', account: '', holder: '' });
   const [msg, setMsg] = useState('');
   useEffect(() => {
     api.admin
@@ -388,6 +389,26 @@ function Feedback({ token }: { token: string }) {
       setMsg(e instanceof Error ? e.message : 'Lỗi');
     }
   };
+  /** Shrinks a QR picture to a small PNG before it is saved. */
+  const upload = (file: File) => {
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(480, img.width, img.height) || 480;
+      const c = document.createElement('canvas');
+      const scale = side / Math.max(img.width, img.height);
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      const url = c.toDataURL('image/png');
+      if (url.length > 300_000) setMsg('Ảnh QR quá lớn, hãy cắt sát mã QR rồi thử lại.');
+      else setSup((x) => ({ ...x, qr: url }));
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(file);
+  };
   const field = (k: keyof Support, label: string, hint: string) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <label htmlFor={`sup-${k}`} className="gd-label">{label}</label>
@@ -398,9 +419,30 @@ function Feedback({ token }: { token: string }) {
     <>
       <section className="gd-paper" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div className="gd-label">Thông tin ủng hộ</div>
-        <p className="gd-msg" style={{ margin: 0 }}>Ô nào để trống sẽ không hiện cho người chơi. Chỉ nhận đường dẫn https.</p>
-        {field('momo', 'Link MoMo', 'https://me.momo.vn/...')}
-        {field('qr', 'Ảnh mã QR (MoMo hoặc ngân hàng)', 'https://... đường dẫn tới ảnh QR')}
+        <p className="gd-msg" style={{ margin: 0 }}>Điền ít nhất một cách, rồi bấm Lưu. Nút “Ủng hộ tác giả” ở trang chủ chỉ hiện khi đã có thông tin. Ô nào để trống sẽ không hiện cho người chơi.</p>
+        <div className="gd-label" style={{ fontSize: 13 }}>Chuyển khoản ngân hàng (tự tạo mã VietQR)</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label htmlFor="sup-bank" className="gd-label">Ngân hàng</label>
+          <select id="sup-bank" className="gd-input" style={{ fontSize: 15, minHeight: 40 }} value={sup.bank} onChange={(e) => setSup({ ...sup, bank: e.target.value })}>
+            <option value="">Chọn ngân hàng</option>
+            {BANKS.map((b) => <option key={b.bin} value={b.bin}>{b.name}</option>)}
+          </select>
+        </div>
+        {field('account', 'Số tài khoản', '0123456789')}
+        {field('holder', 'Tên chủ tài khoản', 'NGUYEN VAN A')}
+        {sup.bank && sup.account && <img src={vietQr(sup.bank, sup.account, sup.holder)} alt="Mã VietQR xem trước" style={{ width: 160, borderRadius: 12, background: '#fff' }} />}
+        <div className="gd-label" style={{ fontSize: 13 }}>Ví điện tử và thẻ</div>
+        {field('momo', 'Link MoMo (không bắt buộc)', 'https://me.momo.vn/...')}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span className="gd-label">Ảnh mã QR riêng (MoMo, ZaloPay… không bắt buộc)</span>
+          <input type="file" accept="image/*" aria-label="Tải ảnh mã QR" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+          {sup.qr && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <img src={sup.qr} alt="Mã QR đã tải" style={{ width: 120, borderRadius: 10, background: '#fff' }} />
+              <button className="gd-chip" onClick={() => setSup({ ...sup, qr: '' })}>Bỏ ảnh</button>
+            </div>
+          )}
+        </div>
         {field('card', 'Trang nhận thẻ (Ko-fi, Buy Me a Coffee, PayPal...)', 'https://ko-fi.com/...')}
         {field('note', 'Lời cảm ơn', 'Cảm ơn bạn đã giúp làng thả diều cao hơn!')}
         <div><button className="gd-btn" style={{ fontSize: 16 }} onClick={save}>Lưu</button></div>

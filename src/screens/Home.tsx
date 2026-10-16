@@ -5,6 +5,7 @@ import { api, type Support } from '../api';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
+import { bankName, vietQr } from '../../shared/banks.js';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
@@ -43,7 +44,8 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   useEffect(() => {
     api.support().then(setSupport).catch(() => {});
   }, []);
-  const canSupport = !!support && !!(support.momo || support.qr || support.card);
+  const canSupport = !!support && !!(support.momo || support.qr || support.card || support.account);
+  const [copied, setCopied] = useState(false);
 
 
   const st = stats();
@@ -256,7 +258,24 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             </div>
             <p className="sup-note">{support.note || 'Thả Diều miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
             <div className="sup-opts">
-              {support.qr && <img className="sup-qr" src={support.qr} alt="Mã QR để chuyển khoản ủng hộ" />}
+              {support.account && support.bank && (
+                <div className="sup-bank">
+                  <img className="sup-qr" src={vietQr(support.bank, support.account, support.holder)} alt={`Mã VietQR chuyển khoản ${bankName(support.bank)}`} />
+                  <span className="sup-bname">{bankName(support.bank)}</span>
+                  <b className="sup-acc">{support.account}</b>
+                  {support.holder && <span className="sup-holder">{support.holder}</span>}
+                  <button
+                    className="pill-btn ghost sup-copy"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(support.account).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {});
+                      track('support', { via: 'bank' });
+                    }}
+                  >
+                    {copied ? 'Đã chép số tài khoản' : 'Chép số tài khoản'}
+                  </button>
+                </div>
+              )}
+              {support.qr && <img className="sup-qr" src={support.qr} alt="Mã QR để ủng hộ" />}
               {support.momo && (
                 <a className="next-btn sup-momo" href={support.momo} target="_blank" rel="noopener noreferrer" onClick={() => track('support', { via: 'momo' })}>
                   Ủng hộ qua MoMo

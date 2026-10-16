@@ -69,6 +69,10 @@ export interface Support {
   qr: string;
   card: string;
   note: string;
+  /** Bank transfer: NAPAS BIN, account number and holder name. */
+  bank: string;
+  account: string;
+  holder: string;
 }
 
 export class ApiError extends Error {

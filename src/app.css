@@ -451,3 +451,9 @@ button{font:inherit;color:inherit}
 .moment-a b{font-family:'Baloo 2',system-ui,sans-serif;font-size:24px;line-height:1.15;color:#1f1b16}
 .moment-a span{font-size:13px;font-weight:700;color:var(--c)}
 .moment-line{margin:4px 0 0;font-weight:600;color:#3b3328}
+.sup-bank{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
+.sup-bname{font-size:14px;color:#5b6678;margin-top:6px}
+.sup-acc{font-family:'Baloo 2',system-ui,sans-serif;font-size:26px;letter-spacing:.04em;color:#0f2747}
+.sup-holder{font-size:14px;font-weight:700;color:#33415a}
+.sup-copy{margin-top:6px}
+.sup-bank .sup-qr{aspect-ratio:540/640;width:230px}

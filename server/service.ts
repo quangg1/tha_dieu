@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION } from '../shared/book/questions.js';
 import { Matcher } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
@@ -769,14 +770,13 @@ export async function closeFeedback(db: Db, id: number) {
 }
 
 export interface Support {
-  /** A MoMo payment link, such as https://me.momo.vn/… */
   momo: string;
-  /** A picture of a MoMo or bank QR code. */
   qr: string;
-  /** A page that takes card payments (Ko-fi, Buy Me a Coffee, PayPal…). */
   card: string;
-  /** A short thank-you line shown above the options. */
   note: string;
+  bank: string;
+  account: string;
+  holder: string;
 }
 
 const httpsOnly = (v: unknown) => {
@@ -792,7 +792,7 @@ const httpsOnly = (v: unknown) => {
 
 export async function getSupport(db: Db): Promise<Support> {
   const [row] = await db.query<{ value: string }>(`select value from meta where key='support'`);
-  const empty: Support = { momo: '', qr: '', card: '', note: '' };
+  const empty: Support = { momo: '', qr: '', card: '', note: '', bank: '', account: '', holder: '' };
   if (!row) return empty;
   try {
     return { ...empty, ...JSON.parse(row.value) };
@@ -802,7 +802,21 @@ export async function getSupport(db: Db): Promise<Support> {
 }
 
 export async function setSupport(db: Db, a: Partial<Support>) {
-  const v: Support = { momo: httpsOnly(a.momo), qr: httpsOnly(a.qr), card: httpsOnly(a.card), note: String(a.note ?? '').trim().slice(0, 200) };
+  const qr = String(a.qr ?? '').trim();
+  // An uploaded picture comes as a small data URL; anything else must be an https link.
+  const okQr = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(qr) && qr.length <= 300_000 ? qr : httpsOnly(qr);
+  const bank = BANKS.some((b) => b.bin === a.bank) ? String(a.bank) : '';
+  const account = String(a.account ?? '').replace(/[^0-9A-Za-z]/g, '').slice(0, 20);
+  const holder = String(a.holder ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 50);
+  const v: Support = {
+    momo: httpsOnly(a.momo),
+    qr: okQr,
+    card: httpsOnly(a.card),
+    note: String(a.note ?? '').trim().slice(0, 200),
+    bank: bank && account ? bank : '',
+    account: bank && account ? account : '',
+    holder: bank && account ? holder : '',
+  };
   await db.query(`insert into meta (key, value) values ('support', $1) on conflict (key) do update set value=excluded.value`, [JSON.stringify(v)]);
   return v;
 }
