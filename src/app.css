@@ -491,3 +491,9 @@ button{font:inherit;color:inherit}
 .home-sub{margin:10px 0 0;font-size:15px;font-weight:600;color:var(--ink);text-shadow:var(--glow)}
 .home-sub b{color:#c0412d}
 .logo-bi-s{color:#e5533d}
+@media (min-width:900px){
+  .home-top{position:fixed;left:24px;right:24px;top:calc(env(safe-area-inset-top,0px) + 18px);z-index:5}
+  .home-top .home-stats{justify-content:center}
+  .home-hero .beta-tag{align-self:center}
+  .home-hero{margin-top:calc(8vh + 54px)}
+}
