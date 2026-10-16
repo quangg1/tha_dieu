@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION } from '../shared/book/questions.js';
 import { Matcher } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
@@ -37,6 +38,9 @@ const NET_PLAYERS_COUNTED = 60;
  * Creates tables and syncs the questions table with the village book. Answers live in code (the book);
  * the database only keeps what players and the village head add, plus counts. Safe to run again.
  */
+/** Book and table layout together: a change to either makes the next server instance run setup again. */
+export const DB_VERSION = `${BOOK_VERSION}.${createHash('sha256').update(SCHEMA).digest('hex').slice(0, 10)}`;
+
 export async function setup(db: Db) {
   await db.exec(SCHEMA);
   const ids = BOOK.map((q) => q.id);
@@ -58,10 +62,10 @@ export async function setup(db: Db) {
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
   await db.query(
     `insert into meta (key, value) values ('book_version', $1) on conflict (key) do update set value=excluded.value`,
-    [BOOK_VERSION],
+    [DB_VERSION],
   );
   const [{ n }] = await db.query<{ n: number }>(`select count(*)::int as n from questions where active`);
-  return { questions: n, version: BOOK_VERSION };
+  return { questions: n, version: DB_VERSION };
 }
 
 /** The book version the database was last synced with, or null for a fresh database. */

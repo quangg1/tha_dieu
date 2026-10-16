@@ -3,7 +3,6 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
-import { BOOK_VERSION } from '../shared/book/questions.js';
 
 let ready: Promise<void> | null = null;
 
@@ -13,7 +12,7 @@ const BURST_PER_MINUTE = Number(process.env.BURST_PER_MINUTE) || 240;
 /** Creates the tables, or resyncs the questions table, the first time a server instance meets a database from another book version. */
 function ensureReady(db: Db) {
   ready ??= (async () => {
-    if ((await S.syncedVersion(db)) !== BOOK_VERSION) await S.setup(db);
+    if ((await S.syncedVersion(db)) !== S.DB_VERSION) await S.setup(db);
   })().catch((e) => {
     ready = null;
     throw e;
