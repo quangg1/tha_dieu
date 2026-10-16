@@ -99,7 +99,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   );
   const text = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
-    const head = mode === 'daily' ? `🪁 Thả Diều ${dayLabel}` : '🪁 Thả Diều · Thả đêm';
+    const head = mode === 'daily' ? `🪁 Thả Diều ${dayLabel}` : '🪁 Thả Diều · Thả vô tận';
     const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
     return [head, verdict, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,7 +109,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     setBusy(true);
     try {
       const blob = await renderCard({
-        dayLabel: mode === 'daily' ? dayLabel : 'Thả đêm',
+        dayLabel: mode === 'daily' ? dayLabel : 'Thả vô tận',
         title: `${title}.`,
         subtitle,
         quote: brag,
@@ -177,7 +177,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <span className="hud-sound">{soundButton}</span>
       </div>
       <div className="result-hero">
-        <span className="result-kicker">{mode === 'daily' ? `Chuyến bay ${dayLabel}` : 'Thả đêm'}</span>
+        <span className="result-kicker">{mode === 'daily' ? `Chuyến bay ${dayLabel}` : 'Thả vô tận'}</span>
         <span className="result-title">{title}.</span>
         <span className="result-sub">{subtitle}</span>
         <span className="result-brag">“{brag}”</span>
@@ -305,7 +305,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
         <section className="card">
           <div className="card-k">
-            Bảng diều {mode === 'daily' ? 'hôm nay' : 'thả đêm'} {board ? `· ${board.players.toLocaleString('vi-VN')} người` : ''}
+            Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'} {board ? `· ${board.players.toLocaleString('vi-VN')} người` : ''}
             {board && !board.settled && mode === 'daily' ? ' · tạm tính' : ''}
           </div>
           {!saved && (
@@ -348,7 +348,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
         <div className="home-row">
           <button className="pill-btn ghost" onClick={onHome}>Về bãi cỏ</button>
-          <button className="pill-btn" onClick={onNight}>{mode === 'night' ? 'Thả đêm lại' : 'Thả đêm'}</button>
+          <button className="pill-btn" onClick={onNight}>{mode === 'night' ? 'Thả vô tận lại' : 'Thả vô tận'}</button>
         </div>
       </div>
       {toast && <div className="toast" role="status">{toast}</div>}

@@ -8,7 +8,7 @@ export interface Tier {
   rank: number;
   /** Number of flutes that sing when this tier is struck. */
   flutes: number;
-  /** Seconds of wind added in Thả đêm. */
+  /** Seconds of wind added in Thả vô tận. */
   wind: number;
   css: string;
   emoji: string;
@@ -91,10 +91,10 @@ export function streakBonus(streak: number): number {
   return Math.min(20, Math.max(0, 5 * (streak - 1)));
 }
 
-/** Thả đêm climbs faster, so that a long night can pass the edge of the universe and start a new lap. */
+/** Thả vô tận climbs faster, so that a long night can pass the edge of the universe and start a new lap. */
 export const NIGHT_POINTS_PER_DECADE = 30;
 
-/** Altitude in metres for a score: ten times higher every 65 points (every 30 in Thả đêm). */
+/** Altitude in metres for a score: ten times higher every 65 points (every 30 in Thả vô tận). */
 export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily'): number {
   if (points <= 0) return 0;
   return Math.pow(10, points / (mode === 'night' ? NIGHT_POINTS_PER_DECADE : POINTS_PER_DECADE));

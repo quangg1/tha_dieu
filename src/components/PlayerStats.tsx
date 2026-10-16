@@ -65,7 +65,7 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
       <p className="pst-line">
         {players > 1 ? (
           <>
-            Cao hơn <b>{beaten}%</b> trong {players.toLocaleString('vi-VN')} người chơi {mode === 'daily' ? 'hôm nay' : 'thả đêm nay'}
+            Cao hơn <b>{beaten}%</b> trong {players.toLocaleString('vi-VN')} người chơi {mode === 'daily' ? 'hôm nay' : 'chơi Thả vô tận hôm nay'}
           </>
         ) : (
           'Bạn là người bay đầu tiên. Đường cong sẽ hiện dần khi cả làng cùng chơi.'

@@ -457,3 +457,4 @@ button{font:inherit;color:inherit}
 .sup-holder{font-size:14px;font-weight:700;color:#33415a}
 .sup-copy{margin-top:6px}
 .sup-bank .sup-qr{aspect-ratio:540/640;width:230px}
+.dial-k{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap;color:#5b6678}

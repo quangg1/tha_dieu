@@ -1068,7 +1068,7 @@ export async function board(db: Db, day: string, mode: Mode, playerId?: string) 
   };
 }
 
-/** A random active question for Thả đêm, avoiding the ones this run has already seen. */
+/** A random active question for Thả vô tận, avoiding the ones this run has already seen. */
 export async function nightQuestion(db: Db, seen: string[]) {
   const rows = await db.query<{ id: string }>(
     `select id from questions where active and not (id = any($1::text[])) order by random() limit 1`,

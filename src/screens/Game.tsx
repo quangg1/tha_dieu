@@ -69,7 +69,7 @@ export function musicLevel(alt: number) {
   return inner < 3 ? 1 : inner < 5 ? 2 : inner < 8.5 ? 3 : inner < 13 ? 4 : inner < 21 ? 5 : 6;
 }
 
-function WindDial({ left, total }: { left: number; total: number }) {
+function WindDial({ left, total, shared }: { left: number; total: number; shared?: boolean }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const p = Math.max(0, Math.min(1, left / total));
@@ -81,6 +81,7 @@ function WindDial({ left, total }: { left: number; total: number }) {
         <circle cx="25" cy="25" r={r} fill="none" stroke={low ? '#e5533d' : '#3a8fd8'} strokeWidth="5" strokeDasharray={`${c * p} ${c}`} strokeLinecap="round" transform="rotate(-90 25 25)" />
       </svg>
       <span>{Math.max(0, Math.ceil(left))}</span>
+      {shared && <em className="dial-k">gió chung</em>}
     </div>
   );
 }
@@ -613,7 +614,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           ) : (
             <>
               <span className="v small">{rows.length}</span>
-              <span className="k">Thả đêm</span>
+              <span className="k">Thả vô tận</span>
             </>
           )}
         </div>
@@ -643,7 +644,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             <div className="cue">
               <span className="cue-cat">{q.category}</span>
               <span className="cue-meta">
-                {mode === 'daily' ? `Câu ${idx + 1}/${count}` : 'Thả đêm'}
+                {mode === 'daily' ? `Câu ${idx + 1}/${count}` : 'Thả vô tận'}
                 {q.level ? ` · ${LEVELS[q.level]}` : ''}
               </span>
             </div>
@@ -674,6 +675,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 </p>
                 <p className="out-line">{answerQuip(outcome.tier!, seedOf(outcome.display ?? '', outcome.altitude))}</p>
                 <div className="chips">
+                  {mode === 'night' && <span className="chip">+{TIERS[outcome.tier!].wind} giây gió</span>}
                   {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
                   {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
                   {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
@@ -754,7 +756,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
               </div>
             )}
             <form className={`answer-bar${shake ? ' shake' : ''}`} key={shake} onSubmit={submit}>
-              <WindDial left={left} total={mode === 'night' ? total : QUESTION_SECONDS} />
+              <WindDial left={left} total={mode === 'night' ? total : QUESTION_SECONDS} shared={mode === 'night'} />
               <label htmlFor="answer" className="sr">Đáp án của bạn</label>
               <input
                 id="answer"
