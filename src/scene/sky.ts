@@ -5,6 +5,7 @@ import { CEILING_L, MILESTONES, formatAlt, lapOf } from '../../shared/scoring.js
 import * as Art from './art';
 import * as Land from './land';
 import * as Sp from './space';
+import { kiteArt, sailSvg, type Tail } from '../kites';
 import * as V from './village';
 
 type Sprite = Art.Sprite;
@@ -124,8 +125,6 @@ export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
   result: { kiteX: 0.32, kiteY: 0.2, decade: 0.3, kiteSize: 0.16, ruler: false, column: 520, kiteMax: 130 },
 };
 
-const LEAF = new Path2D('M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z');
-const INNER = new Path2D('M60 60 C 82 76, 86 118, 60 170 C 34 118, 38 76, 60 60 Z');
 const log = (alt: number) => Math.log10(Math.max(1, alt));
 const easeInOut = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 
@@ -234,7 +233,9 @@ export class SkyScene {
     document.removeEventListener('visibilitychange', this.onVisible);
   }
 
-  private skin: { body: string; inner: string; tail: string; gradient?: [string, string]; pattern?: 'feather' | 'scale' | 'stars'; aura?: string } = { body: SON, inner: HOE, tail: SON };
+  private skin: { id: string; aura?: string; prize?: boolean } = { id: 'son' };
+  /** The kite sails, drawn from their SVG art once and kept as images. */
+  private kiteImgs = new Map<string, HTMLImageElement>();
 
   /**
    * Paints the scene at an altitude onto a fresh canvas of the given size, for the share picture: the same sky,
@@ -271,9 +272,20 @@ export class SkyScene {
     return c;
   }
 
-  /** Colours of the player's kite. */
-  setSkin(s: { body: string; inner: string; tail: string; gradient?: [string, string]; pattern?: 'feather' | 'scale' | 'stars'; aura?: string }) {
-    this.skin = { body: s.body, inner: s.inner, tail: s.tail, gradient: s.gradient, pattern: s.pattern, aura: s.aura };
+  /** The player's kite: its shape, tails and glow come from the kite collection. */
+  setSkin(s: { id?: string; aura?: string; prize?: boolean }) {
+    this.skin = { id: s.id ?? 'son', aura: s.aura, prize: s.prize };
+    this.kiteImage(this.skin.id);
+  }
+
+  private kiteImage(id: string) {
+    let img = this.kiteImgs.get(id);
+    if (!img) {
+      img = new Image();
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sailSvg(id));
+      this.kiteImgs.set(id, img);
+    }
+    return img;
   }
 
   setLayout(l: SkyLayout) {
@@ -1553,31 +1565,24 @@ export class SkyScene {
     ctx.quadraticCurveTo((ax + ex) / 2 + sag, (ay + ey) / 2, ex, ey);
     ctx.stroke();
 
-    const moon = this.camL >= 8.58;
+    const art = kiteArt(this.skin.id);
+    const climb = clamp(this.camVel * 0.8);
     ctx.save();
     ctx.translate(kx, ky);
-    ctx.rotate(angle);
+    ctx.rotate(sway * (art.sway - 1) + angle);
     ctx.scale(s, s);
     ctx.translate(-60, -104);
     ctx.lineJoin = 'round';
-    // Tail ribbon with bows, streaming harder while the kite climbs.
-    const climb = clamp(this.camVel * 0.8);
-    ctx.strokeStyle = moon ? TRANG : this.skin.tail;
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    const pts: [number, number][] = [];
-    for (let i = 0; i <= 10; i++) {
-      const u = i / 10;
-      const px = 60 + Math.sin(this.t * (3 + climb * 4) + i * 0.7) * (5 + 14 * u) * (1 - climb * 0.5) - u * 10;
-      const py = 214 + i * (10 + climb * 5);
-      pts.push([px, py]);
-      if (i) ctx.lineTo(px, py);
-      else ctx.moveTo(px, py);
-    }
-    ctx.stroke();
+    ctx.lineCap = 'round';
+    // Tails first, behind the sail.
+    let lapPts: [number, number][] = [];
+    art.tails.forEach((t, k) => {
+      const pts = this.drawTail(t, k, climb);
+      if (k === 0) lapPts = pts;
+    });
     // One gold star on the tail for every lap of the sky completed.
-    for (let k = 0; k < Math.min(5, this.lap - 1); k++) {
-      const [px, py] = pts[Math.min(pts.length - 1, 2 + k * 2)];
+    for (let k = 0; k < Math.min(5, this.lap - 1) && lapPts.length; k++) {
+      const [px, py] = lapPts[Math.min(lapPts.length - 1, 2 + k * 2)];
       ctx.save();
       ctx.translate(px, py);
       ctx.rotate(this.t * 1.5 + k);
@@ -1592,104 +1597,174 @@ export class SkyScene {
       ctx.fill();
       ctx.restore();
     }
-    ctx.fillStyle = moon ? TRANG : this.skin.inner;
-    for (let i = 3; i < pts.length; i += 3) {
-      const [px, py] = pts[i];
-      ctx.beginPath();
-      ctx.moveTo(px, py);
-      ctx.lineTo(px - 9, py - 4);
-      ctx.lineTo(px - 9, py + 4);
-      ctx.closePath();
-      ctx.moveTo(px, py);
-      ctx.lineTo(px + 9, py - 4);
-      ctx.lineTo(px + 9, py + 4);
-      ctx.closePath();
-      ctx.fill();
-    }
-    // Flutes.
+    // Bamboo flutes on top of the frame.
+    const top = art.top - 30;
     const tubes = [[28, 0, 64, 9], [34, 10, 52, 8], [40, 19, 40, 7]].slice(0, this.flutes).reverse();
     ctx.fillStyle = '#c99b4a';
     ctx.strokeStyle = INK;
     ctx.lineWidth = 2 / Math.max(0.6, s);
-    for (const [x, y, w, h] of tubes) roundRect(ctx, x, y + (3 - this.flutes) * 9 + 4, w, h, h / 2);
+    for (const [x, y, w, h] of tubes) roundRect(ctx, x, top + y + (3 - this.flutes) * 9 + 4, w, h, h / 2);
     ctx.beginPath();
-    ctx.moveTo(60, 26);
-    ctx.lineTo(60, 30);
+    ctx.moveTo(60, top + 26);
+    ctx.lineTo(60, top + 30);
     ctx.stroke();
-    if (this.skin.aura) {
+    // A soft light behind the kite so it reads against the dark of space.
+    if (dark || this.skin.aura) {
       const pulse = 0.75 + 0.25 * Math.sin(this.t * 2.2);
-      const g = ctx.createRadialGradient(60, 120, 10, 60, 120, 150);
-      g.addColorStop(0, `rgba(${this.skin.aura},${0.55 * pulse})`);
-      g.addColorStop(1, `rgba(${this.skin.aura},0)`);
+      const col = this.skin.aura ?? '255,246,220';
+      const al = this.skin.aura ? 0.55 * pulse : 0.16;
+      const g = ctx.createRadialGradient(60, 110, 10, 60, 110, 150);
+      g.addColorStop(0, `rgba(${col},${al})`);
+      g.addColorStop(1, `rgba(${col},0)`);
       ctx.fillStyle = g;
-      ctx.fillRect(-90, -30, 300, 300);
+      ctx.fillRect(-90, -40, 300, 310);
     }
-    // Soft drop shadow.
-    ctx.save();
-    ctx.translate(5, 6);
-    ctx.fillStyle = 'rgba(20,30,60,.18)';
-    ctx.fill(LEAF);
-    ctx.restore();
-    if (this.skin.gradient) {
-      const g = ctx.createLinearGradient(0, 30, 0, 214);
-      g.addColorStop(0, this.skin.gradient[0]);
-      g.addColorStop(1, this.skin.gradient[1]);
-      ctx.fillStyle = g;
-    } else ctx.fillStyle = moon && this.skin.body === SON ? CHAM_DEEP : this.skin.body;
-    ctx.fill(LEAF);
-    if (this.skin.pattern) {
+    // The sail, beating like wings on bird and butterfly kites.
+    const img = this.kiteImage(this.skin.id);
+    if (img.complete && img.naturalWidth) {
       ctx.save();
-      ctx.clip(LEAF);
-      ctx.strokeStyle = 'rgba(255,240,200,.55)';
-      ctx.fillStyle = 'rgba(255,245,215,.85)';
-      ctx.lineWidth = 2.2;
-      if (this.skin.pattern === 'feather') {
-        for (let y = 50; y < 214; y += 16) {
-          ctx.beginPath();
-          ctx.moveTo(20, y + 12);
-          ctx.quadraticCurveTo(60, y - 10, 100, y + 12);
-          ctx.stroke();
-        }
-      } else if (this.skin.pattern === 'scale') {
-        for (let y = 40; y < 214; y += 14) {
-          for (let x = (y / 14) % 2 ? 14 : 24; x < 110; x += 20) {
-            ctx.beginPath();
-            ctx.arc(x, y, 9, 0, Math.PI);
-            ctx.stroke();
-          }
-        }
-      } else {
-        const r = mulberry(3);
-        for (let i = 0; i < 26; i++) {
-          const x = 22 + r() * 76;
-          const y = 40 + r() * 170;
-          const tw = 0.5 + 0.5 * Math.sin(this.t * 3 + i);
-          ctx.globalAlpha = 0.4 + 0.6 * tw;
-          ctx.beginPath();
-          ctx.arc(x, y, 1.2 + r() * 2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1;
+      if (art.flap && !this.reduce) {
+        const beat = 1 - art.flap * (0.5 + 0.5 * Math.sin(this.t * (5 + climb * 4)));
+        ctx.translate(60, 0);
+        ctx.scale(beat, 1);
+        ctx.translate(-60, 0);
       }
+      ctx.shadowColor = 'rgba(20,30,60,.22)';
+      ctx.shadowOffsetX = 5 * s * this.dpr;
+      ctx.shadowOffsetY = 6 * s * this.dpr;
+      ctx.drawImage(img, 0, 0, 120, 220);
       ctx.restore();
     }
-    ctx.lineWidth = 2.5;
-    ctx.strokeStyle = moon ? PAPER : INK;
-    ctx.stroke(LEAF);
-    ctx.fillStyle = moon && this.skin.body === SON ? TRANG : this.skin.inner;
-    ctx.fill(INNER);
-    ctx.strokeStyle = moon ? PAPER : INK;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(60, 30);
-    ctx.lineTo(60, 214);
-    ctx.moveTo(18, 100);
-    ctx.quadraticCurveTo(60, 84, 102, 100);
-    ctx.stroke();
-    ctx.fillStyle = moon && this.skin.body === SON ? TRANG : this.skin.tail;
-    disc(ctx, 60, 104, 7);
-    ctx.stroke();
+    // Prize kites shimmer.
+    if (this.skin.prize && !this.reduce) {
+      for (let i = 0; i < 7; i++) {
+        const a = this.t * 0.7 + i * 0.9;
+        const x = 60 + Math.cos(a * 1.3 + i) * (40 + (i % 3) * 14);
+        const y = 104 + Math.sin(a + i * 2) * (60 + (i % 2) * 20);
+        const tw = Math.pow(0.5 + 0.5 * Math.sin(this.t * 4 + i * 1.7), 3);
+        ctx.fillStyle = `rgba(255,250,225,${tw})`;
+        ctx.beginPath();
+        for (let j = 0; j < 8; j++) {
+          const r = j % 2 ? 1.2 : 5 * tw + 1;
+          const ang = (j * Math.PI) / 4;
+          ctx.lineTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
     ctx.restore();
+  }
+
+  /** One tail of the kite, streaming in the wind; returns its points so stars can ride on it. */
+  private drawTail(t: Tail, k: number, climb: number): [number, number][] {
+    const ctx = this.ctx;
+    const [x0, y0] = t.at;
+    const time = this.reduce ? 0 : this.t;
+    if (t.kind === 'dragon') {
+      // The dragon's body: a chain of discs that ripples down from the head.
+      const n = 10;
+      const segs: [number, number, number][] = [];
+      for (let i = 1; i <= n; i++) {
+        const u = i / n;
+        const x = x0 + Math.sin(time * 2.4 - i * 0.62) * (4 + i * 2.4) - u * 6;
+        const y = y0 - 4 + i * (t.length / n) * (0.9 + climb * 0.25);
+        segs.push([x, y, 15 - u * 8]);
+      }
+      for (let i = segs.length - 1; i >= 0; i--) {
+        const [x, y, r] = segs[i];
+        if (i === segs.length - 1) {
+          ctx.fillStyle = '#e5533d';
+          ctx.beginPath();
+          ctx.moveTo(x - r, y);
+          ctx.quadraticCurveTo(x - r * 2.2, y + r * 3, x + Math.sin(time * 3) * 6, y + r * 4);
+          ctx.quadraticCurveTo(x + r * 2.2, y + r * 3, x + r, y);
+          ctx.fill();
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        ctx.strokeStyle = t.color2!;
+        ctx.lineWidth = 2.6;
+        const legs = Math.sin(time * 5 + i) * 3;
+        ctx.beginPath();
+        ctx.moveTo(x - r * 1.4, y);
+        ctx.lineTo(x - r * 1.4 - 7, y + 6 + legs);
+        ctx.moveTo(x + r * 1.4, y);
+        ctx.lineTo(x + r * 1.4 + 7, y + 6 - legs);
+        ctx.stroke();
+        ctx.fillStyle = i % 2 ? t.color2! : t.color;
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.ellipse(x, y, r * 1.5, r * 0.78, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.35)';
+        ctx.beginPath();
+        ctx.ellipse(x - r * 0.4, y - r * 0.25, r * 0.6, r * 0.22, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      return segs.map(([x, y]) => [x, y]);
+    }
+    const n = t.kind === 'tassel' ? 4 : 10;
+    const phase = k * 1.9;
+    const speed = t.kind === 'feather' ? 2.2 : 3;
+    const pts: [number, number][] = [];
+    for (let i = 0; i <= n; i++) {
+      const u = i / n;
+      const px = x0 + Math.sin(time * (speed + climb * 4) + i * 0.7 + phase) * (4 + 14 * u) * (1 - climb * 0.5) - u * 10;
+      const py = y0 + u * t.length * (1 + climb * 0.4);
+      pts.push([px, py]);
+    }
+    if (t.kind === 'tassel') {
+      for (let j = -2; j <= 2; j++) {
+        ctx.strokeStyle = j % 2 ? t.color2 ?? t.color : t.color;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        const [ex, ey] = pts[n];
+        ctx.quadraticCurveTo(x0 + j * 3, y0 + t.length * 0.5, ex + j * 5, ey);
+        ctx.stroke();
+      }
+      ctx.fillStyle = t.color2 ?? t.color;
+      disc(ctx, x0, y0 + 2, 4);
+      return pts;
+    }
+    ctx.strokeStyle = t.color;
+    ctx.lineWidth = t.kind === 'feather' ? 5 : t.kind === 'streamer' ? 3.2 : 2.4;
+    ctx.beginPath();
+    pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+    ctx.stroke();
+    if (t.kind === 'ribbon') {
+      ctx.fillStyle = t.color2 ?? t.color;
+      for (let i = 3; i < pts.length; i += 3) {
+        const [px, py] = pts[i];
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px - 9, py - 4);
+        ctx.lineTo(px - 9, py + 4);
+        ctx.closePath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + 9, py - 4);
+        ctx.lineTo(px + 9, py + 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (t.kind === 'feather') {
+      // A peacock eye at the tip of each long feather.
+      const [ex, ey] = pts[n];
+      ctx.fillStyle = t.color2 ?? '#ffd36b';
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 6, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#2fbf8f';
+      disc(ctx, ex, ey, 3);
+    }
+    return pts;
   }
 }
 

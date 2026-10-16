@@ -5,6 +5,10 @@ import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
+import { previewSvg } from '../kites';
+
+/** Pictures of every kite for the collection, built once. */
+const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
 import { track } from '../track';
 import { album, krillFound, msToNextDay, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
@@ -184,18 +188,10 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                       sky.setSkin(skinById(k.id));
                     }}
                   >
-                    <svg width="44" height="60" viewBox="0 0 120 220" aria-hidden="true">
-                      {k.gradient && (
-                        <defs>
-                          <linearGradient id={`g-${k.id}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0" stopColor={k.gradient[0]} />
-                            <stop offset="1" stopColor={k.gradient[1]} />
-                          </linearGradient>
-                        </defs>
-                      )}
-                      <path d="M60 30 C 100 52, 106 120, 60 214 C 14 120, 20 52, 60 30 Z" fill={open ? (k.gradient ? `url(#g-${k.id})` : k.body) : '#c9d0da'} stroke="#1f1b16" strokeWidth="5" />
-                      <path d="M60 60 C 82 76, 86 118, 60 170 C 34 118, 38 76, 60 60 Z" fill={open ? k.inner : '#e6eaf0'} />
-                    </svg>
+                    <span className="skin-art" aria-hidden="true">
+                      <img src={KITE_PICS[k.id]} alt="" />
+                      {!open && <i className="skin-lock">🔒</i>}
+                    </span>
                     <b>{k.name}</b>
                     <span>{open ? (skin === k.id ? 'Đang dùng' : 'Chọn') : needLabel(k)}</span>
                   </button>
