@@ -6,6 +6,7 @@ import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
 import { bankName, vietQr } from '../../shared/banks.js';
+import { THEME_ART } from '../themeArt';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
 import { SKINS, needLabel, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
@@ -33,9 +34,18 @@ function useCountdown() {
   return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map((n) => String(n).padStart(2, '0')).join(':');
 }
 
+/** Theme packs shown as a locked preview until they launch. */
+const THEMES = [
+  { id: 'hoadang', name: 'Hoa Đăng', bg: '#1b1530', color: '#ffcf6b', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
+  { id: 'lanbien', name: 'Lặn Biển', bg: '#071a2c', color: '#7fdcff', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
+  { id: 'amnhac', name: 'Âm Nhạc', bg: '#1e1036', color: '#c9a8ff', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
+];
+
 export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyScene; soundButton: ReactNode; onPlay: (m: 'daily' | 'night') => void; onReview: (s: Summary) => void }) {
   const [howto, setHowto] = useState(false);
   const [bag, setBag] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [themes, setThemes] = useState(false);
   const [skin, setSkin] = useState(prefs.skin);
   const [invited, setInvited] = useState('');
   const [sheet, setSheet] = useState<'feedback' | 'support' | null>(null);
@@ -108,6 +118,9 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   return (
     <main className="stage home">
       <div className="home-top">
+        <button className="icon-btn menu-btn" onClick={() => setMenu(true)} aria-label="Mở menu" aria-haspopup="dialog">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        </button>
         <div className="home-stats">
           {st.best > 0 && <span className="stat-chip">Cao nhất <b>{formatAlt(st.best)}</b></span>}
           {st.streak > 0 && <span className="stat-chip">Chuỗi <b>{st.streak} ngày</b></span>}
@@ -196,6 +209,63 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           )}
         </div>
       </section>
+
+      {menu && (
+        <div className="drawer-wrap" role="dialog" aria-modal="true" aria-label="Menu" onClick={() => setMenu(false)}>
+          <nav className="drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-head">
+              <b>Thả Diều</b>
+              <button className="sheet-x" onClick={() => setMenu(false)} aria-label="Đóng menu">✕</button>
+            </div>
+            {(
+              [
+                ['Thả vô tận', 'Câu hỏi nối tiếp, chơi tới khi hết gió', () => go('night')],
+                ['Gói chủ đề', 'Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
+                ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
+                ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
+                ['Góp ý', 'Báo lỗi, đề xuất câu hỏi', () => setSheet('feedback')],
+                ...(canSupport ? [['Ủng hộ tác giả', 'Chuyển khoản hoặc MoMo', () => { setSheet('support'); track('support'); }]] : []),
+              ] as [string, string, () => void, string?][]
+            ).map(([label, sub, act, tag]) => (
+              <button key={label} className="drawer-item" onClick={() => { setMenu(false); act(); }}>
+                <span>
+                  <b>{label}</b>
+                  <small>{sub}</small>
+                </span>
+                {tag ? <em className="drawer-tag">{tag}</em> : <span className="drawer-arrow" aria-hidden="true">›</span>}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {themes && (
+        <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Gói chủ đề" onClick={() => setThemes(false)}>
+          <section className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <h2>Gói chủ đề</h2>
+              <button className="sheet-x" onClick={() => setThemes(false)} aria-label="Đóng">✕</button>
+            </div>
+            <p className="sup-note">Cùng một câu đố, những bầu trời mới. Luật chơi giữ nguyên, mỗi gói đổi khung cảnh, nhạc nền và thước đo của chuyến đi.</p>
+            <div className="themes">
+              {THEMES.map((t) => (
+                <div key={t.id} className="theme-card" style={{ background: t.bg }}>
+                  <div className="theme-art" dangerouslySetInnerHTML={{ __html: THEME_ART[t.id] }} />
+                  <span className="theme-lock">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
+                    Sắp ra mắt
+                  </span>
+                  <div className="theme-body">
+                    <b style={{ color: t.color }}>{t.name}</b>
+                    <p>{t.desc}</p>
+                    <small>{t.measure}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {bag && (
         <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Bộ sưu tập" onClick={() => setBag(false)}>
