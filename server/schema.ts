@@ -126,6 +126,24 @@ create table if not exists events (
 );
 create index if not exists events_day on events (day, name);
 
+create table if not exists day_scores (
+  day date primary key,
+  computed_at timestamptz not null default 'epoch',
+  claimed_at timestamptz not null default 'epoch',
+  final boolean not null default false,
+  data jsonb not null default '{}'::jsonb
+);
+
+create table if not exists feedback (
+  id serial primary key,
+  at timestamptz not null default now(),
+  kind text not null,
+  message text not null,
+  contact text,
+  player_id text,
+  status text not null default 'open'
+);
+
 create table if not exists reports (
   question_id text not null,
   input_key text not null,

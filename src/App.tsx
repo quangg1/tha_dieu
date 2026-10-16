@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { flute } from './audio/flute';
 import { SkyScene } from './scene/sky';
 import { prefs } from './store';
@@ -7,14 +7,32 @@ import { SoundIcon } from './ui';
 import Home from './screens/Home';
 import Game, { type Summary } from './screens/Game';
 import Result from './screens/Result';
-import Admin from './screens/Admin';
+import { api } from './api';
+
+// The admin page is its own chunk, opened only at the secret path the server confirms.
+const Admin = lazy(() => import('./screens/Admin'));
 
 type Screen = { name: 'home' } | { name: 'play'; mode: 'daily' | 'night'; run: number } | { name: 'result'; summary: Summary } | { name: 'admin' };
 
 export default function App() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [sky, setSky] = useState<SkyScene | null>(null);
-  const [screen, setScreen] = useState<Screen>(() => (location.hash === '#admin' ? { name: 'admin' } : { name: 'home' }));
+  const [screen, setScreen] = useState<Screen>({ name: 'home' });
+
+  // A long hash may be the secret admin path: the server checks it, nothing about it lives in this code.
+  useEffect(() => {
+    const check = () => {
+      const s = location.hash.slice(1);
+      if (s.length < 12) return;
+      api
+        .gate(s)
+        .then((r) => r.ok && setScreen({ name: 'admin' }))
+        .catch(() => {});
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
   const [sound, setSound] = useState(prefs.sound);
 
   useEffect(() => {
@@ -53,7 +71,11 @@ export default function App() {
   return (
     <>
       <canvas ref={canvas} className="sky" aria-hidden="true" />
-      {screen.name === 'admin' && <Admin onExit={() => { location.hash = ''; setScreen({ name: 'home' }); }} />}
+      {screen.name === 'admin' && (
+        <Suspense fallback={null}>
+          <Admin onExit={() => { history.replaceState(null, '', location.pathname); setScreen({ name: 'home' }); }} />
+        </Suspense>
+      )}
       {sky && screen.name === 'home' && <Home sky={sky} soundButton={soundButton} onPlay={(mode) => setScreen({ name: 'play', mode, run: Date.now() })} onReview={(summary) => setScreen({ name: 'result', summary })} />}
       {sky && screen.name === 'play' && (
         <Game key={screen.run} sky={sky} mode={screen.mode} soundButton={soundButton} onExit={() => setScreen({ name: 'home' })} onDone={(summary) => setScreen({ name: 'result', summary })} />

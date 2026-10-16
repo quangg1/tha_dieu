@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickReferee, type Referee } from './referee.js';
@@ -38,9 +38,33 @@ function needToday(day: unknown): string {
   return today;
 }
 
-const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Handler }> = {
+/** Per-instance burst counter: cheap, no database write per request. Daily caps that matter stay in the database. */
+const bursts = new Map<string, number>();
+let burstWindow = '';
+function burst(net: string, limit: number) {
+  const minute = new Date().toISOString().slice(0, 16);
+  if (minute !== burstWindow) {
+    bursts.clear();
+    burstWindow = minute;
+  }
+  const n = (bursts.get(net) ?? 0) + 1;
+  bursts.set(net, n);
+  return n <= limit;
+}
+
+/** Seconds until midnight in Vietnam, when the daily set changes. */
+function untilVnMidnight() {
+  const now = Date.now();
+  const vn = new Date(now + 7 * 3600_000);
+  const next = Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), vn.getUTCDate() + 1) - 7 * 3600_000;
+  return Math.max(1, Math.floor((next - now) / 1000));
+}
+
+const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: () => string; run: Handler }> = {
   daily: {
     method: 'GET',
+    // The same seven prompts for everyone: the CDN keeps them until midnight instead of asking the database each time.
+    cache: () => `public, max-age=60, s-maxage=${untilVnMidnight()}`,
     async run({ db }) {
       const day = S.vnToday();
       const ids = await S.dailySet(db, day);
@@ -103,6 +127,52 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; run: Han
     async run({ db, body, net }) {
       if (!(await S.hit(db, `rp:${net}`, S.vnToday(), 60))) throw new S.GameError(429, 'Bạn đã gửi nhiều báo cáo hôm nay rồi. Cảm ơn bạn!');
       return S.report(db, { questionId: String(body.questionId), input: String(body.input ?? ''), kind: body.kind === 'accepted' ? 'accepted' : 'rejected', note: typeof body.note === 'string' ? body.note : undefined });
+    },
+  },
+  // The admin page has no public address: it opens only at a secret path set in ADMIN_PATH, checked here.
+  gate: {
+    method: 'GET',
+    async run({ db, query, net }) {
+      const want = process.env.ADMIN_PATH ?? '';
+      const got = query.get('s') ?? '';
+      if (!(await S.hit(db, `gate:${net}`, S.vnToday(), 30))) return { ok: false };
+      if (want.length < 12 || got.length !== want.length) return { ok: false };
+      return { ok: timingSafeEqual(Buffer.from(got), Buffer.from(want)) };
+    },
+  },
+  feedback: {
+    method: 'POST',
+    async run({ db, body, net }) {
+      if (!(await S.hit(db, `fb:${net}`, S.vnToday(), 20))) throw new S.GameError(429, 'Bạn đã gửi nhiều góp ý hôm nay rồi. Cảm ơn bạn!');
+      return S.sendFeedback(db, { kind: String(body.kind ?? ''), message: String(body.message ?? ''), contact: typeof body.contact === 'string' ? body.contact : undefined, playerId: typeof body.playerId === 'string' ? body.playerId : undefined });
+    },
+  },
+  support: {
+    method: 'GET',
+    cache: () => 'public, max-age=60, s-maxage=60',
+    async run({ db }) {
+      return S.getSupport(db);
+    },
+  },
+  'admin/feedback': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return { feedback: await S.listFeedback(db), support: await S.getSupport(db) };
+    },
+  },
+  'admin/feedback-close': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.closeFeedback(db, Number(body.id));
+    },
+  },
+  'admin/support': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.setSupport(db, body as Partial<S.Support>);
     },
   },
   'admin/insights': {
@@ -172,10 +242,10 @@ async function readBody(req: Req): Promise<Record<string, unknown>> {
   return text ? JSON.parse(text) : {};
 }
 
-function send(res: ServerResponse, status: number, data: unknown) {
+function send(res: ServerResponse, status: number, data: unknown, cache?: string) {
   res.statusCode = status;
   res.setHeader('content-type', 'application/json; charset=utf-8');
-  res.setHeader('cache-control', 'no-store');
+  res.setHeader('cache-control', status === 200 && cache ? cache : 'no-store');
   res.end(JSON.stringify(data));
 }
 
@@ -199,12 +269,11 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
     const net = createHash('sha256').update(`net|${ip}`).digest('hex').slice(0, 24);
     // A burst limit per network on everything players send, so a script cannot flood the counts or the referee.
     if (req.method === 'POST' && !r.admin && !admin) {
-      const minute = new Date().toISOString().slice(0, 16);
-      if (!(await S.hit(db, `b:${net}`, minute, BURST_PER_MINUTE))) return send(res, 429, { error: 'Bạn thao tác nhanh quá. Chờ một chút rồi thử lại nhé.' });
+      if (!burst(net, BURST_PER_MINUTE)) return send(res, 429, { error: 'Bạn thao tác nhanh quá. Chờ một chút rồi thử lại nhé.' });
       if (Math.random() < 0.005) S.sweepLimits(db).catch(() => {});
     }
     const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev, net });
-    send(res, 200, data);
+    send(res, 200, data, r.cache?.());
   } catch (e) {
     if (e instanceof S.GameError) return send(res, e.status, { error: e.message });
     if (e instanceof SyntaxError) return send(res, 400, { error: 'Dữ liệu gửi lên không đọc được.' });

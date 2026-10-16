@@ -104,9 +104,16 @@ const isPop = (id: string) => id.startsWith('pop-');
  * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
  * and nothing asked in the last six weeks while there is enough left to choose from.
  */
+const setCache = new Map<string, string[]>();
+
 export async function dailySet(db: Db, day: string): Promise<string[]> {
+  const cached = setCache.get(day);
+  if (cached) return cached;
   const found = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
-  if (found.length) return found[0].question_ids;
+  if (found.length) {
+    setCache.set(day, found[0].question_ids);
+    return found[0].question_ids;
+  }
   const active = new Set((await db.query<{ id: string }>(`select id from questions where active`)).map((r) => r.id));
   const pool = BOOK.filter((q) => active.has(q.id));
   const recentRows = await db.query<{ day: string; question_ids: string[] }>(
@@ -482,7 +489,6 @@ export async function answer(
   }
   const after = await countsFor(db, q.id, key);
   const share = after.total >= 30 ? Math.round((after.count / after.total) * 1000) / 10 : null;
-  dayCache.delete(a.day);
   return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: await crowdFor(db, q, key) };
 }
 
@@ -504,17 +510,21 @@ export async function sweepLimits(db: Db) {
 /** Whether this player's answers move the day's counts: the first players from each network do. */
 async function countable(db: Db, net: string | undefined, day: string, playerId: string) {
   if (!net) return true;
-  const known = await db.query(`select 1 from net_players where net=$1 and day=$2::date and player_id=$3`, [net, day, playerId]);
-  if (known.length) return true;
-  const [{ c }] = await db.query<{ c: number }>(`select count(*)::int as c from net_players where net=$1 and day=$2::date`, [net, day]);
-  if (c >= NET_PLAYERS_COUNTED) return false;
-  await db.query(`insert into net_players (net, day, player_id) values ($1,$2::date,$3) on conflict do nothing`, [net, day, playerId]);
-  return true;
+  // One round trip: join the network's list if it still has room, then say whether this player is on it.
+  const [r] = await db.query<{ ok: boolean }>(
+    `with ins as (
+       insert into net_players (net, day, player_id)
+       select $1, $2::date, $3 where (select count(*) from net_players where net=$1 and day=$2::date) < $4
+       on conflict do nothing returning 1)
+     select exists (select 1 from ins) or exists (select 1 from net_players where net=$1 and day=$2::date and player_id=$3) as ok`,
+    [net, day, playerId, NET_PLAYERS_COUNTED],
+  );
+  return !!r?.ok;
 }
 
 /* ------------------------------------------------------------------ events and reports */
 
-export const EVENT_NAMES = new Set(['open', 'invite', 'start', 'retry', 'miss', 'finish', 'share', 'challenge', 'challenge_open', 'lap', 'report', 'error', 'howto', 'bag']);
+export const EVENT_NAMES = new Set(['open', 'invite', 'start', 'retry', 'miss', 'finish', 'share', 'challenge', 'challenge_open', 'lap', 'report', 'error', 'howto', 'bag', 'support']);
 
 export async function logEvent(db: Db, a: { day: string; name: string; playerId?: string; props?: unknown }) {
   if (!EVENT_NAMES.has(a.name)) throw new GameError(400, 'Sự kiện không hợp lệ.');
@@ -615,6 +625,69 @@ export async function insights(db: Db) {
   return { today, funnel, days, scores, retention, questions, totals, errors };
 }
 
+/* ------------------------------------------------------------------ feedback and support */
+
+const FEEDBACK_KINDS = new Set(['gopy', 'loi', 'cauhoi']);
+
+export async function sendFeedback(db: Db, a: { kind: string; message: string; contact?: string; playerId?: string }) {
+  const message = String(a.message ?? '').trim().slice(0, 1500);
+  if (message.length < 3) throw new GameError(400, 'Bạn viết thêm vài chữ nhé.');
+  const kind = FEEDBACK_KINDS.has(a.kind) ? a.kind : 'gopy';
+  const contact = String(a.contact ?? '').trim().slice(0, 120) || null;
+  await db.query(`insert into feedback (kind, message, contact, player_id) values ($1,$2,$3,$4)`, [kind, message, contact, a.playerId?.slice(0, 64) ?? null]);
+  return { ok: true };
+}
+
+export async function listFeedback(db: Db) {
+  return db.query<{ id: number; at: Date; kind: string; message: string; contact: string | null; status: string }>(
+    `select id, at, kind, message, contact, status from feedback order by (status = 'open') desc, at desc limit 300`,
+  );
+}
+
+export async function closeFeedback(db: Db, id: number) {
+  await db.query(`update feedback set status='closed' where id=$1`, [id]);
+  return { ok: true };
+}
+
+export interface Support {
+  /** A MoMo payment link, such as https://me.momo.vn/… */
+  momo: string;
+  /** A picture of a MoMo or bank QR code. */
+  qr: string;
+  /** A page that takes card payments (Ko-fi, Buy Me a Coffee, PayPal…). */
+  card: string;
+  /** A short thank-you line shown above the options. */
+  note: string;
+}
+
+const httpsOnly = (v: unknown) => {
+  const s = String(v ?? '').trim().slice(0, 400);
+  if (!s) return '';
+  try {
+    const u = new URL(s);
+    return u.protocol === 'https:' ? u.toString() : '';
+  } catch {
+    return '';
+  }
+};
+
+export async function getSupport(db: Db): Promise<Support> {
+  const [row] = await db.query<{ value: string }>(`select value from meta where key='support'`);
+  const empty: Support = { momo: '', qr: '', card: '', note: '' };
+  if (!row) return empty;
+  try {
+    return { ...empty, ...JSON.parse(row.value) };
+  } catch {
+    return empty;
+  }
+}
+
+export async function setSupport(db: Db, a: Partial<Support>) {
+  const v: Support = { momo: httpsOnly(a.momo), qr: httpsOnly(a.qr), card: httpsOnly(a.card), note: String(a.note ?? '').trim().slice(0, 200) };
+  await db.query(`insert into meta (key, value) values ('support', $1) on conflict (key) do update set value=excluded.value`, [JSON.stringify(v)]);
+  return v;
+}
+
 /** Records a question the wind ran out on. Nothing about the answers is revealed. */
 export async function miss(db: Db, a: { playerId: string; day: string; mode: Mode; questionId: string }) {
   await closeTurn(db, a);
@@ -628,12 +701,52 @@ export async function miss(db: Db, a: { playerId: string; day: string; mode: Mod
  * every player of the day is scored with the same crowd data, so playing early or late makes no difference,
  * and the board settles when the day ends.
  */
-const dayCache = new Map<string, { at: number; scores: Map<string, { score: number; grid: string }> }>();
-const DAY_CACHE_MS = 30_000;
+type DayScores = Map<string, { score: number; grid: string }>;
+const dayCache = new Map<string, { at: number; scores: DayScores }>();
+/** How long one server instance trusts what it last read. */
+const MEM_MS = 10_000;
+/** How often the day is recomputed, by whichever instance claims it first. */
+const DB_FRESH_S = 30;
 
-export async function scoreDay(db: Db, day: string, fresh = false) {
+/**
+ * Everyone's score for the day, recomputed at most every 30 seconds across all server instances and kept in
+ * the database, so a busy evening costs one recompute per half minute instead of one per finished flight.
+ */
+export async function scoreDay(db: Db, day: string): Promise<DayScores> {
   const hit = dayCache.get(day);
-  if (!fresh && hit && Date.now() - hit.at < DAY_CACHE_MS) return hit.scores;
+  if (hit && Date.now() - hit.at < MEM_MS) return hit.scores;
+  await db.query(`insert into day_scores (day) values ($1::date) on conflict do nothing`, [day]);
+  const [row] = await db.query<{ data: Record<string, [number, string]> | string; age: number; final: boolean }>(
+    `select data, extract(epoch from now() - computed_at)::float8 as age, final from day_scores where day=$1::date`,
+    [day],
+  );
+  const parse = (d: Record<string, [number, string]> | string): DayScores => {
+    const o = (typeof d === 'string' ? JSON.parse(d) : d) as Record<string, [number, string]>;
+    return new Map(Object.entries(o ?? {}).map(([k, v]) => [k, { score: v[0], grid: v[1] }]));
+  };
+  let scores: DayScores;
+  if (row && (row.final || row.age < DB_FRESH_S)) {
+    scores = parse(row.data);
+  } else {
+    const claimed = await db.query(
+      `update day_scores set claimed_at = now() where day=$1::date and claimed_at < now() - interval '15 seconds' returning 1`,
+      [day],
+    );
+    if (claimed.length || !row || row.age > 3600) {
+      scores = await computeScores(db, day);
+      const data = Object.fromEntries([...scores].map(([k, v]) => [k, [v.score, v.grid]]));
+      await db.query(`update day_scores set data=$2::jsonb, computed_at=now(), final=$3 where day=$1::date`, [day, JSON.stringify(data), day < vnToday()]);
+    } else {
+      // Another instance is recomputing right now: the last result, at most a minute old, will do.
+      scores = parse(row.data);
+    }
+  }
+  dayCache.set(day, { at: Date.now(), scores });
+  return scores;
+}
+
+/** Scores from the day's answers and current counts; for one player only when an id is given (cheap). */
+export async function computeScores(db: Db, day: string, playerId?: string): Promise<DayScores> {
   const set = await dailySet(db, day);
   const qs = new Map(await Promise.all(set.map(async (id) => [id, await loadQuestion(db, id)] as const)));
   const countRows = await db.query<{ question_id: string; answer_key: string; n: number }>(
@@ -648,8 +761,10 @@ export async function scoreDay(db: Db, day: string, fresh = false) {
     totals.set(r.question_id, (totals.get(r.question_id) ?? 0) + r.n);
   }
   const turns = await db.query<{ player_id: string; question_id: string; answer_key: string | null; tier: number | null }>(
-    `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null order by answered_at`,
-    [day],
+    playerId
+      ? `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null and player_id=$2 order by answered_at`
+      : `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null order by answered_at`,
+    playerId ? [day, playerId] : [day],
   );
   const by = new Map<string, { streak: number; score: number; tiers: Map<string, number> }>();
   for (const t of turns) {
@@ -662,18 +777,23 @@ export async function scoreDay(db: Db, day: string, fresh = false) {
       continue;
     }
     const entry = q.answers.get(t.answer_key);
+    // An answer removed from the book after it was given no longer scores.
+    if (!entry) {
+      p.streak = 0;
+      p.tiers.set(t.question_id, -1);
+      continue;
+    }
     const c = counts.get(q.id)?.get(t.answer_key) ?? 1;
     // The player's own answer is in the counts; score it as the crowd minus themselves, as at answer time.
-    const tier = entry ? tierFor(q, t.answer_key, entry.prior, Math.max(0, c - 1), Math.max(0, (totals.get(q.id) ?? 1) - 1)) : t.tier;
+    const tier = tierFor(q, t.answer_key, entry.prior, Math.max(0, c - 1), Math.max(0, (totals.get(q.id) ?? 1) - 1));
     p.streak = isRare(tier) ? p.streak + 1 : 0;
     p.score += TIERS[tier].points + streakBonus(p.streak);
     p.tiers.set(t.question_id, tier);
   }
-  const scores = new Map<string, { score: number; grid: string }>();
+  const scores: DayScores = new Map();
   for (const [pid, p] of by) {
     scores.set(pid, { score: p.score, grid: set.map((id) => { const t = p.tiers.get(id); return t == null || t < 0 ? 'x' : String(t); }).join('') });
   }
-  dayCache.set(day, { at: Date.now(), scores });
   return scores;
 }
 
@@ -687,12 +807,13 @@ interface Standing {
 }
 
 /** The day's runs ranked by settled score. A second run from the same device on the same day stays off the board. */
-async function standings(db: Db, day: string, mode: Mode, fresh = false): Promise<Standing[]> {
+async function standings(db: Db, day: string, mode: Mode, own?: { playerId: string; score: number; grid: string }): Promise<Standing[]> {
   const runs = await db.query<{ player_id: string; name: string | null; score: number; altitude: number; grid: string; dev: string | null; fresh: boolean | null }>(
     `select player_id, name, score, altitude, grid, dev, fresh from runs where day=$1::date and mode=$2 order by created_at asc`,
     [day, mode],
   );
-  const scores = mode === 'daily' ? await scoreDay(db, day, fresh) : null;
+  const scores = mode === 'daily' ? new Map(await scoreDay(db, day)) : null;
+  if (scores && own) scores.set(own.playerId, { score: own.score, grid: own.grid });
   const seenDev = new Set<string>();
   const out: Standing[] = runs.map((r) => {
     // Only a player first seen today counts as a replay: a family sharing a network and a phone model keeps its runs.
@@ -754,7 +875,8 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
   let grid: string;
   let score: number;
   if (a.mode === 'daily') {
-    const s = (await scoreDay(db, a.day, true)).get(a.playerId);
+    // The player's own score is always fresh; everyone else's comes from the shared half-minute recompute.
+    const s = (await computeScores(db, a.day, a.playerId)).get(a.playerId);
     score = s?.score ?? 0;
     grid = s?.grid ?? 'x'.repeat(DAILY_COUNT);
   } else {
@@ -775,7 +897,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
        grid = case when runs.mode = 'daily' or excluded.score >= runs.score then excluded.grid else runs.grid end`,
     [a.playerId, a.day, a.mode, name, score, altitude, grid, a.dev ?? null, !!a.since && a.since >= a.day],
   );
-  const all = await standings(db, a.day, a.mode);
+  const all = await standings(db, a.day, a.mode, a.mode === 'daily' ? { playerId: a.playerId, score, grid } : undefined);
   const me = all.find((r) => r.player_id === a.playerId);
   const ranked = all.filter((r) => !r.replay);
   const above = ranked.filter((r) => r.altitude > altitude).length;

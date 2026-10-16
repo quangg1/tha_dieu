@@ -64,6 +64,13 @@ export interface BoardRow {
   me: boolean;
 }
 
+export interface Support {
+  momo: string;
+  qr: string;
+  card: string;
+  note: string;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -96,7 +103,14 @@ export const api = {
   finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
   report: (b: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) => call<{ ok: boolean }>('report', b),
+  gate: (s: string) => call<{ ok: boolean }>(`gate?s=${encodeURIComponent(s)}`),
+  feedback: (b: { kind: string; message: string; contact?: string; playerId?: string }) => call<{ ok: boolean }>('feedback', b),
+  support: () => call<Support>('support'),
   admin: {
+    feedback: (token: string) =>
+      call<{ feedback: { id: number; at: string; kind: string; message: string; contact: string | null; status: string }[]; support: Support }>('admin/feedback', undefined, { 'x-admin-token': token }),
+    closeFeedback: (token: string, id: number) => call<{ ok: boolean }>('admin/feedback-close', { id }, { 'x-admin-token': token }),
+    setSupport: (token: string, b: Support) => call<Support>('admin/support', b, { 'x-admin-token': token }),
     insights: (token: string) =>
       call<{
         today: string;

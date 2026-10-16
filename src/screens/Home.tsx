@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
+import { api, type Support } from '../api';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
@@ -10,7 +11,7 @@ import { previewSvg } from '../kites';
 /** Pictures of every kite for the collection, built once. */
 const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
 import { track } from '../track';
-import { album, krillFound, msToNextDay, prefs, stats, today, vnDay } from '../store';
+import { album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
 /** A friend's result from a challenge link, read once and kept for this visit. */
@@ -34,6 +35,24 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   const [bag, setBag] = useState(false);
   const [skin, setSkin] = useState(prefs.skin);
   const [invited, setInvited] = useState('');
+  const [sheet, setSheet] = useState<'feedback' | 'support' | null>(null);
+  const [support, setSupport] = useState<Support | null>(null);
+  const [fb, setFb] = useState({ kind: 'gopy', message: '', contact: '', state: '' as '' | 'sending' | 'sent' | string });
+
+  useEffect(() => {
+    api.support().then(setSupport).catch(() => {});
+  }, []);
+  const canSupport = !!support && !!(support.momo || support.qr || support.card);
+
+  const sendFeedback = async () => {
+    setFb((f) => ({ ...f, state: 'sending' }));
+    try {
+      await api.feedback({ kind: fb.kind, message: fb.message, contact: fb.contact || undefined, playerId: playerId() });
+      setFb({ kind: 'gopy', message: '', contact: '', state: 'sent' });
+    } catch (e) {
+      setFb((f) => ({ ...f, state: e instanceof Error ? e.message : 'Chưa gửi được, thử lại nhé.' }));
+    }
+  };
   const st = stats();
   const rec = today();
   const done = rec && rec.day === vnDay() && rec.result ? rec : null;
@@ -162,6 +181,15 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất
           </b>
         </button>
+        <div className="home-foot">
+          <button className="link-btn" onClick={() => { setSheet('feedback'); setFb((f) => ({ ...f, state: '' })); }} aria-haspopup="dialog">Góp ý</button>
+          {canSupport && (
+            <>
+              <span aria-hidden="true">·</span>
+              <button className="link-btn" onClick={() => { setSheet('support'); track('support'); }} aria-haspopup="dialog">Ủng hộ tác giả</button>
+            </>
+          )}
+        </div>
       </section>
 
       {bag && (
@@ -218,6 +246,63 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                     <b>{e.krill}</b>
                   </div>
                 ))}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {sheet === 'feedback' && (
+        <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Góp ý" onClick={() => setSheet(null)}>
+          <section className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <h2>Góp ý</h2>
+              <button className="sheet-x" onClick={() => setSheet(null)} aria-label="Đóng">✕</button>
+            </div>
+            {fb.state === 'sent' ? (
+              <p className="fb-done">Cảm ơn bạn! Góp ý đã tới tay người làm game.</p>
+            ) : (
+              <div className="fb-form">
+                <div className="fb-kinds" role="radiogroup" aria-label="Loại góp ý">
+                  {[['gopy', 'Góp ý chung'], ['loi', 'Báo lỗi'], ['cauhoi', 'Đề xuất câu hỏi']].map(([k, l]) => (
+                    <button key={k} role="radio" aria-checked={fb.kind === k} className={`fb-kind${fb.kind === k ? ' on' : ''}`} onClick={() => setFb((f) => ({ ...f, kind: k }))}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                <label htmlFor="fb-msg" className="sr">Nội dung góp ý</label>
+                <textarea id="fb-msg" className="fb-text" rows={5} maxLength={1500} placeholder={fb.kind === 'cauhoi' ? 'Câu hỏi bạn muốn làng đố, kèm vài đáp án nếu có…' : fb.kind === 'loi' ? 'Lỗi xảy ra ở đâu, trên máy gì…' : 'Bạn thích gì, muốn game thêm gì…'} value={fb.message} onChange={(e) => setFb((f) => ({ ...f, message: e.target.value }))} />
+                <label htmlFor="fb-contact" className="fb-label">Email hoặc Zalo, nếu muốn được phản hồi (không bắt buộc)</label>
+                <input id="fb-contact" className="fb-input" maxLength={120} value={fb.contact} onChange={(e) => setFb((f) => ({ ...f, contact: e.target.value }))} />
+                {fb.state && fb.state !== 'sending' && <p className="fb-err" role="alert">{fb.state}</p>}
+                <button className="next-btn" disabled={fb.message.trim().length < 3 || fb.state === 'sending'} onClick={sendFeedback}>
+                  {fb.state === 'sending' ? 'Đang gửi…' : 'Gửi góp ý'}
+                </button>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {sheet === 'support' && support && (
+        <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Ủng hộ tác giả" onClick={() => setSheet(null)}>
+          <section className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <h2>Ủng hộ tác giả</h2>
+              <button className="sheet-x" onClick={() => setSheet(null)} aria-label="Đóng">✕</button>
+            </div>
+            <p className="sup-note">{support.note || 'Thả Diều miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
+            <div className="sup-opts">
+              {support.qr && <img className="sup-qr" src={support.qr} alt="Mã QR để chuyển khoản ủng hộ" />}
+              {support.momo && (
+                <a className="next-btn sup-momo" href={support.momo} target="_blank" rel="noopener noreferrer" onClick={() => track('support', { via: 'momo' })}>
+                  Ủng hộ qua MoMo
+                </a>
+              )}
+              {support.card && (
+                <a className="pill-btn sup-card" href={support.card} target="_blank" rel="noopener noreferrer" onClick={() => track('support', { via: 'card' })}>
+                  Ủng hộ bằng thẻ
+                </a>
+              )}
             </div>
           </section>
         </div>

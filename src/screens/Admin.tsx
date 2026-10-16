@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TIERS } from '../../shared/scoring.js';
-import { api } from '../api';
+import { api, type Support } from '../api';
 
 type Pending = { question_id: string; prompt: string; key: string; display: string; plays: number };
 type Queued = { question_id: string; prompt: string; input_key: string; display: string; n: number };
 
-/** Small moderation page at /#admin: set up the database and review answers the Claude referee accepted. */
+/** The admin page, opened only at the secret path in ADMIN_PATH: numbers, reports, feedback and the village book. */
 export default function Admin({ onExit }: { onExit: () => void }) {
   const [token, setToken] = useState(() => sessionStorage.getItem('thadieu.admin') ?? '');
   const [data, setData] = useState<{ stats: Record<string, number>; pending: Pending[] } | null>(null);
@@ -178,11 +178,12 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   );
 }
 
-type Tab = 'overview' | 'questions' | 'reports' | 'book';
+type Tab = 'overview' | 'questions' | 'reports' | 'feedback' | 'book';
 const TABS: [Tab, string][] = [
   ['overview', 'Tổng quan'],
   ['questions', 'Câu hỏi hôm nay'],
   ['reports', 'Báo cáo & lỗi'],
+  ['feedback', 'Góp ý & ủng hộ'],
   ['book', 'Sổ làng'],
 ];
 
@@ -193,6 +194,7 @@ const dm = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 function Insights({ tab, ins, token, onClosed }: { tab: Tab; ins: Ins; token: string; onClosed: (key: string) => void }) {
   if (tab === 'overview') return <Overview ins={ins} />;
   if (tab === 'questions') return <Questions ins={ins} />;
+  if (tab === 'feedback') return <Feedback token={token} />;
   return <Reports ins={ins} token={token} onClosed={onClosed} />;
 }
 
@@ -353,6 +355,79 @@ function Reports({ ins, token, onClosed }: { ins: Ins; token: string; onClosed: 
               <thead><tr><th>Thông báo</th><th>Lượt</th></tr></thead>
               <tbody>
                 {ins.errors.map((e) => <tr key={e.message}><td style={{ wordBreak: 'break-word' }}>{e.message}</td><td>{e.n}</td></tr>)}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+const KIND: Record<string, string> = { gopy: 'Góp ý', loi: 'Báo lỗi', cauhoi: 'Đề xuất câu hỏi' };
+
+function Feedback({ token }: { token: string }) {
+  const [list, setList] = useState<Awaited<ReturnType<typeof api.admin.feedback>>['feedback']>([]);
+  const [sup, setSup] = useState<Support>({ momo: '', qr: '', card: '', note: '' });
+  const [msg, setMsg] = useState('');
+  useEffect(() => {
+    api.admin
+      .feedback(token)
+      .then((r) => {
+        setList(r.feedback);
+        setSup(r.support);
+      })
+      .catch((e) => setMsg(e instanceof Error ? e.message : 'Lỗi'));
+  }, [token]);
+  const save = async () => {
+    try {
+      const v = await api.admin.setSupport(token, sup);
+      setSup(v);
+      setMsg('Đã lưu. Mục Ủng hộ trên trang chủ hiện những ô có điền.');
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Lỗi');
+    }
+  };
+  const field = (k: keyof Support, label: string, hint: string) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <label htmlFor={`sup-${k}`} className="gd-label">{label}</label>
+      <input id={`sup-${k}`} className="gd-input" style={{ fontSize: 15, minHeight: 40 }} value={sup[k]} placeholder={hint} onChange={(e) => setSup({ ...sup, [k]: e.target.value })} />
+    </div>
+  );
+  return (
+    <>
+      <section className="gd-paper" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="gd-label">Thông tin ủng hộ</div>
+        <p className="gd-msg" style={{ margin: 0 }}>Ô nào để trống sẽ không hiện cho người chơi. Chỉ nhận đường dẫn https.</p>
+        {field('momo', 'Link MoMo', 'https://me.momo.vn/...')}
+        {field('qr', 'Ảnh mã QR (MoMo hoặc ngân hàng)', 'https://... đường dẫn tới ảnh QR')}
+        {field('card', 'Trang nhận thẻ (Ko-fi, Buy Me a Coffee, PayPal...)', 'https://ko-fi.com/...')}
+        {field('note', 'Lời cảm ơn', 'Cảm ơn bạn đã giúp làng thả diều cao hơn!')}
+        <div><button className="gd-btn" style={{ fontSize: 16 }} onClick={save}>Lưu</button></div>
+        {msg && <p className="gd-msg gd-msg--hint" style={{ margin: 0 }}>{msg}</p>}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 8 }}>Góp ý của người chơi</div>
+        {list.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa có góp ý nào.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Lúc</th><th>Loại</th><th>Nội dung</th><th>Liên hệ</th><th /></tr></thead>
+              <tbody>
+                {list.map((f) => (
+                  <tr key={f.id} style={f.status === 'open' ? undefined : { opacity: 0.5 }}>
+                    <td style={{ whiteSpace: 'nowrap' }}>{new Date(f.at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td>{KIND[f.kind] ?? f.kind}</td>
+                    <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{f.message}</td>
+                    <td style={{ wordBreak: 'break-word' }}>{f.contact ?? ''}</td>
+                    <td>
+                      {f.status === 'open' && (
+                        <button className="gd-chip" onClick={() => api.admin.closeFeedback(token, f.id).then(() => setList((l) => l.map((x) => (x.id === f.id ? { ...x, status: 'closed' } : x))))}>Đã đọc</button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

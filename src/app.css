@@ -417,3 +417,21 @@ button{font:inherit;color:inherit}
 .adm-tiles span{font-size:13px;font-weight:600}
 .adm-tiles em{font-size:12px;font-style:normal;opacity:.7}
 .adm-bar{display:block;height:8px;border-radius:4px;background:#3a8fd8;min-width:2px}
+
+/* ---------- feedback and support */
+.home-foot{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;color:#8a94a6;font-size:13px}
+.link-btn{border:0;background:none;padding:8px 6px;min-height:36px;font:inherit;font-size:13px;font-weight:600;color:#3a6fb0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.fb-form{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.fb-kinds{display:flex;flex-wrap:wrap;gap:6px}
+.fb-kind{border:1.5px solid #dfe4ec;background:#fff;border-radius:999px;padding:8px 14px;min-height:40px;font:inherit;font-size:14px;font-weight:600;color:#33415a;cursor:pointer}
+.fb-kind.on{border-color:#e5533d;background:#fff0ec;color:#c2412d}
+.fb-text,.fb-input{width:100%;box-sizing:border-box;border:1.5px solid #dfe4ec;border-radius:14px;padding:12px;font:inherit;font-size:15px;color:#0f2747;background:#fff;resize:vertical}
+.fb-text:focus,.fb-input:focus{outline:none;border-color:#3a8fd8}
+.fb-label{font-size:13px;color:#5b6778}
+.fb-err{margin:0;color:#b23a26;font-size:14px}
+.fb-done{margin:16px 0;font-size:16px;color:#2f7a3f;font-weight:600}
+.sup-note{margin:8px 0 14px;font-size:15px;line-height:1.5;color:#33415a}
+.sup-opts{display:flex;flex-direction:column;align-items:center;gap:12px}
+.sup-qr{width:220px;max-width:70vw;aspect-ratio:1;object-fit:contain;border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(20,30,60,.12)}
+.sup-momo{background:#a50064;text-decoration:none;display:flex;align-items:center;justify-content:center;width:100%}
+.sup-card{text-decoration:none;display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box}
