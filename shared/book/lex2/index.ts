@@ -10,6 +10,7 @@ import cothe from './cothe.js';
 import douong from './douong.js';
 import nhaccu from './nhaccu.js';
 import thienvan from './thienvan.js';
+import ngonngu from './ngonngu.js';
 
 export const MORE_LEX: Record<string, string> = {
   dongvat,
@@ -23,4 +24,5 @@ export const MORE_LEX: Record<string, string> = {
   douong,
   nhaccu,
   thienvan,
+  ngonngu,
 };
