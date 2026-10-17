@@ -47,6 +47,7 @@ const EXTEND: Record<string, Source[]> = {
   tet: [S('vanhoa', ['tet']), S('monan', ['tet']), S('thucvat', ['tet'])],
   'co-tich': [S('cotich', ['vn', 'truyen'], { any: ['cotich', 'truyenthuyet', 'ngungon', 'truyencuoi'] })],
   'loai-ca': [S('dongvat', ['ca'])],
+  'tv-ve-tinh': [S('thienvan', ['vetinh'])],
 };
 
 const q = (id: string, c: string, text: string, from: Source[], more: Partial<Spec> = {}): Spec => ({ id, c, q: text, from, ...more });
