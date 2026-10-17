@@ -1,7 +1,7 @@
 // Every question in the game: the handcrafted bank (extended with the village book) plus questions generated from book labels.
 import { BANK } from '../bank.js';
 import { parseRaw, type QuestionDef } from '../match.js';
-import { addLate, addMore, buildSpec, firstLetter, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { addLate, addMore, buildSpec, extendBySpec, firstLetter, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
 import { soft } from '../normalize.js';
 import { MORE } from './more.js';
 import { MORE2 } from './more2.js';
@@ -51,6 +51,11 @@ const EXTEND: Record<string, Source[]> = {
 };
 
 const q = (id: string, c: string, text: string, from: Source[], more: Partial<Spec> = {}): Spec => ({ id, c, q: text, from, ...more });
+
+/** Handcrafted questions with a word rule, extended with every book entry that fits it (after all hand passes). */
+const EXTEND_RULE: Record<string, Spec> = {
+  'con-vat-chu-c': q('con-vat-chu-c', '', '', [S('dongvat')], { start: 'c' }),
+};
 
 /**
  * "Khôn lỏi" answers: the pick that feels clever but that half the village reaches for.
@@ -419,7 +424,8 @@ function assemble() {
     const ext = EXTEND[raw.id];
     const qd00 = ext ? extendQuestion(base, ext, LEXICONS) : base;
     // The book's long tail (lex2) comes after every hand-written pass, so it never takes their answers or tiers.
-    const qd0 = ext ? extendQuestion(thicken(qd00, raw.id), ext, LEXICONS, true) : thicken(qd00, raw.id);
+    const qd0a = ext ? extendQuestion(thicken(qd00, raw.id), ext, LEXICONS, true) : thicken(qd00, raw.id);
+    const qd0 = EXTEND_RULE[raw.id] ? extendBySpec(qd0a, EXTEND_RULE[raw.id], LEXICONS) : qd0a;
     const qd = { ...qd0, traps: resolveTraps(qd0.answers, TRAPS[raw.id]) };
     const strong = qd.answers.filter((a) => a.priorTier <= 1).length;
     const lv = (raw as { lv?: number }).lv;

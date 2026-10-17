@@ -392,3 +392,35 @@ export function addLate(q: QuestionDef, spec: Spec, lex: Record<string, Entry[]>
   }
   return { ...q, answers };
 }
+
+/**
+ * Extends a handcrafted question with every book entry that fits a rule (a lexicon, labels and word rules such as
+ * a first letter), after all hand-written passes. Old answers keep their tiers; new ones start at tier 2–4.
+ */
+export function extendBySpec(q: QuestionDef, spec: Spec, lex: Record<string, Entry[]>): QuestionDef {
+  const answers = q.answers.map((a) => ({ ...a, aliases: [...a.aliases] }));
+  const byName = new Map<string, AnswerEntry>();
+  for (const a of answers) for (const n of a.aliases) byName.set(soft(n), a);
+  const vagueSet = new Set([...(spec.vague ?? []), ...spec.from.flatMap((f) => VAGUE[f.lex] ?? [])].map(soft));
+  for (const src of spec.from) {
+    for (const e0 of lex[src.lex] ?? []) {
+      const e: Entry = { ...e0, names: [...e0.names, ...(e0.lateNames ?? [])], tags: new Set([...e0.tags, ...(e0.lateTags ?? [])]) };
+      if (!pick(e, src) || vagueSet.has(e.key)) continue;
+      const names = fitting(e, spec);
+      if (!names.length) continue;
+      const hit = names.map((n) => byName.get(soft(n))).find(Boolean);
+      if (hit) {
+        for (const n of names) if (!byName.has(soft(n))) {
+          hit.aliases.push(n);
+          byName.set(soft(n), hit);
+        }
+        continue;
+      }
+      const entry: AnswerEntry = { key: soft(names[0]), display: names[0], priorTier: Math.max(e0.late ? 3 : 2, PRIOR_FOR_POP[e.pop]), aliases: [...names] };
+      if (!entry.key || byName.has(entry.key)) continue;
+      answers.push(entry);
+      for (const n of names) byName.set(soft(n), entry);
+    }
+  }
+  return { ...q, answers };
+}
