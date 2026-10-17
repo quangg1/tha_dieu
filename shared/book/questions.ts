@@ -7,6 +7,7 @@ import { MORE } from './more.js';
 import { MORE2 } from './more2.js';
 import { NARROW } from './narrow.js';
 import { MORE3 } from './night.js';
+import { MORE4 } from './more4.js';
 import { LEXICONS } from './index.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
@@ -383,7 +384,7 @@ export const RETIRED = new Set<string>(
 /** The hand-written thickening passes, in order. */
 function thicken(q: QuestionDef, id: string): QuestionDef {
   let out = q;
-  for (const more of [MORE, MORE2, MORE3]) if (more[id]) out = addMore(out, more[id]);
+  for (const more of [MORE, MORE2, MORE4, MORE3]) if (more[id]) out = addMore(out, more[id], more === MORE4);
   return out;
 }
 

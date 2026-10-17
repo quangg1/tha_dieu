@@ -293,7 +293,11 @@ export function extendQuestion(q: QuestionDef, srcs: Source[], lex: Record<strin
  * Adds hand-written answers to a question: five tier lines in the bank's format ("A|alias, B"). A name that already
  * belongs to an answer only adds its spellings to that answer; new names become answers at the line's tier.
  */
-export function addMore(q: QuestionDef, tiers: string[]): QuestionDef {
+/**
+ * `foldNamed`: a new name that is a known answer followed only by proper names ("Phở Bát Đàn", "Adidas Samba",
+ * "Cam Cao Phong") is that answer under another name, so a shop, model or place cannot turn a common answer rare.
+ */
+export function addMore(q: QuestionDef, tiers: string[], foldNamed = false): QuestionDef {
   const answers = q.answers.map((a) => ({ ...a, aliases: [...a.aliases] }));
   const byName = new Map<string, AnswerEntry>();
   for (const a of answers) for (const n of a.aliases) byName.set(soft(n), a);
@@ -301,7 +305,7 @@ export function addMore(q: QuestionDef, tiers: string[]): QuestionDef {
     for (const group of line.split(',')) {
       const names = group.split('|').map((x) => x.trim()).filter(Boolean);
       if (!names.length) continue;
-      const hit = names.map((n) => byName.get(soft(n))).find(Boolean);
+      const hit = names.map((n) => byName.get(soft(n))).find(Boolean) ?? (foldNamed ? namedVariantOf(names[0], byName) : undefined);
       if (hit) {
         for (const n of names) if (!byName.has(soft(n))) {
           hit.aliases.push(n);
@@ -316,4 +320,17 @@ export function addMore(q: QuestionDef, tiers: string[]): QuestionDef {
     }
   });
   return { ...q, answers };
+}
+
+const isProper = (w: string) => /^\d/.test(w) || (w[0] !== w[0].toLowerCase() && w[0] === w[0].toUpperCase());
+
+/** The known answer a name extends with proper names only ("Bún chả Hương Liên" → "Bún chả"), if any. */
+function namedVariantOf(name: string, byName: Map<string, AnswerEntry>): AnswerEntry | undefined {
+  const words = name.trim().split(/\s+/);
+  for (let k = words.length - 1; k >= 1; k--) {
+    if (!words.slice(k).every(isProper)) break;
+    const base = byName.get(soft(words.slice(0, k).join(' ')));
+    if (base) return base;
+  }
+  return undefined;
 }
