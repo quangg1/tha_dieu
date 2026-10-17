@@ -3,10 +3,12 @@ import dongvat from './dongvat.js';
 import thucvat from './thucvat.js';
 import monan from './monan.js';
 import khainiem from './khainiem.js';
+import thethao from './thethao.js';
 
 export const MORE_LEX: Record<string, string> = {
   dongvat,
   thucvat,
   monan,
   khainiem,
+  thethao,
 };
