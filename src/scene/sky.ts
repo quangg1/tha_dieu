@@ -29,8 +29,8 @@ function makeArt() {
     iss: Art.sprite(Sp.issSvg()),
     vinasat: Art.sprite(Sp.vinasatSvg()),
     magpie: [Art.sprite(Sp.magpieSvg(0)), Art.sprite(Sp.magpieSvg(1))],
-    cuoi: Art.spriteUrl('/art/cuoi.png', 282, 360),
-    hang: Art.spriteUrl('/art/hang.png', 315, 520),
+    cuoi: Art.spriteUrl('/art/cuoi.png', 283, 360),
+    hang: Art.spriteUrl('/art/hang.png', 316, 520),
   };
 }
 
