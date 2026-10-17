@@ -277,4 +277,41 @@ export const MORE4: Record<string, string[]> = {
     'Làng gốm Phước Tích, Làng nón Tây Hồ, Làng hương Thủy Xuân, Làng đúc đồng Phường Đúc, Làng rau Trà Quế, Làng chiếu Cẩm Nê, Làng nước mắm Nam Ô, Làng bánh tráng Túy Loan, Làng lụa Tân Châu, Làng gốm Hương Canh, Làng sơn mài Tương Bình Hiệp, Làng sừng Thụy Ứng, Làng tiện Nhị Khê, Làng bánh cuốn Thanh Trì, Làng bánh chưng Tranh Khúc, Làng miến Cự Đà|Làng tương Cự Đà, Làng chè Tân Cương, Làng kim hoàn Định Công, Làng tượng gỗ Sơn Đồng|Làng Sơn Đồng, Làng nem Lai Vung, Làng hoa Vạn Thành, Làng quất Tứ Liên, Làng hoa Mê Linh, Làng hoa kiểng Cái Mơn',
     'Làng gốm Mang Thít|Gốm đỏ Vĩnh Long, Làng bánh đa Kế, Làng gốm Kim Lan, Làng đá Ninh Vân, Làng dệt Phương La, Làng rượu Vân|Rượu làng Vân, Làng rượu Bàu Đá, Làng nón Gò Găng, Làng đúc đồng Tống Xá, Làng mộc La Xuyên, Làng bánh cáy Làng Nguyễn, Làng lụa Nam Cao, Làng dệt lanh Lùng Tám, Làng hoa giấy Thanh Tiên, Làng nón Phú Cam',
   ),
+  // ---------------------------------------------------------------- Batch G
+  'tt-nuoc': T(
+    'Mô tô nước|Jet ski, Lặn bình khí|Lặn scuba, Dù kéo|Dù bay kéo|Parasailing, Lướt ván kéo|Wakeboard, Chèo thuyền canoe|Canoe',
+    'Bóng nước canoe|Canoe polo, Trượt phao|Tubing, Lướt sóng kéo|Wakesurfing, Bơi nước lạnh|Bơi mùa đông, Nhảy cầu đồng bộ, Nhảy cầu cầu cứng|Nhảy cầu 10m, Nhảy cầu ván nhún, Chèo thuyền rowing|Chèo thuyền đua',
+  ),
+  'tt-doi': T(
+    'Bóng bầu dục Mỹ|American football, Bóng ném bãi biển, Bóng bầu dục 7 người|Rugby 7, Cổ vũ|Cheerleading, Xe trượt lòng máng|Bobsleigh',
+    'Bóng bầu dục cờ|Flag football, Touch rugby, Bóng chuyền chân|Footvolley, Bossaball, Roller derby, Ringette, Shinty, Camogie, Quadball|Quidditch, Gateball, Chinlone, Laser tag, Airsoft, Polocrosse, Pesäpallo, Slamball, Throwball, Bơi nghệ thuật đồng đội, Bóng nước canoe|Canoe polo',
+  ),
+  'vh-cotich-tg': T(
+    'Những nhạc sĩ thành Bremen|Nhạc sĩ thành Bremen, Sói và bảy chú dê con|Con sói và bảy chú dê con, Mười hai nàng công chúa nhảy múa, Nàng công chúa ếch, Củ cải khổng lồ|Cây củ cải khổng lồ, Ngỗng đẻ trứng vàng|Con ngỗng đẻ trứng vàng, Sư tử và chuột|Sư tử và chuột nhắt, Ve sầu và kiến|Ve và kiến|Kiến và châu chấu, Quạ và cáo|Con cáo và con quạ, Hoa Mộc Lan|Mộc Lan, Hằng Nga lên cung trăng|Hằng Nga bôn nguyệt, Lương Sơn Bá Chúc Anh Đài|Lương Chúc',
+    'Ngỗng vàng, Hans may mắn, Ba sợi tóc vàng của con quỷ, Bà Holle, Đôi giày đỏ, Cái bật lửa|Chiếc bật lửa, Chàng chăn lợn, Cây thông, Ivan ngốc|Ivan Ngốc, Baba Yaga|Bà phù thủy Baba Yaga, Kolobok|Bánh mì tròn Kolobok, Masha và gấu|Masha và con gấu, Vasilisa xinh đẹp, Con ngựa gù|Con ngựa nhỏ gù lưng, Chim lửa|Con chim lửa, Ông già Băng Giá|Morozko, Mạnh Khương Nữ, Ngu Công dời núi, Khoa Phụ đuổi mặt trời, Hậu Nghệ bắn mặt trời, Nữ Oa vá trời, Tinh Vệ lấp biển, Chú bé một tấc|Issun-bōshi, Kintaro, Chim sẻ bị cắt lưỡi, Ông lão làm hoa nở|Hanasaka Jiji, Hạc trả ơn|Chim hạc báo ơn, Hưng Phu và Nôn Phu|Heungbu và Nolbu, Kongjwi và Patjwi, Jack diệt khổng lồ, Dick Whittington và con mèo, Ba chú dê Billy Gruff|Ba chú dê đực, Gà mái đỏ|Cô gà mái đỏ, Người bánh gừng|Gingerbread Man, Chó sói và cừu non, Chuột thành phố và chuột đồng quê|Chuột thành phố và chuột nhà quê',
+  ),
+  'pop-dien-thoai': T(
+    'Redmi, Black Shark, Red Magic, Microsoft Lumia, Pantech, Cat|Caterpillar, Doogee, Ulefone, Blackview',
+    'Cubot, Oukitel, Umidigi, Micromax, Lava, Karbonn, Symphony, Walton, Cherry Mobile, Evercoss, Advan, Condor, Acer, Essential, Razer, Neffos, Hisense, Haier, Konka, Smartisan, LeEco, Zopo, Elephone, Energizer, Doro, Ericsson, Mitsubishi, NEC, Fujitsu, Casio, Sendo, Handspring, Sky',
+  ),
+  'pop-chuoi-do-uong': T(
+    'The Coffee Bean & Tea Leaf|Coffee Bean, Costa Coffee, Luckin Coffee, % Arabica|Arabica, Tim Hortons, Dunkin\'|Dunkin, Chatime, Kung Fu Tea, Xing Fu Tang, Gloria Jean\'s Coffees|Gloria Jean\'s',
+    'Cotti Coffee, Blue Bottle Coffee, Peet\'s Coffee, Caffè Nero, Ediya Coffee, Twosome Place, Paik\'s Coffee, Mega Coffee, Compose Coffee, Hollys Coffee, Doutor, Tully\'s Coffee, Komeda, Presotea, Chun Shui Tang|Xuân Thủy Đường, 50 Lan, Nayuki, Chabaidao, Guming, Bawang Chaji, Lollicup',
+  ),
+  'pop-sieu-thi': T(
+    'GO!|Siêu thị GO!, Lotus\'s|Tesco Lotus, Makro, Aldi, Lidl, Kmart, Sam\'s Club, Whole Foods, Trader Joe\'s, CU, Emart24, Alfamart, Indomaret',
+    'Kroger, Safeway, Publix, H-E-B, Meijer, Albertsons, Sainsbury\'s, Asda, Morrisons, Waitrose, Woolworths, Coles, IGA, Rewe, Edeka, Spar, Mercadona, Villa Market, FairPrice|NTUC FairPrice, Cold Storage, Sheng Siong, SM Supermarket, Puregold, Ito-Yokado, Seiyu, Daiei, Daily Yamazaki, Homeplus, Lotte Super, Hanaro Mart',
+  ),
+  'pop-app-hoc': T(
+    'Gemini|Google Gemini, Claude, Grammarly, Codecademy, edX, Skillshare, Cambly, Anki, Brainly, Scratch, Code.org, GeoGebra, Desmos, Wikipedia, MochiMochi|Mochi Mochi, TFlat, Từ điển Laban|Laban Dictionary, IOE, Trạng Nguyên Tiếng Việt',
+    'FutureLearn, LinkedIn Learning, MasterClass, Udacity, Byju\'s, Chegg, Course Hero, Socratic, italki, Preply, HelloTalk, Tandem, Rosetta Stone, Mondly, Drops, Pimsleur, Lingokids, Symbolab, Google Scholar, Clevai, Marathon Education, Kyna, Edumall, Unica, Monkey Stories, VMonkey, Hoc10, Kiến Guru',
+  ),
+  'pop-goi-xe': T(
+    'inDrive|inDriver, DoorDash, Uber Eats, Grubhub, Meituan, Swiggy, Zomato, Kakao T, LINE MAN',
+    'Ola, Careem, Cabify, Free Now, Yandex Go, Postmates, Instacart, Ele.me, Rappi, Glovo, Just Eat, Wolt, Talabat, Coupang Eats, Yogiyo',
+  ),
+  'pop-mang-xa-hoi': T(
+    'QQ, Kuaishou, Bilibili, iMessage, FaceTime, Yahoo 360|Yahoo! 360, Hahalolo, 9GAG, Medium',
+    'Band|Naver Band, Vimeo, Dailymotion, Orkut, Friendster, Yik Yak, Periscope, Truth Social, Substack, Google Hangouts|Hangouts, Google Talk, Badoo, Hinge, Nextdoor, Goodreads, Lark|Larksuite',
+  ),
 };
