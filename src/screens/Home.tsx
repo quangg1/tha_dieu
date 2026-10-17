@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { type CSSProperties, useEffect, useState, type ReactNode } from 'react';
 import { DAY_BANDS, MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { api, type Support } from '../api';
@@ -36,17 +36,42 @@ function useCountdown() {
 
 /** Theme packs shown as a locked preview until they launch. */
 const THEMES = [
-  { id: 'tet', name: 'Tết', bg: '#6e1a14', color: '#ffd36b', desc: 'Mỗi đáp án làm cây mai nhà bé Bi nở thêm hoa. Càng hiếm, hoa nở càng rộ, kèm lì xì, bánh chưng và pháo hoa đêm giao thừa.', measure: 'Thước đo: lộc xuân, số hoa nở' },
-  { id: 'hoadang', name: 'Hoa Đăng', bg: '#1b1530', color: '#ffcf6b', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
-  { id: 'lanbien', name: 'Lặn Biển', bg: '#071a2c', color: '#7fdcff', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
-  { id: 'amnhac', name: 'Âm Nhạc', bg: '#1e1036', color: '#c9a8ff', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
+  { id: 'tet', name: 'Tết', tag: 'Ra mắt dịp Tết', bg: '#6e1a14', color: '#ffd36b', desc: 'Mỗi đáp án làm cây mai nhà bé Bi nở thêm hoa. Càng hiếm, hoa nở càng rộ, kèm lì xì, bánh chưng và pháo hoa đêm giao thừa.', measure: 'Thước đo: lộc xuân, số hoa nở' },
+  { id: 'hoadang', name: 'Hoa Đăng', tag: 'Đêm rằm Hội An', bg: '#1b1530', color: '#ffcf6b', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
+  { id: 'lanbien', name: 'Lặn Biển', tag: 'Xuống đáy đại dương', bg: '#071a2c', color: '#7fdcff', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
+  { id: 'amnhac', name: 'Âm Nhạc', tag: 'Đại nhạc hội', bg: '#1e1036', color: '#c9a8ff', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
 ];
+
+/** Lunar New Year 2027 (6 February), for the Tết pack's countdown. */
+const TET_2027 = Date.UTC(2027, 1, 6) - 7 * 3600_000;
+const daysToTet = () => Math.max(0, Math.ceil((TET_2027 - Date.now()) / 86400_000));
+
+/** Packs this player asked to hear about (kept on the device; the wish is also counted). */
+function readWants(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem('thadieu.themeWants') || '[]');
+  } catch {
+    return [];
+  }
+}
 
 export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyScene; soundButton: ReactNode; onPlay: (m: 'daily' | 'night') => void; onReview: (s: Summary) => void }) {
   const [howto, setHowto] = useState(false);
   const [bag, setBag] = useState(false);
   const [menu, setMenu] = useState(false);
   const [themes, setThemes] = useState(false);
+  const [wants, setWants] = useState<string[]>(readWants);
+  const want = (id: string) => {
+    if (wants.includes(id)) return;
+    const next = [...wants, id];
+    setWants(next);
+    try {
+      localStorage.setItem('thadieu.themeWants', JSON.stringify(next));
+    } catch {
+      /* private mode: the wish still counts */
+    }
+    track('theme_want', { id });
+  };
   const [skin, setSkin] = useState(prefs.skin);
   const [invited, setInvited] = useState('');
   const [sheet, setSheet] = useState<'feedback' | 'support' | null>(null);
@@ -255,17 +280,23 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             </div>
             <p className="sup-note">Cùng một câu đố, những bầu trời mới. Luật chơi giữ nguyên, mỗi gói đổi khung cảnh, nhạc nền và thước đo của chuyến đi.</p>
             <div className="themes">
-              {THEMES.map((t) => (
-                <div key={t.id} className="theme-card" style={{ background: t.bg }}>
+              {THEMES.map((t, i) => (
+                <div key={t.id} className={`theme-card${i === 0 ? ' featured' : ''}`} style={{ '--bg': t.bg, '--c': t.color } as CSSProperties}>
                   <div className="theme-art" dangerouslySetInnerHTML={{ __html: THEME_ART[t.id] }} />
                   <span className="theme-lock">
                     <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
-                    Sắp ra mắt
+                    {t.id === 'tet' ? `Còn ${daysToTet()} ngày` : 'Sắp ra mắt'}
                   </span>
                   <div className="theme-body">
-                    <b style={{ color: t.color }}>{t.name}</b>
+                    <span className="theme-tag">{t.tag}</span>
+                    <b>{t.name}</b>
                     <p>{t.desc}</p>
-                    <small>{t.measure}</small>
+                    <div className="theme-foot">
+                      <small>{t.measure}</small>
+                      <button className={`theme-want${wants.includes(t.id) ? ' on' : ''}`} onClick={() => want(t.id)} disabled={wants.includes(t.id)}>
+                        {wants.includes(t.id) ? '✓ Sẽ báo bạn' : 'Muốn chơi gói này'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
