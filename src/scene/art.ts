@@ -33,3 +33,12 @@ export function sprite(def: { svg: string; w: number; h: number }): Sprite {
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(def.svg);
   return s;
 }
+
+/** A sprite from a picture file in /public (the mascot is painted, not drawn in code). */
+export function spriteUrl(url: string, w: number, h: number): Sprite {
+  const img = new Image();
+  const s: Sprite = { img, w, h, ready: false };
+  img.onload = () => (s.ready = true);
+  img.src = url;
+  return s;
+}

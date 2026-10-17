@@ -13,7 +13,6 @@ type Sprite = Art.Sprite;
 
 let ART: ReturnType<typeof makeArt> | null = null;
 function makeArt() {
-  const kids = V.kidsSvg();
   const plane = Sp.airlinerSvg();
   return {
     stork: [Art.sprite(Art.storkSvg(0)), Art.sprite(Art.storkSvg(1))],
@@ -21,8 +20,9 @@ function makeArt() {
     areca: [Art.sprite(V.arecaSvg(0)), Art.sprite(V.arecaSvg(-1))],
     banyan: Art.sprite(V.banyanSvg()),
     house: [Art.sprite(V.houseSvg(0)), Art.sprite(V.houseSvg(1))],
-    kids: Art.sprite(kids),
-    hand: kids.hand,
+    // bé Bi, the mascot: a painted picture; hand = where the kite string leaves his raised fist.
+    kids: Art.spriteUrl('/art/be-bi.png', 325, 420),
+    hand: { x: 0.928, y: 0.276 },
     plane: Art.sprite(plane),
     planeTail: plane.tail,
     balloon: Art.sprite(Sp.balloonSvg()),
@@ -32,7 +32,6 @@ function makeArt() {
     magpie: [Art.sprite(Sp.magpieSvg(0)), Art.sprite(Sp.magpieSvg(1))],
     cuoi: [Art.sprite(Moon.cuoiSvg(0)), Art.sprite(Moon.cuoiSvg(1))],
     hang: Art.sprite(Moon.hangSvg()),
-    rabbit: [Art.sprite(Moon.rabbitSvg(0)), Art.sprite(Moon.rabbitSvg(1))],
   };
 }
 
@@ -739,8 +738,7 @@ export class SkyScene {
       // Chú Cuội under the banyan, the jade rabbit at its medicine, chị Hằng drifting past with her lantern.
       const ground = cy + size * 0.3;
       this.put(A.banyan, cx - size * 0.04, ground, size * 0.6, 0.5, 1);
-      this.put(A.cuoi[this.reduce ? 0 : Math.floor(this.t * 1.6) % 2], cx + size * 0.02, ground + size * 0.02, size * 0.25, 0.5, 1);
-      this.put(A.rabbit[this.reduce ? 0 : Math.floor(this.t * 3) % 2], cx + size * 0.24, ground + size * 0.02, size * 0.17, 0.5, 1);
+      this.put(A.cuoi[this.reduce ? 0 : Math.floor(this.t * 1.6) % 2], cx + size * 0.02, ground + size * 0.02, size * 0.29, 0.5, 1);
       const bob = this.reduce ? 0 : Math.sin(this.t * 0.9) * size * 0.025;
       const hx = this.layout.column ? cx - size * 0.42 : cx - size * 0.62;
       ctx.save();
@@ -1345,6 +1343,10 @@ export class SkyScene {
       ctx.fillStyle = '#5f9440';
       ctx.fillRect(0, yg + fh - 1, W, H - yg - fh + 2);
     }
+    ctx.fillStyle = 'rgba(30,60,20,.25)';
+    ctx.beginPath();
+    ctx.ellipse(bx, dyke + 3, bw * 0.34, bw * 0.05, 0, 0, Math.PI * 2);
+    ctx.fill();
     this.put(A.kids, bx, dyke + 3, bw, 0.5, 1);
 
   }
