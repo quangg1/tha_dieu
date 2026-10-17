@@ -514,3 +514,4 @@ button{font:inherit;color:inherit}
 .row-verdict.approved{color:#1b8a4a}
 .row-verdict.rejected{color:#c0392b}
 .row.row-out .row-a{text-decoration:line-through;opacity:.6}
+.hud-panel .k.zone{overflow:hidden;text-overflow:ellipsis;max-width:46vw;letter-spacing:.08em}

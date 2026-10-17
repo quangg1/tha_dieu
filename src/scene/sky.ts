@@ -7,6 +7,7 @@ import * as Land from './land';
 import * as Sp from './space';
 import { kiteArt, sailSvg, type Tail } from '../kites';
 import * as V from './village';
+import * as Moon from './moonfolk';
 
 type Sprite = Art.Sprite;
 
@@ -14,7 +15,6 @@ let ART: ReturnType<typeof makeArt> | null = null;
 function makeArt() {
   const kids = V.kidsSvg();
   const plane = Sp.airlinerSvg();
-  const rocket = Sp.rocketSvg();
   return {
     stork: [Art.sprite(Art.storkSvg(0)), Art.sprite(Art.storkSvg(1))],
     bamboo: [Art.sprite(V.bambooSvg(1)), Art.sprite(V.bambooSvg(4))],
@@ -29,9 +29,10 @@ function makeArt() {
     hotAir: [Art.sprite(Sp.hotAirSvg(0)), Art.sprite(Sp.hotAirSvg(1)), Art.sprite(Sp.hotAirSvg(2))],
     iss: Art.sprite(Sp.issSvg()),
     vinasat: Art.sprite(Sp.vinasatSvg()),
-    rocket: Art.sprite(rocket),
-    nozzle: rocket.nozzle,
     magpie: [Art.sprite(Sp.magpieSvg(0)), Art.sprite(Sp.magpieSvg(1))],
+    cuoi: [Art.sprite(Moon.cuoiSvg(0)), Art.sprite(Moon.cuoiSvg(1))],
+    hang: Art.sprite(Moon.hangSvg()),
+    rabbit: [Art.sprite(Moon.rabbitSvg(0)), Art.sprite(Moon.rabbitSvg(1))],
   };
 }
 
@@ -734,19 +735,18 @@ export class SkyScene {
       ctx.fillStyle = halo;
       ctx.fillRect(cx - size * 1.3, cy - size * 1.3, size * 2.6, size * 2.6);
       ctx.drawImage(m.img, cx - size / 2, cy - size / 2, size, size);
-      const ax = cx - size / 2 + m.arm.x * size;
-      const ay = cy - size / 2 + m.arm.y * size;
-      const wave = this.reduce ? 0 : Math.sin(this.t * 4) * 0.4;
+      const A = ART!;
+      // Chú Cuội under the banyan, the jade rabbit at its medicine, chị Hằng drifting past with her lantern.
+      const ground = cy + size * 0.3;
+      this.put(A.banyan, cx - size * 0.04, ground, size * 0.6, 0.5, 1);
+      this.put(A.cuoi[this.reduce ? 0 : Math.floor(this.t * 1.6) % 2], cx + size * 0.02, ground + size * 0.02, size * 0.25, 0.5, 1);
+      this.put(A.rabbit[this.reduce ? 0 : Math.floor(this.t * 3) % 2], cx + size * 0.24, ground + size * 0.02, size * 0.17, 0.5, 1);
+      const bob = this.reduce ? 0 : Math.sin(this.t * 0.9) * size * 0.025;
+      const hx = this.layout.column ? cx - size * 0.42 : cx - size * 0.62;
       ctx.save();
-      ctx.translate(ax, ay);
-      ctx.rotate(-1.05 + wave);
-      ctx.strokeStyle = m.shadow;
-      ctx.lineCap = 'round';
-      ctx.lineWidth = Math.max(3, size * 0.022);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(size * 0.065, 0);
-      ctx.stroke();
+      ctx.translate(hx, cy - size * 0.05 + bob);
+      ctx.rotate(this.reduce ? 0 : Math.sin(this.t * 0.6) * 0.04);
+      this.put(A.hang, 0, 0, size * 0.42);
       ctx.restore();
       for (let i = 0; i < 5; i++) {
         const side = i % 2 ? 1 : -1;
@@ -1083,27 +1083,6 @@ export class SkyScene {
     if (this.visible(7.55)) {
       const w = Math.min(this.U * 0.56, 300);
       this.put(A.vinasat, this.gx(0.25) + Math.sin(this.t * 0.3) * 10, this.y(7.55) + Math.sin(this.t * 0.5) * 4, w);
-    }
-    // A rocket on its way to the moon.
-    if (this.visible(8.15, 260)) {
-      const w = Math.min(this.U * 0.14, 76);
-      const h = (w * A.rocket.h) / A.rocket.w;
-      const x = this.wide ? this.gx(0.78) : W * 0.8;
-      const y = this.y(8.15) + Math.sin(this.t * 0.8) * 6;
-      const nx = x - w / 2 + A.nozzle.x * w;
-      const ny = y - h / 2 + A.nozzle.y * h;
-      const fl = h * (0.45 + 0.08 * Math.sin(this.t * 30));
-      const g = ctx.createLinearGradient(0, ny, 0, ny + fl);
-      g.addColorStop(0, 'rgba(255,240,180,.95)');
-      g.addColorStop(0.4, 'rgba(255,170,60,.85)');
-      g.addColorStop(1, 'rgba(255,90,40,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.moveTo(nx - w * 0.2, ny);
-      ctx.quadraticCurveTo(nx, ny + fl * 1.3, nx + w * 0.2, ny);
-      ctx.closePath();
-      ctx.fill();
-      this.put(A.rocket, x, y, w);
     }
   }
 

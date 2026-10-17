@@ -354,60 +354,8 @@ export function paintMoon(size: number, dpr: number): { img: Paint; arm: { x: nu
     ctx.arc(u(0.12 + r() * 0.76), u(0.12 + r() * 0.76), u(0.012 + r() * 0.025), 0, Math.PI * 2);
     ctx.stroke();
   }
-  // Silhouettes: the banyan, chú Cuội at its foot, the jade rabbit.
+  // The folk of the moon (chú Cuội, chị Hằng, the jade rabbit) are coloured sprites drawn by the scene.
   const shadow = 'rgba(176,128,46,.62)';
-  ctx.fillStyle = shadow;
-  ctx.beginPath();
-  ctx.ellipse(u(0.5), u(0.9), u(0.42), u(0.1), 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(u(0.455), u(0.84));
-  ctx.bezierCurveTo(u(0.47), u(0.72), u(0.46), u(0.62), u(0.42), u(0.54));
-  ctx.lineTo(u(0.45), u(0.53));
-  ctx.bezierCurveTo(u(0.48), u(0.58), u(0.5), u(0.6), u(0.51), u(0.62));
-  ctx.bezierCurveTo(u(0.52), u(0.58), u(0.55), u(0.55), u(0.58), u(0.52));
-  ctx.lineTo(u(0.6), u(0.54));
-  ctx.bezierCurveTo(u(0.55), u(0.62), u(0.54), u(0.72), u(0.56), u(0.84));
-  ctx.closePath();
-  ctx.fill();
-  const lobes: [number, number, number][] = [[0.5, 0.36, 0.13], [0.38, 0.42, 0.1], [0.62, 0.41, 0.1], [0.29, 0.49, 0.07], [0.71, 0.48, 0.07], [0.44, 0.3, 0.09], [0.57, 0.29, 0.09], [0.5, 0.47, 0.09]];
-  for (const [x, y, rad] of lobes) {
-    ctx.beginPath();
-    ctx.arc(u(x), u(y), u(rad), 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.strokeStyle = shadow;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = Math.max(1.2, S * 0.006);
-  for (const [x, l] of [[0.33, 0.2], [0.37, 0.26], [0.66, 0.24], [0.7, 0.18]]) {
-    ctx.beginPath();
-    ctx.moveTo(u(x), u(0.52));
-    ctx.quadraticCurveTo(u(x + 0.01), u(0.52 + l * 0.6), u(x), u(0.52 + l));
-    ctx.stroke();
-  }
-  // Chú Cuội sitting against the trunk; his waving arm is drawn live by the scene.
-  ctx.beginPath();
-  ctx.arc(u(0.635), u(0.705), u(0.03), 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(u(0.6), u(0.84));
-  ctx.bezierCurveTo(u(0.6), u(0.77), u(0.61), u(0.74), u(0.635), u(0.735));
-  ctx.bezierCurveTo(u(0.66), u(0.74), u(0.675), u(0.77), u(0.68), u(0.8));
-  ctx.lineTo(u(0.72), u(0.82));
-  ctx.lineTo(u(0.72), u(0.845));
-  ctx.closePath();
-  ctx.fill();
-  // The jade rabbit with long ears.
-  ctx.beginPath();
-  ctx.ellipse(u(0.32), u(0.81), u(0.05), u(0.032), 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(u(0.365), u(0.785), u(0.022), 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(u(0.36), u(0.745), u(0.008), u(0.03), -0.25, 0, Math.PI * 2);
-  ctx.ellipse(u(0.375), u(0.748), u(0.008), u(0.028), 0.15, 0, Math.PI * 2);
-  ctx.fill();
   ctx.restore();
   return { img: cv, arm: { x: 0.655, y: 0.755 }, shadow };
 }

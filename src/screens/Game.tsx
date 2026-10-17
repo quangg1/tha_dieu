@@ -10,6 +10,7 @@ import {
   rankOf,
   crossed,
   formatAlt,
+  lastMilestone,
   formatAltParts,
   lapOf,
   CEILING_L,
@@ -606,7 +607,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           <BackIcon />
         </button>
         <div className="hud-panel">
-          <span className="k">{lap > 1 ? `Độ cao · vòng ${lap}` : 'Độ cao'}</span>
+          {/* Where the kite is now: the last landmark passed, so the climb reads as a journey. */}
+          <span className="k zone" title="Khu vực diều đang bay">
+            {lap > 1 ? `Vòng ${lap} · ` : ''}
+            {lastMilestone(shownAlt).name}
+          </span>
           <span className="v">
             {altNum}
             <small>{altUnit}</small>
