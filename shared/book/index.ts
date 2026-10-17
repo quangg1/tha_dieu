@@ -25,6 +25,7 @@ import thienvan from './lex/thienvan.js';
 import ngonngu from './lex/ngonngu.js';
 import tungu from './lex/tungu.js';
 import khainiem from './lex/khainiem.js';
+import { MORE_LEX } from './lex2/index.js';
 
 export const SOURCES: Record<string, string> = {
   dongvat,
@@ -54,8 +55,8 @@ export const SOURCES: Record<string, string> = {
   khainiem,
 };
 
-/** Every lexicon of the village book, parsed. */
-export const LEXICONS: Record<string, Entry[]> = Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, parseLex(k, v)]));
+/** Every lexicon of the village book, parsed: the first edition, then the thickening pass (lex2) appended. */
+export const LEXICONS: Record<string, Entry[]> = Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, parseLex(k, v + '\n@\n' + (MORE_LEX[k] ?? ''))]));
 
 // Capitals, read from the countries lexicon (the text after "^"), carry their country's labels.
 LEXICONS.thudo = LEXICONS.quocgia
