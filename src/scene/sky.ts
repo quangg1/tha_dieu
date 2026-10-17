@@ -7,7 +7,6 @@ import * as Land from './land';
 import * as Sp from './space';
 import { kiteArt, sailSvg, type Tail } from '../kites';
 import * as V from './village';
-import * as Moon from './moonfolk';
 
 type Sprite = Art.Sprite;
 
@@ -30,8 +29,8 @@ function makeArt() {
     iss: Art.sprite(Sp.issSvg()),
     vinasat: Art.sprite(Sp.vinasatSvg()),
     magpie: [Art.sprite(Sp.magpieSvg(0)), Art.sprite(Sp.magpieSvg(1))],
-    cuoi: [Art.sprite(Moon.cuoiSvg(0)), Art.sprite(Moon.cuoiSvg(1))],
-    hang: Art.sprite(Moon.hangSvg()),
+    cuoi: Art.spriteUrl('/art/cuoi.png', 282, 360),
+    hang: Art.spriteUrl('/art/hang.png', 315, 520),
   };
 }
 
@@ -735,15 +734,29 @@ export class SkyScene {
       ctx.fillRect(cx - size * 1.3, cy - size * 1.3, size * 2.6, size * 2.6);
       ctx.drawImage(m.img, cx - size / 2, cy - size / 2, size, size);
       const A = ART!;
-      // Chú Cuội under the banyan, the jade rabbit at its medicine, chị Hằng drifting past with her lantern.
-      const ground = cy + size * 0.3;
-      this.put(A.banyan, cx - size * 0.04, ground, size * 0.6, 0.5, 1);
-      this.put(A.cuoi[this.reduce ? 0 : Math.floor(this.t * 1.6) % 2], cx + size * 0.02, ground + size * 0.02, size * 0.29, 0.5, 1);
-      const bob = this.reduce ? 0 : Math.sin(this.t * 0.9) * size * 0.025;
-      const hx = this.layout.column ? cx - size * 0.42 : cx - size * 0.62;
+      // Chú Cuội sitting under the banyan and waving, chị Hằng drifting past with the jade rabbit in her arms.
+      const ground = cy + size * 0.36;
+      // A small pale hill on the moon for the banyan and Cuội to sit on.
+      const hill = ctx.createRadialGradient(cx, ground, 0, cx, ground, size * 0.36);
+      hill.addColorStop(0, 'rgba(255,251,234,.95)');
+      hill.addColorStop(0.6, 'rgba(250,236,190,.75)');
+      hill.addColorStop(1, 'rgba(250,236,190,0)');
+      ctx.fillStyle = hill;
+      ctx.beginPath();
+      ctx.ellipse(cx, ground + size * 0.01, size * 0.36, size * 0.075, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.put(A.banyan, cx - size * 0.06, ground + size * 0.015, size * 0.66, 0.5, 1);
+      const sway = this.reduce ? 0 : Math.sin(this.t * 2.2) * 0.03;
       ctx.save();
-      ctx.translate(hx, cy - size * 0.05 + bob);
-      ctx.rotate(this.reduce ? 0 : Math.sin(this.t * 0.6) * 0.04);
+      ctx.translate(cx + size * 0.07, ground + size * 0.03);
+      ctx.rotate(sway);
+      this.put(A.cuoi, 0, 0, size * 0.3, 0.5, 1);
+      ctx.restore();
+      const bob = this.reduce ? 0 : Math.sin(this.t * 0.9) * size * 0.025;
+      const hx = this.layout.column ? cx - size * 0.44 : cx - size * 0.66;
+      ctx.save();
+      ctx.translate(hx, cy + bob);
+      ctx.rotate(this.reduce ? 0 : Math.sin(this.t * 0.6) * 0.035);
       this.put(A.hang, 0, 0, size * 0.42);
       ctx.restore();
       for (let i = 0; i < 5; i++) {

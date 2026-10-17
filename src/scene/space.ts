@@ -333,31 +333,75 @@ export function paintMoon(size: number, dpr: number): { img: Paint; arm: { x: nu
   ctx.beginPath();
   ctx.arc(c, c, R, 0, Math.PI * 2);
   ctx.clip();
-  const g = ctx.createRadialGradient(c - R * 0.25, c - R * 0.3, R * 0.1, c, c, R);
-  g.addColorStop(0, '#fffbe8');
-  g.addColorStop(0.55, '#f8e7a8');
-  g.addColorStop(1, '#ecc867');
+  // Warm full moon, lit from the upper left.
+  const g = ctx.createRadialGradient(c - R * 0.3, c - R * 0.35, R * 0.05, c, c, R * 1.02);
+  g.addColorStop(0, '#fffdf2');
+  g.addColorStop(0.45, '#fdf0c4');
+  g.addColorStop(0.8, '#f5dc93');
+  g.addColorStop(1, '#e9c26a');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, S, S);
-  // Faint maria and craters.
-  const r = rng(17);
-  ctx.fillStyle = 'rgba(214,176,86,.22)';
-  for (let i = 0; i < 7; i++) {
+  // Soft maria: overlapping blobs that fade at the edges, like the "Cuội under the banyan" shapes seen from Earth.
+  const blob = (x: number, y: number, rx: number, ry: number, a: number) => {
+    const bg = ctx.createRadialGradient(u(x), u(y), 0, u(x), u(y), u(Math.max(rx, ry)));
+    bg.addColorStop(0, `rgba(218,182,104,${a})`);
+    bg.addColorStop(0.7, `rgba(218,182,104,${a * 0.55})`);
+    bg.addColorStop(1, 'rgba(218,182,104,0)');
+    ctx.fillStyle = bg;
+    ctx.save();
+    ctx.translate(u(x), u(y));
+    ctx.scale(1, ry / rx);
+    ctx.translate(-u(x), -u(y));
     ctx.beginPath();
-    ctx.ellipse(u(0.2 + r() * 0.6), u(0.15 + r() * 0.35), u(0.05 + r() * 0.09), u(0.04 + r() * 0.06), r() * 3, 0, Math.PI * 2);
+    ctx.arc(u(x), u(y), u(rx), 0, Math.PI * 2);
     ctx.fill();
-  }
-  ctx.strokeStyle = 'rgba(200,160,70,.35)';
-  ctx.lineWidth = Math.max(1, S * 0.004);
-  for (let i = 0; i < 9; i++) {
+    ctx.restore();
+  };
+  for (const [x, y, rx, ry, a] of [
+    [0.36, 0.3, 0.13, 0.1, 0.34], [0.5, 0.24, 0.1, 0.07, 0.28], [0.64, 0.34, 0.12, 0.1, 0.3],
+    [0.3, 0.46, 0.09, 0.08, 0.26], [0.72, 0.52, 0.08, 0.1, 0.24], [0.46, 0.4, 0.07, 0.06, 0.2], [0.24, 0.62, 0.06, 0.05, 0.18],
+  ] as const) blob(x, y, rx, ry, a);
+  // Craters: a dark bowl with a light rim on the side facing the light.
+  const r = rng(23);
+  for (let i = 0; i < 16; i++) {
+    const x = 0.14 + r() * 0.72;
+    const y = 0.12 + r() * 0.76;
+    if (Math.hypot(x - 0.5, y - 0.5) > 0.42) continue;
+    const rad = 0.012 + r() * (i < 4 ? 0.04 : 0.02);
+    ctx.fillStyle = 'rgba(205,165,85,.32)';
     ctx.beginPath();
-    ctx.arc(u(0.12 + r() * 0.76), u(0.12 + r() * 0.76), u(0.012 + r() * 0.025), 0, Math.PI * 2);
+    ctx.arc(u(x), u(y), u(rad), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,252,236,.75)';
+    ctx.lineWidth = Math.max(1, u(rad * 0.28));
+    ctx.beginPath();
+    ctx.arc(u(x), u(y), u(rad), Math.PI * 0.15, Math.PI * 0.95);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(190,148,68,.4)';
+    ctx.beginPath();
+    ctx.arc(u(x), u(y), u(rad), Math.PI * 1.15, Math.PI * 1.95);
     ctx.stroke();
   }
-  // The folk of the moon (chú Cuội, chị Hằng, the jade rabbit) are coloured sprites drawn by the scene.
-  const shadow = 'rgba(176,128,46,.62)';
+  // A soft pale mound low on the disc where the banyan grows and chú Cuội sits.
+  const m = ctx.createRadialGradient(u(0.48), u(0.86), 0, u(0.48), u(0.86), u(0.34));
+  m.addColorStop(0, 'rgba(255,250,228,.85)');
+  m.addColorStop(1, 'rgba(255,250,228,0)');
+  ctx.fillStyle = m;
+  ctx.fillRect(0, u(0.5), S, u(0.5));
+  // Limb darkening at the lower right, then a thin bright rim.
+  const limb = ctx.createRadialGradient(c - R * 0.2, c - R * 0.2, R * 0.7, c, c, R);
+  limb.addColorStop(0, 'rgba(200,150,60,0)');
+  limb.addColorStop(1, 'rgba(200,150,60,.28)');
+  ctx.fillStyle = limb;
+  ctx.fillRect(0, 0, S, S);
   ctx.restore();
-  return { img: cv, arm: { x: 0.655, y: 0.755 }, shadow };
+  ctx.strokeStyle = 'rgba(255,248,220,.9)';
+  ctx.lineWidth = Math.max(1.5, S * 0.006);
+  ctx.beginPath();
+  ctx.arc(c, c, R - ctx.lineWidth / 2, 0, Math.PI * 2);
+  ctx.stroke();
+  // The folk of the moon (chú Cuội, chị Hằng) are painted sprites drawn by the scene.
+  return { img: cv, arm: { x: 0.655, y: 0.755 }, shadow: 'rgba(176,128,46,.62)' };
 }
 
 /** A comet: a glowing head with a straight blue ion tail and a curved golden dust tail. Head at the right. */
