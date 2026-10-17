@@ -14,6 +14,7 @@ import ngonngu from './ngonngu.js';
 import vanhoa from './vanhoa.js';
 import diadanh from './diadanh.js';
 import thegioi from './thegioi.js';
+import nhanvat from './nhanvat.js';
 
 export const MORE_LEX: Record<string, string> = {
   dongvat,
@@ -31,4 +32,5 @@ export const MORE_LEX: Record<string, string> = {
   vanhoa,
   diadanh,
   thegioi,
+  nhanvat,
 };
