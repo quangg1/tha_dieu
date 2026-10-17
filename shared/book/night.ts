@@ -7,7 +7,7 @@ export const MORE3: Record<string, string[]> = {
     'Mì chính|Bột ngọt, Xì dầu|Nước tương',
     'Tương cà|Sốt cà chua|Ketchup, Mayonnaise|Sốt mayonnaise|Mayo, Mù tạt|Mustard, Ớt khô, Tiêu đen, Tiêu trắng, Vừng|Mè, Bột tỏi, Bột quế',
     'Tiêu xanh, Dầu điều, Hắc xì dầu, Bột gừng, Bột hành, Muối vừng|Muối mè, Muối sả, Đường nâu|Đường vàng, Mật mía, Giấm gạo, Giấm táo, Ngò om|Rau om, Rau ngổ, Hồi|Hoa hồi|Đại hồi, Vỏ quýt khô|Trần bì, Sốt teriyaki|Teriyaki, Paprika|Ớt bột paprika',
-    'Sa nhân, Tiểu hồi|Hạt tiểu hồi, Thì là Ai Cập|Cumin, Lá giang, Bỗng rượu, Rượu mai quế lộ, Rượu Thiệu Hưng, Gochujang|Tương ớt Hàn Quốc, Gochugaru|Bột ớt Hàn Quốc, Doenjang|Tương đậu Hàn Quốc, Muối hồng Himalaya|Muối hồng, Ớt cayenne|Cayenne, Oregano, Cỏ xạ hương|Thyme, Xô thơm|Sage',
+    'Sa nhân, Tiểu hồi|Hạt tiểu hồi, Lá giang, Bỗng rượu, Rượu mai quế lộ, Rượu Thiệu Hưng, Gochujang|Tương ớt Hàn Quốc, Gochugaru|Bột ớt Hàn Quốc, Doenjang|Tương đậu Hàn Quốc, Muối hồng Himalaya|Muối hồng, Ớt cayenne|Cayenne, Oregano, Cỏ xạ hương|Thyme, Xô thơm|Sage',
     'Garam masala, Hạt cỏ cà ri|Fenugreek, Hạt cần tây, Ngải giấm|Tarragon, Sumac, Za\'atar, Shichimi|Thất vị Nhật, Cam thảo, Hạt tiêu hồng',
   ],
   'pop-pokemon': [

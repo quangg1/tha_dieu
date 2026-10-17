@@ -415,7 +415,7 @@ export default `
 1 Củ khoai rừng
 1 Củ chụp
 1 Củ sắn tàu
-1 Củ cải ngựa|Wasabi # giavi
+1 Củ cải ngựa|Horseradish # giavi
 1 Củ hành lá
 1 Củ Topinambur|Atiso Jerusalem
 @ hoa
@@ -871,7 +871,8 @@ export default `
 4 Dấm|Giấm|Vinegar # chua
 3 Thảo quả|Black cardamom
 3 Đinh hương|Clove
-3 Tương bần|Tương|Tương đen
+3 Tương bần|Tương
+2 Tương đen|Hoisin|Sốt hoisin
 3 Mẻ|Cơm mẻ # chua
 3 Hạt điều màu|Điều màu|Annatto # do
 3 Ngũ vị hương|Five spice
@@ -880,7 +881,8 @@ export default `
 3 Mắm tép
 3 Dầu hào|Oyster sauce
 3 Tương ớt|Chili sauce # do
-3 Mù tạt|Wasabi|Mustard
+3 Mù tạt|Mustard
+3 Wasabi|Mù tạt xanh|Mù tạt Nhật
 3 Hạt mùi|Hạt ngò|Coriander seed
 3 Lá nguyệt quế|Bay leaf
 3 Bột cà ri|Cà ri|Curry
@@ -896,14 +898,16 @@ export default `
 2 Muối kiến vàng # vn
 2 Muối tôm|Muối Tây Ninh
 2 Muối ớt
-2 Muối tiêu chanh|Muối tiêu
+2 Muối tiêu chanh
+2 Muối tiêu
 2 Nước cốt dừa
 2 Nước màu|Nước hàng
 2 Tương hột
 2 Tương miso|Miso
 2 Bột nghệ
 2 Bột ớt|Ớt bột|Paprika # do
-2 Hạt thì là|Thì là ai cập|Cumin
+2 Hạt thì là
+2 Thì là Ai Cập|Cumin
 2 Bạch đậu khấu|Cardamom
 2 Nhục đậu khấu|Nutmeg
 2 Nghệ tây|Saffron # do
@@ -928,7 +932,8 @@ export default `
 2 Me chua|Nước me
 2 Chanh muối
 2 Gừng khô
-2 Tỏi phi|Hành phi
+2 Tỏi phi
+2 Hành phi
 2 Dầu ăn
 2 Dầu mè|Dầu vừng
 2 Mỡ hành

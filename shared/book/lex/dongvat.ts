@@ -109,7 +109,8 @@ export default `
 2 Cầy vằn # rung vn dem
 2 Chuột nhắt # nuoi
 1 Sao la|Kỳ lân châu Á # rung vn sung
-1 Mang Trường Sơn|Mang lớn # rung vn sung
+1 Mang Trường Sơn # rung vn sung
+1 Mang lớn|Mang Vũ Quang # rung vn sung
 1 Voọc chà vá chân nâu|Chà vá chân nâu|Chà vá|Voọc chà vá # rung vn
 1 Voọc mũi hếch # rung vn
 1 Voọc Cát Bà|Voọc đầu vàng # rung vn
@@ -117,7 +118,9 @@ export default `
 1 Voọc|Con voọc # rung vn
 1 Vượn đen má trắng # rung vn
 1 Vượn Cao Vít # rung vn
-1 Cu li|Culi|Cu li nhỏ|Cu li lớn # rung vn dem
+1 Cu li|Culi # rung vn dem
+1 Cu li nhỏ # rung vn dem
+1 Cu li lớn # rung vn dem
 1 Bò xám|Kouprey # rung vn sung
 1 Hổ Tasmania|Sói Tasmania|Thylacine # tuyet uc
 1 Quỷ Tasmania|Tasmanian devil # uc dem
