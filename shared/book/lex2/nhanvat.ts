@@ -439,4 +439,508 @@ export default `
 2 Đỗ Mười # cm
 2 Phạm Hùng # cm
 2 Trần Văn Giàu # cm khoa
+@ tg nhacsi
+2 Claudio Monteverdi
+2 Henry Purcell
+2 Jean-Philippe Rameau
+2 Arcangelo Corelli
+2 Domenico Scarlatti
+2 Georg Philipp Telemann
+2 Christoph Willibald Gluck
+2 Carl Philipp Emanuel Bach
+2 Luigi Boccherini
+2 Antonio Salieri
+2 Muzio Clementi
+2 Carl Maria von Weber
+2 Gaetano Donizetti
+2 Vincenzo Bellini
+2 Mikhail Glinka
+2 Charles Gounod
+2 Jacques Offenbach
+2 César Franck
+2 Anton Bruckner
+2 Bedřich Smetana
+2 Alexander Borodin
+2 Léo Delibes
+2 Jules Massenet
+2 Gabriel Fauré
+2 Edward Elgar
+2 Leoš Janáček
+2 Richard Strauss
+2 Alexander Scriabin
+2 Ottorino Respighi
+2 Manuel de Falla
+2 Isaac Albéniz
+2 Enrique Granados
+2 Joaquín Rodrigo
+2 Béla Bartók
+2 Zoltán Kodály
+2 Arnold Schoenberg
+2 Alban Berg
+2 Anton Webern
+2 Paul Hindemith
+2 Francis Poulenc
+2 Darius Milhaud
+2 Arthur Honegger
+2 Olivier Messiaen
+2 Aaron Copland
+2 Samuel Barber
+2 Leonard Bernstein
+2 John Cage
+2 Philip Glass
+2 Steve Reich
+2 Arvo Pärt
+2 Benjamin Britten
+2 Ralph Vaughan Williams
+2 Gustav Holst
+2 Carl Orff
+2 Aram Khachaturian
+2 Dmitry Kabalevsky
+2 Alfred Schnittke
+2 Hildegard von Bingen
+2 Giovanni Pierluigi da Palestrina|Palestrina
+2 Thomas Tallis
+2 William Byrd
+2 Josquin des Prez
+2 Guillaume de Machaut
+2 Clara Schumann
+2 Fanny Mendelssohn
+2 Johann Strauss|Johann Strauss II|Johann Strauss con|Johann Strauss I|Johann Strauss cha
+2 Franz von Suppé
+2 Engelbert Humperdinck
+2 Pietro Mascagni
+2 Ruggero Leoncavallo
+2 Amilcare Ponchielli
+2 Heitor Villa-Lobos
+@ hoasi
+2 Hieronymus Bosch
+2 Jan van Eyck
+2 Pieter Bruegel|Bruegel
+2 Hans Holbein
+2 Titian|Tiziano
+2 Giotto
+2 Fra Angelico
+2 Masaccio
+2 Donatello
+2 Gian Lorenzo Bernini|Bernini
+2 Tintoretto
+2 Paolo Veronese
+2 Nicolas Poussin
+2 Jean-Antoine Watteau
+2 Jean-Honoré Fragonard
+2 Jacques-Louis David
+2 Jean-Auguste-Dominique Ingres|Ingres
+2 Eugène Delacroix
+2 Théodore Géricault
+2 Gustave Courbet
+2 Jean-François Millet
+2 Camille Corot
+2 John Constable
+2 Caspar David Friedrich
+2 William Blake
+2 Dante Gabriel Rossetti
+2 John Everett Millais
+2 Camille Pissarro
+2 Alfred Sisley
+2 Berthe Morisot
+2 Mary Cassatt
+2 Gustave Caillebotte
+2 Paul Signac
+2 Henri Rousseau
+2 Egon Schiele
+2 Alphonse Mucha|Alfons Mucha
+2 Georges Braque
+2 Fernand Léger
+2 Piet Mondrian
+2 Kazimir Malevich
+2 Paul Klee
+2 Max Ernst
+2 Giorgio de Chirico
+2 Marcel Duchamp
+2 Edward Hopper
+2 Georgia O'Keeffe
+2 Mark Rothko
+2 Willem de Kooning
+2 Roy Lichtenstein
+2 Jean-Michel Basquiat
+2 Keith Haring
+2 Banksy
+2 Yayoi Kusama
+2 Takashi Murakami
+2 Ai Weiwei|Ngải Vị Vị
+2 Damien Hirst
+2 Jeff Koons
+2 David Hockney
+2 Francis Bacon
+2 Lucian Freud
+2 Gerhard Richter
+2 Anselm Kiefer
+2 Louise Bourgeois
+2 Alberto Giacometti
+2 Constantin Brâncuși
+2 Henry Moore
+2 Antonio Canova
+2 Utagawa Hiroshige|Hiroshige
+2 Kitagawa Utamaro|Utamaro
+2 Từ Bi Hồng
+2 Ngô Đạo Tử
+2 Trương Trạch Đoan
+2 Raja Ravi Varma
+2 Diego Rivera
+2 Fernando Botero
+2 Tarsila do Amaral
+2 Ilya Repin
+2 Ivan Aivazovsky
+2 Ivan Shishkin
+2 Isaac Levitan
+@ vn hoasi
+2 Lê Thị Lựu
+2 Huỳnh Văn Gấm
+2 Nguyễn Đỗ Cung
+2 Diệp Minh Châu
+2 Nguyễn Khang
+2 Hoàng Tích Chù
+2 Phan Kế An
+2 Lưu Công Nhân
+2 Trần Lưu Hậu
+2 Đỗ Quang Em
+2 Thành Chương
+2 Lê Thiết Cương
+2 Nguyễn Trung
+2 Trịnh Cung
+2 Đinh Cường
+2 Bửu Chỉ
+2 Nguyễn Trường
+2 Lê Huy Tiếp
+2 Đặng Xuân Hòa
+2 Hà Trí Hiếu
+2 Trần Lương
+2 Lê Bá Đảng
+2 Tạ Tỵ
+@ thamhiem
+2 Leif Erikson
+2 Bartolomeu Dias
+2 Hernán Cortés
+2 Francisco Pizarro
+2 Jacques Cartier
+2 Samuel de Champlain
+2 Henry Hudson
+2 Abel Tasman
+2 Francis Drake
+2 Walter Raleigh
+2 Vitus Bering
+2 Meriwether Lewis
+2 William Clark
+2 Henry Morton Stanley
+2 Robert Peary
+2 Matthew Henson
+2 Richard Byrd
+2 Fridtjof Nansen
+2 Douglas Mawson
+2 Thor Heyerdahl
+2 Jacques Cousteau
+2 Reinhold Messner
+2 Junko Tabei
+2 Sylvia Earle
+2 Charles Lindbergh
+2 Amelia Earhart
+2 Trương Khiên|Zhang Qian
+2 Pháp Hiển
+2 Từ Hà Khách|Xu Xiake
+2 Hernando de Soto
+2 Juan Ponce de León
+2 Vasco Núñez de Balboa
+2 Francisco de Orellana
+2 Pedro Álvares Cabral
+2 Alexander Mackenzie
+2 John Cabot
+2 Giovanni da Verrazzano
+2 Willem Barentsz
+2 John Glenn
+2 Alan Shepard
+2 Michael Collins
+2 Sally Ride
+2 Alexei Leonov
+2 Gherman Titov
+2 Valeri Polyakov
+2 Chris Hadfield
+2 Tim Peake
+2 Thomas Pesquet
+2 Scott Kelly
+2 Peggy Whitson
+2 Yi So-yeon
+2 Rakesh Sharma
+2 Mamoru Mohri
+2 Eugene Cernan
+2 Pete Conrad
+2 Jim Lovell
+2 Dennis Tito
+2 Christina Koch
+2 Kalpana Chawla
+2 Sunita Williams
+2 Vương Á Bình
+2 Trịnh Hòa|Zheng He
+@ triet
+2 Heraclitus
+2 Parmenides
+2 Democritus
+2 Epicurus
+2 Zeno
+2 Diogenes
+2 Thales
+2 Anaximander
+2 Plotinus
+2 Augustine|Thánh Augustinô
+2 Boethius
+2 William of Ockham|Ockham
+2 Niccolò Machiavelli|Machiavelli
+2 Thomas More
+2 Erasmus
+2 Michel de Montaigne|Montaigne
+2 Thomas Hobbes
+2 Gottfried Wilhelm Leibniz|Leibniz
+2 George Berkeley
+2 Montesquieu
+2 Denis Diderot
+2 Adam Smith
+2 Edmund Burke
+2 Mary Wollstonecraft
+2 Jeremy Bentham
+2 John Stuart Mill
+2 Auguste Comte
+2 Ludwig Feuerbach
+2 Charles Sanders Peirce
+2 William James
+2 John Dewey
+2 Henri Bergson
+2 Edmund Husserl
+2 Martin Heidegger
+2 Ludwig Wittgenstein
+2 Bertrand Russell
+2 Gottlob Frege
+2 Karl Popper
+2 Thomas Kuhn
+2 Simone de Beauvoir
+2 Albert Camus
+2 Michel Foucault
+2 Jacques Derrida
+2 Gilles Deleuze
+2 Jürgen Habermas
+2 Hannah Arendt
+2 Theodor Adorno
+2 Walter Benjamin
+2 Antonio Gramsci
+2 Vladimir Lenin|Lenin
+2 Mahatma Gandhi|Gandhi
+2 Martin Luther King|Martin Luther King Jr.
+2 Martin Luther
+2 John Calvin
+2 Thích Ca Mâu Ni|Đức Phật|Phật Thích Ca
+2 Long Thọ|Nagarjuna
+2 Huệ Năng|Lục tổ Huệ Năng
+2 Bồ Đề Đạt Ma
+2 Chu Hy
+2 Vương Dương Minh
+2 Đổng Trọng Thư
+2 Tuân Tử
+2 Liệt Tử
+2 Quản Trọng
+2 Thương Ưởng
+2 Thích Nhất Hạnh
+2 Trần Đức Thảo
+2 Ibn Sina|Avicenna
+2 Ibn Rushd|Averroes
+2 Al-Farabi
+2 Al-Ghazali
+2 Ibn Khaldun
+2 Maimonides
+2 Noam Chomsky
+2 Slavoj Žižek
+2 Peter Singer
+2 John Rawls
+2 Ayn Rand
+@ tg khoa
+2 Tycho Brahe
+2 Christiaan Huygens
+2 Antonie van Leeuwenhoek|Leeuwenhoek
+2 Robert Koch
+2 Joseph Lister
+2 Florence Nightingale
+2 Rudolf Virchow
+2 Santiago Ramón y Cajal
+2 Paul Ehrlich
+2 Jonas Salk
+2 Albert Sabin
+2 Edward Teller
+2 Barbara McClintock
+2 Jane Goodall
+2 Dian Fossey
+2 Rachel Carson
+2 Đồ U U|Tu Youyou
+2 Katalin Karikó
+2 Jennifer Doudna
+2 Emmanuelle Charpentier
+2 Peter Higgs
+2 Paul Dirac
+2 Wolfgang Pauli
+2 Max Born
+2 Louis de Broglie
+2 Arthur Compton
+2 Murray Gell-Mann
+2 Dương Chấn Ninh|Chen Ning Yang
+2 Lý Chính Đạo|Tsung-Dao Lee
+2 Ngô Kiện Hùng|Chien-Shiung Wu
+2 Subrahmanyan Chandrasekhar
+2 C. V. Raman
+2 Hideki Yukawa
+2 Abdus Salam
+2 Andrei Sakharov
+2 Lev Landau
+2 Pyotr Kapitsa
+2 Igor Kurchatov
+2 Sergei Korolev
+2 Wernher von Braun
+2 Robert Goddard
+2 Vera Rubin
+2 Henrietta Leavitt
+2 Jocelyn Bell Burnell
+2 Kip Thorne
+2 Roger Penrose
+2 Neil deGrasse Tyson
+2 Michio Kaku
+2 Grigori Perelman
+2 Andrew Wiles
+2 Terence Tao
+2 Maryam Mirzakhani
+2 Kurt Gödel
+2 David Hilbert
+2 Henri Poincaré
+2 Évariste Galois
+2 Niels Henrik Abel
+2 Joseph-Louis Lagrange
+2 Pierre-Simon Laplace
+2 Joseph Fourier
+2 Augustin-Louis Cauchy
+2 Georg Cantor
+2 Pierre de Fermat
+2 Brahmagupta
+2 Aryabhata
+2 Omar Khayyam
+2 Lưu Huy
+2 Thẩm Quát
+2 Lý Thời Trân
+2 Hoa Đà
+2 Biển Thước
+2 Trương Trọng Cảnh
+2 Galen
+2 Eratosthenes
+2 Ptolemy|Ptolemaeus
+2 Hipparchus
+2 Aristarchus
+2 Heron
+2 Benjamin Franklin
+2 Joseph Priestley
+2 Henry Cavendish
+2 Humphry Davy
+2 Jöns Jacob Berzelius
+2 Friedrich Wöhler
+2 August Kekulé
+2 Fritz Haber
+2 Irène Joliot-Curie
+2 Otto Hahn
+2 Glenn Seaborg
+2 Dorothy Hodgkin
+2 Ahmed Zewail
+2 Wilhelm Röntgen|Röntgen
+2 Henri Becquerel
+2 J. J. Thomson
+2 Robert Millikan
+2 Hans Christian Ørsted
+2 Gustav Kirchhoff
+2 Hendrik Lorentz
+2 Ludwig Boltzmann
+2 Josiah Willard Gibbs
+2 Rudolf Clausius
+2 Sadi Carnot
+2 Evangelista Torricelli
+2 Charles-Augustin de Coulomb|Coulomb
+2 Joseph Henry
+2 Oliver Heaviside
+2 William Shockley
+2 John Bardeen
+2 Jack Kilby
+2 Robert Noyce
+2 Gordon Moore
+2 Grace Hopper
+2 Charles Babbage
+2 George Boole
+2 Dennis Ritchie
+2 Ken Thompson
+2 Linus Torvalds
+2 Donald Knuth
+2 Edsger Dijkstra
+2 Geoffrey Hinton
+2 Yann LeCun
+2 Yoshua Bengio
+2 Andrew Ng
+2 Demis Hassabis
+2 Lý Phi Phi|Fei-Fei Li
+2 John McCarthy
+2 Marvin Minsky
+2 Vint Cerf
+2 Steve Wozniak
+2 Thomas Hunt Morgan
+2 Louis Leakey
+2 Mary Anning
+2 Georges Cuvier
+2 Alfred Russel Wallace
+2 Richard Dawkins
+2 E. O. Wilson
+2 Konrad Lorenz
+2 James Hutton
+2 Charles Lyell
+2 Inge Lehmann
+2 Charles Richter
+2 Svante Arrhenius
+2 Frederick Banting
+2 Christiaan Barnard
+2 Nikolai Vavilov
+2 Nikolai Lobachevsky
+2 Andrey Kolmogorov
+@ vn khoa
+2 Phạm Ngọc Thạch
+2 Đặng Vũ Hỷ
+2 Đỗ Xuân Hợp
+2 Hoàng Đình Cầu
+2 Nguyễn Văn Đạo
+2 Đào Văn Tiến
+2 Phạm Hoàng Hộ
+2 Võ Quý
+2 Tạ Quang Bửu
+2 Ngụy Như Kon Tum
+2 Trần Văn Khê
+2 Trần Quốc Vượng
+2 Phan Huy Lê
+2 Hà Văn Tấn
+2 Đinh Xuân Lâm
+2 Cao Xuân Huy
+2 Cao Xuân Hạo
+2 Hoàng Phê
+2 Nguyễn Tài Cẩn
+2 Đặng Thai Mai
+2 Phan Đình Diệu
+2 Nguyễn Cảnh Toàn
+2 Nguyễn Đình Tứ
+2 Vũ Đình Cự
+2 Võ Tòng Xuân
+2 Đàm Thanh Sơn
+2 Vũ Hà Văn
+2 Nguyễn Thanh Liêm
+2 Phạm Gia Khải
+2 Nguyễn Tài Thu
+2 Đỗ Tất Lợi
+2 Trịnh Xuân Thuận
+2 Nguyễn Xuân Vinh
+2 Dương Nguyệt Ánh
+2 Lê Bá Khánh Trình
 `;
