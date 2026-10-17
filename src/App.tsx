@@ -50,16 +50,15 @@ export default function App() {
 
   // Browsers allow sound only after the first tap; the music starts then.
   useEffect(() => {
+    // Phones count only the end of a tap (not the touch down) as permission to play, so listen to those too,
+    // and keep listening: a tap the browser refused is followed by one it accepts.
+    const events = ['pointerup', 'touchend', 'click', 'keydown'] as const;
     const wake = () => {
       flute.unlock();
       flute.start();
     };
-    window.addEventListener('pointerdown', wake, { once: true });
-    window.addEventListener('keydown', wake, { once: true });
-    return () => {
-      window.removeEventListener('pointerdown', wake);
-      window.removeEventListener('keydown', wake);
-    };
+    events.forEach((e) => window.addEventListener(e, wake, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, wake));
   }, []);
 
   const soundButton = (

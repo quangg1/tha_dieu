@@ -33,7 +33,8 @@ class FluteEngine {
   private _on = true;
   private playing = false;
   /** The recorded bamboo-flute track that plays under everything. */
-  private track?: { el: HTMLAudioElement; gain: GainNode };
+  /** The recorded flute track: a plain audio element, which phones play even with the ringer switched to silent. */
+  private track?: HTMLAudioElement;
 
   get on() {
     return this._on;
@@ -48,6 +49,17 @@ class FluteEngine {
       this.build();
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
+    // iPhone: let web sound play through the silent switch, like a video would.
+    const nav = navigator as Navigator & { audioSession?: { type: string } };
+    if (nav.audioSession) {
+      try {
+        nav.audioSession.type = 'playback';
+      } catch {
+        /* older Safari */
+      }
+    }
+    // A tap that comes after an earlier refused attempt starts the track now.
+    if (this.playing && this.track?.paused && this._on) void this.track.play().catch(() => {});
   }
 
   private build() {
@@ -81,6 +93,10 @@ class FluteEngine {
   setOn(on: boolean) {
     this._on = on;
     if (this.ctx) this.master.gain.setTargetAtTime(on ? 0.9 : 0, this.ctx.currentTime, 0.15);
+    if (this.track) {
+      this.track.muted = !on;
+      if (on && this.playing && this.track.paused) void this.track.play().catch(() => {});
+    }
   }
 
   /** How far into space the music is: 0 in the air, 1 between the galaxies. */
@@ -96,7 +112,7 @@ class FluteEngine {
     const t = ctx.currentTime;
     const sp = this.space;
     this.droneGain?.gain.setTargetAtTime(0, t, 1.5);
-    this.track?.gain.gain.setTargetAtTime(this.playing ? this.trackLevel : 0, t, 2);
+    if (this.track) this.track.volume = this.trackLevel;
     if (this.wind) {
       this.wind.filter.frequency.setTargetAtTime(this.level >= 3 ? 280 : 650, t, 2);
       // No wind in space: the rush of air fades out as the kite leaves the atmosphere.
@@ -315,21 +331,18 @@ class FluteEngine {
     this.setLevel(this.level);
   }
 
-  /** The background flute track, looping through the master gain so the sound button mutes it too. */
+  /** The background flute track, looping. */
   private startTrack() {
-    const ctx = this.ctx!;
     if (!this.track) {
       const el = new Audio('/audio/sao.mp3');
       el.loop = true;
       el.preload = 'auto';
-      el.crossOrigin = 'anonymous';
-      const gain = ctx.createGain();
-      gain.gain.value = 0;
-      ctx.createMediaElementSource(el).connect(gain).connect(this.master);
-      this.track = { el, gain };
+      el.setAttribute('playsinline', '');
+      this.track = el;
     }
-    this.track.gain.gain.setTargetAtTime(this.trackLevel, ctx.currentTime, 1.2);
-    void this.track.el.play().catch(() => {});
+    this.track.volume = this.trackLevel;
+    this.track.muted = !this._on;
+    void this.track.play().catch(() => {});
   }
 
   /** The track softens as the kite climbs into space, where the shimmering pad takes over. */
@@ -346,8 +359,7 @@ class FluteEngine {
     this.wind?.gain.gain.setTargetAtTime(0, t, 0.6);
     this.pad?.gain.gain.setTargetAtTime(0, t, 0.8);
     if (this.track) {
-      this.track.gain.gain.setTargetAtTime(0, t, 0.6);
-      const el = this.track.el;
+      const el = this.track;
       setTimeout(() => !this.playing && el.pause(), 2500);
     }
     const drones = this.drone;
