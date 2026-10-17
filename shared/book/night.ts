@@ -6,9 +6,9 @@ export const MORE3: Record<string, string[]> = {
   'gia-vi': [
     'Mì chính|Bột ngọt, Xì dầu|Nước tương',
     'Tương cà|Sốt cà chua|Ketchup, Mayonnaise|Sốt mayonnaise|Mayo, Mù tạt|Mustard, Ớt khô, Tiêu đen, Tiêu trắng, Vừng|Mè, Bột tỏi, Bột quế',
-    'Tiêu xanh, Dầu điều, Hắc xì dầu, Bột gừng, Bột hành, Muối vừng|Muối mè, Muối sả, Đường nâu|Đường vàng, Mật mía, Giấm gạo, Giấm táo, Ngò om|Rau om, Rau ngổ, Hồi|Hoa hồi|Đại hồi, Vỏ quýt khô|Trần bì, Sốt teriyaki|Teriyaki, Paprika|Ớt bột paprika',
+    'Tiêu xanh, Dầu điều, Hắc xì dầu, Bột gừng, Bột hành, Muối vừng|Muối mè, Muối sả, Đường nâu|Đường vàng, Mật mía, Giấm gạo, Giấm táo, Ngò om|Rau om, Rau ngổ, Hồi|Hoa hồi|Đại hồi, Vỏ quýt khô|Trần bì, Sốt teriyaki|Teriyaki, Paprika|Ớt bột paprika, Dầu ớt',
     'Sa nhân, Tiểu hồi|Hạt tiểu hồi, Lá giang, Bỗng rượu, Rượu mai quế lộ, Rượu Thiệu Hưng, Gochujang|Tương ớt Hàn Quốc, Gochugaru|Bột ớt Hàn Quốc, Doenjang|Tương đậu Hàn Quốc, Muối hồng Himalaya|Muối hồng, Ớt cayenne|Cayenne, Oregano, Cỏ xạ hương|Thyme, Xô thơm|Sage',
-    'Garam masala, Hạt cỏ cà ri|Fenugreek, Hạt cần tây, Ngải giấm|Tarragon, Sumac, Za\'atar, Shichimi|Thất vị Nhật, Cam thảo, Hạt tiêu hồng',
+    'Garam masala, Hạt cỏ cà ri|Fenugreek, Hạt cần tây, Ngải giấm|Tarragon, Sumac, Za\'atar, Shichimi|Thất vị Nhật, Cam thảo, Hạt tiêu hồng, Mirin, Ponzu, Sốt Worcestershire|Worcestershire',
   ],
   'pop-pokemon': [
     'Pikachu|Pi-ka-chu',
@@ -43,13 +43,13 @@ export const MORE3: Record<string, string[]> = {
     'Phượng hoàng đất|Hồng hoàng, Sếu|Sếu đầu đỏ, Báo hoa mai, Rùa biển, Đồi mồi, Cá sấu nước mặn|Cá sấu hoa cà, Trăn gấm, Rắn hổ mang chúa|Hổ mang chúa, Bò biển|Cá cúi|Dugong, Công|Chim công',
     'Voọc chà vá chân đen, Voọc chà vá chân xám, Voọc Hà Tĩnh, Voọc đen má trắng, Voọc bạc Đông Dương, Vượn đen tuyền, Vượn đen má vàng, Cu li nhỏ, Cu li lớn, Mèo cá, Beo|Báo lửa, Rái cá lông mũi, Sơn dương, Tê tê Java, Tê tê vàng, Hươu sao, Cheo cheo lưng bạc|Cheo cheo Việt Nam',
     'Vích, Rùa da, Rùa núi vàng, Rùa hộp trán vàng, Rùa đầu to, Trăn đất, Kỳ đà hoa, Kỳ đà vân, Ba ba gai, Niệc mỏ vằn, Niệc nâu, Trĩ đỏ, Gà so, Hạc cổ trắng, Già đẫy lớn, Già đẫy Java, Bồ nông chân xám, Quắm cánh xanh, Ngan cánh trắng, Sâm cầm',
-    'Cá rồng|Cá mơn, Cá chình mun, Cá sủ vàng, Cá mập voi, Cá voi, Rái cá lông mượt, Sóc bay lớn, Chồn mực|Cầy mực, Khỉ mốc, Cầy tai trắng, Gà lôi trắng|Gà lôi bạc, Đại bàng đầu nâu, Kền kền, Gà tiền mặt vàng, Ốc anh vũ, Bướm phượng cánh kiếm',
+    'Cá rồng|Cá mơn, Cá chình mun, Cá sủ vàng, Cá mập voi, Cá voi, Rái cá lông mượt, Sóc bay lớn, Chồn mực|Cầy mực, Khỉ mốc, Cầy tai trắng, Gà lôi trắng|Gà lôi bạc, Đại bàng đầu nâu, Kền kền, Gà tiền mặt vàng, Ốc anh vũ, Bướm phượng cánh kiếm, Rùa Trung bộ, Cò quắm đầu đen|Cò quăm đầu đen, Mèo ri, Voọc xám',
   ],
   'ng-yte': [
     'Điều dưỡng|Y tá',
     'Bác sĩ nội khoa, Bác sĩ ngoại khoa, Bác sĩ đông y|Bác sĩ y học cổ truyền, Bác sĩ răng hàm mặt, Bác sĩ phụ khoa|Bác sĩ sản phụ khoa, Kỹ thuật viên siêu âm, Trình dược viên',
-    'Bác sĩ chấn thương chỉnh hình, Bác sĩ tiết niệu, Bác sĩ tiêu hóa, Bác sĩ hô hấp, Bác sĩ nội tiết, Bác sĩ huyết học, Bác sĩ truyền nhiễm, Bác sĩ phục hồi chức năng, Bác sĩ chỉnh nha, Bác sĩ nam khoa, Bác sĩ lão khoa, Bác sĩ y học dự phòng, Kỹ thuật viên nội soi',
+    'Bác sĩ chấn thương chỉnh hình, Bác sĩ tiết niệu, Bác sĩ tiêu hóa, Bác sĩ hô hấp, Bác sĩ nội tiết, Bác sĩ huyết học, Bác sĩ truyền nhiễm, Bác sĩ phục hồi chức năng, Bác sĩ chỉnh nha, Bác sĩ nam khoa, Bác sĩ lão khoa, Bác sĩ y học dự phòng, Kỹ thuật viên nội soi, Bác sĩ phẫu thuật thần kinh, Bác sĩ phẫu thuật tim mạch, Bác sĩ sơ sinh, Bác sĩ xạ trị, Kỹ thuật viên xạ trị',
     'Bác sĩ giải phẫu bệnh, Bác sĩ dị ứng miễn dịch, Bác sĩ y học thể thao, Bác sĩ thận, Kỹ thuật viên chạy thận, Kỹ thuật viên phục hồi chức năng, Kỹ thuật viên y học cổ truyền, Kỹ thuật viên khúc xạ|Chuyên viên khúc xạ, Chuyên viên tâm lý lâm sàng, Kỹ thuật viên dược',
-    'Kỹ thuật viên giải phẫu bệnh, Kỹ thuật viên điện tim, Kỹ thuật viên ngân hàng máu, Chuyên viên kiểm soát nhiễm khuẩn, Thư ký y khoa, Nhà vật lý y khoa, Kỹ thuật viên chỉnh hình, Điều phối viên cấp cứu 115, Bác sĩ hàng không, Bác sĩ quân y|Quân y',
+    'Kỹ thuật viên giải phẫu bệnh, Kỹ thuật viên điện tim, Kỹ thuật viên ngân hàng máu, Chuyên viên kiểm soát nhiễm khuẩn, Thư ký y khoa, Nhà vật lý y khoa, Kỹ thuật viên chỉnh hình, Điều phối viên cấp cứu 115, Bác sĩ hàng không, Bác sĩ quân y|Quân y, Bác sĩ y học hạt nhân, Bác sĩ vi sinh, Chuyên viên thính học, Kỹ thuật viên hoạt động trị liệu, Kỹ thuật viên cộng hưởng từ|Kỹ thuật viên MRI, Nhân viên công tác xã hội bệnh viện',
   ],
 };
