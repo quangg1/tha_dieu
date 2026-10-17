@@ -231,6 +231,11 @@ export class SkyScene {
   }
 
   private held = false;
+  private heldDrawn = 0;
+  private wakeUntil = 0;
+  private wake() {
+    this.wakeUntil = performance.now() + 1500;
+  }
   private mo: MutationObserver;
 
   private onVisible = () => {
@@ -289,6 +294,7 @@ export class SkyScene {
 
   /** The player's kite: its shape, tails and glow come from the kite collection. */
   setSkin(s: { id?: string; aura?: string; prize?: boolean }) {
+    this.wake();
     this.skin = { id: s.id ?? 'son', aura: s.aura, prize: s.prize };
     this.kiteImage(this.skin.id);
   }
@@ -304,11 +310,13 @@ export class SkyScene {
   }
 
   setLayout(l: SkyLayout) {
+    this.wake();
     this.layout = l;
   }
 
   /** Moves the camera to an altitude: the world slides past while the kite stays near its spot. With a duration, the climb follows a set ease. */
   setAltitude(alt: number, animate = true, dur?: number) {
+    this.wake();
     this.alt = alt;
     const { lap, inner } = lapOf(alt);
     this.targetL = log(inner);
@@ -336,10 +344,12 @@ export class SkyScene {
   }
 
   setFlutes(n: number) {
+    this.wake();
     this.flutes = Math.max(1, Math.min(3, n));
   }
 
   setNervous(on: boolean) {
+    this.wake();
     this.nervous = on;
   }
 
@@ -455,11 +465,13 @@ export class SkyScene {
   }
 
   private frame(now: number) {
-    if (this.held) {
-      this.last = 0;
+    // Under a sheet the sky slows to a few frames a second, unless something just changed (a new kite, a new height),
+    // which then plays at full speed for a moment so the player sees it at once.
+    if (this.held && now > this.wakeUntil && now - this.heldDrawn < 160) {
       this.raf = requestAnimationFrame((t) => this.frame(t));
       return;
     }
+    if (this.held) this.heldDrawn = now;
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.t += dt;
