@@ -55,8 +55,8 @@ export async function setup(db: Db) {
   const ids = BOOK.map((q) => q.id);
   await db.query(
     `insert into questions (id, category, prompt, note, strip, krill_key, active)
-     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, a
-     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::boolean[]) as x(id, c, p, n, st, k, a)
+     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, a = 'y'
+     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[]) as x(id, c, p, n, st, k, a)
      on conflict (id) do update set category=excluded.category, prompt=excluded.prompt, note=excluded.note,
        strip=excluded.strip, krill_key=excluded.krill_key, active=excluded.active`,
     [
@@ -66,7 +66,8 @@ export async function setup(db: Db) {
       BOOK.map((q) => q.note ?? ''),
       BOOK.map((q) => q.strip.join(' ')),
       BOOK.map((q) => q.krillKey),
-      BOOK.map((q) => !RETIRED.has(q.id)),
+      // Sent as text: the Postgres driver does not pass a boolean array.
+      BOOK.map((q) => (RETIRED.has(q.id) ? 'n' : 'y')),
     ],
   );
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
