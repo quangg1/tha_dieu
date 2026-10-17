@@ -260,4 +260,21 @@ export const MORE4: Record<string, string[]> = {
     'Đỉnh Fansipan|Nóc nhà Đông Dương, Cáp treo Fansipan, Bản Cát Cát Sa Pa, Bản Tả Van Sa Pa, Bản Lao Chải Sa Pa, Bản Tả Phìn Sa Pa, Thác Bạc Sa Pa, Thác Tình Yêu Sa Pa, Núi Hàm Rồng Sa Pa, Nhà thờ đá|Nhà thờ Sa Pa, Đèo Ô Quy Hồ Sa Pa, Cổng trời Sa Pa, Thung lũng Mường Hoa Sa Pa, Ruộng bậc thang Mường Hoa, Chợ đêm Sa Pa, Hồ Sa Pa|Hồ Sapa, Sun World Fansipan Legend, Tàu hỏa leo núi Mường Hoa',
     'Bản Hầu Thào, Bản Sử Pán Sa Pa, Bản Giàng Tả Chải, Bản Mông Sến, Bản Suối Thầu, Bản Tả Giàng Phình, Bản Trung Chải, Bản Sín Chải Sa Pa, Bản Lủ Khấu, Bản Nậm Cang Sa Pa, Bản Ý Lình Hồ|Bản Ý Linh Hồ, Rừng thông Sa Pa, Đỉnh Hàm Rồng, Sân mây Hàm Rồng, Vườn lan Hàm Rồng, Vườn hoa Hàm Rồng, Cổng trời Ô Quy Hồ, Thác Ma Hoàng, Bãi đá cổ Mường Hoa, Suối Mường Hoa, Cầu Mây Sa Pa, Cầu Kính Rồng Mây, Đồi chè Ô Long Sa Pa, Đỉnh Tả Giàng Phình, Nhà thờ Tả Phìn, Hang Tả Phìn, Chợ tình Sa Pa, Quảng trường Sa Pa, Bảo tàng Sa Pa, Phố cổ Sa Pa, Đường Cầu Mây, Moana Sa Pa Cafe, Thung lũng Sử Pán, Vườn quốc gia Hoàng Liên, Trạm Tôn, Thủy điện Cát Cát',
   ),
+  // ---------------------------------------------------------------- Batch F
+  'pop-do-an-nhanh': T(
+    'Mang Inasal, Chowking, Greenwich Pizza, Marrybrown, Dicos, Chester\'s, Mom\'s Touch, Goobne Chicken, Freshness Burger, Matsuya, Tenya',
+    'Whataburger, Raising Cane\'s, Zaxby\'s, Bojangles, El Pollo Loco, Del Taco, Culver\'s, Steak \'n Shake, Krystal, Checkers, Smashburger, Fatburger, Johnny Rockets, Nathan\'s Famous, Carl\'s Jr|Carl\'s Junior, Jimmy John\'s, Jersey Mike\'s, Firehouse Subs, Quiznos, Panera Bread, Qdoba, Sbarro, Blaze Pizza, Marco\'s Pizza, Papa Murphy\'s, Auntie Anne\'s, Cinnabon, Captain D\'s, Hungry Jack\'s, Red Rooster, Greggs, Wimpy, Quick, Telepizza, Lotteria Hàn Quốc, Jollibee Philippines, Hoka Hoka Bento, CFC|California Fried Chicken, Wallace|Hoa Lai Sĩ',
+  ),
+  'pop-mi-goi': T(
+    'Cup Noodles|Mì cốc Nissin, Maruchan, Top Ramen, Lucky Me!|Lucky Me, Mì Koka|Koka, Mie Sedaap|Mì Sedaap, Khang Sư Phụ|Master Kong',
+    'Supermi, Sarimi, Demae Ramen|Demae Iccho, Nissin UFO, Nissin Donbei, Mì Dosirak|Paldo Dosirak, Ansungtangmyun, Ottogi Snack Ramen, Ottogi Yeul Ramen, Nongshim Yukgaejang, Samyang Ramen, Tong Yi|Thống Nhất, Baixiang|Bạch Tượng, Mì Mamee|Mamee, MyKuali|Mì MyKuali, Mì Ibumie|Ibumie, Prima Taste, Mì Ching\'s Secret, Phở Cung Đình, Mì Hảo Hảo Ly|Hảo Hảo ly, Phở Bò Vifon, Mì Kim Chi Hàn Quốc Vifon, Mì Chính Hiệu',
+  ),
+  'pop-topping': T(
+    'Trân châu đen, Kem macchiato|Macchiato|Kem mặn, Thạch củ năng đỏ|Củ năng, Thạch sương sáo đen, Pudding trứng|Pudding gà, Thạch xoài, Thạch dâu, Kem muối|Kem phô mai muối, Trân châu phô mai, Trân châu caramel, Thạch hoa đậu biếc, Đác|Hạt đác',
+    'Trân châu mật ong, Trân châu dâu, Trân châu lá dứa, Trân châu hoa đậu biếc, Thạch trà xanh, Thạch ô long, Thạch hồng trà, Thạch sữa dừa, Thạch táo, Thạch bưởi, Thạch cầu vồng, Thạch konjac|Thạch rau câu konjac, Pudding trà xanh, Pudding xoài, Pudding socola, Pudding đậu đỏ, Kem socola, Bột cacao, Bánh crepe, Bánh bông lan, Dừa khô|Dừa sấy, Nhãn, Mít, Chuối, Kiwi, Tép bưởi, Hạt chanh dây, Nho, Dứa|Thơm, Khoai lang, Khoai dẻo, Mứt dâu, Sốt caramel, Sốt socola, Đường đen, Mật ong, Kitkat, Ngũ cốc, Yến mạch, Granola, Hạt điều, Hạnh nhân, Đậu phộng|Lạc, Bắp|Ngô, Kem trứng nướng|Crème brûlée, Trà xanh latte foam|Kem matcha, Bông lan trứng muối',
+  ),
+  'lang-nghe': T(
+    'Làng gốm Phước Tích, Làng nón Tây Hồ, Làng hương Thủy Xuân, Làng đúc đồng Phường Đúc, Làng rau Trà Quế, Làng chiếu Cẩm Nê, Làng nước mắm Nam Ô, Làng bánh tráng Túy Loan, Làng lụa Tân Châu, Làng gốm Hương Canh, Làng sơn mài Tương Bình Hiệp, Làng sừng Thụy Ứng, Làng tiện Nhị Khê, Làng bánh cuốn Thanh Trì, Làng bánh chưng Tranh Khúc, Làng miến Cự Đà|Làng tương Cự Đà, Làng chè Tân Cương, Làng kim hoàn Định Công, Làng tượng gỗ Sơn Đồng|Làng Sơn Đồng, Làng nem Lai Vung, Làng hoa Vạn Thành, Làng quất Tứ Liên, Làng hoa Mê Linh, Làng hoa kiểng Cái Mơn',
+    'Làng gốm Mang Thít|Gốm đỏ Vĩnh Long, Làng bánh đa Kế, Làng gốm Kim Lan, Làng đá Ninh Vân, Làng dệt Phương La, Làng rượu Vân|Rượu làng Vân, Làng rượu Bàu Đá, Làng nón Gò Găng, Làng đúc đồng Tống Xá, Làng mộc La Xuyên, Làng bánh cáy Làng Nguyễn, Làng lụa Nam Cao, Làng dệt lanh Lùng Tám, Làng hoa giấy Thanh Tiên, Làng nón Phú Cam',
+  ),
 };
