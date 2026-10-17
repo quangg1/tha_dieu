@@ -4,6 +4,7 @@ import thucvat from './thucvat.js';
 import monan from './monan.js';
 import khainiem from './khainiem.js';
 import thethao from './thethao.js';
+import nghe from './nghe.js';
 
 export const MORE_LEX: Record<string, string> = {
   dongvat,
@@ -11,4 +12,5 @@ export const MORE_LEX: Record<string, string> = {
   monan,
   khainiem,
   thethao,
+  nghe,
 };
