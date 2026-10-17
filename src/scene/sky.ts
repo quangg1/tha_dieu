@@ -1082,19 +1082,24 @@ export class SkyScene {
       const x = ((this.t * 16) % (W + w)) - w / 2;
       this.put(A.iss, x, this.y(5.6), w);
     }
+    // Satellites give way as Cung Trăng comes into view, so the moon scene is only the moon and its folk.
+    const quiet = 1 - clamp((this.camL - 7.75) / 0.35);
+    if (quiet <= 0) return;
+    ctx.globalAlpha = quiet;
     // Smaller satellites on the way out to the geostationary ring.
     for (const [L, fx, k, rot] of [[6.35, 0.78, 0.3, -0.4], [6.95, 0.2, 0.26, 0.3]] as const) {
       if (!this.visible(L)) continue;
       ctx.save();
       ctx.translate((this.wide ? this.gx(fx) : W * fx) + Math.sin(this.t * 0.4 + L) * 8, this.y(L));
       ctx.rotate(rot + Math.sin(this.t * 0.3 + L) * 0.05);
-      this.put(A.vinasat, 0, 0, Math.min(this.U * k, 150), 0.5, 0.5, 0.9);
+      this.put(A.vinasat, 0, 0, Math.min(this.U * k, 150), 0.5, 0.5, 0.9 * quiet);
       ctx.restore();
     }
     if (this.visible(7.55)) {
       const w = Math.min(this.U * 0.56, 300);
-      this.put(A.vinasat, this.gx(0.25) + Math.sin(this.t * 0.3) * 10, this.y(7.55) + Math.sin(this.t * 0.5) * 4, w);
+      this.put(A.vinasat, this.gx(0.25) + Math.sin(this.t * 0.3) * 10, this.y(7.55) + Math.sin(this.t * 0.5) * 4, w, 0.5, 0.5, quiet);
     }
+    ctx.globalAlpha = 1;
   }
 
   /* ---------------------------------------------------------------- the air: storks, clouds, hot-air balloons, airliner, weather balloon */

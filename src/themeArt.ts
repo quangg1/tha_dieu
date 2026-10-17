@@ -1,21 +1,24 @@
-// Preview art for the theme packs: a scene for each pack with bé Bi (the painted mascot) dressed up with props
-// for it, and his kite. Each preview is one SVG with light CSS animation (off for reduced motion).
+// Preview art for the theme packs: a scene for each pack with bé Bi (the painted mascot) in that pack's outfit,
+// and his kite. Each preview is one SVG with light CSS animation (off for reduced motion).
 
-const BI = '/art/be-bi.png';
-/** bé Bi's picture is 325 × 420; props are drawn in its pixel space and scaled with it. */
-const BI_W = 325;
-const BI_H = 420;
+/** bé Bi dressed for each pack: picture size and where his raised fist is (fractions of the picture). */
+const OUTFIT = {
+  tet: { src: '/art/be-bi-tet.png', w: 260, h: 420, fist: [0.9, 0.29] },
+  hoadang: { src: '/art/be-bi-hoadang.png', w: 301, h: 420, fist: [0.93, 0.25] },
+  lanbien: { src: '/art/be-bi-lanbien.png', w: 274, h: 420, fist: [0.92, 0.3] },
+  amnhac: { src: '/art/be-bi-amnhac.png', w: 274, h: 420, fist: [0.91, 0.31] },
+} as const;
 
 const INK = '#3a2a22';
 
-/** Places bé Bi with his props; `fist` = his raised fist in scene units, for the kite string. */
-function bi(x: number, y: number, w: number, props: string, back = '') {
-  const s = w / BI_W;
-  const fist = { x: x + 305 * s, y: y + 128 * s };
-  const svg =
-    `<g transform="translate(${x} ${y}) scale(${s})">${back}` +
-    `<image href="${BI}" width="${BI_W}" height="${BI_H}"/>${props}</g>`;
-  return { svg, fist, s };
+/** Places bé Bi in his outfit, `h` tall; `fist` = his raised fist in scene units, for the kite string. */
+function bi(theme: keyof typeof OUTFIT, x: number, y: number, h: number, back = '') {
+  const o = OUTFIT[theme];
+  const w = (h * o.w) / o.h;
+  const fist = { x: x + o.fist[0] * w, y: y + o.fist[1] * h };
+  const svg = `${back}<ellipse cx="${x + w / 2}" cy="${y + h - 3}" rx="${w * 0.36}" ry="5" fill="#000" opacity=".22"/>` +
+    `<image href="${o.src}" x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}"/>`;
+  return { svg, fist };
 }
 
 /** A diamond kite with ribbon tails, string to the fist. */
@@ -88,11 +91,8 @@ function tet() {
   b += `<path d="M0 196 Q 180 184 360 196 L 360 220 L 0 220 Z" fill="#8a2a14" opacity=".55"/>`;
   b += `<g transform="translate(250 160)"><rect width="40" height="36" rx="3" fill="#3f7d3a" stroke="${INK}" stroke-width="2"/><rect x="2" y="2" width="36" height="32" rx="2" fill="none" stroke="#5e9e4c" stroke-width="1.4"/><path d="M13 0 V36 M27 0 V36 M0 12 H40 M0 24 H40" stroke="#e8d7a8" stroke-width="2"/></g>`;
   b += `<g transform="translate(300 150)"><rect width="22" height="48" rx="2" fill="#d42a1f" stroke="${INK}" stroke-width="1.6"/><path d="M6 10 h10 M6 20 h10 M6 30 h10 M6 40 h10" stroke="#ffd36b" stroke-width="3" stroke-linecap="round"/></g>`;
-  // bé Bi: a lì xì in one hand, mai blossoms on his hat.
-  let props = `<g transform="rotate(-12 58 200)"><rect x="34" y="150" width="46" height="66" rx="6" fill="#e5332a" stroke="${INK}" stroke-width="7"/><circle cx="57" cy="178" r="13" fill="#ffd23f" stroke="${INK}" stroke-width="4"/><path d="M51 178 h12 M57 172 v12" stroke="#c0392b" stroke-width="4" stroke-linecap="round"/></g>`;
-  props += `<circle cx="58" cy="218" r="26" fill="#ffd9b8" stroke="${INK}" stroke-width="7"/><path d="M44 212 q 8 -6 16 0 M48 224 q 8 -5 16 0" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  for (const [x, y, r] of [[52, 128, 11], [76, 122, 10], [98, 115, 9], [64, 112, 7]] as const) props += blossom(x, y, r);
-  const B = bi(28, 36, 128, props);
+  // bé Bi in a red áo dài and khăn đóng, a lì xì in hand.
+  const B = bi('tet', 30, 40, 160);
   b += kite(B.fist.x, B.fist.y, 200, 118, ['#ffd23f', '#e5332a', '#ffcf3a', '#c62a1e'], 'kt', `<circle cx="200" cy="118" r="5" fill="#ffd23f" stroke="${INK}" stroke-width="1.2"/>`);
   b += B.svg;
   return wrap(id, b);
@@ -134,13 +134,8 @@ function hoadang() {
     `<path d="M${x - 6 * k} ${y - 2 * k} Q ${x} ${y - 14 * k} ${x + 6 * k} ${y - 2 * k}" fill="#ffc2d6" stroke="#2a1a33" stroke-width="${k}"/>` +
     `<path class="fl" d="M${x} ${y - 16 * k} q ${3 * k} ${4 * k} 0 ${7 * k} q ${-3 * k} ${-3 * k} 0 ${-7 * k} Z" fill="#ffe08a"/></g>`;
   b += lotus(196, 192, 0.9, 0) + lotus(250, 182, 0.7, 0.8) + lotus(300, 198, 1, 1.4) + lotus(338, 178, 0.6, 2.1) + lotus(160, 206, 0.6, 1.1);
-  // bé Bi with a lotus lantern hanging from his hand.
-  const props =
-    `<path d="M58 228 L 58 268" stroke="${INK}" stroke-width="4"/>` +
-    `<circle cx="58" cy="300" r="62" fill="url(#hd-glow)" class="fl"/>` +
-    `<path d="M22 300 Q 18 270 44 274 Q 58 246 72 274 Q 98 270 94 300 Z" fill="#ff8fb0" stroke="${INK}" stroke-width="6"/>` +
-    `<path d="M40 300 Q 58 262 76 300" fill="#ffc2d6" stroke="${INK}" stroke-width="5"/><path class="fl" d="M58 252 q 7 10 0 18 q -7 -8 0 -18 Z" fill="#ffe08a"/>`;
-  const B = bi(26, 40, 124, props);
+  // bé Bi in áo bà ba with a lotus lantern.
+  const B = bi('hoadang', 18, 42, 158);
   b += kite(B.fist.x, B.fist.y, 196, 104, ['#ffd23f', '#ffb02e', '#e94f9a', '#ffd23f'], 'kt');
   b += B.svg;
   return wrap(id, b);
@@ -180,11 +175,8 @@ function lanbien() {
   b += `<g stroke="#ff8fb0" stroke-width="5" stroke-linecap="round" fill="none"><path d="M336 204 V 178 M336 190 L 346 180 M336 186 L 326 176"/></g>`;
   // Bubbles.
   for (const [x, y, r, d] of [[110, 120, 4, 0], [122, 140, 3, 1.2], [104, 156, 5, 2.4], [200, 180, 3, 0.6], [260, 170, 4, 1.8], [150, 190, 3, 3]] as const) b += `<circle class="bb" style="animation-delay:${d}s" cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#dff6ff" stroke-width="1.4"/>`;
-  // bé Bi in a diving mask with a snorkel.
-  const props =
-    `<path d="M268 148 Q 300 140 296 100 L 296 40" stroke="${INK}" stroke-width="16" fill="none" stroke-linecap="round"/><path d="M268 148 Q 300 140 296 100 L 296 40" stroke="#ff8a2a" stroke-width="8" fill="none" stroke-linecap="round"/><rect x="284" y="26" width="24" height="16" rx="5" fill="#ff8a2a" stroke="${INK}" stroke-width="5"/>` +
-    `<g transform="rotate(-7 165 150)"><rect x="82" y="112" width="166" height="80" rx="34" fill="#7fdcff" fill-opacity=".45" stroke="${INK}" stroke-width="8"/><rect x="82" y="112" width="166" height="80" rx="34" fill="none" stroke="#2fa6e0" stroke-width="5"/><path d="M165 116 V 188" stroke="#2fa6e0" stroke-width="5"/><path d="M100 128 q 14 -8 30 -6" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".8"/></g>`;
-  const B = bi(30, 46, 120, props);
+  // bé Bi in a wetsuit, mask and flippers.
+  const B = bi('lanbien', 30, 40, 160);
   // His kite is a fish-kite here.
   b += kite(B.fist.x, B.fist.y, 192, 106, ['#7fdcff', '#ff8a2a', '#ffd23f', '#ffb37a'], 'jl', `<circle cx="196" cy="100" r="2.6" fill="${INK}"/>`);
   b += B.svg;
@@ -231,15 +223,8 @@ function amnhac() {
   const note = (x: number, y: number, c: string, d: number) =>
     `<g class="note" style="animation-delay:${d}s"><path d="M${x} ${y} V ${y - 18} L ${x + 12} ${y - 22} V ${y - 4}" stroke="${c}" stroke-width="2.6" fill="none" stroke-linejoin="round"/><ellipse cx="${x - 3}" cy="${y}" rx="4.6" ry="3.6" fill="${c}"/><ellipse cx="${x + 9}" cy="${y - 4}" rx="4.6" ry="3.6" fill="${c}"/></g>`;
   b += note(170, 140, '#ffd36b', 0) + note(250, 150, '#7af0ff', 1.3) + note(140, 120, '#ff7ad9', 2.4) + note(300, 90, '#c9a8ff', 3);
-  // bé Bi with sunglasses and a microphone.
-  const props =
-    `<g transform="rotate(-7 165 148)"><path d="M100 138 Q 98 120 118 120 L 150 120 Q 162 122 160 142 Q 156 170 128 168 Q 102 166 100 138 Z" fill="#14081f" stroke="${INK}" stroke-width="7"/>` +
-    `<path d="M178 136 Q 176 118 196 118 L 228 118 Q 240 120 238 140 Q 234 168 206 166 Q 180 164 178 136 Z" fill="#14081f" stroke="${INK}" stroke-width="7"/>` +
-    `<path d="M160 132 Q 169 124 178 132" stroke="${INK}" stroke-width="7" fill="none"/><path d="M98 132 L 78 138 M240 128 L 258 124" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>` +
-    `<path d="M112 130 l 18 -4 M190 128 l 18 -4" stroke="#ff7ad9" stroke-width="5" stroke-linecap="round" opacity=".9"/></g>` +
-    `<g transform="rotate(14 58 200)"><rect x="50" y="200" width="16" height="60" rx="7" fill="#2b2b35" stroke="${INK}" stroke-width="6"/><circle cx="58" cy="186" r="20" fill="#b9bcc8" stroke="${INK}" stroke-width="6"/><path d="M46 180 h24 M44 188 h28 M46 196 h24" stroke="#7b7f8e" stroke-width="2.4"/></g>` +
-    `<circle cx="58" cy="222" r="24" fill="#ffd9b8" stroke="${INK}" stroke-width="7"/><path d="M44 216 q 8 -6 16 0 M48 228 q 8 -5 16 0" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  const B = bi(30, 34, 124, props);
+  // bé Bi in a bomber jacket and star shades, mic in hand.
+  const B = bi('amnhac', 34, 6, 152);
   b += kite(B.fist.x, B.fist.y, 196, 112, ['#7af0ff', '#8b4fd8', '#ff7ad9', '#c9a8ff'], 'kt', `<path d="M194 116 V 104 L 202 102 V 112" stroke="#fff" stroke-width="2" fill="none"/>`);
   b += B.svg + crowd;
   return wrap(id, b);
