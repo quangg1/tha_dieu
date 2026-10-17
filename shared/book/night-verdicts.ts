@@ -17,6 +17,7 @@ export const NIGHT_VERDICTS: { day: string; pending: NightVerdict[]; submissions
   day: '2026-10-17',
   pending: [
     { q: 'pop-hoat-hinh-chieu-rap', key: 'mởcửara', valid: false, canonical: 'Mở cửa ra', reason: 'Không có phim hoạt hình chiếu rạp nào tên như vậy.' },
+    { q: 'du-truyenthong', key: 'tràgừng', valid: true, canonical: 'Trà gừng', reason: 'Thức uống dân gian quen thuộc của người Việt.' },
   ],
   submissions: [
     { q: 'nv-bongda-tg', key: 'sadiomane', valid: true, canonical: 'Sadio Mané', reason: 'Tiền đạo người Senegal, từng vô địch Champions League cùng Liverpool.' },
@@ -35,6 +36,8 @@ export const NIGHT_VERDICTS: { day: string; pending: NightVerdict[]; submissions
     { q: 'qg-eu', key: 'venezuala', valid: false, canonical: 'Venezuela', reason: 'Venezuela ở Nam Mỹ, không phải châu Âu.' },
     { q: 'nghe-nghiep', key: 'banhang', valid: true, canonical: 'Nhân viên bán hàng', reason: 'Bán hàng là một nghề phổ biến.' },
     { q: 'qg-eu', key: 'venezela', valid: false, canonical: 'Venezuela', reason: 'Venezuela ở Nam Mỹ, không phải châu Âu.' },
+    { q: 'du-truyenthong', key: 'tràgừng', valid: true, canonical: 'Trà gừng', reason: 'Thức uống dân gian quen thuộc của người Việt.' },
+    { q: 'dd-cho-noi', key: 'bađình', valid: false, canonical: 'Ba Đình', reason: 'Ba Đình là một quận ở Hà Nội, không phải chợ nổi miền Tây.' },
     { q: 'sinh-vat-bien', key: 'cáigìđólạhoắc', valid: false, canonical: 'Cái gì đó lạ hoắc', reason: 'Không phải tên một sinh vật cụ thể.' },
   ],
 };
