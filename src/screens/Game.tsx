@@ -767,7 +767,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   if (notice) setNotice('');
                   if (rejected) setRejected(null);
                 }}
-                placeholder="Gõ đáp án, không dấu cũng được…"
+                placeholder={window.innerWidth < 480 ? 'Gõ đáp án…' : 'Gõ đáp án, không dấu cũng được…'}
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}

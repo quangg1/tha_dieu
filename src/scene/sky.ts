@@ -1471,7 +1471,7 @@ export class SkyScene {
     // "Bạn" marker at the kite's height.
     const label = formatAlt(this.alt);
     const fs = wide ? 16 : 14;
-    ctx.font = `800 ${fs}px 'Baloo 2', system-ui, sans-serif`;
+    ctx.font = `900 ${fs}px 'Nunito', system-ui, sans-serif`;
     const tw = ctx.measureText(label).width;
     ctx.font = "800 10px 'Be Vietnam Pro', system-ui, sans-serif";
     const bw = ctx.measureText('BẠN').width;
@@ -1494,7 +1494,7 @@ export class SkyScene {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffd66b';
     ctx.fillText('BẠN', bx + 10, yk + 3.5);
-    ctx.font = `800 ${fs}px 'Baloo 2', system-ui, sans-serif`;
+    ctx.font = `900 ${fs}px 'Nunito', system-ui, sans-serif`;
     ctx.fillStyle = '#ffffff';
     ctx.fillText(label, bx + 16 + bw, yk + fs * 0.36);
     ctx.fillStyle = '#e5533d';
