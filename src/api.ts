@@ -108,7 +108,7 @@ export const api = {
   newstatus: (b: { playerId: string; day: string; mode: string; questionIds: string[] }) =>
     call<{ answers: { questionId: string; state: 'pending' | 'approved' | 'rejected'; display: string | null }[] }>('newstatus', b),
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
-  finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string }) => call<FinishResult>('finish', b),
+  finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string; runSince?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
   report: (b: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) => call<{ ok: boolean }>('report', b),
   gate: (s: string) => call<{ ok: boolean }>(`gate?s=${encodeURIComponent(s)}`),

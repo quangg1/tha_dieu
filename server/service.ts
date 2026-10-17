@@ -1186,7 +1186,7 @@ async function flightDone(db: Db, day: string, playerId: string) {
   return r.n >= set.length;
 }
 
-export async function finish(db: Db, a: { playerId: string; day: string; mode: Mode; name?: string; dev?: string; since?: string }) {
+export async function finish(db: Db, a: { playerId: string; day: string; mode: Mode; name?: string; dev?: string; since?: string; runSince?: string }) {
   const name = typeof a.name === 'string' ? a.name.replace(/\s+/g, ' ').trim().slice(0, 24) || null : null;
   let grid: string;
   let score: number;
@@ -1196,9 +1196,13 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     score = s?.score ?? 0;
     grid = s?.grid ?? 'x'.repeat(DAILY_COUNT);
   } else {
+    // Only this run: a player may fly Thả vô tận several times a day, and each run starts from the meadow.
+    const since = a.runSince && !Number.isNaN(Date.parse(a.runSince)) ? new Date(Date.parse(a.runSince) - 1000).toISOString() : null;
     const rows = await db.query<{ tier: number | null; points: number | null }>(
-      `select tier, points from turns where player_id=$1 and day=$2::date and mode='night' and answered_at is not null order by answered_at`,
-      [a.playerId, a.day],
+      since
+        ? `select tier, points from turns where player_id=$1 and day=$2::date and mode='night' and answered_at is not null and started_at >= $3::timestamptz order by answered_at`
+        : `select tier, points from turns where player_id=$1 and day=$2::date and mode='night' and answered_at is not null order by answered_at`,
+      since ? [a.playerId, a.day, since] : [a.playerId, a.day],
     );
     score = rows.reduce((s, r) => s + (r.points ?? 0), 0);
     grid = rows.map((r) => (r.tier == null || r.tier < 0 ? 'x' : String(r.tier))).join('').slice(0, 60);

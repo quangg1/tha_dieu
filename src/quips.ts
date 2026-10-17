@@ -101,3 +101,30 @@ export function momentLine(tier: number, seed: number) {
   if (tier === 4) return pick(['Gần như chỉ mình bạn nghĩ tới.', 'Câu tưởng dễ mà gần như chẳng ai nghĩ ra.'], seed);
   return pick(['Rất ít người nghĩ ra câu này.', 'Câu này kéo diều lên cao nhất chuyến bay.'], seed);
 }
+
+/**
+ * Thả vô tận has no daily bands (a long run easily passes the daily top score): its verdict follows how far up the
+ * sky this run's kite actually got, and the lap when it went round through the wormhole.
+ */
+const NIGHT_VERDICTS: readonly (readonly [string, string, readonly string[]])[] = [
+  ['Mới cất cánh', 'Gió đêm còn dài, thả tiếp đi.', ['Mới khởi động thôi, ván sau mới thật.', 'Diều còn ngửi thấy mùi cỏ.']],
+  ['Lên cao rồi', 'Đêm nay gió thuận.', ['Diều đã qua khỏi mây làng.', 'Bay vừa tầm, chưa ai phải ngước cổ.']],
+  ['Vượt mây', 'Diều bắt đầu chạm sao.', ['Mây ở dưới chân rồi.', 'Đêm nay nghĩ khác người một chút là thấy liền.']],
+  ['Ra ngoài Trái Đất', 'Đêm nay bay xa thật.', ['Trạm vũ trụ vẫy tay chào.', 'Diều này cần bình dưỡng khí.']],
+  ['Giữa các vì sao', 'Hiếm ai thả tới đây.', ['Diều đang đi ngang qua mấy thiên hà.', 'Ánh sáng còn phải chạy mỏi chân mới tới diều mình.']],
+  ['Rìa vũ trụ', 'Thêm một cú gió là sang vòng trời mới.', ['Hết chỗ để bay rồi, chỉ còn lỗ sâu.', 'Ai thả xa hơn thì lên tiếng.']],
+];
+
+export function nightVerdict(altitude: number, ceilingLog: number, seed: number) {
+  const L = Math.log10(Math.max(1, altitude));
+  const lap = Math.floor(L / ceilingLog) + 1;
+  const frac = (L - (lap - 1) * ceilingLog) / ceilingLog;
+  const band = Math.max(0, Math.min(5, Math.floor(frac * 6)));
+  const [title, subtitle, brags] = NIGHT_VERDICTS[band];
+  return {
+    band,
+    title: lap > 1 ? `Vòng trời thứ ${lap}` : title,
+    subtitle: lap > 1 ? `Đã chui qua lỗ sâu ${lap - 1} lần. ${title}.` : subtitle,
+    brag: pick(brags, seed),
+  };
+}

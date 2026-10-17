@@ -140,7 +140,7 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
   finish: {
     method: 'POST',
     async run({ db, body, dev }) {
-      return S.finish(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), name: body.name as string | undefined, dev, since: typeof body.since === 'string' ? body.since : undefined });
+      return S.finish(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), name: body.name as string | undefined, dev, since: typeof body.since === 'string' ? body.since : undefined, runSince: typeof body.runSince === 'string' ? body.runSince : undefined });
     },
   },
   board: {

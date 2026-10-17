@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { DAY_BANDS, TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
+import { CEILING_L, DAY_BANDS, TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
 import { api, type BoardRow, type FinishResult } from '../api';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, renderCard, shareCard } from '../shareCard';
-import { bragLine, momentLine, seedOf, tauntLine } from '../quips';
+import { bragLine, momentLine, nightVerdict, seedOf, tauntLine } from '../quips';
 import { skinById } from '../skins';
 import { addToAlbum, krillFound, playerId, playerSince, prefs, saveToday, stats, today, vnDay } from '../store';
 import { musicLevel, type Summary } from './Game';
@@ -112,13 +112,15 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 
   const d = new Date(Date.now() + 7 * 3600_000);
   const dayLabel = `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
-  const verdict = bandFor(result.score).verdict;
-  const [title, ...rest] = verdict.split('. ');
-  const subtitle = rest.join('. ');
-  const krills = result.reveal?.filter((r) => r.tier === 5).length ?? 0;
-  const band = DAY_BANDS.indexOf(bandFor(result.score));
   const seed = seedOf(day, mode, result.score);
-  const brag = bragLine(band, { krills, beaten: result.beaten, players: result.players, seed });
+  const krills = result.reveal?.filter((r) => r.tier === 5).length ?? 0;
+  // The daily bands fit seven answers; Thả vô tận is judged by how far up the sky this run actually went.
+  const night = mode === 'night' ? nightVerdict(result.altitude, CEILING_L, seed) : null;
+  const [dayTitle, ...rest] = bandFor(result.score).verdict.split('. ');
+  const title = night ? night.title : dayTitle;
+  const subtitle = night ? night.subtitle : rest.join('. ');
+  const band = night ? night.band : DAY_BANDS.indexOf(bandFor(result.score));
+  const brag = night ? night.brag : bragLine(band, { krills, beaten: result.beaten, players: result.players, seed });
   // The flight's rarest answer, if it is rare enough to be worth a screenshot.
   const moment = rows
     .map((r, i) => ({ r, i, rank: r.tier >= 0 ? TIERS[r.tier].rank : -1 }))
@@ -133,7 +135,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
     const head = mode === 'daily' ? `🪁 Bilion · Thả Diều ${dayLabel}` : '🪁 Bilion · Thả vô tận';
     const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
-    return [head, verdict, `“${brag}”`, height, grid].join('\n');
+    return [head, `${title}. ${subtitle}`, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
@@ -164,7 +166,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   };
 
   const shareLink = async () => {
-    const msg = `🪁 ${tauntLine(band, result.altitude, seed)}`;
+    const msg = `🪁 ${tauntLine(night ? Math.min(band, 4) : band, result.altitude, seed)}`;
     try {
       track('challenge', { mode });
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -192,7 +194,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     if (!n) return;
     prefs.name = n;
     try {
-      await api.finish({ playerId: pid, day, mode, name: n, since: playerSince() });
+      await api.finish({ playerId: pid, day, mode, name: n, since: playerSince(), runSince: summary.runSince });
       setSaved(true);
       void loadBoard();
     } catch (e) {
@@ -230,7 +232,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           )}
         </div>
         <span className="result-note">
-          {waitingCount ? `${waitingCount} đáp án mới đang chờ làng xác nhận, điểm chốt lúc 0 giờ. ` : ''}
+          {waitingCount ? `${waitingCount} đáp án mới đang chờ làng xác nhận${mode === 'daily' ? ', điểm chốt lúc 0 giờ' : ''}. ` : ''}
           {result.replay
             ? 'Lượt chơi lại trên thiết bị này không lên bảng diều. '
             : mode === 'daily' && !result.settled

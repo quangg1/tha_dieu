@@ -29,6 +29,8 @@ export interface Summary {
   mode: 'daily' | 'night';
   rows: LocalRow[];
   result: FinishResult;
+  /** Thả vô tận: when this run began on the server, so the result counts this run only, not earlier runs today. */
+  runSince?: string;
 }
 
 type Phase = 'loading' | 'intro' | 'asking' | 'judging' | 'reveal' | 'result' | 'error';
@@ -256,16 +258,17 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   }, [mode]);
 
   /* ------------------------------------------------ finishing */
+  const runSince = useRef<string | null>(null);
   const finish = useCallback(async () => {
     if (finishing.current) return;
     finishing.current = true;
     setPhase('loading');
     try {
-      const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined, since: playerSince() });
+      const result = await api.finish({ playerId: pid, day, mode, name: prefs.name || undefined, since: playerSince(), runSince: runSince.current ?? undefined });
       recordFlight(day, mode, result.altitude, result.score, result.grid);
       track('finish', { mode, score: result.score, alt: result.altitude, lap: lapOf(result.altitude).lap, replay: !!result.replay });
       if (mode === 'daily') saveToday({ day, rows: rowsRef.current, result });
-      onDone({ mode, rows: rowsRef.current, result });
+      onDone({ mode, rows: rowsRef.current, result, runSince: runSince.current ?? undefined });
     } catch (e) {
       finishing.current = false;
       setError(e instanceof Error ? e.message : 'Không lưu được chuyến bay.');
@@ -352,6 +355,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       }
       try {
         const t = await api.start({ playerId: pid, day: d, mode, questionId: question.id });
+        runSince.current ??= new Date(Date.parse(t.now) - 2000).toISOString();
         if (mode === 'daily') {
           if (t.answered) return 'answered';
           const elapsed = Math.max(0, (Date.parse(t.now) - Date.parse(t.startedAt)) / 1000);
