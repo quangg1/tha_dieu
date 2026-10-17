@@ -6,6 +6,7 @@ import khainiem from './khainiem.js';
 import thethao from './thethao.js';
 import nghe from './nghe.js';
 import xe from './xe.js';
+import cothe from './cothe.js';
 
 export const MORE_LEX: Record<string, string> = {
   dongvat,
@@ -15,4 +16,5 @@ export const MORE_LEX: Record<string, string> = {
   thethao,
   nghe,
   xe,
+  cothe,
 };
