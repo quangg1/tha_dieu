@@ -5,6 +5,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
+import { NIGHT_VERDICTS } from '../shared/book/night-verdicts.js';
 
 let ready: Promise<void> | null = null;
 
@@ -98,6 +99,15 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return S.newAnswerStatus(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionIds: ids });
     },
   },
+  // What the scheduled night-shift run reads: tomorrow's prompts and the answers waiting for a verdict.
+  nightqueue: {
+    method: 'GET',
+    async run({ db, admin, query }) {
+      const key = process.env.NIGHT_TOKEN;
+      if (!admin && !(key && query.get('k') === key)) throw new S.GameError(401, 'Không được phép.');
+      return S.nightQueue(db);
+    },
+  },
   // The night shift, called by Vercel Cron (with CRON_SECRET when set) or by the village head.
   nightly: {
     method: 'GET',
@@ -105,11 +115,13 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       const secret = process.env.CRON_SECRET;
       const allowed = admin || (secret ? auth === `Bearer ${secret}` : true);
       if (!allowed) throw new S.GameError(401, 'Không được phép.');
+      // The scheduled Claude run's verdicts ship with the code; apply them first.
+      const night = await S.applyNight(db, NIGHT_VERDICTS);
       const ai = pickAi();
-      if (!ai) return { skipped: 'Chưa có khóa AI (GEMINI_API_KEY hoặc ANTHROPIC_API_KEY).' };
+      if (!ai) return { night, skipped: 'Chưa có khóa AI (GEMINI_API_KEY hoặc ANTHROPIC_API_KEY).' };
       // Without a secret, anyone could call this: once a day is all it ever does.
-      if (!admin && !(await S.hit(db, 'nightly', S.vnToday(), 1))) return { skipped: 'Đã chạy hôm nay.' };
-      return S.nightShift(db, ai);
+      if (!admin && !(await S.hit(db, 'nightly', S.vnToday(), 1))) return { night, skipped: 'Đã chạy hôm nay.' };
+      return { night, ai: await S.nightShift(db, ai) };
     },
   },
   miss: {

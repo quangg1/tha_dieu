@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
+import type { NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
@@ -1448,4 +1449,66 @@ export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
     }),
   );
   return report;
+}
+
+/* ------------------------------------------------------------------ the night shift, done by a scheduled Claude */
+
+/** What the night shift needs to read: tomorrow's prompts with the book's answers, and every answer still waiting. */
+export async function nightQueue(db: Db, today = vnToday()) {
+  const tomorrow = new Date(new Date(today + 'T00:00:00Z').getTime() + 86400_000).toISOString().slice(0, 10);
+  const ids = await dailySet(db, tomorrow);
+  const questions = await Promise.all(
+    ids.map(async (id) => {
+      const q = await loadQuestion(db, id);
+      return { id, prompt: q.prompt, note: q.note, known: [...q.answers.values()].map((a) => a.display) };
+    }),
+  );
+  const pending = await db.query<{ q: string; prompt: string; key: string; display: string; plays: number }>(
+    `select a.question_id as q, qs.prompt, a.key, a.display, coalesce(c.n,0)::int as plays
+     from answers a join questions qs on qs.id=a.question_id left join counts c on c.question_id=a.question_id and c.answer_key=a.key
+     where a.status='pending' and a.source='crowd' order by a.created_at limit 300`,
+  );
+  const submissions = await db.query<{ q: string; prompt: string; key: string; display: string; n: number }>(
+    `select s.question_id as q, qs.prompt, s.input_key as key, s.display, s.n from submissions s join questions qs on qs.id=s.question_id
+     where s.status='open' and not exists (select 1 from verdicts v where v.question_id=s.question_id and v.input_key=s.input_key)
+     order by (s.question_id = any($1::text[])) desc, s.n desc limit 200`,
+    [ids],
+  );
+  return { today, tomorrow, questions, pending, submissions };
+}
+
+/** Applies the night shift's verdicts once per batch (by its day); safe to call again. */
+export async function applyNight(db: Db, batch: { day: string; pending: NightVerdict[]; submissions: NightVerdict[] }) {
+  if (!batch.day) return { applied: false, reason: 'empty' };
+  const [done] = await db.query<{ value: string }>(`select value from meta where key='night_applied'`);
+  if (done?.value === batch.day) return { applied: false, reason: 'already', day: batch.day };
+  const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0 };
+  for (const v of batch.pending) {
+    if (!BOOK_BY_ID.has(v.q)) continue;
+    const [row] = await db.query<{ display: string }>(`select display from answers where question_id=$1 and key=$2`, [v.q, v.key]);
+    if (!row) continue;
+    const r = await settle(db, v.q, row.display, v.key, { valid: v.valid, canonical: v.canonical, reason: v.reason });
+    if (r === 'approved') out.approved++;
+    if (r === 'rejected') out.rejected++;
+  }
+  for (const v of batch.submissions) {
+    if (!BOOK_BY_ID.has(v.q)) continue;
+    const [row] = await db.query<{ display: string }>(`select display from submissions where question_id=$1 and input_key=$2`, [v.q, v.key]);
+    if (!row) continue;
+    if (v.valid && v.canonical.trim()) {
+      const q = await loadQuestion(db, v.q);
+      await learnAnswer(db, q, row.display, v.canonical.trim().slice(0, 60), 'ai', 'approved', 3, v.reason || 'Ca đêm công nhận');
+      out.learned++;
+    } else {
+      await db.query(
+        `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict (question_id, input_key) do nothing`,
+        [v.q, v.key, v.reason || 'Trọng tài không công nhận đáp án này.'],
+      );
+      out.refused++;
+    }
+    await db.query(`update submissions set status=$3 where question_id=$1 and input_key=$2`, [v.q, v.key, v.valid ? 'accepted' : 'dismissed']);
+    forgetQuestion(v.q);
+  }
+  await db.query(`insert into meta (key, value) values ('night_applied', $1) on conflict (key) do update set value=excluded.value`, [batch.day]);
+  return out;
 }

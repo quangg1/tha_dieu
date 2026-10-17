@@ -450,3 +450,21 @@ describe('the night shift', () => {
     expect([...q.answers.values()].some((a) => a.display === suggested[0] || suggested.includes(a.display))).toBe(true);
   });
 });
+
+describe('the night shift run by Claude', () => {
+  it('lists what is waiting and applies a verdict batch once', async () => {
+    const { nullReferee } = await import('./referee.js');
+    await S.startTurn(db, { playerId: 'claude_night', day, mode: 'night', questionId: 'loai-rau' });
+    const r = await S.answer(db, { playerId: 'claude_night', day, mode: 'night', questionId: 'loai-rau', input: 'Rau đêm khuya bịa' }, nullReferee);
+    expect(r.pending).toBe(true);
+    const qd = await S.nightQueue(db);
+    expect(qd.questions).toHaveLength(7);
+    const item = qd.pending.find((p) => p.q === 'loai-rau' && p.display === 'Rau đêm khuya bịa')!;
+    expect(item).toBeTruthy();
+    const batch = { day: '2099-01-01', pending: [{ q: 'loai-rau', key: item.key, valid: false, canonical: '', reason: 'Không có loại rau này.' }], submissions: [] };
+    expect((await S.applyNight(db, batch)).applied).toBe(true);
+    expect((await S.applyNight(db, batch)).applied).toBe(false);
+    const st = await S.newAnswerStatus(db, { playerId: 'claude_night', day, mode: 'night', questionIds: ['loai-rau'] });
+    expect(st.answers[0].state).toBe('rejected');
+  });
+});
