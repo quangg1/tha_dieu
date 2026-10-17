@@ -47,7 +47,9 @@ const ASKS_PER_DAY = 40;
 export const DB_VERSION = `${BOOK_VERSION}.${createHash('sha256').update(SCHEMA).digest('hex').slice(0, 10)}`;
 
 export async function setup(db: Db) {
-  await db.exec(SCHEMA);
+  // A new deploy wakes several instances at once and each runs setup; the layout changes take table-wide
+  // locks, so two of them at the same moment deadlock. One lock for the whole layout makes them take turns.
+  await db.exec(`begin; select pg_advisory_xact_lock(7151); ${SCHEMA}; commit;`);
   const ids = BOOK.map((q) => q.id);
   await db.query(
     `insert into questions (id, category, prompt, note, strip, krill_key, active)
