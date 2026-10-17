@@ -18,8 +18,7 @@ import {
 import type { Db } from './db.js';
 import { nullReferee, type Ai, type Referee, type Verdict } from './referee.js';
 import { SCHEMA } from './schema.js';
-import { WIKI_RULES, wikiCheck, wikiExists } from './wikidata.js';
-import { looksVietnamese } from '../shared/syllable.js';
+import { WIKI_RULES, wikiCheck } from './wikidata.js';
 
 export class GameError extends Error {
   constructor(public status: number, message: string) {
@@ -35,12 +34,8 @@ const REFEREE_CALLS_PER_DAY = 40;
 const REFEREE_CALLS_PER_NET = 300;
 /** Players from one network whose answers count towards the day's rarity. A school or a café shares an address; a script does too. */
 const NET_PLAYERS_COUNTED = 60;
-/** New answers a player may leave for the village to confirm in one run, beyond which they must try a known one. */
-const PENDING_PER_RUN = 2;
-/** Networks that must give the same new answer before it joins the book on its own. */
-const CONFIRM_VOTES = 3;
-/** Rarity a new answer starts at while it waits: rare, but not the top tiers until the crowd backs it. */
-const PENDING_PRIOR = 2;
+/** Answers the book did not know that one player may leave for the night shift in a day. */
+const ASKS_PER_DAY = 40;
 
 /* ------------------------------------------------------------------ setup */
 
@@ -205,6 +200,8 @@ export interface LoadedQuestion {
   traps: Set<string>;
 }
 
+const unvouched = (e: { status: string; source?: string }) => e.status === 'pending' && e.source === 'crowd';
+
 const cache = new Map<string, { at: number; q: LoadedQuestion }>();
 const CACHE_MS = 60_000;
 
@@ -234,14 +231,16 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     }
     if (!answers.has(key)) {
       answers.set(key, { display: l.display, prior: l.prior_tier, status: l.status, source: l.source });
-      entries.push({ key, aliases: [l.display], priorTier: l.prior_tier });
+      // A crowd answer nobody has vouched for (from before answers stopped waiting) keeps its old turns' names, but is not matched.
+      if (!unvouched(answers.get(key)!)) entries.push({ key, aliases: [l.display], priorTier: l.prior_tier });
     }
   }
   const matcher = new Matcher(base.strip, entries.filter((e) => answers.has(e.key)));
   const al = await db.query<{ alias: string; key: string }>(`select alias, key from aliases where question_id=$1`, [id]);
   for (const a of al) {
     const key = rekey.get(a.key) ?? a.key;
-    if (answers.has(key)) matcher.addAlias(a.alias, key, answers.get(key)!.prior);
+    const e = answers.get(key);
+    if (e && !unvouched(e)) matcher.addAlias(a.alias, key, e.prior);
   }
   const q: LoadedQuestion = {
     id: base.id,
@@ -406,12 +405,15 @@ export async function tallies(db: Db, day: string, ids: string[]): Promise<Map<s
 /** Earlier days count only once they hold enough players to say something. */
 const HIST_MIN = 30;
 
-/** The tier of an answer against a tally, leaving the player's own answer out when it is already counted. */
-function tierFromTally(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, t: Tally, self = 0): TierIndex {
-  const count = Math.max(0, (t.today.get(key) ?? 0) - self);
-  const total = Math.max(0, t.todayTotal - self);
-  const histShare = t.histTotal >= HIST_MIN ? (t.hist.get(key) ?? 0) / t.histTotal : undefined;
-  return tierFor(q, key, prior, count, total, histShare);
+/**
+ * The tier of an answer, fixed for the whole day: the book's prior, corrected by what players gave on earlier days.
+ * Today's players never move it, so a score is final the moment the answer lands (as in Krillion), and playing
+ * early or late makes no difference. Today's counts teach tomorrow.
+ */
+function tierFromTally(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, t: Tally): TierIndex {
+  // Earlier days count only once they hold enough players to say something.
+  if (t.histTotal < HIST_MIN) return tierFor(q, key, prior);
+  return tierFor(q, key, prior, t.hist.get(key) ?? 0, t.histTotal);
 }
 
 /** Uses the cached verdict, or asks the referee (within the player's daily budget), for an answer the bank does not know. */
@@ -439,10 +441,12 @@ async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: st
   if (!known) {
     await db.query(
       `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,$5,$6)
-       on conflict (question_id, key) do nothing`,
+       on conflict (question_id, key) do update set status=excluded.status, source=excluded.source, display=excluded.display
+       where answers.status='pending' and excluded.status='approved'`,
       [q.id, key, display, prior, source, status],
     );
-    if (!q.answers.has(key)) q.answers.set(key, { display, prior, status, source });
+    const had = q.answers.get(key);
+    if (!had || (unvouched(had) && status === 'approved')) q.answers.set(key, { display, prior: had?.prior ?? prior, status, source });
   }
   await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`, [q.id, inputKey, key, soft(display)]);
   q.matcher.addAlias(input, key);
@@ -472,7 +476,7 @@ export async function settleAll() {
 
 const sleep = (ms: number) => new Promise<null>((r) => setTimeout(() => r(null), ms));
 
-async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string, mode: Mode = 'daily') {
+async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string) {
   const inputKey = soft(input);
   if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
   const cached = await db.query<{ valid: boolean; canonical_key: string | null; reason: string | null }>(
@@ -498,44 +502,72 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
       (!net || (await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) &&
       (await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 5000));
   }
-  // Wikidata, the referee and the "is this a real name" check all start at once.
+  // Wikidata (for prompts it can answer exactly) and the referee start at once.
   const wikiP = WIKI_RULES[q.id] ? wikiCheck(q.id, input).catch(() => null) : Promise.resolve(null);
   const callP = useReferee ? referee(q.prompt, q.note ?? undefined, input).catch(() => null) : null;
-  let existsP: Promise<boolean | null> | null = null;
-  const exists = () => (existsP ??= looksVietnamese(input) ? Promise.resolve(true) : wikiExists(input).catch(() => null));
-  if (callP) exists();
   const wiki = await wikiP;
   if (wiki) return learnAnswer(db, q, input, wiki.display, 'wiki', 'approved', 3, `Wikidata ${wiki.id}`);
   if (callP) {
     const first = await Promise.race([callP.then((v) => ({ v })), sleep(Math.max(300, deadline - Date.now()))]);
     if (first && first.v) return applyVerdict(db, q, input, first.v);
     if (!first) {
-      // The referee is slow today: the answer stands as new for now, and the verdict settles it a moment later.
-      const r = await standAsNew(db, q, input, playerId, day, mode, exists);
-      if (r.key) {
-        const key = r.key;
-        background(callP.then((v) => settle(db, q.id, input, key, v)));
-      }
-      return r;
+      // The referee is slow today: this try does not count, and its verdict, when it comes, teaches the book for next time.
+      background(callP.then((v) => (v ? applyVerdict(db, q, input, v).then(() => forgetQuestion(q.id)) : null)));
     }
   }
-  return standAsNew(db, q, input, playerId, day, mode, exists);
+  return notInBook(db, q, input, playerId, day);
 }
 
-/** No verdict yet: a plausible, real-looking name stands as a new answer the village (or the night referee) confirms. */
-async function standAsNew(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, mode: Mode, exists: () => Promise<boolean | null>) {
+/**
+ * The book does not know this answer and nobody could vouch for it in time. As in Krillion, nothing is left
+ * waiting: the player tries another answer while the wind lasts, and the night shift reads what was typed.
+ * If it turns out right, the book learns it and the player hears about it on their next visit.
+ */
+async function notInBook(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string) {
+  if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
+  const inputKey = soft(input);
   await db.query(
     `insert into submissions (question_id, input_key, display) values ($1,$2,$3)
      on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
-    [q.id, soft(input), input.slice(0, 60)],
+    [q.id, inputKey, input.slice(0, 60)],
   );
-  if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
-  // A new answer must read as Vietnamese words, or be a real name somewhere on Wikidata (foreign brands, places, people).
-  if (!(await exists())) return { key: null, reason: 'Làng không nhận ra tên này. Kiểm tra lại chính tả, hoặc thử một đáp án khác nhé.' };
-  if (!(await hit(db, `pend:${mode}:${playerId}`, day, PENDING_PER_RUN))) {
-    return { key: null, reason: `Bạn đã có ${PENDING_PER_RUN} đáp án mới đang chờ làng xét. Câu này thử một đáp án quen hơn nhé.` };
+  if (await hit(db, `ask:${playerId}`, day, ASKS_PER_DAY)) {
+    await db.query(
+      `insert into asks (player_id, question_id, input_key, display, day) values ($1,$2,$3,$4,$5::date) on conflict do nothing`,
+      [playerId, q.id, inputKey, input.slice(0, 60), day],
+    );
   }
-  return learnAnswer(db, q, input, tidy(input), 'crowd', 'pending', PENDING_PRIOR, null);
+  return { key: null, reason: `Sổ của làng chưa có “${input.slice(0, 40)}”. Thử đáp án khác nhé, bé Bi đã ghi lại cho ca đêm xem.` };
+}
+
+/** Answers this player typed that the book did not know then but has learned since; each is told once. */
+export async function notices(db: Db, playerId: string) {
+  const rows = await db.query<{ question_id: string; input_key: string; display: string }>(
+    `select question_id, input_key, display from asks where player_id=$1 and not told and day >= current_date - 14 order by day desc limit 40`,
+    [playerId],
+  );
+  const out: { questionId: string; prompt: string; typed: string; answer: string }[] = [];
+  const told: string[][] = [];
+  for (const r of rows) {
+    const base = BOOK_BY_ID.get(r.question_id);
+    if (!base) continue;
+    const q = await loadQuestion(db, r.question_id);
+    const m = q.matcher.match(r.display);
+    const [v] = m?.exact ? [] : await db.query<{ valid: boolean; canonical_key: string | null }>(`select valid, canonical_key from verdicts where question_id=$1 and input_key=$2`, [r.question_id, r.input_key]);
+    const key = m?.exact ? m.key : v?.valid ? v.canonical_key : null;
+    if (v && !v.valid) told.push([r.question_id, r.input_key]);
+    const entry = key ? q.answers.get(key) : undefined;
+    if (!entry || entry.status === 'rejected') continue;
+    told.push([r.question_id, r.input_key]);
+    if (out.length < 5) out.push({ questionId: r.question_id, prompt: q.prompt, typed: r.display, answer: entry.display });
+  }
+  if (told.length) {
+    await db.query(
+      `update asks set told=true where player_id=$1 and (question_id, input_key) in (select * from unnest($2::text[], $3::text[]))`,
+      [playerId, told.map((t) => t[0]), told.map((t) => t[1])],
+    );
+  }
+  return { learned: out };
 }
 
 /** The referee answered in time: the answer is in or out right away. */
@@ -666,27 +698,20 @@ export function crowdFrom(q: LoadedQuestion, key: string | null, t: Tally): Crow
   return { total, top: guess, mine: null, estimated: true };
 }
 
-/** The hidden answer loses its 100 points once more than this share of the day's players give it. */
-const KRILL_MAX_SHARE = 0.02;
-const KRILL_MIN_PLAYERS = 20;
-
-/** Minimum players before the crowd can call an answer Khôn lỏi on its own. */
+/** Players on earlier days before history can call an answer Khôn lỏi on its own. */
 const KHON_LOI_MIN_PLAYERS = 30;
 
 /**
- * The tier an answer lands at. Besides plain rarity, an answer the book expected to be uncommon but that many
- * players give is Khôn lỏi: the pick that feels clever but that half the village reaches for.
+ * The tier an answer lands at, from the book's prior and (when given) the share earlier days measured. Besides plain
+ * rarity, an answer the book expected to be uncommon but that many players give is Khôn lỏi: the pick that feels
+ * clever but that half the village reaches for. The day's hidden answer is always Độc nhất: it changes every time
+ * the prompt comes back, so it cannot be learned from a previous day.
  */
-export function tierFor(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, count: number, total: number, histShare?: number): TierIndex {
-  if (key === q.krillKey) {
-    // The hidden answer stays hidden only while few of today's players reach it; once it leaks, it scores as what it is.
-    const leaked = total >= KRILL_MIN_PLAYERS && count / total > KRILL_MAX_SHARE;
-    if (!leaked) return CUNG_TRANG;
-    const t = tierFromCounts(4, count, total);
-    return t <= 1 ? KHON_LOI : t;
-  }
-  const base = tierFromCounts(prior, count, total, histShare);
-  const enough = total >= KHON_LOI_MIN_PLAYERS;
+export function tierFor(q: Pick<LoadedQuestion, 'krillKey' | 'traps'>, key: string, prior: number, histCount = 0, histTotal = 0): TierIndex {
+  if (key === q.krillKey) return CUNG_TRANG;
+  // The book's estimate is worth a few imaginary players; earlier days' real players outweigh it as they add up.
+  const base = tierFromCounts(prior, histCount, histTotal);
+  const enough = histTotal >= KHON_LOI_MIN_PLAYERS;
   if (q.traps.has(key) && (!enough || base <= 2)) return KHON_LOI;
   if (enough && prior >= 2 && base <= 1) return KHON_LOI;
   return base;
@@ -729,15 +754,13 @@ export async function answer(
   let key = m?.key ?? null;
   let judged = false;
   if (!key) {
-    const j = await judge(db, q, input, a.playerId, a.day, referee, a.net, a.mode);
+    const j = await judge(db, q, input, a.playerId, a.day, referee, a.net);
     // Nobody loses a prompt to an answer the village does not know: they try again while the wind lasts.
     if (!j.key) return { status: 'retry', input, reason: j.reason };
     key = j.key;
     judged = true;
   }
   const entry = q.answers.get(key)!;
-  const waiting = entry.status === 'pending' && entry.source === 'crowd';
-  if (waiting) await vote(db, q, key, entry, a.net ?? a.playerId);
   const tally = (await tallies(db, a.day, [q.id])).get(q.id)!;
   const tier = tierFromTally(q, key, entry.prior, tally);
   const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
@@ -766,18 +789,7 @@ export async function answer(
     tally.todayTotal = todayTotal;
   }
   const share = todayTotal >= 30 ? Math.round((mineCount / todayTotal) * 1000) / 10 : null;
-  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged: judged && !waiting, share, crowd: crowdFrom(q, key, tally), pending: waiting && entry.status === 'pending' };
-}
-
-/** One vote for a new answer from this network; enough networks and it joins the book. */
-async function vote(db: Db, q: LoadedQuestion, key: string, entry: { status: string }, voter: string) {
-  await db.query(`insert into pending_votes (question_id, key, voter) values ($1,$2,$3) on conflict do nothing`, [q.id, key, voter.slice(0, 64)]);
-  const [r] = await db.query<{ n: number }>(`select count(*)::int as n from pending_votes where question_id=$1 and key=$2`, [q.id, key]);
-  if ((r?.n ?? 0) >= CONFIRM_VOTES) {
-    await db.query(`update answers set status='approved', source='crowd' where question_id=$1 and key=$2 and status='pending'`, [q.id, key]);
-    entry.status = 'approved';
-    forgetQuestion(q.id);
-  }
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: crowdFrom(q, key, tally) };
 }
 
 /** Adds one to a counter for this window and says whether it is still within the limit. */
@@ -1012,11 +1024,7 @@ export async function miss(db: Db, a: { playerId: string; day: string; mode: Mod
 
 /* ------------------------------------------------------------------ runs and board */
 
-/**
- * Daily scores, recomputed from everyone's answers. An answer's tier is not fixed at the moment it is given:
- * every player of the day is scored with the same crowd data, so playing early or late makes no difference,
- * and the board settles when the day ends.
- */
+/** Daily scores for the board, summed from the stored turns and shared across server instances. */
 type DayScores = Map<string, { score: number; grid: string }>;
 const dayCache = new Map<string, { at: number; scores: DayScores; stamp: string }>();
 /** How long one server instance trusts what it last read. */
@@ -1069,41 +1077,22 @@ export async function scoreDay(db: Db, day: string): Promise<DayScores> {
   return scores;
 }
 
-/** Scores from the day's answers and current counts; for one player only when an id is given (cheap). */
+/** The day's scores: every answer was scored for good when it landed, so this only adds up what is stored. */
 export async function computeScores(db: Db, day: string, playerId?: string): Promise<DayScores> {
   const set = await dailySet(db, day);
-  const qs = new Map(await Promise.all(set.map(async (id) => [id, await dayQuestion(db, day, id)] as const)));
-  const tl = await tallies(db, day, set);
-  const turns = await db.query<{ player_id: string; question_id: string; answer_key: string | null; tier: number | null }>(
+  const turns = await db.query<{ player_id: string; question_id: string; tier: number | null; points: number | null }>(
     playerId
-      ? `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null and player_id=$2 order by answered_at`
-      : `select player_id, question_id, answer_key, tier from turns where day=$1::date and mode='daily' and answered_at is not null order by answered_at`,
+      ? `select player_id, question_id, tier, points from turns where day=$1::date and mode='daily' and answered_at is not null and player_id=$2`
+      : `select player_id, question_id, tier, points from turns where day=$1::date and mode='daily' and answered_at is not null`,
     playerId ? [day, playerId] : [day],
   );
-  const by = new Map<string, { streak: number; score: number; tiers: Map<string, number> }>();
+  const by = new Map<string, { score: number; tiers: Map<string, number> }>();
   for (const t of turns) {
-    const p = by.get(t.player_id) ?? { streak: 0, score: 0, tiers: new Map() };
+    const p = by.get(t.player_id) ?? { score: 0, tiers: new Map() };
     by.set(t.player_id, p);
-    const q = qs.get(t.question_id);
-    if (!q || !t.answer_key || t.tier == null || t.tier < 0) {
-      p.streak = 0;
-      p.tiers.set(t.question_id, -1);
-      continue;
-    }
-    const entry = q.answers.get(t.answer_key);
-    // An answer removed from the book no longer scores; a new answer still unconfirmed when its day is over scores nothing.
-    if (!entry || (entry.status === 'pending' && entry.source === 'crowd' && day < vnToday())) {
-      p.streak = 0;
-      p.tiers.set(t.question_id, -1);
-      continue;
-    }
-    // The player's own answer is in today's counts; score it as the crowd minus themselves, as at answer time.
-    const tally = tl.get(q.id)!;
-    const self = (tally.today.get(t.answer_key) ?? 0) > 0 ? 1 : 0;
-    const tier = tierFromTally(q, t.answer_key, entry.prior, tally, self);
-    p.streak = isRare(tier) ? p.streak + 1 : 0;
-    p.score += TIERS[tier].points + streakBonus(p.streak);
-    p.tiers.set(t.question_id, tier);
+    const ok = t.tier != null && t.tier >= 0;
+    p.score += ok ? t.points ?? 0 : 0;
+    p.tiers.set(t.question_id, ok ? t.tier! : -1);
   }
   const scores: DayScores = new Map();
   for (const [pid, p] of by) {

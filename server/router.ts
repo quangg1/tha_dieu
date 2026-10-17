@@ -99,6 +99,13 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return S.newAnswerStatus(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionIds: ids });
     },
   },
+  // Answers this player typed that the book has learned since (told once each).
+  notices: {
+    method: 'POST',
+    async run({ db, body }) {
+      return S.notices(db, S.checkPlayer(body.playerId));
+    },
+  },
   // What the scheduled night-shift run reads: tomorrow's prompts and the answers waiting for a verdict.
   nightqueue: {
     method: 'GET',

@@ -91,6 +91,16 @@ create table if not exists pending_votes (
   primary key (question_id, key, voter)
 );
 
+create table if not exists asks (
+  player_id text not null,
+  question_id text not null,
+  input_key text not null,
+  display text not null,
+  day date not null,
+  told boolean not null default false,
+  primary key (player_id, question_id, input_key)
+);
+
 create table if not exists submissions (
   question_id text not null,
   input_key text not null,

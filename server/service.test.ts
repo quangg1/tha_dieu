@@ -152,12 +152,10 @@ describe('Khôn lỏi', () => {
     expect(S.tierFor(q, 'common', 0, 60, 400)).toBe(0);
     expect(S.tierFor(q, 'other', 3, 0, 10)).toBe(4);
   });
-  it('keeps the hidden answer hidden while few reach it, and drops it once it leaks', () => {
+  it('always scores the day\'s hidden answer as Độc nhất', () => {
     const q = { krillKey: 'tesla', traps: new Set(['tesla']) };
     expect(S.tierFor(q, 'tesla', 4, 0, 10)).toBe(5);
-    expect(S.tierFor(q, 'tesla', 4, 4, 400)).toBe(5);
-    expect(S.tierFor(q, 'tesla', 4, 300, 400)).toBe(6);
-    expect(S.tierFor(q, 'tesla', 4, 12, 400)).not.toBe(5);
+    expect(S.tierFor(q, 'tesla', 4, 300, 400)).toBe(5);
   });
   it('lands a trap from the book in play', async () => {
     const p = 'player_test_0010';
@@ -190,29 +188,35 @@ describe('admin', () => {
   });
 });
 
-describe('new answers without a referee', () => {
-  it('lets an unknown answer stand as a new one, and the village head can accept it', async () => {
+describe('answers the book does not know', () => {
+  it('asks for another try, logs it for the night shift, and tells the player once the book learns it', async () => {
     const { nullReferee } = await import('./referee.js');
     const qid = 'loai-hoa';
-    await S.startTurn(db, { playerId: 'player_test_0005', day, mode: 'night', questionId: qid });
-    const r = await S.answer(db, { playerId: 'player_test_0005', day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
-    expect(r.status).toBe('landed');
-    expect(r.pending).toBe(true);
-    expect(r.tier).toBe(2);
+    const p = 'player_test_0005';
+    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
+    const r = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Hoa bảy màu thần kỳ' }, nullReferee);
+    expect(r.status).toBe('retry');
+    expect(r.reason).toMatch(/chưa có/);
+    // The prompt is still open: a known answer lands.
+    const ok = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'hoa hồng' }, nullReferee);
+    expect(ok.status).toBe('landed');
     const item = (await S.submissions(db)).find((x) => x.question_id === qid && x.input_key === soft('Hoa bảy màu thần kỳ'))!;
     expect(item.n).toBe(1);
+    expect((await S.notices(db, p)).learned).toHaveLength(0);
     await S.decideSubmission(db, { questionId: qid, inputKey: item.input_key, decision: 'accept', display: 'Hoa bảy màu thần kỳ', tier: 3 });
+    const told = await S.notices(db, p);
+    expect(told.learned).toMatchObject([{ questionId: qid, typed: 'Hoa bảy màu thần kỳ', answer: 'Hoa bảy màu thần kỳ' }]);
+    expect((await S.notices(db, p)).learned).toHaveLength(0);
     await S.startTurn(db, { playerId: 'player_test_0005b', day, mode: 'night', questionId: qid });
-    const ok = await S.answer(db, { playerId: 'player_test_0005b', day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
-    expect(ok.status).toBe('landed');
-    expect(ok.pending).toBeFalsy();
+    const next = await S.answer(db, { playerId: 'player_test_0005b', day, mode: 'night', questionId: qid, input: 'bảy màu thần kỳ' }, nullReferee);
+    expect(next.status).toBe('landed');
   });
 
-  it('a dismissed new answer is refused afterwards', async () => {
+  it('a dismissed answer is refused with the reason afterwards', async () => {
     const { nullReferee } = await import('./referee.js');
     await S.startTurn(db, { playerId: 'player_test_0006', day, mode: 'night', questionId: 'loai-rau' });
     const first = await S.answer(db, { playerId: 'player_test_0006', day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
-    expect(first.pending).toBe(true);
+    expect(first.status).toBe('retry');
     await S.decideSubmission(db, { questionId: 'loai-rau', inputKey: soft('rau gì đó'), decision: 'dismiss' });
     await S.startTurn(db, { playerId: 'player_test_0006b', day, mode: 'night', questionId: 'loai-rau' });
     const r = await S.answer(db, { playerId: 'player_test_0006b', day, mode: 'night', questionId: 'loai-rau', input: 'rau gì đó' }, nullReferee);
@@ -220,55 +224,12 @@ describe('new answers without a referee', () => {
     expect(r.reason).toMatch(/không công nhận/);
   });
 
-  it('three networks giving the same new answer confirm it', async () => {
+  it('refuses keyboard noise without logging it', async () => {
     const { nullReferee } = await import('./referee.js');
-    const qid = 'trai-cay';
-    const ask = async (p: string, net: string) => {
-      await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-      return S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'Quả thanh long ruột tím', net }, nullReferee);
-    };
-    expect((await ask('vote_p1', 'net-a')).pending).toBe(true);
-    expect((await ask('vote_p2', 'net-a')).pending).toBe(true);
-    expect((await ask('vote_p3', 'net-b')).pending).toBe(true);
-    const third = await ask('vote_p4', 'net-c');
-    expect(third.status).toBe('landed');
-    expect(third.pending).toBe(false);
-    expect((await ask('vote_p5', 'net-d')).pending).toBe(false);
-  });
-
-  it('allows two new answers a run, then asks for a known one; nonsense is refused', async () => {
-    const { nullReferee } = await import('./referee.js');
-    const p = 'limit_player';
-    const qs = ['loai-ca', 'con-trung', 'nhac-cu'];
-    const out = [];
-    for (const [i, qid] of qs.entries()) {
-      await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-      out.push(await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: `Tên lạ thứ ${['một', 'hai', 'ba'][i]}` }, nullReferee));
-    }
-    expect(out.map((r) => r.status)).toEqual(['landed', 'landed', 'retry']);
     await S.startTurn(db, { playerId: 'junk_player', day, mode: 'night', questionId: 'the-thao' });
     const junk = await S.answer(db, { playerId: 'junk_player', day, mode: 'night', questionId: 'the-thao', input: 'aaaaaaa' }, nullReferee);
     expect(junk.status).toBe('retry');
-  });
-
-  it('refuses keyboard noise, but takes a real foreign name Wikidata knows', async () => {
-    const { nullReferee } = await import('./referee.js');
-    await S.startTurn(db, { playerId: 'noise_player', day, mode: 'night', questionId: 'the-thao' });
-    const noise = await S.answer(db, { playerId: 'noise_player', day, mode: 'night', questionId: 'the-thao', input: 'abcxyz lạ' }, nullReferee);
-    expect(noise.status).toBe('retry');
-    setWikiFetch(async (url) => {
-      const u = String(url);
-      if (u.includes('wbsearchentities') && u.includes('Zorbing')) return new Response(JSON.stringify({ search: [{ id: 'Q1', label: 'Zorbing', match: { text: 'Zorbing' } }] }));
-      return new Response(JSON.stringify({ search: [] }));
-    });
-    try {
-      await S.startTurn(db, { playerId: 'noise_player2', day, mode: 'night', questionId: 'the-thao' });
-      const real = await S.answer(db, { playerId: 'noise_player2', day, mode: 'night', questionId: 'the-thao', input: 'Zorbing' }, nullReferee);
-      expect(real.status).toBe('landed');
-      expect(real.pending).toBe(true);
-    } finally {
-      setWikiFetch(async () => new Response('', { status: 503 }));
-    }
+    expect((await S.submissions(db)).some((x) => x.input_key === soft('aaaaaaa'))).toBe(false);
   });
 
   it('accepts an answer Wikidata confirms is of the right kind', async () => {
@@ -379,45 +340,49 @@ describe('day by day', () => {
     expect(S.tierFor(dq, q.krillKey, 4, 0, 5)).not.toBe(5);
   });
 
-  it('measures rarity among the day\'s players, with earlier days as the starting guess', async () => {
-    // An answer the book thought rare but that earlier days gave everywhere is not rare today either.
-    expect([0, 1, 6]).toContain(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 1, 40, 0.9));
+  it('takes rarity from the book and earlier days, never from today\'s players', async () => {
+    // An answer the book thought rare but that earlier days gave everywhere is not rare any more.
+    expect([0, 1, 6]).toContain(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 36, 40));
     // Without history the book's guess is used.
-    expect(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 0, 40)).toBe(4);
+    expect(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4)).toBe(4);
+    // Everyone today gets the same tier for the same answer, however many give it.
+    const d = '2033-04-01';
+    const [qid] = await S.dailySet(db, d);
+    const q = await S.loadQuestion(db, qid);
+    const [, entry] = [...q.answers.entries()].find(([k, a]) => a.prior === 3 && k !== q.krillKey && !q.traps.has(k))!;
+    const tiers: number[] = [];
+    for (let i = 0; i < 25; i++) {
+      const p = `same_tier_${i}`;
+      await S.startTurn(db, { playerId: p, day: d, mode: 'daily', questionId: qid });
+      tiers.push((await S.answer(db, { playerId: p, day: d, mode: 'daily', questionId: qid, input: entry.display }, referee)).tier!);
+    }
+    expect(new Set(tiers).size).toBe(1);
   });
 });
 
 describe('a slow referee', () => {
   const slow = (v: { valid: boolean; canonical: string; reason: string }): Referee => () => new Promise((r) => setTimeout(() => r(v), 500));
-  it('lets the answer land at once, then settles it in the background', async () => {
+  it('asks for another try at once, and its late verdict teaches the book', async () => {
     process.env.REFEREE_INLINE_MS = '40';
     try {
       const qid = 'loai-hoa';
       await S.startTurn(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid });
       const r = await S.answer(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid, input: 'Hoa bướm đêm Sơn La' }, slow({ valid: true, canonical: 'Hoa bướm đêm Sơn La', reason: 'Có thật.' }));
-      expect(r).toMatchObject({ status: 'landed', pending: true });
+      expect(r.status).toBe('retry');
       await S.settleAll();
-      const st = await S.newAnswerStatus(db, { playerId: 'slow_ok', day, mode: 'night', questionIds: [qid] });
-      expect(st.answers[0].state).toBe('approved');
+      expect((await S.notices(db, 'slow_ok')).learned).toMatchObject([{ answer: 'Hoa bướm đêm Sơn La' }]);
+      await S.startTurn(db, { playerId: 'slow_ok2', day, mode: 'night', questionId: qid });
+      const again = await S.answer(db, { playerId: 'slow_ok2', day, mode: 'night', questionId: qid, input: 'hoa bướm đêm sơn la' }, slow({ valid: false, canonical: '', reason: 'x' }));
+      expect(again.status).toBe('landed');
 
       await S.startTurn(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau' });
       const bad = await S.answer(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: false, canonical: '', reason: 'Không có loại rau này.' }));
-      expect(bad.status).toBe('landed');
+      expect(bad.status).toBe('retry');
       await S.settleAll();
-      const st2 = await S.newAnswerStatus(db, { playerId: 'slow_bad', day, mode: 'night', questionIds: ['loai-rau'] });
-      expect(st2.answers[0].state).toBe('rejected');
-      // The next player who types it is refused at once.
+      // The next player who types it is refused at once, with the reason.
       await S.startTurn(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau' });
-      const again = await S.answer(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: false, canonical: '', reason: 'x' }));
-      expect(again.status).toBe('retry');
-
-      // A misspelling of a book answer is folded into it.
-      await S.startTurn(db, { playerId: 'slow_fold', day, mode: 'night', questionId: 'trai-cay' });
-      const fold = await S.answer(db, { playerId: 'slow_fold', day, mode: 'night', questionId: 'trai-cay', input: 'Trái xoài cát lộc' }, slow({ valid: true, canonical: 'Xoài', reason: 'Là xoài.' }));
-      expect(fold.pending).toBe(true);
-      await S.settleAll();
-      const st3 = await S.newAnswerStatus(db, { playerId: 'slow_fold', day, mode: 'night', questionIds: ['trai-cay'] });
-      expect(st3.answers[0]).toMatchObject({ state: 'approved', display: 'Xoài' });
+      const no = await S.answer(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: true, canonical: 'x', reason: 'x' }));
+      expect(no).toMatchObject({ status: 'retry', reason: 'Không có loại rau này.' });
     } finally {
       delete process.env.REFEREE_INLINE_MS;
     }
@@ -425,15 +390,17 @@ describe('a slow referee', () => {
 });
 
 describe('the night shift', () => {
-  it('judges waiting answers and fills tomorrow from the AI', async () => {
+  it('judges what players typed for tomorrow and fills tomorrow from the AI', async () => {
     const { nullReferee } = await import('./referee.js');
-    await S.startTurn(db, { playerId: 'night_p', day, mode: 'night', questionId: 'loai-ca' });
-    const r = await S.answer(db, { playerId: 'night_p', day, mode: 'night', questionId: 'loai-ca', input: 'Cá lạ đêm khuya' }, nullReferee);
-    expect(r.pending).toBe(true);
+    const tomorrow = new Date(new Date(S.vnToday() + 'T00:00:00Z').getTime() + 86400_000).toISOString().slice(0, 10);
+    const [qid] = await S.dailySet(db, tomorrow);
+    await S.startTurn(db, { playerId: 'night_p', day, mode: 'night', questionId: qid });
+    const r = await S.answer(db, { playerId: 'night_p', day, mode: 'night', questionId: qid, input: 'Đáp án đêm khuya có thật' }, nullReferee);
+    expect(r.status).toBe('retry');
     const suggested: string[] = [];
     const report = await S.nightShift(db, {
       async judgeMany(_p, _n, inputs) {
-        return inputs.map((x) => (/đêm khuya/.test(x) ? { valid: false, canonical: '', reason: 'Bịa.' } : { valid: true, canonical: x, reason: 'Đúng.' }));
+        return inputs.map((x) => ({ valid: true, canonical: x, reason: 'Đúng.' }));
       },
       async suggest(prompt) {
         const name = `Đáp án mới cho ${prompt.slice(0, 12)}`;
@@ -441,30 +408,28 @@ describe('the night shift', () => {
         return [{ name, tier: 2 }];
       },
     });
-    expect(report.rejected).toBeGreaterThanOrEqual(1);
+    expect(report.submissions).toBeGreaterThanOrEqual(1);
     expect(report.questions).toHaveLength(7);
     expect(report.added).toBe(7);
-    const st = await S.newAnswerStatus(db, { playerId: 'night_p', day, mode: 'night', questionIds: ['loai-ca'] });
-    expect(st.answers[0].state).toBe('rejected');
+    expect((await S.notices(db, 'night_p')).learned).toMatchObject([{ answer: 'Đáp án đêm khuya có thật' }]);
     const q = await S.loadQuestion(db, report.questions[0]);
-    expect([...q.answers.values()].some((a) => a.display === suggested[0] || suggested.includes(a.display))).toBe(true);
+    expect([...q.answers.values()].some((a) => suggested.includes(a.display))).toBe(true);
   });
 });
 
 describe('the night shift run by Claude', () => {
-  it('lists what is waiting and applies a verdict batch once', async () => {
+  it('lists what players typed and applies a verdict batch once', async () => {
     const { nullReferee } = await import('./referee.js');
     await S.startTurn(db, { playerId: 'claude_night', day, mode: 'night', questionId: 'loai-rau' });
-    const r = await S.answer(db, { playerId: 'claude_night', day, mode: 'night', questionId: 'loai-rau', input: 'Rau đêm khuya bịa' }, nullReferee);
-    expect(r.pending).toBe(true);
+    const r = await S.answer(db, { playerId: 'claude_night', day, mode: 'night', questionId: 'loai-rau', input: 'Rau đêm khuya thật' }, nullReferee);
+    expect(r.status).toBe('retry');
     const qd = await S.nightQueue(db);
     expect(qd.questions).toHaveLength(7);
-    const item = qd.pending.find((p) => p.q === 'loai-rau' && p.display === 'Rau đêm khuya bịa')!;
+    const item = qd.submissions.find((p) => p.q === 'loai-rau' && p.display === 'Rau đêm khuya thật')!;
     expect(item).toBeTruthy();
-    const batch = { day: '2099-01-01', pending: [{ q: 'loai-rau', key: item.key, valid: false, canonical: '', reason: 'Không có loại rau này.' }], submissions: [] };
+    const batch = { day: '2099-01-01', pending: [], submissions: [{ q: 'loai-rau', key: item.key, valid: true, canonical: 'Rau đêm khuya thật', reason: 'Có thật.' }] };
     expect((await S.applyNight(db, batch)).applied).toBe(true);
     expect((await S.applyNight(db, batch)).applied).toBe(false);
-    const st = await S.newAnswerStatus(db, { playerId: 'claude_night', day, mode: 'night', questionIds: ['loai-rau'] });
-    expect(st.answers[0].state).toBe('rejected');
+    expect((await S.notices(db, 'claude_night')).learned).toMatchObject([{ answer: 'Rau đêm khuya thật' }]);
   });
 });

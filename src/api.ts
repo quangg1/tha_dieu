@@ -36,8 +36,6 @@ export interface AnswerResult {
   points?: number;
   bonus?: number;
   judged?: boolean;
-  /** A new answer waiting for the village to confirm it. */
-  pending?: boolean;
   share?: number | null;
   crowd?: Crowd;
 }
@@ -107,6 +105,7 @@ export const api = {
   answer: (b: { playerId: string; day: string; mode: string; questionId: string; input: string }) => call<AnswerResult>('answer', b),
   newstatus: (b: { playerId: string; day: string; mode: string; questionIds: string[] }) =>
     call<{ answers: { questionId: string; state: 'pending' | 'approved' | 'rejected'; display: string | null }[] }>('newstatus', b),
+  notices: (playerId: string) => call<{ learned: { questionId: string; prompt: string; typed: string; answer: string }[] }>('notices', { playerId }),
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
   finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string; runSince?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),

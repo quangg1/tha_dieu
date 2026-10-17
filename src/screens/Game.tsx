@@ -45,7 +45,6 @@ interface Outcome {
   bonus?: number;
   share?: number | null;
   judged?: boolean;
-  pending?: boolean;
   reason?: string;
   altitude: number;
   milestone?: Milestone | null;
@@ -552,7 +551,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       leftRef.current = Math.min(NIGHT_MAX_SECONDS, leftRef.current + TIERS[tier].wind);
       setLeft(leftRef.current);
     }
-    pushRow({ questionId: q.id, prompt: q.prompt, display: r.display!, tier, points: r.points!, pending: r.pending });
+    pushRow({ questionId: q.id, prompt: q.prompt, display: r.display!, tier, points: r.points! });
     await climb(r.display!, tier, after);
     scoreRef.current += r.points!;
     setScore(scoreRef.current);
@@ -563,7 +562,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     buzz(rank >= 5 ? [30, 40, 30, 40, 120] : rank >= 3 ? [30, 50, 60] : rank === 1 ? [80, 40, 20] : 25);
     flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
     flute.setLevel(musicLevel(after));
-    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, pending: r.pending, altitude: after, milestone: m, crowd: r.crowd });
+    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after, milestone: m, crowd: r.crowd });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2600);
   };
@@ -690,13 +689,12 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   <span className="pts-badge">+{outcome.points} điểm</span>
                   <span>diều lên {formatAlt(outcome.altitude)}</span>
                 </p>
-                <p className="out-line">{outcome.pending ? 'Làng chưa có đáp án này, bạn là người đầu tiên! Điểm được giữ khi làng xác nhận.' : answerQuip(outcome.tier!, seedOf(outcome.display ?? '', outcome.altitude))}</p>
+                <p className="out-line">{answerQuip(outcome.tier!, seedOf(outcome.display ?? '', outcome.altitude))}</p>
                 <div className="chips">
                   {mode === 'night' && <span className="chip">+{TIERS[outcome.tier!].wind} giây gió</span>}
                   {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
                   {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
                   {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
-                  {outcome.pending && <span className="chip pend">Đáp án mới · làng đang xét</span>}
                   {outcome.milestone && <span className="chip mile">Vượt mốc · {outcome.milestone.name}</span>}
                 </div>
                 {outcome.crowd && outcome.crowd.top.length > 0 && <CrowdPanel crowd={outcome.crowd} mine={outcome.display ?? ''} />}
@@ -723,7 +721,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             <ol>
               <li><b>Gõ một đáp án đúng</b> cho câu hỏi. Gõ không dấu cũng được.</li>
               <li><b>Càng ít người nghĩ ra, đáp án càng hiếm</b> (từ Thường tới Độc nhất) và <b>diều càng được đẩy cao</b>. Điểm cộng dồn qua 7 câu quyết định diều bay tới tầng trời nào.</li>
-              <li>Làng chưa biết đáp án của bạn? Nó được tính là <b>đáp án mới</b> và giữ điểm khi làng xác nhận. Chỉ hết gió mới mất lượt.</li>
+              <li>Đáp án chưa có trong sổ của làng? <b>Cứ thử đáp án khác</b>, không bị trừ gì. Chỉ hết gió mới mất lượt. Điểm hiện ra là điểm chốt luôn.</li>
             </ol>
             <div className="coach-tiers" aria-hidden="true">
               {LADDER.map((t) => (
@@ -756,7 +754,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             {suggest && (
               <div className="toast-pill" role="status">
                 “{suggest.from}” → <b>“{suggest.to}”</b>
-                <span>bấm Thả lần nữa để chốt, hoặc sửa lại</span>
+                <span>ý bạn là vậy? Bấm Thả lần nữa để chốt, hoặc sửa lại</span>
               </div>
             )}
             {notice && (
