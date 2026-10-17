@@ -194,6 +194,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [quitArmed, setQuitArmed] = useState(false);
+  const [pulling, setPulling] = useState(false);
   const [notice, setNotice] = useState('');
   /** The answer the village just turned away, so the player can say the referee got it wrong. */
   const [rejected, setRejected] = useState<{ questionId: string; input: string; sent: boolean } | null>(null);
@@ -487,14 +488,24 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     const text = input.trim();
     if (!text) return;
     setPhase('judging');
+    // A wait longer than a blink (a new answer the referee is reading) becomes part of the throw:
+    // bé Bi tugs the line and the wind picks up, so the climb that follows feels like one motion.
+    const pull = window.setTimeout(() => {
+      setPulling(true);
+      sky.boost(0.35);
+    }, 280);
     let r: AnswerResult;
     try {
       r = await api.answer({ playerId: pid, day, mode, questionId: q.id, input: text });
     } catch (err) {
+      clearTimeout(pull);
+      setPulling(false);
       setNotice(err instanceof ApiError ? err.message : 'Không gửi được đáp án. Thử lại.');
       setPhase('asking');
       return;
     }
+    clearTimeout(pull);
+    setPulling(false);
     if (r.status === 'empty') return setPhase('asking');
     if (r.status === 'vague') {
       setNotice(r.reason ?? 'Chung chung quá. Hãy kể tên một thứ cụ thể hơn.');
@@ -728,6 +739,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         )}
         {(phase === 'asking' || phase === 'judging') && (
           <>
+            {phase === 'judging' && pulling && (
+              <div className="toast-pill pull" role="status">
+                Bé Bi đang kéo dây<span className="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
+              </div>
+            )}
             {suggest && (
               <div className="toast-pill" role="status">
                 “{suggest.from}” → <b>“{suggest.to}”</b>

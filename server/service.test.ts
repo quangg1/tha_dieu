@@ -363,7 +363,10 @@ describe('day by day', () => {
   it('picks a new hidden answer when a prompt comes back, never one shown before', async () => {
     const d1 = '2032-05-01';
     const d2 = '2032-07-01';
-    const [qid] = await S.dailySet(db, d1);
+    // A prompt no earlier test day has asked, so its first hidden answer is the book's.
+    const used = new Set((await db.query<{ ids: string[] }>(`select question_ids as ids from daily_sets`)).flatMap((r) => r.ids));
+    const qid = (await db.query<{ id: string }>(`select id from questions where active order by id`)).map((r) => r.id).find((id) => !used.has(id))!;
+    await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict do nothing`, [d1, [qid]]);
     const q = await S.loadQuestion(db, qid);
     expect(await S.krillFor(db, d1, q)).toBe(q.krillKey);
     // The same prompt asked again later.
@@ -381,5 +384,69 @@ describe('day by day', () => {
     expect([0, 1, 6]).toContain(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 1, 40, 0.9));
     // Without history the book's guess is used.
     expect(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 0, 40)).toBe(4);
+  });
+});
+
+describe('a slow referee', () => {
+  const slow = (v: { valid: boolean; canonical: string; reason: string }): Referee => () => new Promise((r) => setTimeout(() => r(v), 500));
+  it('lets the answer land at once, then settles it in the background', async () => {
+    process.env.REFEREE_INLINE_MS = '40';
+    try {
+      const qid = 'loai-hoa';
+      await S.startTurn(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid });
+      const r = await S.answer(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid, input: 'Hoa bướm đêm Sơn La' }, slow({ valid: true, canonical: 'Hoa bướm đêm Sơn La', reason: 'Có thật.' }));
+      expect(r).toMatchObject({ status: 'landed', pending: true });
+      await S.settleAll();
+      const st = await S.newAnswerStatus(db, { playerId: 'slow_ok', day, mode: 'night', questionIds: [qid] });
+      expect(st.answers[0].state).toBe('approved');
+
+      await S.startTurn(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau' });
+      const bad = await S.answer(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: false, canonical: '', reason: 'Không có loại rau này.' }));
+      expect(bad.status).toBe('landed');
+      await S.settleAll();
+      const st2 = await S.newAnswerStatus(db, { playerId: 'slow_bad', day, mode: 'night', questionIds: ['loai-rau'] });
+      expect(st2.answers[0].state).toBe('rejected');
+      // The next player who types it is refused at once.
+      await S.startTurn(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau' });
+      const again = await S.answer(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: false, canonical: '', reason: 'x' }));
+      expect(again.status).toBe('retry');
+
+      // A misspelling of a book answer is folded into it.
+      await S.startTurn(db, { playerId: 'slow_fold', day, mode: 'night', questionId: 'trai-cay' });
+      const fold = await S.answer(db, { playerId: 'slow_fold', day, mode: 'night', questionId: 'trai-cay', input: 'Trái xoài cát lộc' }, slow({ valid: true, canonical: 'Xoài', reason: 'Là xoài.' }));
+      expect(fold.pending).toBe(true);
+      await S.settleAll();
+      const st3 = await S.newAnswerStatus(db, { playerId: 'slow_fold', day, mode: 'night', questionIds: ['trai-cay'] });
+      expect(st3.answers[0]).toMatchObject({ state: 'approved', display: 'Xoài' });
+    } finally {
+      delete process.env.REFEREE_INLINE_MS;
+    }
+  });
+});
+
+describe('the night shift', () => {
+  it('judges waiting answers and fills tomorrow from the AI', async () => {
+    const { nullReferee } = await import('./referee.js');
+    await S.startTurn(db, { playerId: 'night_p', day, mode: 'night', questionId: 'loai-ca' });
+    const r = await S.answer(db, { playerId: 'night_p', day, mode: 'night', questionId: 'loai-ca', input: 'Cá lạ đêm khuya' }, nullReferee);
+    expect(r.pending).toBe(true);
+    const suggested: string[] = [];
+    const report = await S.nightShift(db, {
+      async judgeMany(_p, _n, inputs) {
+        return inputs.map((x) => (/đêm khuya/.test(x) ? { valid: false, canonical: '', reason: 'Bịa.' } : { valid: true, canonical: x, reason: 'Đúng.' }));
+      },
+      async suggest(prompt) {
+        const name = `Đáp án mới cho ${prompt.slice(0, 12)}`;
+        suggested.push(name);
+        return [{ name, tier: 2 }];
+      },
+    });
+    expect(report.rejected).toBeGreaterThanOrEqual(1);
+    expect(report.questions).toHaveLength(7);
+    expect(report.added).toBe(7);
+    const st = await S.newAnswerStatus(db, { playerId: 'night_p', day, mode: 'night', questionIds: ['loai-ca'] });
+    expect(st.answers[0].state).toBe('rejected');
+    const q = await S.loadQuestion(db, report.questions[0]);
+    expect([...q.answers.values()].some((a) => a.display === suggested[0] || suggested.includes(a.display))).toBe(true);
   });
 });

@@ -72,6 +72,38 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.reveal]);
 
+  // New answers the referee or the village may have settled since they landed: ask a few times, then show the verdicts.
+  const [verdicts, setVerdicts] = useState<Record<string, { state: 'pending' | 'approved' | 'rejected'; display: string | null }>>({});
+  useEffect(() => {
+    const ids = rows.filter((r) => r.pending).map((r) => r.questionId);
+    if (!ids.length) return;
+    let stop = false;
+    let timer = 0;
+    let tries = 0;
+    let changed = false;
+    const ask = () =>
+      api
+        .newstatus({ playerId: pid, day, mode, questionIds: ids })
+        .then((res) => {
+          if (stop) return;
+          setVerdicts(Object.fromEntries(res.answers.map((a) => [a.questionId, a])));
+          const settledNow = res.answers.some((a) => a.state !== 'pending');
+          if (settledNow && !changed && mode === 'daily') {
+            changed = true;
+            api.finish({ playerId: pid, day, mode, since: playerSince() }).then(setResult).catch(() => {});
+          }
+          if (res.answers.some((a) => a.state === 'pending') && ++tries < 3) timer = window.setTimeout(ask, 5000);
+        })
+        .catch(() => {});
+    void ask();
+    return () => {
+      stop = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const waitingCount = rows.filter((r) => r.pending && (verdicts[r.questionId]?.state ?? 'pending') === 'pending').length;
+
   const loadBoard = () => api.board(mode, pid).then(setBoard).catch(() => setBoard(null));
   useEffect(() => {
     void loadBoard();
@@ -198,7 +230,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           )}
         </div>
         <span className="result-note">
-          {rows.some((r) => r.pending) ? `${rows.filter((r) => r.pending).length} đáp án mới đang chờ làng xác nhận, điểm chốt lúc 0 giờ. ` : ''}
+          {waitingCount ? `${waitingCount} đáp án mới đang chờ làng xác nhận, điểm chốt lúc 0 giờ. ` : ''}
           {result.replay
             ? 'Lượt chơi lại trên thiết bị này không lên bảng diều. '
             : mode === 'daily' && !result.settled
@@ -275,14 +307,22 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           <div className="card-k">{mode === 'daily' ? 'Bảy cú gió của bạn' : 'Những cú gió của bạn'}</div>
           {mode === 'daily' && <RarityStrings rows={rows} />}
           <div className="rows">
-            {rows.map((r) => (
-              <div className="row" key={r.questionId + r.points + r.display}>
-                <TierIcon tier={r.tier >= 0 ? r.tier : null} size={40} />
+            {rows.map((r) => {
+              const v = r.pending ? verdicts[r.questionId] : undefined;
+              const out = v?.state === 'rejected';
+              return (
+              <div className={`row${out ? ' row-out' : ''}`} key={r.questionId + r.points + r.display}>
+                <TierIcon tier={r.tier >= 0 && !out ? r.tier : null} size={40} />
                 <span style={{ minWidth: 0 }}>
-                  <b className="row-a">{r.display ?? (r.input ? `“${r.input}”` : 'Hết gió')}</b>
-                  <span className="row-q">{r.tier >= 0 ? `${TIERS[r.tier].name} · ` : ''}{r.prompt}</span>
+                  <b className="row-a">{(v?.state === 'approved' && v.display) || r.display || (r.input ? `“${r.input}”` : 'Hết gió')}</b>
+                  {r.pending && (
+                    <span className={`row-verdict ${v?.state ?? 'pending'}`}>
+                      {v?.state === 'approved' ? '✓ Làng đã công nhận' : out ? '✗ Không được tính' : 'Đáp án mới · làng đang xét'}
+                    </span>
+                  )}
+                  <span className="row-q">{r.tier >= 0 && !out ? `${TIERS[r.tier].name} · ` : ''}{r.prompt}</span>
                 </span>
-                <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
+                <b className="pts">{r.points && !out ? `+${r.points}` : '0'}</b>
                 {r.display && r.tier >= 0 && (
                   <button
                     className={`flag-btn${flagged.has(r.questionId) ? ' on' : ''}`}
@@ -300,7 +340,8 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                   </button>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

@@ -1,8 +1,11 @@
 // Every question in the game: the handcrafted bank (extended with the village book) plus questions generated from book labels.
 import { BANK } from '../bank.js';
 import { parseRaw, type QuestionDef } from '../match.js';
-import { addMore, buildSpec, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { addMore, buildSpec, firstLetter, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { soft } from '../normalize.js';
 import { MORE } from './more.js';
+import { MORE2 } from './more2.js';
+import { NARROW } from './narrow.js';
 import { LEXICONS } from './index.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
@@ -359,21 +362,69 @@ const NUMBER_QUESTIONS: Built[] = [
 
 /* ------------------------------------------------------------------ the whole book */
 
+/**
+ * Prompts with no end to their answers ("a thing that is yellow", "a Hollywood film", "a Vietnamese dish"):
+ * however thick the book, new players keep landing on answers it does not know. Like Krillion, the game asks
+ * only prompts whose answers are many but finite; these stay in the book (old days still open) but are never asked.
+ */
+export const RETIRED = new Set<string>(
+  `x-vang x-do x-bay x-nuoc x-ca x-banh x-dan x-xe tv-all dv-ngu dv-tam dv-noithat
+  do-bep dv-dien kn-chatlieu dv-nhon dv-xua dv-dungcu qa-dau qa-ao qa-phukien qa-all qa-chan nghe-nghiep
+  ng-ngoaitroi ng-dongphuc ng-nghethuat  tu-troi tu-nuoc tu-long tu-mat tu-tay tu-camxuc tu-tinhcach tu-tuonghinh
+  tu-tuongthanh pop-tu-long mon-an ma-anvat ma-ngoai ma-banh-ngoai pop-mon-au-my ma-bac ma-nam ma-trung ma-taybac 
+  ma-nuong ma-ngot ma-chu-n ma-chu-x ma-chu-g pop-an-vat do-uong du-ep du-sua tet pop-phim-hollywood pop-nhac-quoc-te
+  pop-game kn-app pop-hoat-hinh vh-hoathinh pop-thoi-trang pop-my-pham pop-clb-bong-da nv-bongda-tg nv-vdv nv-van-tg vh-tacpham-tg vh-nv-tg
+  nv-lanhdao-tg dd-hn dd-hcm dd-bac dd-nam dd-trung danh-thang dd-ditich dd-chua dd-cau-cho dd-tn tg-tp-eu
+  tg-tp-as tg-tp-my tg-song tg-nui tg-dao-ho dv-4chan dv-dem cay-go tv-thaomoc tv-caycanh tv-tim tv-hoa-vang
+  tv-hoa-trang tv-hoa-do`.split(/\s+/),
+);
+
+/** The hand-written thickening passes, in order. */
+function thicken(q: QuestionDef, id: string): QuestionDef {
+  let out = q;
+  for (const more of [MORE, MORE2]) if (more[id]) out = addMore(out, more[id]);
+  return out;
+}
+
+/**
+ * Hand-written additions must still obey a prompt's letter or head-word rule: "Bắp nướng" is not an answer to
+ * "a dish starting with N", even as another name for "Ngô nướng".
+ */
+function keepRules<T extends QuestionDef>(q: T, spec: Spec): T {
+  if (!spec.start && !spec.head) return q;
+  const strip = new Set((q.strip ?? []).map((w) => soft(w)));
+  const ok = (name: string) => {
+    const words = name.trim().split(/\s+/);
+    const bare = words.length > 1 && strip.has(soft(words[0])) ? words.slice(1).join(' ') : name;
+    if (spec.start && firstLetter(bare) !== spec.start) return false;
+    if (spec.head && soft(words[0]) !== soft(spec.head)) return false;
+    return true;
+  };
+  const answers = q.answers
+    .map((a) => {
+      const aliases = a.aliases.filter(ok);
+      return aliases.length === a.aliases.length ? a : { ...a, aliases, display: ok(a.display) ? a.display : aliases[0] };
+    })
+    .filter((a) => a.aliases.length && a.display);
+  return { ...q, answers };
+}
+
 function assemble() {
   const out: QuestionDef[] = [];
-  for (const raw of BANK) {
+  for (const raw of [...BANK, ...NARROW]) {
     const base = parseRaw(raw);
     const ext = EXTEND[raw.id];
     const qd00 = ext ? extendQuestion(base, ext, LEXICONS) : base;
-    const qd0 = MORE[raw.id] ? addMore(qd00, MORE[raw.id]) : qd00;
+    const qd0 = thicken(qd00, raw.id);
     const qd = { ...qd0, traps: resolveTraps(qd0.answers, TRAPS[raw.id]) };
     const strong = qd.answers.filter((a) => a.priorTier <= 1).length;
-    out.push({ ...qd, level: qd.answers.length >= 60 && strong >= 3 ? 1 : 2, family: qd.family ?? raw.id });
+    const lv = (raw as { lv?: number }).lv;
+    out.push({ ...qd, level: lv ?? (qd.answers.length >= 60 && strong >= 3 ? 1 : 2), family: qd.family ?? raw.id });
   }
   const dropped: string[] = [];
   for (const spec of SPECS) {
     const b0 = buildSpec(TRAPS[spec.id] ? { ...spec, traps: TRAPS[spec.id] } : spec, LEXICONS);
-    const b = b0 && MORE[spec.id] ? { ...b0, ...addMore(b0, MORE[spec.id]) } : b0;
+    const b = b0 ? keepRules({ ...b0, ...thicken(b0, spec.id) }, spec) : b0;
     if (b) out.push(b);
     else dropped.push(spec.id);
   }
@@ -392,7 +443,7 @@ export const BOOK_BY_ID = new Map(BOOK.map((x) => [x.id, x]));
 /** Changes whenever a question's wording or hidden answer changes, so servers know to resync the questions table. */
 export const BOOK_VERSION = (() => {
   let h = 2166136261;
-  const s = BOOK.map((x) => [x.id, x.prompt, x.category, x.note ?? '', x.krillKey, x.level, x.family].join('|')).join('\n');
+  const s = BOOK.map((x) => [x.id, x.prompt, x.category, x.note ?? '', x.krillKey, x.level, x.family, RETIRED.has(x.id) ? 'r' : ''].join('|')).join('\n');
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return `${BOOK.length}-${(h >>> 0).toString(36)}`;
 })();

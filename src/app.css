@@ -500,3 +500,17 @@ button{font:inherit;color:inherit}
 .chip.pend{background:#fff4d6;color:#8a5a00;border:1px dashed #e0a800}
 .sheet,.drawer{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .result .home-row .pill-btn{font-size:15px;padding:0 12px;white-space:nowrap}
+/* bé Bi tugging the line while a new answer is read */
+.toast-pill.pull{flex-wrap:nowrap;gap:0;animation:tug .9s ease-in-out infinite}
+.toast-pill.pull .dots{width:auto;display:inline-flex;font-size:inherit;color:inherit}
+.toast-pill.pull .dots i{font-style:normal;animation:dot 1.2s infinite}
+.toast-pill.pull .dots i:nth-child(2){animation-delay:.2s}
+.toast-pill.pull .dots i:nth-child(3){animation-delay:.4s}
+@keyframes tug{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes dot{0%,60%,100%{opacity:.2}30%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.toast-pill.pull,.toast-pill.pull .dots i{animation:none}}
+.row-verdict{display:block;font-size:12px;font-weight:800;margin:1px 0}
+.row-verdict.pending{color:#8a5a00}
+.row-verdict.approved{color:#1b8a4a}
+.row-verdict.rejected{color:#c0392b}
+.row.row-out .row-a{text-decoration:line-through;opacity:.6}

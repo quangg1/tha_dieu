@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
-import { BOOK, BOOK_BY_ID, BOOK_VERSION } from '../shared/book/questions.js';
+import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
 import { Matcher } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
@@ -15,9 +15,9 @@ import {
   type TierIndex,
 } from '../shared/scoring.js';
 import type { Db } from './db.js';
-import { nullReferee, type Referee } from './referee.js';
+import { nullReferee, type Ai, type Referee, type Verdict } from './referee.js';
 import { SCHEMA } from './schema.js';
-import { wikiCheck, wikiExists } from './wikidata.js';
+import { WIKI_RULES, wikiCheck, wikiExists } from './wikidata.js';
 import { looksVietnamese } from '../shared/syllable.js';
 
 export class GameError extends Error {
@@ -55,10 +55,10 @@ export async function setup(db: Db) {
   const ids = BOOK.map((q) => q.id);
   await db.query(
     `insert into questions (id, category, prompt, note, strip, krill_key, active)
-     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, true
-     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[]) as x(id, c, p, n, st, k)
+     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, a
+     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::boolean[]) as x(id, c, p, n, st, k, a)
      on conflict (id) do update set category=excluded.category, prompt=excluded.prompt, note=excluded.note,
-       strip=excluded.strip, krill_key=excluded.krill_key, active=true`,
+       strip=excluded.strip, krill_key=excluded.krill_key, active=excluded.active`,
     [
       ids,
       BOOK.map((q) => q.category),
@@ -66,6 +66,7 @@ export async function setup(db: Db) {
       BOOK.map((q) => q.note ?? ''),
       BOOK.map((q) => q.strip.join(' ')),
       BOOK.map((q) => q.krillKey),
+      BOOK.map((q) => !RETIRED.has(q.id)),
     ],
   );
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
@@ -453,6 +454,22 @@ async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: st
   return { key, reason: '' };
 }
 
+/** How long a player waits for the referee before the answer stands as new; the kite's climb covers the wait. */
+const inlineMs = () => Number(process.env.REFEREE_INLINE_MS) || 1500;
+
+/** Work that finishes after the reply: kept alive on Vercel, tracked here so tests can wait for it. */
+const inflight = new Set<Promise<unknown>>();
+export function background(p: Promise<unknown>) {
+  const t = p.catch((e) => console.error('background', e)).finally(() => inflight.delete(t));
+  inflight.add(t);
+  if (process.env.VERCEL) import('@vercel/functions').then((m) => m.waitUntil(t)).catch(() => {});
+}
+export async function settleAll() {
+  while (inflight.size) await Promise.all([...inflight]);
+}
+
+const sleep = (ms: number) => new Promise<null>((r) => setTimeout(() => r(null), ms));
+
 async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string, mode: Mode = 'daily') {
   const inputKey = soft(input);
   if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
@@ -465,53 +482,66 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     if (c.valid && c.canonical_key && q.answers.has(c.canonical_key)) return { key: c.canonical_key, reason: '' };
     if (!c.valid) return { key: null, reason: c.reason || 'Trọng tài không công nhận đáp án này.' };
   }
-  // Wikidata first: free, and certain for prompts that name a kind of thing.
-  const t0 = Date.now();
-  const wiki = await wikiCheck(q.id, input).catch(() => null);
-  if (process.env.VERCEL) console.log('wiki', q.id, JSON.stringify(input), wiki ? wiki.id : '-', Date.now() - t0, 'ms');
+  const deadline = Date.now() + inlineMs();
+  // The referee, when there is one and the day's limits allow it; past the limits the village decides instead.
+  let useReferee = referee !== nullReferee;
+  if (useReferee) {
+    const [usage] = await db.query<{ calls: number }>(
+      `insert into referee_usage (player_id, day, calls) values ($1,$2::date,1)
+       on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls`,
+      [playerId, day],
+    );
+    useReferee =
+      usage.calls <= REFEREE_CALLS_PER_DAY &&
+      (!net || (await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) &&
+      (await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 5000));
+  }
+  // Wikidata, the referee and the "is this a real name" check all start at once.
+  const wikiP = WIKI_RULES[q.id] ? wikiCheck(q.id, input).catch(() => null) : Promise.resolve(null);
+  const callP = useReferee ? referee(q.prompt, q.note ?? undefined, input).catch(() => null) : null;
+  let existsP: Promise<boolean | null> | null = null;
+  const exists = () => (existsP ??= looksVietnamese(input) ? Promise.resolve(true) : wikiExists(input).catch(() => null));
+  if (callP) exists();
+  const wiki = await wikiP;
   if (wiki) return learnAnswer(db, q, input, wiki.display, 'wiki', 'approved', 3, `Wikidata ${wiki.id}`);
-  const hasReferee = referee !== nullReferee;
-  const [usage] = !hasReferee ? [{ calls: 0 }] : await db.query<{ calls: number }>(
-    `insert into referee_usage (player_id, day, calls) values ($1,$2::date,1)
-     on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls`,
-    [playerId, day],
+  if (callP) {
+    const first = await Promise.race([callP.then((v) => ({ v })), sleep(Math.max(300, deadline - Date.now()))]);
+    if (first && first.v) return applyVerdict(db, q, input, first.v);
+    if (!first) {
+      // The referee is slow today: the answer stands as new for now, and the verdict settles it a moment later.
+      const r = await standAsNew(db, q, input, playerId, day, mode, exists);
+      if (r.key) {
+        const key = r.key;
+        background(callP.then((v) => settle(db, q.id, input, key, v)));
+      }
+      return r;
+    }
+  }
+  return standAsNew(db, q, input, playerId, day, mode, exists);
+}
+
+/** No verdict yet: a plausible, real-looking name stands as a new answer the village (or the night referee) confirms. */
+async function standAsNew(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, mode: Mode, exists: () => Promise<boolean | null>) {
+  await db.query(
+    `insert into submissions (question_id, input_key, display) values ($1,$2,$3)
+     on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
+    [q.id, soft(input), input.slice(0, 60)],
   );
-  if (usage.calls > REFEREE_CALLS_PER_DAY) return { key: null, reason: 'Hôm nay trọng tài đã xem quá nhiều đáp án lạ của bạn. Thử một đáp án quen hơn nhé.' };
-  if (hasReferee && net && !(await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) {
-    return { key: null, reason: 'Trọng tài đang quá tải với mạng của bạn. Thử một đáp án quen hơn nhé.' };
+  if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
+  // A new answer must read as Vietnamese words, or be a real name somewhere on Wikidata (foreign brands, places, people).
+  if (!(await exists())) return { key: null, reason: 'Làng không nhận ra tên này. Kiểm tra lại chính tả, hoặc thử một đáp án khác nhé.' };
+  if (!(await hit(db, `pend:${mode}:${playerId}`, day, PENDING_PER_RUN))) {
+    return { key: null, reason: `Bạn đã có ${PENDING_PER_RUN} đáp án mới đang chờ làng xét. Câu này thử một đáp án quen hơn nhé.` };
   }
-  if (hasReferee && !(await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 5000))) {
-    return { key: null, reason: 'Hôm nay trọng tài đã làm việc hết sức. Thử một đáp án quen hơn nhé.' };
-  }
-  let v;
-  try {
-    v = await referee(q.prompt, q.note ?? undefined, input);
-  } catch {
-    v = null;
-  }
-  if (!v) {
-    // No referee: log it for the village head, and let it stand as a new answer the village will confirm.
-    await db.query(
-      `insert into submissions (question_id, input_key, display) values ($1,$2,$3)
-       on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now()`,
-      [q.id, inputKey, input.slice(0, 60)],
-    );
-    if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
-    // A new answer must read as Vietnamese words, or be a real name somewhere on Wikidata (foreign brands, places, people).
-    if (!looksVietnamese(input) && !(await wikiExists(input).catch(() => null))) {
-      return { key: null, reason: 'Làng không nhận ra tên này. Kiểm tra lại chính tả, hoặc thử một đáp án khác nhé.' };
-    }
-    if (!(await hit(db, `pend:${mode}:${playerId}`, day, PENDING_PER_RUN))) {
-      return { key: null, reason: `Bạn đã có ${PENDING_PER_RUN} đáp án mới đang chờ làng xét. Câu này thử một đáp án quen hơn nhé.` };
-    }
-    return learnAnswer(db, q, input, tidy(input), 'crowd', 'pending', PENDING_PRIOR, null);
-  }
+  return learnAnswer(db, q, input, tidy(input), 'crowd', 'pending', PENDING_PRIOR, null);
+}
+
+/** The referee answered in time: the answer is in or out right away. */
+async function applyVerdict(db: Db, q: LoadedQuestion, input: string, v: Verdict) {
+  const inputKey = soft(input);
   if (!v.valid) {
-    await db.query(
-      `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`,
-      [q.id, inputKey, v.reason],
-    );
-    return { key: null, reason: v.reason || 'Trọng tài không công nhận đáp án này.' };
+    await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [q.id, inputKey, v.reason]);
+    return { key: null as string | null, reason: v.reason || 'Trọng tài không công nhận đáp án này.' };
   }
   const known = q.matcher.match(v.canonical);
   const key = known?.key ?? soft(v.canonical);
@@ -520,12 +550,10 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
       `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,4,'claude','pending') on conflict do nothing`,
       [q.id, key, v.canonical],
     );
-    q.answers.set(key, { display: v.canonical, prior: 4, status: 'pending' });
+    // In the book at once; it stays on the village head's review list (source 'claude' is never scored down).
+    q.answers.set(key, { display: v.canonical, prior: 4, status: 'pending', source: 'claude' });
   }
-  await db.query(
-    `insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`,
-    [q.id, inputKey, key, soft(v.canonical)],
-  );
+  await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`, [q.id, inputKey, key, soft(v.canonical)]);
   q.matcher.addAlias(input, key);
   q.matcher.addAlias(v.canonical, key);
   await db.query(
@@ -533,6 +561,56 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     [q.id, inputKey, key, v.reason],
   );
   return { key, reason: '' };
+}
+
+/**
+ * A late verdict on an answer that stood as new: approve it, fold it into the book answer it really is,
+ * or take it out (the player's turn then scores nothing, shown on the result screen).
+ */
+export async function settle(db: Db, questionId: string, input: string, key: string, v: Verdict | null) {
+  if (!v) return 'pending';
+  const inputKey = soft(input);
+  const q = await loadQuestion(db, questionId);
+  if (!v.valid) {
+    await db.query(`update answers set status='rejected' where question_id=$1 and key=$2 and status='pending' and source='crowd'`, [questionId, key]);
+    await db.query(
+      `insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3)
+       on conflict (question_id, input_key) do update set valid=false, canonical_key=null, reason=excluded.reason`,
+      [questionId, inputKey, v.reason || 'Trọng tài không công nhận đáp án này.'],
+    );
+    forgetQuestion(questionId);
+    return 'rejected';
+  }
+  const known = q.matcher.match(v.canonical);
+  const target = known && known.key !== key && q.answers.get(known.key)?.status === 'approved' ? known.key : key;
+  if (target !== key) {
+    // "chim sao sau" was "Sáo sậu" all along: move its turns and counts onto the book's answer.
+    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [questionId, inputKey, target]);
+    await db.query(`update turns set answer_key=$3 where question_id=$1 and answer_key=$2`, [questionId, key, target]);
+    await db.query(
+      `insert into counts (question_id, answer_key, n) select question_id, $3, n from counts where question_id=$1 and answer_key=$2
+       on conflict (question_id, answer_key) do update set n = counts.n + excluded.n`,
+      [questionId, key, target],
+    );
+    await db.query(`delete from counts where question_id=$1 and answer_key=$2`, [questionId, key]);
+    await db.query(
+      `insert into day_counts (day, question_id, answer_key, n) select day, question_id, $3, n from day_counts where question_id=$1 and answer_key=$2
+       on conflict (day, question_id, answer_key) do update set n = day_counts.n + excluded.n`,
+      [questionId, key, target],
+    );
+    await db.query(`delete from day_counts where question_id=$1 and answer_key=$2`, [questionId, key]);
+    await db.query(`update answers set status='rejected' where question_id=$1 and key=$2 and status='pending' and source='crowd'`, [questionId, key]);
+  } else {
+    await db.query(`update answers set status='approved', source='ai', display=$3 where question_id=$1 and key=$2 and status='pending'`, [questionId, key, v.canonical || tidy(input)]);
+    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict do nothing`, [questionId, soft(v.canonical), key]);
+  }
+  await db.query(
+    `insert into verdicts (question_id, input_key, valid, canonical_key, reason) values ($1,$2,true,$3,$4)
+     on conflict (question_id, input_key) do update set valid=true, canonical_key=excluded.canonical_key, reason=excluded.reason`,
+    [questionId, inputKey, target, v.reason],
+  );
+  forgetQuestion(questionId);
+  return 'approved';
 }
 
 export interface AnswerResult {
@@ -1270,4 +1348,103 @@ export async function decideSubmission(
   await db.query(`delete from verdicts where question_id=$1 and input_key=$2`, [a.questionId, a.inputKey]);
   forgetQuestion(a.questionId);
   return { ok: true, key };
+}
+
+/* ------------------------------------------------------------------ late verdicts */
+
+/** Where this player's new answers stand now: still waiting, confirmed (maybe under the book's name), or not counted. */
+export async function newAnswerStatus(db: Db, a: { playerId: string; day: string; mode: Mode; questionIds: string[] }) {
+  const ids = a.questionIds.slice(0, 10).map(String);
+  const turns = await db.query<{ question_id: string; answer_key: string | null }>(
+    `select question_id, answer_key from turns where player_id=$1 and day=$2::date and mode=$3 and question_id = any($4::text[])`,
+    [a.playerId, a.day, a.mode, ids],
+  );
+  const out: { questionId: string; state: 'pending' | 'approved' | 'rejected'; display: string | null }[] = [];
+  for (const t of turns) {
+    if (!t.answer_key) continue;
+    const q = await loadQuestion(db, t.question_id);
+    const e = q.answers.get(t.answer_key);
+    out.push({
+      questionId: t.question_id,
+      state: !e ? 'rejected' : e.status === 'pending' && e.source === 'crowd' ? 'pending' : 'approved',
+      display: e?.display ?? null,
+    });
+  }
+  return { answers: out };
+}
+
+/* ------------------------------------------------------------------ the night shift */
+
+const NIGHT_PENDING_MAX = 300;
+const NIGHT_SUBMISSIONS_MAX = 40;
+const NIGHT_SUGGEST = 60;
+
+/**
+ * Runs once a night when an AI key is set:
+ *  B. judges every new answer still waiting for the village (in batches per question), so none waits for votes;
+ *  A. for tomorrow's seven prompts, judges what players typed before and asks for the answers the book is missing,
+ *     so tomorrow most answers are found in the book at once.
+ */
+export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
+  const report = { judged: 0, approved: 0, rejected: 0, submissions: 0, added: 0, questions: [] as string[] };
+  // B: the waiting new answers.
+  const waiting = await db.query<{ question_id: string; key: string; display: string }>(
+    `select question_id, key, display from answers where status='pending' and source='crowd' order by created_at limit $1`,
+    [NIGHT_PENDING_MAX],
+  );
+  const byQ = new Map<string, { key: string; display: string }[]>();
+  for (const w of waiting) byQ.set(w.question_id, [...(byQ.get(w.question_id) ?? []), w]);
+  await Promise.all(
+    [...byQ].map(async ([qid, list]) => {
+      const base = BOOK_BY_ID.get(qid);
+      if (!base) return;
+      for (let i = 0; i < list.length; i += 25) {
+        const chunk = list.slice(i, i + 25);
+        const vs = await ai.judgeMany(base.prompt, base.note ?? undefined, chunk.map((x) => x.display));
+        if (!vs) continue;
+        for (const [k, v] of vs.entries()) {
+          if (!v) continue;
+          const r = await settle(db, qid, chunk[k].display, chunk[k].key, v);
+          report.judged++;
+          if (r === 'approved') report.approved++;
+          if (r === 'rejected') report.rejected++;
+        }
+      }
+    }),
+  );
+  // A: tomorrow's prompts.
+  const tomorrow = new Date(new Date(today + 'T00:00:00Z').getTime() + 86400_000).toISOString().slice(0, 10);
+  const ids = await dailySet(db, tomorrow);
+  report.questions = ids;
+  await Promise.all(
+    ids.map(async (qid) => {
+      const q = await loadQuestion(db, qid);
+      // What players typed before that the book did not know (refused at the gates, or never confirmed).
+      const subs = await db.query<{ input_key: string; display: string }>(
+        `select input_key, display from submissions where question_id=$1 and status='open' order by n desc limit $2`,
+        [qid, NIGHT_SUBMISSIONS_MAX],
+      );
+      const open = subs.filter((s) => !q.matcher.match(s.display));
+      if (open.length) {
+        const vs = await ai.judgeMany(q.prompt, q.note ?? undefined, open.map((s) => s.display));
+        for (const [k, v] of (vs ?? []).entries()) {
+          if (!v) continue;
+          report.submissions++;
+          if (v.valid) await learnAnswer(db, q, open[k].display, v.canonical, 'ai', 'approved', 3, v.reason);
+          else await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [qid, open[k].input_key, v.reason]);
+          await db.query(`update submissions set status=$3 where question_id=$1 and input_key=$2`, [qid, open[k].input_key, v.valid ? 'accepted' : 'dismissed']);
+        }
+      }
+      // The answers the book is missing.
+      const known = [...q.answers.values()].map((x) => x.display);
+      const more = await ai.suggest(q.prompt, q.note ?? undefined, known, NIGHT_SUGGEST);
+      for (const m of more ?? []) {
+        if (q.matcher.match(m.name)) continue;
+        await learnAnswer(db, q, m.name, m.name, 'ai', 'approved', Math.max(1, m.tier), 'Gợi ý ban đêm');
+        report.added++;
+      }
+      forgetQuestion(qid);
+    }),
+  );
+  return report;
 }

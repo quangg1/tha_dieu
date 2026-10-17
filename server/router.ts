@@ -3,7 +3,7 @@ import { looksVietnamese } from '../shared/syllable.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
-import { pickReferee, type Referee } from './referee.js';
+import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
 
 let ready: Promise<void> | null = null;
@@ -27,7 +27,7 @@ export interface Req extends IncomingMessage {
   query?: Record<string, string | string[] | undefined>;
 }
 
-type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean; dev: string; net: string }) => Promise<unknown>;
+type Handler = (ctx: { db: Db; body: Record<string, unknown>; query: URLSearchParams; referee: Referee; admin: boolean; dev: string; net: string; auth: string }) => Promise<unknown>;
 
 function mode(v: unknown): S.Mode {
   return v === 'night' ? 'night' : 'daily';
@@ -88,6 +88,28 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
         { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionId: String(body.questionId), input: String(body.input ?? ''), net },
         referee,
       );
+    },
+  },
+  // Where this player's new answers stand now (the referee may have settled them after the reply).
+  newstatus: {
+    method: 'POST',
+    async run({ db, body }) {
+      const ids = Array.isArray(body.questionIds) ? body.questionIds.map(String) : [];
+      return S.newAnswerStatus(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionIds: ids });
+    },
+  },
+  // The night shift, called by Vercel Cron (with CRON_SECRET when set) or by the village head.
+  nightly: {
+    method: 'GET',
+    async run({ db, admin, auth }) {
+      const secret = process.env.CRON_SECRET;
+      const allowed = admin || (secret ? auth === `Bearer ${secret}` : true);
+      if (!allowed) throw new S.GameError(401, 'Không được phép.');
+      const ai = pickAi();
+      if (!ai) return { skipped: 'Chưa có khóa AI (GEMINI_API_KEY hoặc ANTHROPIC_API_KEY).' };
+      // Without a secret, anyone could call this: once a day is all it ever does.
+      if (!admin && !(await S.hit(db, 'nightly', S.vnToday(), 1))) return { skipped: 'Đã chạy hôm nay.' };
+      return S.nightShift(db, ai);
     },
   },
   miss: {
@@ -288,7 +310,7 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
       if (!burst(net, BURST_PER_MINUTE)) return send(res, 429, { error: 'Bạn thao tác nhanh quá. Chờ một chút rồi thử lại nhé.' });
       if (Math.random() < 0.005) S.sweepLimits(db).catch(() => {});
     }
-    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev, net });
+    const data = await r.run({ db, body, query: url.searchParams, referee: opts.referee ?? pickReferee(), admin, dev, net, auth: String(req.headers.authorization ?? '') });
     send(res, 200, data, r.cache?.());
   } catch (e) {
     if (e instanceof S.GameError) return send(res, e.status, { error: e.message });
