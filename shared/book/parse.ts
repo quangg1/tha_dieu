@@ -11,6 +11,11 @@ export interface Entry {
   extra?: string[];
   /** Position in the source, used to break ties between equally familiar entries. */
   order: number;
+  /** Added by a thickening pass (after a `%late` line): long tail that must not shift the first edition's tiers. */
+  late?: boolean;
+  /** Names and labels a thickening pass added to a first-edition entry; used only when the long tail is added. */
+  lateNames?: string[];
+  lateTags?: Set<string>;
 }
 
 /**
@@ -22,9 +27,14 @@ export function parseLex(lex: string, src: string, merged?: string[]): Entry[] {
   const seen = new Map<string, Entry>();
   const byName = new Map<string, Entry>();
   let base: string[] = [];
+  let late = false;
   for (const raw of src.split('\n')) {
     const line = raw.replace(/\/\/.*$/, '').trim();
     if (!line) continue;
+    if (line === '%late') {
+      late = true;
+      continue;
+    }
     if (line.startsWith('@')) {
       base = line.slice(1).trim().split(/\s+/).filter(Boolean);
       continue;
@@ -56,6 +66,15 @@ export function parseLex(lex: string, src: string, merged?: string[]): Entry[] {
     // The same thing listed twice (a fruit that is also a tree, a dish in two sections): merge names and labels.
     // A later line whose main name is already a name of an earlier line is treated as that same thing.
     const prev = seen.get(key) ?? byName.get(key);
+    if (prev && late && !prev.late) {
+      // A thickening line about a first-edition entry: keep its names, labels and familiarity apart, so the
+      // first edition's answers and tiers stay exactly as they were.
+      for (const n of names) if (!prev.names.includes(n) && !prev.lateNames?.includes(n)) (prev.lateNames ??= []).push(n);
+      for (const t of tags) if (!prev.tags.has(t)) (prev.lateTags ??= new Set()).add(t);
+      for (const n of names) if (!byName.has(soft(n))) byName.set(soft(n), prev);
+      merged?.push(`${names[0]} → ${prev.names[0]}`);
+      continue;
+    }
     if (prev) {
       for (const n of names) if (!prev.names.includes(n)) prev.names.push(n);
       for (const t of tags) prev.tags.add(t);
@@ -65,7 +84,7 @@ export function parseLex(lex: string, src: string, merged?: string[]): Entry[] {
       merged?.push(`${names[0]} → ${prev.names[0]}`);
       continue;
     }
-    const e: Entry = { lex, key, names, pop, tags: new Set(tags), extra, order: out.length };
+    const e: Entry = { lex, key, names, pop, tags: new Set(tags), extra, order: out.length, ...(late ? { late } : {}) };
     seen.set(key, e);
     for (const n of names) if (!byName.has(soft(n))) byName.set(soft(n), e);
     out.push(e);

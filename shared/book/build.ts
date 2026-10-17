@@ -118,6 +118,18 @@ function hash(s: string) {
   return h >>> 0;
 }
 
+/**
+ * How an entry looks to the long-tail pass: a thickening entry as it is; a first-edition entry with only what a
+ * thickening pass added (null when it added nothing that matters for this source).
+ */
+function lateView(e: Entry, src: Source): { entry: Entry; isNew: boolean } | null {
+  if (e.late) return pick(e, src) ? { entry: e, isNew: true } : null;
+  if (!e.lateNames && !e.lateTags) return null;
+  const full: Entry = { ...e, names: [...e.names, ...(e.lateNames ?? [])], tags: new Set([...e.tags, ...(e.lateTags ?? [])]) };
+  if (!pick(full, src)) return null;
+  return { entry: full, isNew: !pick(e, src) };
+}
+
 function pick(entry: Entry, src: Source) {
   if (src.all && !src.all.every((t) => entry.tags.has(t))) return false;
   if (src.any && !src.any.some((t) => entry.tags.has(t))) return false;
@@ -159,13 +171,18 @@ export interface Built extends QuestionDef {
 }
 
 /** Assigns starting rarity from familiarity (1–5) blended with rank inside this question's pool. */
-function priors(list: { pop: number; order: number }[]): number[] {
-  const idx = list.map((e, i) => ({ i, pop: e.pop, order: e.order }));
+function priors(list: { pop: number; order: number; late?: boolean }[]): number[] {
+  const out = new Array<number>(list.length);
+  // The long tail from thickening passes is rare by definition, and it must not push the first edition's answers
+  // down the ranks: those tiers stay exactly what they were.
+  list.forEach((e, i) => {
+    if (e.late) out[i] = Math.max(3, PRIOR_FOR_POP[e.pop]);
+  });
+  const idx = list.map((e, i) => ({ i, pop: e.pop, order: e.order, late: e.late })).filter((e) => !e.late);
   idx.sort((a, b) => b.pop - a.pop || a.order - b.order);
   const cuts = [0.05, 0.15, 0.35, 0.62];
-  const out = new Array<number>(list.length);
   idx.forEach((e, r) => {
-    const q = (r + 0.5) / list.length;
+    const q = (r + 0.5) / idx.length;
     const rankTier = cuts.findIndex((c) => q < c);
     const rt = rankTier < 0 ? 4 : rankTier;
     out[e.i] = Math.floor((rt + PRIOR_FOR_POP[e.pop]) / 2);
@@ -174,7 +191,7 @@ function priors(list: { pop: number; order: number }[]): number[] {
 }
 
 export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | null {
-  const seen = new Map<string, { names: string[]; pop: number; order: number }>();
+  const seen = new Map<string, { names: string[]; pop: number; order: number; late?: boolean }>();
   const nameIndex = new Map<string, string>();
   let order = 0;
   const vagueSet = new Set([...(spec.vague ?? []), ...spec.from.flatMap((f) => VAGUE[f.lex] ?? [])].map(soft));
@@ -183,7 +200,7 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
     if (!list) throw new Error(`Unknown lexicon ${src.lex} in ${spec.id}`);
     for (const e of list) {
       order++;
-      if (!pick(e, src)) continue;
+      if (e.late || !pick(e, src)) continue;
       if (vagueSet.has(e.key)) continue;
       const names = fitting(e, spec);
       if (!names.length) continue;
@@ -203,7 +220,7 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
       }
       // An entry that fits only through a lesser-known name ("Thiên Trúc" for Ấn Độ) is a rarer answer.
       const pop = names.includes(e.names[0]) ? e.pop : Math.max(1, e.pop - 2);
-      seen.set(k, { names: [...names], pop, order: order + e.order / 10000 });
+      seen.set(k, { names: [...names], pop, order: order + e.order / 10000, late: e.late });
       for (const n of names) if (!nameIndex.has(soft(n))) nameIndex.set(soft(n), k);
     }
   }
@@ -212,9 +229,11 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
   if (items.length < min) return null;
   const pr = priors(items);
   const answers: AnswerEntry[] = items.map((it, i) => ({ key: it.key, display: it.names[0], priorTier: pr[i], aliases: it.names }));
-  // The hidden Cung Trăng answer: a little-known but genuine answer, chosen once per question.
-  const rare = answers.filter((a) => a.priorTier === 4 && !(spec.noKrill ?? []).some((n) => soft(n) === a.key));
-  const pool = rare.length ? rare : answers.filter((a) => a.priorTier >= 3);
+  // The hidden Cung Trăng answer: a little-known but genuine answer, chosen once per question from the first
+  // edition, so thickening the book never moves it.
+  const first = answers.filter((_, i) => !items[i].late);
+  const rare = first.filter((a) => a.priorTier === 4 && !(spec.noKrill ?? []).some((n) => soft(n) === a.key));
+  const pool = rare.length ? rare : first.filter((a) => a.priorTier >= 3);
   const krill = (pool.length ? pool : answers)[hash(spec.id) % (pool.length || answers.length)];
   krill.priorTier = 5;
   const lexes = [...new Set(spec.from.map((s) => s.lex))];
@@ -252,13 +271,15 @@ export function resolveTraps(answers: AnswerEntry[], names: string[] = []): stri
 }
 
 /** Adds book entries to a handcrafted question, keeping its curated tiers and hidden answer. */
-export function extendQuestion(q: QuestionDef, srcs: Source[], lex: Record<string, Entry[]>): QuestionDef {
+export function extendQuestion(q: QuestionDef, srcs: Source[], lex: Record<string, Entry[]>, late = false): QuestionDef {
   const byName = new Map<string, AnswerEntry>();
   for (const a of q.answers) for (const n of a.aliases) byName.set(soft(n), a);
   const added: { names: string[]; pop: number; order: number }[] = [];
   for (const src of srcs) {
-    for (const e of lex[src.lex] ?? []) {
-      if (!pick(e, src)) continue;
+    for (const e0 of lex[src.lex] ?? []) {
+      const view = late ? lateView(e0, src) : !e0.late && pick(e0, src) ? { entry: e0, isNew: true } : null;
+      if (!view) continue;
+      const e = view.entry;
       const hit = e.names.map((n) => byName.get(soft(n))).find(Boolean);
       if (hit) {
         for (const n of e.names) if (!byName.has(soft(n))) {
@@ -276,7 +297,7 @@ export function extendQuestion(q: QuestionDef, srcs: Source[], lex: Record<strin
   const extra: AnswerEntry[] = added.map((it) => ({
     key: soft(it.names[0]),
     display: it.names[0],
-    priorTier: Math.max(2, PRIOR_FOR_POP[it.pop]),
+    priorTier: Math.max(late ? 3 : 2, PRIOR_FOR_POP[it.pop]),
     aliases: it.names,
   }));
   const lexes = srcs.map((s) => s.lex);
@@ -333,4 +354,41 @@ function namedVariantOf(name: string, byName: Map<string, AnswerEntry>): AnswerE
     if (base) return base;
   }
   return undefined;
+}
+
+/**
+ * The thickening passes' long tail for a question built from the book, added after its hand-written answers so
+ * that it never takes their place or tier: an entry that is already an answer only adds the names that fit.
+ */
+export function addLate(q: QuestionDef, spec: Spec, lex: Record<string, Entry[]>): QuestionDef {
+  const answers = q.answers.map((a) => ({ ...a, aliases: [...a.aliases] }));
+  const byName = new Map<string, AnswerEntry>();
+  for (const a of answers) for (const n of a.aliases) byName.set(soft(n), a);
+  const vagueSet = new Set([...(spec.vague ?? []), ...spec.from.flatMap((f) => VAGUE[f.lex] ?? [])].map(soft));
+  for (const src of spec.from) {
+    for (const e0 of lex[src.lex] ?? []) {
+      const view = lateView(e0, src);
+      if (!view || vagueSet.has(e0.key)) continue;
+      const e = view.entry;
+      const names = fitting(e, spec);
+      if (!names.length) continue;
+      const hit = names.map((n) => byName.get(soft(n))).find(Boolean);
+      if (hit) {
+        for (const n of names) if (!byName.has(soft(n))) {
+          hit.aliases.push(n);
+          byName.set(soft(n), hit);
+        }
+        continue;
+      }
+      if (spec.start || spec.syllables) {
+        const bare = stripLead(names[0], STRIP[e.lex] ?? []);
+        if (bare !== names[0]) names.unshift(bare.charAt(0).toUpperCase() + bare.slice(1));
+      }
+      const entry: AnswerEntry = { key: soft(names[0]), display: names[0], priorTier: Math.max(3, PRIOR_FOR_POP[e.pop]), aliases: [...names] };
+      if (!entry.key || byName.has(entry.key)) continue;
+      answers.push(entry);
+      for (const n of names) byName.set(soft(n), entry);
+    }
+  }
+  return { ...q, answers };
 }

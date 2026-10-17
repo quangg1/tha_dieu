@@ -56,7 +56,7 @@ export const SOURCES: Record<string, string> = {
 };
 
 /** Every lexicon of the village book, parsed: the first edition, then the thickening pass (lex2) appended. */
-export const LEXICONS: Record<string, Entry[]> = Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, parseLex(k, v + '\n@\n' + (MORE_LEX[k] ?? ''))]));
+export const LEXICONS: Record<string, Entry[]> = Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, parseLex(k, v + '\n@\n%late\n' + (MORE_LEX[k] ?? ''))]));
 
 // Capitals, read from the countries lexicon (the text after "^"), carry their country's labels.
 LEXICONS.thudo = LEXICONS.quocgia
@@ -78,9 +78,16 @@ function foldPlaceVariants(lexName: string) {
     for (let k = Math.min(3, words.length - 1); k >= 1; k--) {
       if (!places.has(soft(words.slice(words.length - k).join(' ')))) continue;
       const base = primary.get(soft(words.slice(0, words.length - k).join(' ')));
-      if (!base || base === e) continue;
-      for (const n of e.names) if (!base.names.includes(n)) base.names.push(n);
-      for (const t of e.tags) base.tags.add(t);
+      // A first-edition dish folds only into a first-edition dish, so thickening never moves an old answer.
+      if (!base || base === e || (base.late && !e.late)) continue;
+      if (e.late && !base.late) {
+        // The long tail's spellings join a first-edition dish only when the long tail is added.
+        for (const n of [...e.names, ...(e.lateNames ?? [])]) if (!base.names.includes(n) && !base.lateNames?.includes(n)) (base.lateNames ??= []).push(n);
+        for (const t of e.tags) if (!base.tags.has(t)) (base.lateTags ??= new Set()).add(t);
+      } else {
+        for (const n of e.names) if (!base.names.includes(n)) base.names.push(n);
+        for (const t of e.tags) base.tags.add(t);
+      }
       gone.add(e);
       break;
     }

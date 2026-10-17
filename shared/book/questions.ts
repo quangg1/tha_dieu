@@ -1,7 +1,7 @@
 // Every question in the game: the handcrafted bank (extended with the village book) plus questions generated from book labels.
 import { BANK } from '../bank.js';
 import { parseRaw, type QuestionDef } from '../match.js';
-import { addMore, buildSpec, firstLetter, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
+import { addLate, addMore, buildSpec, firstLetter, extendQuestion, resolveTraps, type Built, type Source, type Spec } from './build.js';
 import { soft } from '../normalize.js';
 import { MORE } from './more.js';
 import { MORE2 } from './more2.js';
@@ -417,7 +417,8 @@ function assemble() {
     const base = parseRaw(raw);
     const ext = EXTEND[raw.id];
     const qd00 = ext ? extendQuestion(base, ext, LEXICONS) : base;
-    const qd0 = thicken(qd00, raw.id);
+    // The book's long tail (lex2) comes after every hand-written pass, so it never takes their answers or tiers.
+    const qd0 = ext ? extendQuestion(thicken(qd00, raw.id), ext, LEXICONS, true) : thicken(qd00, raw.id);
     const qd = { ...qd0, traps: resolveTraps(qd0.answers, TRAPS[raw.id]) };
     const strong = qd.answers.filter((a) => a.priorTier <= 1).length;
     const lv = (raw as { lv?: number }).lv;
@@ -426,7 +427,7 @@ function assemble() {
   const dropped: string[] = [];
   for (const spec of SPECS) {
     const b0 = buildSpec(TRAPS[spec.id] ? { ...spec, traps: TRAPS[spec.id] } : spec, LEXICONS);
-    const b = b0 ? keepRules({ ...b0, ...thicken(b0, spec.id) }, spec) : b0;
+    const b = b0 ? keepRules({ ...b0, ...addLate(thicken(b0, spec.id), spec, LEXICONS) }, spec) : b0;
     if (b) out.push(b);
     else dropped.push(spec.id);
   }
