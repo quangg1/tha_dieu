@@ -69,7 +69,7 @@ describe('answering', () => {
     const p = 'player_test_0002';
     const qid = 'loai-chim';
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const bad = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim lửa' }, referee);
+    const bad = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
     expect(bad.status).toBe('retry');
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
     const good = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim ngũ sắc' }, referee);
@@ -79,7 +79,7 @@ describe('answering', () => {
     expect(good.tier).toBe(4);
     const n = calls.length;
     await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const again = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim lửa' }, referee);
+    const again = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
     expect(again.status).toBe('retry');
     expect(calls.length).toBe(n);
     const pend = await S.pending(db);

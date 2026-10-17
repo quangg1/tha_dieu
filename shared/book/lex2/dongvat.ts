@@ -550,7 +550,6 @@ export default `
 1 Cà kheo|Chim cà kheo|Stilt
 1 Mỏ cong|Avocet|Chim mỏ cong
 1 Chim nhạn rừng
-1 Chim ngũ sắc
 1 Chim xanh|Chim xanh nam bộ
 1 Chim Phường chèo
 1 Chim chàng làng đuôi dài
