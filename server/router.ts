@@ -1,4 +1,5 @@
-import { wikiCheck } from './wikidata.js';
+import { wikiCheck, wikiExists } from './wikidata.js';
+import { looksVietnamese } from '../shared/syllable.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
@@ -178,8 +179,9 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     async run({ db, query, net }) {
       if (!(await S.hit(db, `wiki:${net}`, S.vnToday(), 30))) throw new S.GameError(429, 'Thử lại sau nhé.');
       const t0 = Date.now();
-      const r = await wikiCheck(String(query.get('q') ?? ''), String(query.get('s') ?? '').slice(0, 60));
-      return { hit: r, ms: Date.now() - t0 };
+      const typed = String(query.get('s') ?? '').slice(0, 60);
+      const r = await wikiCheck(String(query.get('q') ?? ''), typed);
+      return { hit: r, vietnamese: looksVietnamese(typed), exists: await wikiExists(typed), ms: Date.now() - t0 };
     },
   },
   'admin/support': {

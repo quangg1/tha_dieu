@@ -120,3 +120,23 @@ export async function wikiCheck(questionId: string, input: string, fetcher: type
   // Wikidata's labels are often lower case; show them the way the book does.
   return { id, display: label.charAt(0).toUpperCase() + label.slice(1) };
 }
+
+/**
+ * Whether the typed name is the exact name (or alias) of something on Wikidata, in Vietnamese or English.
+ * Null when Wikidata could not be asked. Used to tell a real foreign name ("Pizza Hut") from keyboard noise.
+ */
+export async function wikiExists(input: string, fetcher: typeof fetch = defaultFetch): Promise<boolean | null> {
+  const typed = soft(input);
+  if (typed.length < 2) return false;
+  let asked = false;
+  for (const lang of ['vi', 'en']) {
+    const url =
+      'https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&type=item&limit=7&origin=*&language=' +
+      lang + '&uselang=' + lang + '&search=' + encodeURIComponent(input.trim());
+    const j = (await getJson(url, 2000, fetcher)) as { search?: { label?: string; match?: { text?: string } }[] } | null;
+    if (!j) continue;
+    asked = true;
+    if ((j.search ?? []).some((r) => soft(r.match?.text ?? r.label ?? '') === typed || soft(r.label ?? '') === typed)) return true;
+  }
+  return asked ? false : null;
+}

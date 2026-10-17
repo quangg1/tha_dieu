@@ -251,6 +251,26 @@ describe('new answers without a referee', () => {
     expect(junk.status).toBe('retry');
   });
 
+  it('refuses keyboard noise, but takes a real foreign name Wikidata knows', async () => {
+    const { nullReferee } = await import('./referee.js');
+    await S.startTurn(db, { playerId: 'noise_player', day, mode: 'night', questionId: 'the-thao' });
+    const noise = await S.answer(db, { playerId: 'noise_player', day, mode: 'night', questionId: 'the-thao', input: 'abcxyz lạ' }, nullReferee);
+    expect(noise.status).toBe('retry');
+    setWikiFetch(async (url) => {
+      const u = String(url);
+      if (u.includes('wbsearchentities') && u.includes('Zorbing')) return new Response(JSON.stringify({ search: [{ id: 'Q1', label: 'Zorbing', match: { text: 'Zorbing' } }] }));
+      return new Response(JSON.stringify({ search: [] }));
+    });
+    try {
+      await S.startTurn(db, { playerId: 'noise_player2', day, mode: 'night', questionId: 'the-thao' });
+      const real = await S.answer(db, { playerId: 'noise_player2', day, mode: 'night', questionId: 'the-thao', input: 'Zorbing' }, nullReferee);
+      expect(real.status).toBe('landed');
+      expect(real.pending).toBe(true);
+    } finally {
+      setWikiFetch(async () => new Response('', { status: 503 }));
+    }
+  });
+
   it('accepts an answer Wikidata confirms is of the right kind', async () => {
     const { nullReferee } = await import('./referee.js');
     setWikiFetch(async (url) => {

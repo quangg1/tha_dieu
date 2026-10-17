@@ -17,7 +17,8 @@ import {
 import type { Db } from './db.js';
 import { nullReferee, type Referee } from './referee.js';
 import { SCHEMA } from './schema.js';
-import { wikiCheck } from './wikidata.js';
+import { wikiCheck, wikiExists } from './wikidata.js';
+import { looksVietnamese } from '../shared/syllable.js';
 
 export class GameError extends Error {
   constructor(public status: number, message: string) {
@@ -416,6 +417,8 @@ function plausible(input: string) {
   const t = input.trim();
   if (norm(t).length < 2 || t.length > 40 || t.split(/\s+/).length > 6) return false;
   if (!/\p{L}/u.test(t) || /(.)\1{3,}/u.test(norm(t))) return false;
+  const words = norm(t.replace(/\s+/g, '|')).length ? t.toLowerCase().split(/\s+/) : [];
+  if (words.length >= 3 && new Set(words).size === 1) return false;
   return /^[\p{L}\p{N}\s'’.\-&+#]+$/u.test(t);
 }
 
@@ -494,6 +497,10 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
       [q.id, inputKey, input.slice(0, 60)],
     );
     if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
+    // A new answer must read as Vietnamese words, or be a real name somewhere on Wikidata (foreign brands, places, people).
+    if (!looksVietnamese(input) && !(await wikiExists(input).catch(() => null))) {
+      return { key: null, reason: 'Làng không nhận ra tên này. Kiểm tra lại chính tả, hoặc thử một đáp án khác nhé.' };
+    }
     if (!(await hit(db, `pend:${mode}:${playerId}`, day, PENDING_PER_RUN))) {
       return { key: null, reason: `Bạn đã có ${PENDING_PER_RUN} đáp án mới đang chờ làng xét. Câu này thử một đáp án quen hơn nhé.` };
     }
