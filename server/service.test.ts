@@ -602,3 +602,59 @@ describe('the night shift reviews what the book learned', () => {
     expect((await S.nightQueue(db)).learned.some((l) => l.key === item.key)).toBe(false);
   });
 });
+
+describe('accounts', () => {
+  it('keeps one history across devices: first device becomes the account, a second folds in only days the account did not fly', async () => {
+    const A = await import('./account.js');
+    A.setVerifier(async (jwt) => {
+      if (!jwt.startsWith('good-token-')) throw new S.GameError(401, 'bad');
+      return { sub: jwt.slice('good-token-'.length), email: 'bi@example.com', name: 'Bé Bi' };
+    });
+    const d1 = S.vnToday(new Date(Date.now() - 5 * 86_400_000));
+    const d2 = S.vnToday(new Date(Date.now() - 4 * 86_400_000));
+    for (const d of [d1, d2]) await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict do nothing`, [d, ['tinh-thanh']]);
+    const fly = async (pid: string, d: string, input: string) => {
+      await S.startTurn(db, { playerId: pid, day: d, mode: 'daily', questionId: 'tinh-thanh' });
+      const r = await S.answer(db, { playerId: pid, day: d, mode: 'daily', questionId: 'tinh-thanh', input }, referee);
+      expect(r.status).toBe('landed');
+      await S.finish(db, { playerId: pid, day: d, mode: 'daily' });
+    };
+    // Phone flies day 1, laptop flies days 1 and 2.
+    await fly('acct_phone_0001', d1, 'Hà Nội');
+    await fly('acct_laptop_001', d1, 'Huế');
+    await fly('acct_laptop_001', d2, 'Đà Nẵng');
+
+    await expect(A.login(db, { jwt: 'nope-token-xxxxxxxxxxxx', playerId: 'acct_phone_0001' })).rejects.toThrow();
+    const first = await A.login(db, { jwt: 'good-token-user-1-aaaaaaaa', playerId: 'acct_phone_0001' });
+    expect(first.playerId).toBe('acct_phone_0001');
+    expect(first.created).toBe(true);
+    expect(first.deviceDays).toBe(0);
+
+    const second = await A.login(db, { jwt: 'good-token-user-1-aaaaaaaa', playerId: 'acct_laptop_001' });
+    expect(second.playerId).toBe('acct_phone_0001');
+    expect(second.deviceDays).toBe(2);
+    const auth = `Bearer ${second.session}`;
+    const m = await A.merge(db, auth, 'acct_laptop_001');
+    // Day 1 the account already flew: the laptop's day 1 stays apart; day 2 moves over.
+    expect(m.days).toBe(1);
+    const mine = await db.query<{ day: string; answer_key: string }>(
+      `select to_char(day, 'YYYY-MM-DD') as day, answer_key from turns where player_id = 'acct_phone_0001' order by day`,
+    );
+    expect(mine.map((r) => r.day)).toEqual([d1, d2]);
+    expect(mine[0].answer_key).toBe(soft('Hà Nội'));
+    const me = await A.me(db, auth);
+    expect(me.stats.flights).toBe(2);
+    expect(me.stats.streak).toBe(2);
+    expect(me.since).toBe(d1);
+    expect(me.album.length).toBe(2);
+    // Another person's device history cannot be taken.
+    const other = await A.login(db, { jwt: 'good-token-user-2-bbbbbbbb', playerId: 'acct_phone_0001' });
+    expect(other.playerId).not.toBe('acct_phone_0001');
+    expect(other.deviceDays).toBe(0);
+    await expect(A.merge(db, `Bearer ${other.session}`, 'acct_phone_0001')).rejects.toThrow();
+    // Signing out ends the session.
+    await A.logout(db, auth);
+    await expect(A.me(db, auth)).rejects.toThrow();
+    A.setVerifier(null);
+  });
+});

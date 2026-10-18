@@ -188,3 +188,83 @@ export function msToNextDay(now = new Date()) {
   const next = Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), vn.getUTCDate() + 1) - 7 * 3600_000;
   return next - now.getTime();
 }
+
+/* ---------------------------------------------------------------- account */
+
+export interface AccountInfo {
+  session: string;
+  name: string | null;
+  email: string | null;
+}
+
+/** The signed-in account on this device, if any. */
+export function account(): AccountInfo | null {
+  return read<AccountInfo | null>('account', null);
+}
+
+interface DeviceBackup {
+  player: string;
+  since: string;
+  stats: Partial<Stats>;
+  album: Record<string, AlbumEntry>;
+  today: DayRecord | null;
+}
+
+/**
+ * Switches this device to the account: its player id from now on, and the account's numbers and collection. The
+ * device's own state is kept aside, so signing out gives the device back what it had.
+ */
+export function enterAccount(
+  info: AccountInfo,
+  me: { playerId: string; since: string; stats: Partial<Stats>; album: { day: string; questionId: string; prompt: string; krill: string; found: boolean }[] },
+  opts: { keepDevice: boolean },
+) {
+  const device = playerId();
+  if (!read<DeviceBackup | null>('deviceBackup', null) && device !== me.playerId) {
+    write('deviceBackup', { player: device, since: playerSince(), stats: read('stats', {}), album: album(), today: today() } satisfies DeviceBackup);
+  }
+  write('account', info);
+  write('player', me.playerId);
+  write('since', me.since);
+  write('stats', me.stats);
+  const a: Record<string, AlbumEntry> = opts.keepDevice ? album() : {};
+  for (const e of me.album) {
+    const k = `${e.day}:${e.questionId}`;
+    a[k] = { day: e.day, prompt: e.prompt, krill: e.krill, found: e.found || !!a[k]?.found };
+  }
+  write('album', a);
+  // Today's flight on this device belongs to the account only when the device's history was folded in.
+  const t = today();
+  if (t && device !== me.playerId && !opts.keepDevice) write('today', null);
+}
+
+/** Refreshes the account's numbers on this device (another device may have flown since). */
+export function refreshAccount(me: { stats: Partial<Stats>; album: { day: string; questionId: string; prompt: string; krill: string; found: boolean }[] }) {
+  write('stats', me.stats);
+  const a = album();
+  for (const e of me.album) {
+    const k = `${e.day}:${e.questionId}`;
+    a[k] = { day: e.day, prompt: e.prompt, krill: e.krill, found: e.found || !!a[k]?.found };
+  }
+  write('album', a);
+}
+
+/** Signs this device out: back to the player it was before, or a fresh one. */
+export function leaveAccount() {
+  const b = read<DeviceBackup | null>('deviceBackup', null);
+  write('account', null);
+  write('deviceBackup', null);
+  if (b) {
+    write('player', b.player);
+    write('since', b.since);
+    write('stats', b.stats);
+    write('album', b.album);
+    write('today', b.today);
+  } else {
+    write('player', '');
+    write('stats', {});
+    write('album', {});
+    write('today', null);
+    playerId();
+  }
+}

@@ -5,6 +5,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
+import * as A from './account.js';
 import { NIGHT_VERDICTS } from '../shared/book/night-verdicts.js';
 
 let ready: Promise<void> | null = null;
@@ -157,6 +158,33 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     async run({ db, query }) {
       const pid = query.get('playerId');
       return S.yesterday(db, pid && /^[A-Za-z0-9_-]{8,64}$/.test(pid) ? pid : undefined);
+    },
+  },
+  // Sign in with a Neon Auth token (after Google): returns Bilion's own session and the account's player id.
+  'account/login': {
+    method: 'POST',
+    async run({ db, body, net }) {
+      if (!(await S.hit(db, `login:${net}`, S.vnToday(), 40))) throw new S.GameError(429, 'Thử lại sau nhé.');
+      return A.login(db, { jwt: String(body.jwt ?? ''), playerId: body.playerId });
+    },
+  },
+  // Folds this device's earlier history into the signed-in account (the player said yes).
+  'account/merge': {
+    method: 'POST',
+    async run({ db, body, auth }) {
+      return A.merge(db, auth, body.from);
+    },
+  },
+  'account/me': {
+    method: 'GET',
+    async run({ db, auth }) {
+      return A.me(db, auth);
+    },
+  },
+  'account/logout': {
+    method: 'POST',
+    async run({ db, auth }) {
+      return A.logout(db, auth);
     },
   },
   board: {

@@ -8,16 +8,20 @@ import Home from './screens/Home';
 import Game, { type Summary } from './screens/Game';
 import Result from './screens/Result';
 import { api } from './api';
+import { backFromGoogle } from './auth';
 
 // The admin page is its own chunk, opened only at the secret path the server confirms.
 const Admin = lazy(() => import('./screens/Admin'));
+// Sign-in is its own chunk too, with the auth SDK behind it.
+const Account = lazy(() => import('./screens/Account'));
 
-type Screen = { name: 'home' } | { name: 'play'; mode: 'daily' | 'night'; run: number } | { name: 'result'; summary: Summary } | { name: 'admin' };
+type Screen = { name: 'home' } | { name: 'play'; mode: 'daily' | 'night'; run: number } | { name: 'result'; summary: Summary } | { name: 'admin' } | { name: 'account' };
 
 export default function App() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [sky, setSky] = useState<SkyScene | null>(null);
-  const [screen, setScreen] = useState<Screen>({ name: 'home' });
+  // Coming back from Google opens the account page, which finishes the sign-in.
+  const [screen, setScreen] = useState<Screen>(() => (backFromGoogle() ? { name: 'account' } : { name: 'home' }));
 
   // A long hash may be the secret admin path: the server checks it, nothing about it lives in this code.
   useEffect(() => {
@@ -75,7 +79,12 @@ export default function App() {
           <Admin onExit={() => { history.replaceState(null, '', location.pathname); setScreen({ name: 'home' }); }} />
         </Suspense>
       )}
-      {sky && screen.name === 'home' && <Home sky={sky} soundButton={soundButton} onPlay={(mode) => setScreen({ name: 'play', mode, run: Date.now() })} onReview={(summary) => setScreen({ name: 'result', summary })} />}
+      {screen.name === 'account' && (
+        <Suspense fallback={null}>
+          <Account soundButton={soundButton} onHome={() => setScreen({ name: 'home' })} />
+        </Suspense>
+      )}
+      {sky && screen.name === 'home' && <Home sky={sky} soundButton={soundButton} onPlay={(mode) => setScreen({ name: 'play', mode, run: Date.now() })} onReview={(summary) => setScreen({ name: 'result', summary })} onAccount={() => setScreen({ name: 'account' })} />}
       {sky && screen.name === 'play' && (
         <Game key={screen.run} sky={sky} mode={screen.mode} soundButton={soundButton} onExit={() => setScreen({ name: 'home' })} onDone={(summary) => setScreen({ name: 'result', summary })} />
       )}

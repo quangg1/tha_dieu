@@ -18,7 +18,7 @@ import { RemindSheet } from '../components/RemindSheet';
 const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
 const KITE_HERO: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id, { flutes: true }))]));
 import { track } from '../track';
-import { addToAlbum, album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
+import { account, addToAlbum, album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
 /** A friend's result from a challenge link, read once and kept for this visit. */
@@ -58,7 +58,7 @@ function readWants(): string[] {
   }
 }
 
-export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyScene; soundButton: ReactNode; onPlay: (m: 'daily' | 'night') => void; onReview: (s: Summary) => void }) {
+export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: { sky: SkyScene; soundButton: ReactNode; onPlay: (m: 'daily' | 'night') => void; onReview: (s: Summary) => void; onAccount: () => void }) {
   const [howto, setHowto] = useState(false);
   const [bag, setBag] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -291,6 +291,9 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             ))}
           </span>
         </button>
+        <button className="acct-btn" onClick={onAccount}>
+          {account() ? <>Bilion của tôi · <b>đã đồng bộ</b></> : <>Giữ chuỗi ngày trên mọi máy · <b>Đăng nhập</b></>}
+        </button>
         <div className="home-foot">
           <button className="link-btn" onClick={() => { setSheet('remind'); track('remind_open'); }} aria-haspopup="dialog">Nhắc chơi</button>
           <span aria-hidden="true">·</span>
@@ -315,6 +318,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
               [
                 ['Thả vô tận', 'Câu hỏi nối tiếp, chơi tới khi hết gió', () => go('night')],
                 ['Gói chủ đề', 'Tết, Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
+                ['Bilion của tôi', account() ? `Đã đăng nhập${account()!.name ? ': ' + account()!.name : ''}` : 'Đăng nhập Google, giữ lịch sử trên mọi máy', () => onAccount()],
                 ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
                 ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
                 ['Nhắc chơi mỗi ngày', 'Thêm lời nhắc vào lịch của bạn', () => { setSheet('remind'); track('remind_open'); }],

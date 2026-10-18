@@ -201,4 +201,31 @@ create table if not exists muted (
 
 -- The day's scores read every turn of one day; the primary key starts with the player.
 create index if not exists turns_day on turns (day, mode);
+
+-- Players who signed in (Neon Auth, same database). Every device signed in to an account plays as its player id.
+create table if not exists accounts (
+  user_id text primary key,
+  email text,
+  name text,
+  player_id text not null unique,
+  created_at timestamptz not null default now(),
+  last_at timestamptz not null default now()
+);
+
+-- Bilion's own sessions, so a sign-in survives without the auth server's cookies (blocked across sites on iPhone).
+create table if not exists sessions (
+  token_hash text primary key,
+  user_id text not null references accounts(user_id) on delete cascade,
+  created_at timestamptz not null default now(),
+  last_at timestamptz not null default now()
+);
+
+-- Device histories folded into an account, for the record.
+create table if not exists account_merges (
+  user_id text not null,
+  from_player text not null,
+  at timestamptz not null default now(),
+  days int not null default 0,
+  primary key (user_id, from_player)
+);
 `;

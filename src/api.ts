@@ -100,7 +100,37 @@ async function call<T>(path: string, body?: unknown, headers: Record<string, str
   return data as T;
 }
 
+export interface AccountStats {
+  best: number;
+  nightBest: number;
+  streak: number;
+  lastDay: string | null;
+  flights: number;
+  bestStreak: number;
+  total: number;
+  bestScore: number;
+  tiers: number[];
+  misses: number;
+}
+
+export interface AccountMe {
+  playerId: string;
+  profile: { name: string | null; email: string | null };
+  since: string;
+  stats: AccountStats;
+  album: { day: string; questionId: string; prompt: string; krill: string; found: boolean }[];
+}
+
+const bearer = (session: string) => ({ authorization: `Bearer ${session}` });
+
 export const api = {
+  account: {
+    login: (b: { jwt: string; playerId: string }) =>
+      call<{ session: string; playerId: string; created: boolean; deviceDays: number; profile: { name: string | null; email: string | null } }>('account/login', b),
+    merge: (session: string, from: string) => call<{ days: number }>('account/merge', { from }, bearer(session)),
+    me: (session: string) => call<AccountMe>('account/me', undefined, bearer(session)),
+    logout: (session: string) => call<{ ok: boolean }>('account/logout', {}, bearer(session)),
+  },
   daily: () => call<{ day: string; questions: PublicQuestion[] }>('daily'),
   night: (seen: string[]) => call<{ day: string; question: PublicQuestion }>('night', { seen }),
   start: (b: { playerId: string; day: string; mode: string; questionId: string }) =>

@@ -583,3 +583,13 @@ button svg,a svg{flex-shrink:0}
 .card-k-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .card-k-row small{font-size:12px;font-weight:600;color:#8a97a8}
 .remind-btn{display:flex;justify-content:center;text-decoration:none}
+.acct-btn{width:100%;margin-top:8px;min-height:40px;padding:8px 12px;border:1px solid #d5e3ef;border-radius:14px;background:#f3f8fc;color:#33506f;font:inherit;font-size:14px;cursor:pointer}
+.acct-btn b{color:#c2412d}
+.acct-hero{margin-top:14vh}
+.acct-card .home-row{gap:10px;flex-wrap:wrap}
+.acct-p{margin:0;font-size:16px;line-height:1.5}
+.acct-mail{color:#4a5f7d;font-size:14px}
+.acct-note{margin:0;font-size:13px;line-height:1.5;color:#4a5f7d}
+.acct-note a{color:#c2412d}
+.acct-msg{margin:0;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.92);color:#0f2747;font-size:14px}
+.acct-google{width:100%}
