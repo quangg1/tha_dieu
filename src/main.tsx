@@ -1,6 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import '@fontsource/grandstander/700.css';
+import '@fontsource/grandstander/800.css';
+import '@fontsource/grandstander/900.css';
 import './giaydiep.css';
 import './app.css';
 import { watchErrors } from './track';

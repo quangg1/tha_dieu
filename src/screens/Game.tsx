@@ -25,6 +25,7 @@ import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { playerId, playerSince, prefs, recordFlight, saveToday, today, vnDay, type LocalRow } from '../store';
 import { BackIcon } from '../ui';
+import { KiteIcon } from '../glyphs';
 
 export interface Summary {
   mode: 'daily' | 'night';
@@ -138,7 +139,7 @@ function Ladder({ step, tier, fell, side, done }: { step: number; tier: number |
       {fell && (
         <div className="ladder-khon" style={{ '--c': TIER_COLOR[KHON_LOI] } as CSSProperties}>
           <TierIcon tier={KHON_LOI} size={28} />
-          <span>Khôn lỏi · {TIERS[KHON_LOI].points}</span>
+          <span>Khôn lỏi, {TIERS[KHON_LOI].points} điểm</span>
         </div>
       )}
     </div>
@@ -152,7 +153,7 @@ function CrowdPanel({ crowd, mine }: { crowd: Crowd; mine: string }) {
     return (
       <div className="crowd">
         <span className="crowd-k">Sổ làng đoán cả làng hay nói</span>
-        <span className="crowd-guess">{crowd.top.map((t) => t.display).join(' · ')}</span>
+        <span className="crowd-guess">{crowd.top.map((t) => t.display).join(', ')}</span>
       </div>
     );
   }
@@ -168,9 +169,9 @@ function CrowdPanel({ crowd, mine }: { crowd: Crowd; mine: string }) {
   );
   return (
     <div className="crowd">
-      <span className="crowd-k">Cả làng nói gì · {crowd.total.toLocaleString('vi-VN')} người</span>
+      <span className="crowd-k">{crowd.total.toLocaleString('vi-VN')} người đã trả lời câu này</span>
       {top.map((t) => row(t.display, t.pct ?? 0, t.mine))}
-      {!inTop && row(`${mine} · bạn`, crowd.mine ?? 0, true)}
+      {!inTop && row(`${mine} (bạn)`, crowd.mine ?? 0, true)}
     </div>
   );
 }
@@ -608,7 +609,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         <div className="hud-panel">
           {/* Where the kite is now: the last landmark passed, so the climb reads as a journey. */}
           <span className="k zone" title="Khu vực diều đang bay">
-            {lap > 1 ? `Vòng ${lap} · ` : ''}
+            {lap > 1 ? `Vòng ${lap}, ` : ''}
             {lastMilestone(shownAlt).name}
           </span>
           <span className="v">
@@ -695,7 +696,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                   {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
                   {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
                   {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
-                  {outcome.milestone && <span className="chip mile">Vượt mốc · {outcome.milestone.name}</span>}
+                  {outcome.milestone && <span className="chip mile">Vượt mốc {outcome.milestone.name}</span>}
                 </div>
                 {outcome.crowd && outcome.crowd.top.length > 0 && <CrowdPanel crowd={outcome.crowd} mine={outcome.display ?? ''} />}
               </>
@@ -806,7 +807,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         )}
         {phase === 'result' && (
           <button className="next-btn" onClick={next} autoFocus>
-            {lastDaily ? 'Xem diều bay tới đâu' : 'Bay tiếp'} <span aria-hidden="true">▲</span>
+            {lastDaily ? 'Xem diều bay tới đâu' : 'Bay tiếp'} <KiteIcon />
           </button>
         )}
       </div>

@@ -35,7 +35,7 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
     <div className="pst-curve">
       <div className="pst-score">
         <b>{score}</b>
-        <span>điểm · {formatAlt(Math.pow(10, score / (mode === 'daily' ? 65 : 30)))}</span>
+        <span>điểm, diều lên {formatAlt(Math.pow(10, score / (mode === 'daily' ? 65 : 30)))}</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={players > 1 ? `Điểm của bạn cao hơn ${beaten}% người chơi hôm nay` : 'Bạn là người bay đầu tiên hôm nay'}>
         <defs>
@@ -70,7 +70,7 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
         ) : (
           'Bạn là người bay đầu tiên. Đường cong sẽ hiện dần khi cả làng cùng chơi.'
         )}
-        {players > 1 && players < 20 ? <span> · mới có ít người, đường cong còn thay đổi</span> : null}
+        {players > 1 && players < 20 ? <span> Mới có ít người chơi nên đường cong còn thay đổi.</span> : null}
       </p>
     </div>
   );
@@ -167,7 +167,7 @@ export function MyRecord({ s, krill }: { s: Stats; krill: number }) {
       {all > 0 && (
         <>
           <p className="pst-line">
-            {Math.round((rare / all) * 100)}% đáp án của bạn từ Rất hiếm trở lên · cao nhất {formatAlt(s.best)}
+            {Math.round((rare / all) * 100)}% đáp án của bạn từ Rất hiếm trở lên. Diều từng bay cao nhất {formatAlt(s.best)}.
           </p>
           <div className="pst-bars">
             {TIERS_BY_RANK.map((t) => (

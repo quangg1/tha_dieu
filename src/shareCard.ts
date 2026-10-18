@@ -114,7 +114,7 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   if (d.quote) quoteBubble(ctx, d.quote);
 
   ctx.fillStyle = ink;
-  ctx.font = "900 130px 'Nunito', system-ui, sans-serif";
+  ctx.font = "900 130px 'Grandstander', system-ui, sans-serif";
   ctx.shadowColor = '#e5533d';
   ctx.shadowOffsetY = 8;
   ctx.fillText(d.title, 72, 640);
@@ -123,7 +123,7 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   ctx.fillStyle = 'rgba(255,255,255,.88)';
   ctx.fillText(d.subtitle, 76, 712);
 
-  ctx.font = "900 96px 'Nunito', system-ui, sans-serif";
+  ctx.font = "900 96px 'Grandstander', system-ui, sans-serif";
   ctx.fillStyle = '#ffd66b';
   ctx.fillText(formatAlt(d.altitude), 72, 860);
   ctx.font = "600 38px 'Be Vietnam Pro', system-ui, sans-serif";
@@ -146,7 +146,7 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
     ctx.fill();
     if (ch !== 'x') {
       ctx.fillStyle = '#fff';
-      ctx.font = "900 34px 'Nunito', system-ui, sans-serif";
+      ctx.font = "900 34px 'Grandstander', system-ui, sans-serif";
       ctx.textAlign = 'center';
       ctx.fillText(String(TIERS[Number(ch)].points), x + size / 2, y + size / 2 + 12);
       ctx.textAlign = 'left';

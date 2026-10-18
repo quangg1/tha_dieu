@@ -12,6 +12,7 @@ import { musicLevel, type Summary } from './Game';
 import { track } from '../track';
 import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/PlayerStats';
 import { FeedbackSheet } from '../components/FeedbackSheet';
+import { CheckIcon, FlagIcon } from '../glyphs';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
@@ -190,7 +191,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
           <div>
             <b>{result.players > 1 ? `${result.beaten}%` : '—'}</b>
-            <span>{result.players > 1 ? `cao hơn người chơi · hạng ${result.rank}/${result.players.toLocaleString('vi-VN')}` : 'bạn thả đầu tiên'}</span>
+            <span>{result.players > 1 ? `cao hơn người chơi, hạng ${result.rank}/${result.players.toLocaleString('vi-VN')}` : 'bạn thả đầu tiên'}</span>
           </div>
           {mode === 'daily' && (
             <div>
@@ -259,10 +260,8 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                   <b>{r.krill}</b>
                   {r.tier === 5 && <span className="rv-found">bạn tìm ra!</span>}
                 </div>
-                <span className="rv-meta">
-                  {r.top ? `Cả làng hay nói: ${r.top}` : ''}
-                  {r.mine && r.tier !== 5 ? ` · Bạn: ${r.mine}` : ''}
-                </span>
+                {r.top && <span className="rv-meta">Cả làng hay nói: {r.top}</span>}
+                {r.mine && r.tier !== 5 && <span className="rv-meta">Bạn nói: {r.mine}</span>}
               </div>
             ))}
           </section>
@@ -277,7 +276,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                 <TierIcon tier={r.tier >= 0 ? r.tier : null} size={40} />
                 <span style={{ minWidth: 0 }}>
                   <b className="row-a">{r.display || (r.input ? `“${r.input}”` : 'Hết gió')}</b>
-                  <span className="row-q">{r.tier >= 0 ? `${TIERS[r.tier].name} · ` : ''}{r.prompt}</span>
+                  <span className="row-q">
+                    {r.tier >= 0 && <em className="row-t" style={{ color: TIER_COLOR[r.tier] }}>{TIERS[r.tier].name}</em>} {r.prompt}
+                  </span>
                 </span>
                 <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
                 {r.display && r.tier >= 0 && (
@@ -293,7 +294,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                       flash('Đã báo trưởng làng xem lại đáp án này. Cảm ơn bạn!');
                     }}
                   >
-                    {flagged.has(r.questionId) ? '✓' : '⚑'}
+                    {flagged.has(r.questionId) ? <CheckIcon size={14} /> : <FlagIcon size={14} />}
                   </button>
                 )}
               </div>
@@ -302,8 +303,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         </section>
 
         <section className="card">
-          <div className="card-k">
-            Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'} {board ? `· ${board.players.toLocaleString('vi-VN')} người` : ''}
+          <div className="card-k card-k-row">
+            <span>Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'}</span>
+            {board && <small>{board.players.toLocaleString('vi-VN')} người chơi</small>}
           </div>
           {!saved && (
             <form className="name-row" onSubmit={(e) => { e.preventDefault(); void saveName(); }}>

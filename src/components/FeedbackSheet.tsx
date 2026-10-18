@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { api } from '../api';
 import { playerId } from '../store';
 import { track } from '../track';
+import { CloseIcon } from '../glyphs';
 
 const KINDS: [string, string][] = [
   ['gopy', 'Góp ý chung'],
@@ -33,7 +34,7 @@ export function FeedbackSheet({ onClose, intro }: { onClose: () => void; intro?:
         <div className="sheet-head">
           <h2>Góp ý</h2>
           <button className="sheet-x" onClick={onClose} aria-label="Đóng">
-            ✕
+            <CloseIcon />
           </button>
         </div>
         {state === 'sent' ? (

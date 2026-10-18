@@ -10,6 +10,7 @@ import { THEME_ART } from '../themeArt';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
 import { SKINS, needLabel, progress, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
+import { CheckIcon, CloseIcon, KiteIcon, LetterIcon } from '../glyphs';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 
 /** Pictures of every kite for the collection, built once. */
@@ -194,7 +195,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           </span>
           <span aria-hidden="true">lion</span>
         </h1>
-        <p className="home-sub">cùng bé <b>Bi</b> · gói <b>Thả Diều</b></p>
+        <p className="home-sub">cùng bé <b>Bi</b> chơi gói <b>Thả Diều</b></p>
         <p className="home-tag">Đáp án càng hiếm, diều càng bay cao.</p>
       </div>
 
@@ -225,9 +226,9 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           </>
         ) : (
           <>
-            <p className="home-line">7 câu hỏi · mỗi câu 25 giây gió · mỗi câu một đáp án</p>
+            <p className="home-line">7 câu hỏi, mỗi câu 25 giây gió và một lần trả lời</p>
             <button className="next-btn" onClick={() => go('daily')}>
-              Thả diều <span aria-hidden="true">▲</span>
+              Thả diều <KiteIcon />
             </button>
           </>
         )}
@@ -241,14 +242,14 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
         </div>
         {done && (
           <button className="invite-btn" onClick={invite}>
-            <span aria-hidden="true">✉</span> {invited || 'Thách bạn bè bay cao hơn'}
+            <LetterIcon /> {invited || 'Thách bạn bè bay cao hơn'}
           </button>
         )}
         <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
           <span className="bag-txt">
             <span>Bộ sưu tập</span>
             <b>
-              {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất
+              {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} cánh diều đã mở
             </b>
           </span>
           <span className="bag-kites" aria-hidden="true">
@@ -273,7 +274,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <nav className="drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-head">
               <b><span className="logo-bi-s">Bi</span>lion</b>
-              <button className="sheet-x" onClick={() => setMenu(false)} aria-label="Đóng menu">✕</button>
+              <button className="sheet-x" onClick={() => setMenu(false)} aria-label="Đóng menu"><CloseIcon /></button>
             </div>
             {(
               [
@@ -302,7 +303,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <section className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head">
               <h2>Gói chủ đề</h2>
-              <button className="sheet-x" onClick={() => setThemes(false)} aria-label="Đóng">✕</button>
+              <button className="sheet-x" onClick={() => setThemes(false)} aria-label="Đóng"><CloseIcon /></button>
             </div>
             <p className="sup-note">Cùng một câu đố, những bầu trời mới. Luật chơi giữ nguyên, mỗi gói đổi khung cảnh, nhạc nền và thước đo của chuyến đi.</p>
             <div className="themes">
@@ -320,7 +321,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                     <div className="theme-foot">
                       <small>{t.measure}</small>
                       <button className={`theme-want${wants.includes(t.id) ? ' on' : ''}`} onClick={() => want(t.id)} disabled={wants.includes(t.id)}>
-                        {wants.includes(t.id) ? '✓ Sẽ báo bạn' : 'Muốn chơi gói này'}
+                        {wants.includes(t.id) ? <><CheckIcon /> Sẽ báo bạn</> : 'Muốn chơi gói này'}
                       </button>
                     </div>
                   </div>
@@ -337,7 +338,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             <div className="sheet-head">
               <h2>Bộ sưu tập</h2>
               <button className="sheet-x" onClick={() => setBag(false)} aria-label="Đóng">
-                ✕
+                <CloseIcon />
               </button>
             </div>
             {(() => {
@@ -427,7 +428,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                 </span>
               ))}
             </div>
-            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án độc nhất · {krillFound()} đã tìm ra</div>
+            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án độc nhất: đã tìm ra {krillFound()}</div>
             <div className="album">
               {Object.values(album()).length === 0 && <p className="row-q">Chơi xong một chuyến bay để mở các đáp án độc nhất.</p>}
               {Object.values(album())
@@ -451,7 +452,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <section className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head">
               <h2>Ủng hộ tác giả</h2>
-              <button className="sheet-x" onClick={() => setSheet(null)} aria-label="Đóng">✕</button>
+              <button className="sheet-x" onClick={() => setSheet(null)} aria-label="Đóng"><CloseIcon /></button>
             </div>
             <p className="sup-note">{support.note || 'Bilion miễn phí và không quảng cáo. Nếu bạn thích trò này, một chút ủng hộ giúp làng có thêm câu hỏi và bầu trời mới.'}</p>
             <div className="sup-opts">
@@ -500,7 +501,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             <div className="sheet-head">
               <h2>Cách chơi</h2>
               <button className="sheet-x" onClick={() => setHowto(false)} aria-label="Đóng">
-                ✕
+                <CloseIcon />
               </button>
             </div>
             <ol className="rules">
