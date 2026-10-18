@@ -84,6 +84,40 @@ interface Cand {
  * 2. Without tones, when only one answer is spelled that way. If several are ("de" = dê or dế), the most common is offered for confirmation.
  * 3. A small typo budget on longer words, offered for confirmation.
  */
+/**
+ * Words that name the kind of thing rather than the thing: a shop, an app, a bank, a club. People drop them
+ * ("TikTok" for TikTok Shop) or add them ("ngân hàng MB", "app Shopee"), and either way mean the same answer.
+ */
+const GENERIC_PHRASES = [
+  'ngân hàng', 'ứng dụng', 'câu lạc bộ', 'hãng hàng không', 'trang web', 'cửa hàng', 'siêu thị', 'tập đoàn', 'công ty',
+  'ngan hang', 'ung dung', 'cau lac bo', 'trang web', 'cua hang', 'sieu thi', 'tap doan', 'cong ty',
+];
+// Tones are kept while matching these, so "hãng" (a brand) never swallows "hàng", "hang" or "Hằng".
+// Kind words only say what sort of thing it is: dropping one still names the same answer.
+const KIND_WORDS = new Set(['shop', 'mall', 'app', 'apps', 'online', 'mobile', 'bank', 'airlines', 'airline', 'airways', 'hãng', 'fc', 'clb', 'store', 'official', 'web', 'website', 'group', 'inc']);
+// Product words tell one service of a brand from another (Apple Music, Apple TV, ShopeeFood): without one, ask.
+const PRODUCT_WORDS = new Set(['mart', 'food', 'express', 'music', 'tv', 'play', 'plus']);
+
+/** A name with its generic words removed, compared without tones; '' when too little is left to be sure. */
+function coreOf(name: string, min = 3, product = false) {
+  let t = ' ' + name.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}+#&]+/gu, ' ') + ' ';
+  for (const p of GENERIC_PHRASES) t = t.split(` ${p} `).join(' ');
+  const kept = t.split(' ').filter((w) => w && !KIND_WORDS.has(w) && !(product && PRODUCT_WORDS.has(w)));
+  const core = norm(kept.join(''));
+  return core.length >= min ? core : '';
+}
+
+/** Questions about brands, shops, apps and clubs, where a generic word on a name changes nothing. */
+const BRAND_QUESTIONS = new Set([
+  'pop-mua-sam-online', 'pop-goi-xe', 'pop-ngan-hang', 'pop-hang-bay', 'pop-clb-bong-da', 'pop-ngoai-hang-anh', 'pop-sieu-thi',
+  'pop-do-an-nhanh', 'pop-chuoi-do-uong', 'pop-app-xem-phim', 'pop-app-hoc', 'pop-mang-xa-hoi', 'pop-game', 'pop-dien-thoai',
+  'pop-nha-mang', 'pop-thoi-trang', 'pop-my-pham', 'pop-my-pham-han', 'pop-hang-xa-xi', 'pop-mi-goi', 'pop-banh-keo',
+  'pop-nuoc-giai-khat', 'pop-hang-sua', 'pop-xe-may', 'kn-hangxe', 'kn-hangcn', 'kn-app', 'n-giay-hieu',
+]);
+export function namesBrands(questionId: string) {
+  return BRAND_QUESTIONS.has(questionId);
+}
+
 /** Whether the player typed Vietnamese tone or vowel marks (or đ). */
 function marked(s: string) {
   return /[\u00c0-\u1ef9]/.test(s.normalize('NFC'));
@@ -93,10 +127,15 @@ export class Matcher {
   private readonly exactMap = new Map<string, Cand>();
   private readonly strippedMap = new Map<string, Cand>();
   private readonly loose = new Map<string, Cand[]>();
+  /** Names with their generic words taken off ("TikTok Shop" → "tiktok", "Ngân hàng MB" → "mb"). */
+  private readonly core = new Map<string, Cand[]>();
+  /** The same with product words off too ("Apple Music" → "apple"): a match here is offered, not taken. */
+  private readonly productCore = new Map<string, Cand[]>();
 
   constructor(
     private readonly strip: string[],
     entries: { key: string; aliases: string[]; priorTier?: number }[],
+    private readonly brands = false,
   ) {
     // Main names first, so an alias never takes a word that is another answer's own name.
     const sorted = [...entries];
@@ -116,6 +155,18 @@ export class Matcher {
     const rank = tier * 10 + level;
     if (!this.exactMap.has(s)) this.exactMap.set(s, { key, rank });
     this.addLoose(norm(name), key, rank);
+    if (this.brands) {
+      const add = (map: Map<string, Cand[]>, c: string) => {
+        if (!c) return;
+        const list = map.get(c) ?? [];
+        const prev = list.find((x) => x.key === key);
+        if (prev) prev.rank = Math.min(prev.rank, rank);
+        else list.push({ key, rank });
+        map.set(c, list);
+      };
+      add(this.core, coreOf(name));
+      add(this.productCore, coreOf(name, 3, true));
+    }
     const st = stripWords(name, this.strip);
     if (st) {
       const ss = soft(st);
@@ -153,6 +204,25 @@ export class Matcher {
       const keys = new Set(list.map((c) => c.key));
       const best = [...list].sort((a, b) => a.rank - b.rank)[0];
       return { key: best.key, exact: keys.size === 1 };
+    }
+    // The same name with or without a generic word: "TikTok" for TikTok Shop, "app Shopee", "CLB Arsenal".
+    const c = this.brands ? coreOf(raw) : '';
+    const byCore = c ? this.core.get(c) : undefined;
+    if (byCore?.length) {
+      const keys = new Set(byCore.map((x) => x.key));
+      const top = [...byCore].sort((a, b) => a.rank - b.rank)[0];
+      return { key: top.key, exact: keys.size === 1 };
+    }
+    const byProduct = c ? this.productCore.get(c) : undefined;
+    if (byProduct?.length) return { key: [...byProduct].sort((a, b) => a.rank - b.rank)[0].key, exact: false };
+    // A short name once the generic word is off ("ngân hàng MB" → MB): only an exact known name counts.
+    const short = this.brands ? coreOf(raw, 2) : '';
+    if (short && short !== norm(raw)) {
+      const list = this.loose.get(short);
+      if (list?.length) {
+        const keys = new Set(list.map((x) => x.key));
+        return { key: [...list].sort((a, b) => a.rank - b.rank)[0].key, exact: keys.size === 1 };
+      }
     }
     let best: Cand | null = null;
     let bestD = Infinity;

@@ -46,6 +46,20 @@ describe('matching', () => {
     expect(display('trai-cay', 'cmm')).toBeNull();
     expect(display('loai-chim', 'chim lửa')).toBeNull();
   });
+  it('reads brand names with or without their kind word', () => {
+    const m = new Matcher([], [
+      { key: 'tts', aliases: ['TikTok Shop'] },
+      { key: 'mb', aliases: ['MB Bank', 'MB'] },
+      { key: 'am', aliases: ['Apple Music'] },
+      { key: 'atv', aliases: ['Apple TV+'] },
+    ], true);
+    expect(m.match('tiktok')).toEqual({ key: 'tts', exact: true });
+    expect(m.match('ngân hàng MB')).toEqual({ key: 'mb', exact: true });
+    expect(m.match('Apple')?.exact).toBe(false);
+    const plain = new Matcher([], [{ key: 'hang', aliases: ['Hang Én'] }, { key: 'giao', aliases: ['Giao hàng'] }]);
+    expect(plain.match('Én')).toBeNull();
+    expect(plain.match('giao')).toBeNull();
+  });
   it('does not offer a different name that only looks close once the tones are gone', () => {
     const m = new Matcher(['sông'], [{ key: 'songhong', aliases: ['Sông Hồng', 'Sông Cái', 'Hồng Hà'] }]);
     expect(m.match('Hoàng Hà')).toBeNull();

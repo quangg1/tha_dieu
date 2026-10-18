@@ -345,5 +345,5 @@ export const MORE4: Record<string, string[]> = {
   'pop-ngoai-hang-anh': T('Liverpool|LFC|Lữ đoàn đỏ, Arsenal|Pháo thủ, Chelsea|The Blues, Manchester City|MC|Man xanh, Tottenham|Gà trống, Manchester United|Man United|Quỷ đỏ, Newcastle United|Chích chòe, West Ham United|Búa tạ, Aston Villa|Villa, Everton|The Toffees', ''),
   'pop-nha-mang': T('Mobifone|Mobi, Vinaphone|Vina, Viettel|Viettel Telecom', ''),
   'pop-app-xem-phim': T('YouTube|YT|Ytb|YouTube Premium, FPT Play|FPTPlay', ''),
-  'pop-mua-sam-online': T('Lazada|Laz, Điện Máy Xanh|ĐMX', ''),
+  'pop-mua-sam-online': T('Lazada|Laz, Điện Máy Xanh|ĐMX, TikTok Shop|TikTok|Tik Tok, Facebook Marketplace|FB', ''),
 };

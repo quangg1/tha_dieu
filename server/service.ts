@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
 import type { NightVerdict } from '../shared/book/night-verdicts.js';
-import { Matcher } from '../shared/match.js';
+import { Matcher, namesBrands } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
   CUNG_TRANG,
@@ -237,7 +237,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
       if (!unvouched(answers.get(key)!)) entries.push({ key, aliases: [l.display], priorTier: l.prior_tier });
     }
   }
-  const matcher = new Matcher(base.strip, entries.filter((e) => answers.has(e.key)));
+  const matcher = new Matcher(base.strip, entries.filter((e) => answers.has(e.key)), namesBrands(base.id));
   const al = await db.query<{ alias: string; key: string }>(`select alias, key from aliases where question_id=$1`, [id]);
   for (const a of al) {
     const key = rekey.get(a.key) ?? a.key;
