@@ -1243,4 +1243,16 @@ export default `
 2 Nespresso
 2 Philips|Philips Hue
 2 Xiaomi Yeelight|Yeelight
+@ hangxe
+2 VinFast|VF
+2 Lamborghini|Lambo
+2 Mitsubishi|Mitsu
+2 Hyundai|Hyundai Thành Công
+@ hangcn
+2 Samsung|SS
+2 HP|Hewlett-Packard
+2 Xiaomi|Mi
+2 Microsoft|MS
+2 Apple|Táo khuyết
+@
 `;
