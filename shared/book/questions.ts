@@ -9,6 +9,7 @@ import { NARROW } from './narrow.js';
 import { MORE3 } from './night.js';
 import { MORE4 } from './more4.js';
 import { LEXICONS } from './index.js';
+import { foldColours } from './prune.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
 
@@ -439,7 +440,7 @@ function assemble() {
     else dropped.push(spec.id);
   }
   out.push(...NUMBER_QUESTIONS.map((n) => ({ ...n, traps: resolveTraps(n.answers, TRAPS[n.id]) })));
-  return { questions: out, dropped };
+  return { questions: out.map(foldColours), dropped };
 }
 
 const assembled = assemble();
