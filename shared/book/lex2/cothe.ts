@@ -275,4 +275,51 @@ export default `
 2 Hạ bì
 2 Lớp mỡ dưới da
 2 Mạch đập|Mạch
+
+@
+@ doi
+3 Hông #
+3 Mông #
+3 Lòng bàn tay #
+3 Lòng bàn chân #
+3 Bàn tay #
+3 Bàn chân #
+3 Cẳng tay #
+3 Cẳng chân #
+3 Mắt cá chân #
+3 Hốc mắt #
+3 Lông mi #
+3 Con ngươi|Đồng tử #
+3 Tròng mắt #
+3 Võng mạc #
+3 Thủy tinh thể #
+3 Màng nhĩ #
+3 Vành tai #
+3 Ống tai #
+3 Xương sườn cụt #
+3 Xương bả vai #
+3 Xương mác #
+3 Xương chày #
+3 Xương quay #
+3 Xương trụ #
+3 Xương cánh tay #
+3 Xương chậu #
+3 Buồng trứng #
+3 Tinh hoàn #
+3 Vòi trứng|Ống dẫn trứng #
+3 Niệu quản #
+3 Tuyến vú|Bầu ngực #
+3 Núm vú #
+3 Tuyến lệ #
+3 Tuyến mang tai #
+3 Amidan #
+3 Phế quản #
+3 Thùy phổi #
+3 Bán cầu não #
+3 Gò má #
+2 Cơ tứ đầu đùi #
+2 Cơ nhị đầu #
+2 Gân Achilles #
+2 Dây thanh quản|Dây thanh âm #
+@
 `;

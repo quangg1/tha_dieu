@@ -1696,4 +1696,84 @@ export default `
 1 Cây cỏ đỏ|Rooibos
 1 Cây mate|Yerba mate
 1 Cây moringa|Moringa
+
+@
+@ tim
+3 Khoai môn #
+3 Khoai lang tím #
+3 Củ từ tím #
+3 Mận tím|Mận hậu #
+3 Sung #
+3 Ô liu đen #
+3 Nho mẫu đơn #
+3 Dâu tằm tím #
+3 Sim rừng #
+3 Rau dền tím #
+3 Rau muống tím #
+3 Súp lơ tím #
+3 Ớt tím #
+3 Ngô tím #
+3 Gạo tím|Gạo than #
+3 Đậu bắp tím #
+3 Hoa oải hương|Lavender #
+3 Hoa thạch thảo tím #
+3 Hoa linh lan tím #
+3 Hoa tường vi tím #
+3 Hoa thanh tước|Delphinium #
+3 Hoa dừa cạn tím #
+3 Hoa phong lữ tím #
+3 Hoa tím Phi|Violet châu Phi #
+3 Hoa lan phi điệp #
+3 Hoa đinh hương #
+3 Hoa hành tím #
+3 Hoa cúc thạch thảo #
+2 Hoa păng xê tím #
+2 Hoa forget-me-not #
+2 Hoa cẩm chướng tím #
+2 Hoa phi yến tím #
+@ hoa do
+3 Hoa trạng nguyên đỏ #
+3 Hoa poinsettia #
+3 Hoa mẫu đơn đỏ #
+3 Hoa anh thảo đỏ #
+3 Hoa ngũ sắc đỏ #
+3 Hoa móng tay đỏ #
+3 Hoa vạn thọ đỏ #
+3 Hoa dong riềng đỏ #
+3 Hoa đỗ quyên đỏ #
+3 Hoa bông phấn đỏ #
+3 Hoa vông nem #
+3 Hoa dừa cạn đỏ #
+3 Hoa hồng gai đỏ #
+3 Hoa salvia đỏ|Hoa xác pháo #
+2 Hoa thiên điểu đỏ #
+2 Hoa trà my đỏ #
+@ hoa vang
+3 Hoa cúc mâm xôi #
+3 Hoa cúc họa mi vàng #
+3 Hoa hoàng yến #
+3 Hoa huỳnh anh #
+3 Hoa ngọc lan vàng #
+3 Hoa sứ vàng #
+3 Hoa bò cạp vàng #
+3 Hoa lim xẹt|Hoa điệp vàng #
+3 Hoa mai địa thảo #
+3 Hoa cải dầu #
+3 Hoa bí ngô #
+3 Hoa dưa chuột #
+3 Hoa kim châm|Hoa hiên #
+3 Hoa vạn thọ vàng #
+3 Hoa lan vũ nữ #
+3 Hoa lan hoàng thảo vàng #
+3 Hoa cúc kim tiền #
+3 Hoa mõm sói vàng #
+3 Hoa hồng leo vàng #
+3 Hoa nguyệt quế vàng #
+3 Hoa tầm xuân vàng #
+3 Hoa anh thảo vàng #
+3 Hoa xuyến chi vàng #
+2 Hoa mai chiếu thủy vàng #
+2 Hoa tuyết điểm vàng #
+2 Hoa thiên lý #
+@
 `;

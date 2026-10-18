@@ -408,4 +408,93 @@ export default `
 2 Thợ làm đá hoa cương
 2 Thợ cắt tóc nam|Thợ cạo râu
 2 Thợ làm nail|Thợ làm móng
+
+@
+@ dongphuc
+3 Học sinh #
+3 Sinh viên trường quân đội #
+3 Công nhân may|Công nhân nhà máy #
+3 Nhân viên siêu thị #
+3 Nhân viên cửa hàng tiện lợi #
+3 Nhân viên thức ăn nhanh #
+3 Nhân viên giao hàng #
+3 Tài xế công nghệ #
+3 Tài xế taxi #
+3 Tài xế xe buýt #
+3 Phụ xe buýt #
+3 Nhân viên soát vé #
+3 Nhân viên đường sắt #
+3 Nhân viên hàng không #
+3 Nhân viên an ninh sân bay #
+3 Hải quan #
+3 Kiểm sát viên #
+3 Thẩm phán #
+3 Luật sư #
+3 Quản lý thị trường #
+3 Thanh tra giao thông #
+3 Kiểm lâm viên #
+3 Công an phường #
+3 Cảnh sát cơ động #
+3 Dân quân tự vệ #
+3 Linh mục #
+3 Nhà sư #
+3 Phi hành gia #
+3 Thủy thủ đoàn tàu biển #
+3 Thợ lặn #
+3 Đầu bếp khách sạn #
+3 Nhân viên spa #
+3 Kỹ thuật viên phòng thí nghiệm #
+3 Nhân viên điện lực|Thợ điện lực #
+3 Công nhân vệ sinh môi trường #
+3 Nhân viên y tế #
+3 Hướng dẫn viên du lịch #
+3 Trọng tài bóng đá #
+3 Cầu thủ #
+3 Vận động viên #
+2 Cấp dưỡng #
+2 Người hầu bàn khách sạn|Nhân viên buồng phòng #
+2 Nhân viên cây xăng #
+2 Nhân viên rạp chiếu phim #
+@ ngoaitroi
+3 Thợ cắt tỉa cây|Công nhân cây xanh #
+3 Công nhân làm đường #
+3 Công nhân cầu đường #
+3 Thợ hàn trên cao #
+3 Thợ lắp kính nhà cao tầng #
+3 Công nhân điện lực|Thợ đường dây #
+3 Lính gác|Bộ đội canh gác #
+3 Shipper|Người giao hàng #
+3 Tài xế xe ôm #
+3 Người bán hàng rong #
+3 Người bán vé số #
+3 Thợ đánh giày #
+3 Người thu mua phế liệu|Đồng nát #
+3 Thợ sửa xe đạp vỉa hè #
+3 Ngư dân đánh bắt xa bờ #
+3 Người chèo đò|Lái đò #
+3 Thợ mỏ lộ thiên #
+3 Công nhân cao su #
+3 Người hái chè #
+3 Người trồng cà phê #
+3 Người làm muối #
+3 Người làm rẫy #
+3 Người chăn trâu #
+3 Người chăn dê #
+3 Người chăn cừu #
+3 Hướng dẫn viên leo núi #
+3 Porter|Người khuân vác leo núi #
+3 Cứu hộ bãi biển #
+3 Nhà khảo cổ #
+3 Nhà khí tượng #
+3 Nhiếp ảnh gia thiên nhiên #
+3 Phóng viên chiến trường #
+3 Trắc địa viên #
+3 Người đưa thư #
+3 Lính thủy đánh bộ #
+3 Kiểm ngư #
+3 Cảnh sát cơ động #
+2 Thợ lặn bắt hải sản #
+2 Người nuôi cá lồng bè #
+2 Người khai thác yến #
+@
 `;

@@ -551,4 +551,68 @@ export default `
 2 Sữa trâu #
 2 Sữa lạc đà #
 @
+
+@
+@ nuocep
+3 Nước ép cà chua #
+3 Nước ép xoài #
+3 Nước ép đào #
+3 Nước ép dâu #
+3 Nước ép cóc #
+3 Nước ép mãng cầu #
+3 Nước ép thanh long #
+3 Nước ép dưa leo #
+3 Nước ép táo xanh #
+3 Nước ép cam cà rốt #
+3 Nước ép gừng #
+3 Nước ép chanh leo #
+3 Nước ép việt quất #
+3 Nước ép nha đam #
+3 Nước ép rau cải kale #
+3 Nước ép cải bó xôi #
+3 Nước ép mãng cầu xiêm #
+3 Nước ép ổi hồng #
+3 Nước ép dưa lưới #
+3 Nước ép me #
+3 Nước ép khế #
+3 Nước ép bí đao #
+3 Nước ép đu đủ #
+3 Nước ép mận #
+3 Nước ép quýt #
+2 Nước ép cam bưởi #
+2 Nước ép táo cần tây #
+2 Nước ép detox #
+2 Nước ép sơ ri #
+2 Nước ép nho đen #
+@ sinhto
+3 Sinh tố dứa #
+3 Sinh tố ổi #
+3 Sinh tố kiwi #
+3 Sinh tố dâu chuối #
+3 Sinh tố bơ dừa #
+3 Sinh tố bơ sầu riêng #
+3 Sinh tố mãng cầu xiêm #
+3 Sinh tố cam #
+3 Sinh tố táo #
+3 Sinh tố lê #
+3 Sinh tố nho #
+3 Sinh tố dừa #
+3 Sinh tố khoai môn #
+3 Sinh tố yến mạch #
+3 Sinh tố chuối yến mạch #
+3 Sinh tố đậu xanh #
+3 Sinh tố cải bó xôi #
+3 Sinh tố cà phê #
+3 Sinh tố socola #
+3 Sinh tố mâm xôi #
+3 Sinh tố hạt chia #
+3 Sinh tố sữa chua #
+3 Sinh tố mít dừa #
+3 Sinh tố dưa lưới #
+3 Sinh tố vú sữa #
+2 Sinh tố xoài chanh dây #
+2 Sinh tố dâu tằm #
+2 Sinh tố nhãn #
+2 Smoothie bowl #
+@
 `;
