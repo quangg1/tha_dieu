@@ -20,7 +20,8 @@ export interface Crowd {
 export interface Reveal {
   questionId: string;
   prompt: string;
-  krill: string;
+  /** The hidden answer: null until midnight, unless this player found it. */
+  krill: string | null;
   top: string;
   mine: string | null;
   tier: number;
@@ -51,6 +52,8 @@ export interface FinishResult {
   replay?: boolean;
   /** The day is over and the scores are final. */
   settled?: boolean;
+  /** The name typed was kept off the board (rude, or muted by the village head). */
+  nameRefused?: boolean;
   reveal?: Reveal[];
   /** The day's scores in buckets of w points, for the curve. */
   dist?: { w: number; counts: number[] };
@@ -109,6 +112,7 @@ export const api = {
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
   finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string; runSince?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
+  yesterday: (playerId: string) => call<{ day: string; reveal: Reveal[] }>(`yesterday?playerId=${encodeURIComponent(playerId)}`),
   report: (b: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) => call<{ ok: boolean }>('report', b),
   gate: (s: string) => call<{ ok: boolean }>(`gate?s=${encodeURIComponent(s)}`),
   feedback: (b: { kind: string; message: string; contact?: string; playerId?: string }) => call<{ ok: boolean }>('feedback', b),
@@ -138,5 +142,7 @@ export const api = {
     decide: (token: string, b: { questionId: string; inputKey: string; decision: 'accept' | 'dismiss'; display?: string; tier?: number }) =>
       call<{ ok: boolean }>('admin/decide', b, { 'x-admin-token': token }),
     setup: (token: string) => call<{ questions: number }>('setup', {}, { 'x-admin-token': token }),
+    names: (token: string) => call<{ names: { player_id: string; name: string | null; score: number; muted: boolean }[] }>('admin/names', undefined, { 'x-admin-token': token }),
+    mute: (token: string, playerId: string) => call<{ ok: boolean }>('admin/mute', { playerId }, { 'x-admin-token': token }),
   },
 };

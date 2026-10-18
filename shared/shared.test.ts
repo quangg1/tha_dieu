@@ -124,3 +124,14 @@ describe('laps of the sky', () => {
     expect(lapOf(altitudeFor(820, 'daily')).lap).toBe(1);
   });
 });
+
+import { boardName, rudeName } from './names.js';
+
+describe('board names', () => {
+  it('refuses rude names, with or without tones, and keeps innocent ones', () => {
+    for (const bad of ['đồ ngu', 'Đm mày', 'dit me', 'con cac', 'F u c k', 'vcl luôn', 'óc chó']) expect(rudeName(bad), bad).toBe(true);
+    for (const ok of ['Nguyễn Văn An', 'Đeo kính', 'Các bạn ơi', 'Cặp đôi', 'Lan Chi', 'Bé Bi', 'Hoàng Anh Tuấn']) expect(rudeName(ok), ok).toBe(false);
+    expect(boardName('  Bé   Bi  ')).toBe('Bé Bi');
+    expect(boardName('đồ ngu')).toBeNull();
+  });
+});

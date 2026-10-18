@@ -150,6 +150,15 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return S.finish(db, { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), name: body.name as string | undefined, dev, since: typeof body.since === 'string' ? body.since : undefined, runSince: typeof body.runSince === 'string' ? body.runSince : undefined });
     },
   },
+  // Yesterday's answers, the hidden ones included: they open only once the day is over.
+  yesterday: {
+    method: 'GET',
+    cache: () => 'private, max-age=300',
+    async run({ db, query }) {
+      const pid = query.get('playerId');
+      return S.yesterday(db, pid && /^[A-Za-z0-9_-]{8,64}$/.test(pid) ? pid : undefined);
+    },
+  },
   board: {
     method: 'GET',
     async run({ db, query }) {
@@ -230,6 +239,21 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     admin: true,
     async run({ db, body }) {
       return S.setSupport(db, body as Partial<S.Support>);
+    },
+  },
+  // Names on today's board, to take a rude one off.
+  'admin/names': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return { names: await S.adminBoard(db, S.vnToday()) };
+    },
+  },
+  'admin/mute': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.mutePlayer(db, S.checkPlayer(body.playerId));
     },
   },
   'admin/insights': {
@@ -314,7 +338,8 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
   if (!r) return send(res, 404, { error: 'Không có đường dẫn này.' });
   if (req.method !== r.method) return send(res, 405, { error: 'Sai phương thức.' });
   const token = process.env.ADMIN_TOKEN;
-  const admin = !!token && req.headers['x-admin-token'] === token;
+  const sent = Buffer.from(String(req.headers['x-admin-token'] ?? ''));
+  const admin = !!token && sent.length === Buffer.byteLength(token) && timingSafeEqual(sent, Buffer.from(token));
   if (r.admin && !admin) return send(res, 401, { error: 'Cần mã quản trị.' });
   try {
     const body = req.method === 'POST' ? await readBody(req) : {};

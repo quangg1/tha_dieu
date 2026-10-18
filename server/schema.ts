@@ -192,4 +192,13 @@ create table if not exists reports (
   status text not null default 'open',
   primary key (question_id, input_key, kind)
 );
+
+-- Players whose names the village head took off the board.
+create table if not exists muted (
+  player_id text primary key,
+  at timestamptz not null default now()
+);
+
+-- The day's scores read every turn of one day; the primary key starts with the player.
+create index if not exists turns_day on turns (day, mode);
 `;

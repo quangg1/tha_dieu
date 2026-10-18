@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quyền riêng tư · Bilion</title>
+<meta name="description" content="Bilion lưu gì về người chơi, để làm gì, và cách xóa." />
+<link rel="icon" href="/icon.svg" />
+<style>
+  :root { --bg: #eef6fb; --paper: #fff; --ink: #0f2747; --muted: #4a5f7d; --line: #d5e3ef; --accent: #e5533d; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0d1a2c; --paper: #13243b; --ink: #e8f0f8; --muted: #a7b8cc; --line: #24395a; --accent: #ff8a6b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 28px 16px 48px; }
+  a { color: var(--accent); }
+  .back { display: inline-block; margin-bottom: 18px; font-weight: 600; text-decoration: none; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin: 0 0 14px; }
+  h2 { font-size: 18px; margin: 0 0 8px; }
+  ul { margin: 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  p { margin: 6px 0; }
+  .small { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/">← Về Bilion</a>
+  <h1>Quyền riêng tư</h1>
+  <p class="lede">Bilion là trò đố chữ chơi thử, miễn phí, không quảng cáo và không bán dữ liệu của ai. Trang này nói rõ trò chơi lưu gì và để làm gì.</p>
+
+  <section>
+    <h2>Không cần tài khoản</h2>
+    <p>Lần đầu bạn mở Bilion, trình duyệt tạo một mã người chơi ngẫu nhiên và giữ nó trong bộ nhớ của trình duyệt. Mã này không gắn với tên, email hay số điện thoại của bạn. Chuỗi ngày chơi, bộ sưu tập diều và tên bạn chọn cũng nằm trong trình duyệt đó.</p>
+  </section>
+
+  <section>
+    <h2>Máy chủ lưu gì</h2>
+    <ul>
+      <li><b>Lượt chơi:</b> câu bạn trả lời, đáp án, điểm và độ cao, gắn với mã người chơi. Đây là thứ làm nên bảng diều và độ hiếm của từng đáp án.</li>
+      <li><b>Tên trên bảng diều</b> nếu bạn tự đặt. Tên thô tục bị chặn, và người quản lý có thể ẩn một tên.</li>
+      <li><b>Dấu vết chống gian lận:</b> một chuỗi băm một chiều từ địa chỉ mạng và loại trình duyệt, để giới hạn spam và nhận ra lượt chơi lại bằng tab ẩn danh. Địa chỉ mạng gốc không được lưu.</li>
+      <li><b>Sự kiện sử dụng</b> (mở trang, bắt đầu và kết thúc chuyến bay…), gắn với mã người chơi ngẫu nhiên, để biết câu nào khó, chỗ nào người chơi bỏ cuộc. Giữ tối đa 45 ngày.</li>
+      <li><b>Góp ý</b> bạn gửi, kèm cách liên hệ nếu bạn tự điền.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Bên thứ ba</h2>
+    <ul>
+      <li><b>Trọng tài AI:</b> khi bạn gõ một đáp án sổ làng chưa biết, đúng chữ bạn gõ và câu hỏi được gửi tới dịch vụ AI (Google Gemini hoặc Anthropic Claude) để xem có đúng không. Không gửi mã người chơi hay thông tin nào khác về bạn.</li>
+      <li><b>Wikidata</b> được hỏi với đúng chữ bạn gõ cho một số câu có danh sách chuẩn.</li>
+      <li><b>Vercel</b> chạy trang web và đếm lượt xem ẩn danh, không dùng cookie theo dõi. Dữ liệu trò chơi nằm trong cơ sở dữ liệu Postgres do Neon vận hành.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Xóa dữ liệu</h2>
+    <p>Xóa dữ liệu trang web của Bilion trong trình duyệt là xóa mã người chơi và mọi thứ lưu trên máy. Muốn xóa cả lượt chơi trên máy chủ, gửi yêu cầu qua mục <b>Góp ý</b> trong game, kèm cách liên hệ, người làm game sẽ xóa và báo lại cho bạn.</p>
+  </section>
+
+  <p class="small">Cập nhật ngày 19/10/2026. Khi Bilion có đăng nhập, trang này sẽ được cập nhật trước.</p>
+</main>
+</body>
+</html>

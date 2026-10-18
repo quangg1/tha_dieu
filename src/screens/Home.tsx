@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useState, type ReactNode } from 'react';
 import { DAY_BANDS, MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
-import { api, type Support } from '../api';
+import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, readChallenge } from '../shareCard';
@@ -12,12 +12,13 @@ import { SKINS, needLabel, progress, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
 import { CheckIcon, CloseIcon, KiteIcon, LetterIcon } from '../glyphs';
 import { FeedbackSheet } from '../components/FeedbackSheet';
+import { RemindSheet } from '../components/RemindSheet';
 
 /** Pictures of every kite for the collection, built once. */
 const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
 const KITE_HERO: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id, { flutes: true }))]));
 import { track } from '../track';
-import { album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
+import { addToAlbum, album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
 /** A friend's result from a challenge link, read once and kept for this visit. */
@@ -76,7 +77,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
   };
   const [skin, setSkin] = useState(prefs.skin);
   const [invited, setInvited] = useState('');
-  const [sheet, setSheet] = useState<'feedback' | 'support' | null>(null);
+  const [sheet, setSheet] = useState<'feedback' | 'support' | 'remind' | null>(null);
   const [support, setSupport] = useState<Support | null>(null);
 
   useEffect(() => {
@@ -88,6 +89,24 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     if (!stats().best && !stats().nightBest) return;
     api.notices(playerId()).then((r) => setLearned(r.learned)).catch(() => {});
   }, []);
+  // Yesterday's hidden answers open after midnight: into the collection, and once on the home screen.
+  const [yday, setYday] = useState<{ day: string; reveal: Reveal[] } | null>(null);
+  useEffect(() => {
+    if (!stats().best) return;
+    api
+      .yesterday(playerId())
+      .then((r) => {
+        if (!r.reveal.length) return;
+        const played = r.reveal.some((x) => x.mine || x.tier >= 0);
+        if (played) addToAlbum(r.day, r.reveal);
+        if (played && prefs.ydaySeen !== r.day) setYday(r);
+      })
+      .catch(() => {});
+  }, []);
+  const closeYday = () => {
+    if (yday) prefs.ydaySeen = yday.day;
+    setYday(null);
+  };
   const canSupport = !!support && !!(support.momo || support.qr || support.card || support.account);
   const [copied, setCopied] = useState(false);
   const [payTab, setPayTab] = useState<'bank' | 'qr'>('bank');
@@ -187,6 +206,19 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
         </div>
       )}
 
+      {yday && (
+        <div className="challenge yday">
+          <span className="challenge-k">Đáp án độc nhất hôm qua</span>
+          {yday.reveal.map((r) => (
+            <p key={r.questionId} className="yday-row">
+              <span>{r.prompt}</span> <b>{r.krill}</b>
+              {r.tier === 5 && <em className="rv-found"> bạn tìm ra!</em>}
+            </p>
+          ))}
+          <button className="toast-link" onClick={closeYday}>Đã xem</button>
+        </div>
+      )}
+
       <div className="home-hero">
         <span className="home-kicker">Đố chữ mỗi ngày</span>
         <span className="beta-tag">Bản chơi thử</span>
@@ -260,6 +292,8 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           </span>
         </button>
         <div className="home-foot">
+          <button className="link-btn" onClick={() => { setSheet('remind'); track('remind_open'); }} aria-haspopup="dialog">Nhắc chơi</button>
+          <span aria-hidden="true">·</span>
           <button className="link-btn" onClick={() => setSheet('feedback')} aria-haspopup="dialog">Góp ý</button>
           {canSupport && (
             <>
@@ -283,8 +317,10 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                 ['Gói chủ đề', 'Tết, Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
                 ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
                 ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
+                ['Nhắc chơi mỗi ngày', 'Thêm lời nhắc vào lịch của bạn', () => { setSheet('remind'); track('remind_open'); }],
                 ['Góp ý', 'Báo lỗi, đề xuất câu hỏi', () => setSheet('feedback')],
                 ...(canSupport ? [['Ủng hộ tác giả', 'Chuyển khoản hoặc MoMo', () => { setSheet('support'); track('support'); }]] : []),
+                ['Quyền riêng tư', 'Bilion lưu gì về bạn', () => { location.href = '/rieng-tu.html'; }],
               ] as [string, string, () => void, string?][]
             ).map(([label, sub, act, tag]) => (
               <button key={label} className="drawer-item" onClick={() => { setMenu(false); act(); }}>
@@ -431,7 +467,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
             </div>
             <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án độc nhất: đã tìm ra {krillFound()}</div>
             <div className="album">
-              {Object.values(album()).length === 0 && <p className="row-q">Chơi xong một chuyến bay để mở các đáp án độc nhất.</p>}
+              {Object.values(album()).length === 0 && <p className="row-q">Đáp án độc nhất của mỗi ngày mở lúc nửa đêm, sau khi cả làng đã bay xong.</p>}
               {Object.values(album())
                 .sort((a, b) => (a.day < b.day ? 1 : -1))
                 .slice(0, 60)
@@ -447,6 +483,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
       )}
 
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
+      {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}
 
       {sheet === 'support' && support && (
         <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Ủng hộ tác giả" onClick={() => setSheet(null)}>

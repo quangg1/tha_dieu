@@ -56,6 +56,13 @@ export const prefs = {
   set coached(v: boolean) {
     write('coached', v);
   },
+  /** The day whose hidden answers the home screen last showed. */
+  get ydaySeen() {
+    return read('ydaySeen', '');
+  },
+  set ydaySeen(v: string) {
+    write('ydaySeen', v);
+  },
   get skin() {
     return read('skin', 'son');
   },
@@ -78,11 +85,13 @@ export function album(): Record<string, AlbumEntry> {
   return read<Record<string, AlbumEntry>>('album', {});
 }
 
-export function addToAlbum(day: string, items: { questionId: string; prompt: string; krill: string; found: boolean }[]) {
+/** Adds a day's answers to the collection; a hidden answer still locked (null, before midnight) waits for later. */
+export function addToAlbum(day: string, items: { questionId: string; prompt: string; krill: string | null; tier: number }[]) {
   const a = album();
   for (const it of items) {
+    if (!it.krill) continue;
     const k = `${day}:${it.questionId}`;
-    a[k] = { day, prompt: it.prompt, krill: it.krill, found: it.found || !!a[k]?.found };
+    a[k] = { day, prompt: it.prompt, krill: it.krill, found: it.tier === 5 || !!a[k]?.found };
   }
   write('album', a);
 }

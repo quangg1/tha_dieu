@@ -7,6 +7,7 @@ import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, renderCard, shareCard } from '../shareCard';
 import { bragLine, momentLine, nightVerdict, seedOf, tauntLine } from '../quips';
 import { skinById } from '../skins';
+import { rudeName } from '../../shared/names.js';
 import { addToAlbum, krillFound, playerId, playerSince, prefs, saveToday, stats, today, vnDay } from '../store';
 import { musicLevel, type Summary } from './Game';
 import { track } from '../track';
@@ -69,7 +70,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   }, []);
 
   useEffect(() => {
-    if (mode === 'daily' && result.reveal) addToAlbum(day, result.reveal.map((r) => ({ questionId: r.questionId, prompt: r.prompt, krill: r.krill, found: r.tier === 5 })));
+    if (mode === 'daily' && result.reveal) addToAlbum(day, result.reveal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.reveal]);
 
@@ -161,9 +162,17 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const saveName = async () => {
     const n = name.trim().slice(0, 24);
     if (!n) return;
-    prefs.name = n;
+    if (rudeName(n)) {
+      flash('Tên này không lên bảng được. Chọn một tên khác nhé.');
+      return;
+    }
     try {
-      await api.finish({ playerId: pid, day, mode, name: n, since: playerSince(), runSince: summary.runSince });
+      const r = await api.finish({ playerId: pid, day, mode, name: n, since: playerSince(), runSince: summary.runSince });
+      if (r.nameRefused) {
+        flash('Tên này không lên bảng được. Chọn một tên khác nhé.');
+        return;
+      }
+      prefs.name = n;
       setSaved(true);
       void loadBoard();
     } catch (e) {
@@ -252,12 +261,15 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         {mode === 'daily' && result.reveal && (
           <section className="card reveal-card">
             <div className="card-k">Đáp án độc nhất hôm nay</div>
+            {result.reveal.some((r) => !r.krill) && (
+              <p className="rv-meta rv-lock-note">Đáp án độc nhất bạn chưa tìm ra sẽ mở lúc nửa đêm, để không ai chuyền tay cho người chơi sau. Sáng mai mở Bilion là thấy.</p>
+            )}
             {result.reveal.map((r) => (
               <div key={r.questionId} className="rv">
                 <span className="rv-q">{r.prompt}</span>
                 <div className="rv-a">
                   <TierIcon tier={5} size={22} />
-                  <b>{r.krill}</b>
+                  {r.krill ? <b>{r.krill}</b> : <b className="rv-locked">Mở lúc 0 giờ</b>}
                   {r.tier === 5 && <span className="rv-found">bạn tìm ra!</span>}
                 </div>
                 {r.top && <span className="rv-meta">Cả làng hay nói: {r.top}</span>}

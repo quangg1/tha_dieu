@@ -67,21 +67,26 @@ describe('answering', () => {
     await expect(S.startTurn(db, { playerId: player, day, mode: 'daily', questionId: other })).rejects.toThrow();
   });
 
+  // Thả vô tận never asks the day's own prompts: these run on a past day whose set holds none of them.
+  const nd = '2020-01-01';
+  const nightDay = () => db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict do nothing`, [nd, ['tinh-thanh']]);
+
   it('asks the referee once for an unknown answer, then remembers the verdict', async () => {
+    await nightDay();
     const p = 'player_test_0002';
     const qid = 'loai-chim';
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const bad = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
+    await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: qid });
+    const bad = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
     expect(bad.status).toBe('retry');
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const good = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim ngũ sắc' }, referee);
+    await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: qid });
+    const good = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: qid, input: 'chim ngũ sắc' }, referee);
     expect(good.status).toBe('landed');
     expect(good.judged).toBe(true);
     expect(good.display).toBe('Chim ngũ sắc');
     expect(good.tier).toBe(4);
     const n = calls.length;
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: qid });
-    const again = await S.answer(db, { playerId: p, day, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
+    await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: qid });
+    const again = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);
     expect(again.status).toBe('retry');
     expect(calls.length).toBe(n);
     const pend = await S.pending(db);
@@ -89,13 +94,14 @@ describe('answering', () => {
   });
 
   it('gives the hidden answer 100 points and builds a streak', async () => {
+    await nightDay();
     const p = 'player_test_0003';
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'nhac-cu' });
-    const a = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'nhac-cu', input: 'dan moi' }, referee);
+    await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: 'nhac-cu' });
+    const a = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: 'nhac-cu', input: 'dan moi' }, referee);
     expect(a.tier).toBe(5);
     expect(a.points).toBe(100);
-    await S.startTurn(db, { playerId: p, day, mode: 'night', questionId: 'loai-hoa' });
-    const b = await S.answer(db, { playerId: p, day, mode: 'night', questionId: 'loai-hoa', input: 'xuyen chi' }, referee);
+    await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: 'loai-hoa' });
+    const b = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: 'loai-hoa', input: 'xuyen chi' }, referee);
     expect(b.bonus).toBe(5);
   });
 
@@ -275,13 +281,28 @@ describe('settling the day', () => {
     const b = await S.finish(db, { playerId: players[5], day: d, mode: 'daily', dev: 'dev-b', since: '2031-01-01' });
     expect(a.score).toBe(b.score);
     expect(b.reveal).toBeUndefined();
-    expect(a.reveal?.[0].krill).toBe(q.answers.get(q.krillKey)!.display);
+    // The day is still being played (it is in the future here): the hidden answer stays locked.
+    expect(a.reveal?.[0].krill).toBeNull();
     expect(a.reveal?.[0].mine).toBe(rare[1].display);
     // Same device, a player id first seen today: a replay in a private tab.
     const c = await S.finish(db, { playerId: players[3], day: d, mode: 'daily', dev: 'dev-a', since: d });
     expect(c.replay).toBe(true);
     const board = await S.board(db, d, 'daily');
     expect(board.players).toBe(2);
+  });
+});
+
+describe('the hidden answer', () => {
+  it('opens only once the day is over, and is never on offer in Thả vô tận on its own day', async () => {
+    const yday = S.vnToday(new Date(Date.now() - 86_400_000));
+    const [qid] = await S.dailySet(db, yday);
+    const y = await S.yesterday(db);
+    expect(y.day).toBe(yday);
+    const q = await S.dayQuestion(db, yday, qid);
+    expect(y.reveal[0].krill).toBe(q.answers.get(q.krillKey)!.display);
+    const today = await S.dailySet(db, day);
+    await expect(S.startTurn(db, { playerId: 'night_scout_1', day, mode: 'night', questionId: today[0] })).rejects.toThrow();
+    for (let i = 0; i < 20; i++) expect(today).not.toContain((await S.nightQuestion(db, [])).id);
   });
 });
 

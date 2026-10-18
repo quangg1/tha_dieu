@@ -4,6 +4,7 @@ import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/question
 import { struck } from '../shared/book/prune.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
+import { boardName } from '../shared/names.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
   CUNG_TRANG,
@@ -278,8 +279,12 @@ export function checkPlayer(playerId: unknown): string {
 }
 
 async function ensureInSet(db: Db, mode: Mode, day: string, questionId: string) {
-  if (mode !== 'daily') return;
   const set = await dailySet(db, day);
+  // Thả vô tận lets a prompt be tried again and again: on today's prompts that would find the hidden answer for the daily flight.
+  if (mode !== 'daily') {
+    if (set.includes(questionId)) throw new GameError(400, 'Câu này thuộc chuyến bay hôm nay, Thả vô tận không hỏi câu này.');
+    return;
+  }
   if (!set.includes(questionId)) throw new GameError(400, 'Câu này không thuộc chuyến bay hôm nay.');
 }
 
@@ -823,7 +828,8 @@ export function crowdFrom(q: LoadedQuestion, key: string | null, t: Tally): Crow
   const total = t.todayTotal;
   if (total >= CROWD_MIN) {
     const pct = (n: number) => Math.round((n / total) * 1000) / 10;
-    const top = rows.slice(0, 4).map(([k, n]) => ({ display: q.answers.get(k)?.display ?? k, pct: pct(n), mine: k === key }));
+    // The hidden answer never shows in the crowd's list unless it is this player's own.
+    const top = rows.filter(([k]) => k !== q.krillKey || k === key).slice(0, 4).map(([k, n]) => ({ display: q.answers.get(k)?.display ?? k, pct: pct(n), mine: k === key }));
     const mineRow = rows.find(([k]) => k === key);
     return { total, top, mine: mineRow ? pct(mineRow[1]) : 0, estimated: false };
   }
@@ -941,6 +947,8 @@ export async function hit(db: Db, k: string, win: string, limit: number) {
 export async function sweepLimits(db: Db) {
   await db.query(`delete from limits where day < current_date - 1`);
   await db.query(`delete from net_players where day < current_date - 2`);
+  // Play events feed the village head's insights for the last weeks; older ones only fill the free database.
+  await db.query(`delete from events where day < current_date - 45`);
 }
 
 /** Whether this player's answers move the day's counts: the first players from each network do. */
@@ -1269,15 +1277,21 @@ async function standings(db: Db, day: string, mode: Mode, own?: { playerId: stri
 export interface Reveal {
   questionId: string;
   prompt: string;
-  /** The hidden Cung Trăng answer. */
-  krill: string;
+  /** The hidden Cung Trăng answer: null until the day is over, unless this player found it themselves. */
+  krill: string | null;
   /** What most of the village answered. */
   top: string;
   mine: string | null;
   tier: number;
 }
 
+/**
+ * A day's answers for one player. While the day is still being played, the hidden answer stays hidden from everyone
+ * who did not find it: shown at once, a first account could finish, read it, and hand it to a second browser or a
+ * friend climbing the same day's board. It opens after midnight (Vietnam), on the home screen as yesterday's answers.
+ */
 async function revealDay(db: Db, day: string, playerId: string, grid: string): Promise<Reveal[]> {
+  const open = day < vnToday();
   const set = await dailySet(db, day);
   const mineRows = await db.query<{ question_id: string; answer_key: string | null }>(
     `select question_id, answer_key from turns where player_id=$1 and day=$2::date and mode='daily'`,
@@ -1290,16 +1304,26 @@ async function revealDay(db: Db, day: string, playerId: string, grid: string): P
       const q = await dayQuestion(db, day, id);
       const c = crowdFrom(q, null, tl.get(id)!);
       const k = mine.get(id);
+      const found = !!k && k === q.krillKey;
       return {
         questionId: id,
         prompt: q.prompt,
-        krill: q.answers.get(q.krillKey)?.display ?? q.krillKey,
+        krill: open || found ? q.answers.get(q.krillKey)?.display ?? q.krillKey : null,
         top: c.top[0]?.display ?? '',
         mine: k ? q.answers.get(k)?.display ?? null : null,
         tier: grid[i] === 'x' || grid[i] == null ? -1 : Number(grid[i]),
       };
     }),
   );
+}
+
+/** Yesterday's answers, hidden answers included, with how this player did (their row if they flew that day). */
+export async function yesterday(db: Db, playerId?: string) {
+  const day = vnToday(new Date(Date.now() - 86_400_000));
+  const [set] = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
+  if (!set) return { day, reveal: [] as Reveal[] };
+  const grid = playerId ? (await computeScores(db, day, playerId)).get(playerId)?.grid ?? '' : '';
+  return { day, reveal: await revealDay(db, day, playerId ?? '', grid) };
 }
 
 async function flightDone(db: Db, day: string, playerId: string) {
@@ -1312,7 +1336,11 @@ async function flightDone(db: Db, day: string, playerId: string) {
 }
 
 export async function finish(db: Db, a: { playerId: string; day: string; mode: Mode; name?: string; dev?: string; since?: string; runSince?: string }) {
-  const name = typeof a.name === 'string' ? a.name.replace(/\s+/g, ' ').trim().slice(0, 24) || null : null;
+  // A rude name, or any name from a player the village head muted, stays off the board (the score still counts).
+  const typed = typeof a.name === 'string' && a.name.trim() !== '';
+  let name = boardName(a.name);
+  if (name && (await db.query(`select 1 from muted where player_id=$1`, [a.playerId])).length) name = null;
+  const nameRefused = typed && !name;
   let grid: string;
   let score: number;
   if (a.mode === 'daily') {
@@ -1365,28 +1393,65 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     dist: { w, counts },
     replay: !!me?.replay,
     settled,
-    // The hidden answers are shown only once the whole flight is done, so they cannot be scouted for another account.
+    nameRefused,
+    // The answers of the day once the whole flight is done; the hidden ones stay hidden until midnight (revealDay).
     reveal: a.mode === 'daily' && (await flightDone(db, a.day, a.playerId)) ? await revealDay(db, a.day, a.playerId, grid) : undefined,
   };
 }
 
+/** The top of the board, kept a few seconds per server: anyone may ask for it, and each ask reads every run of the day. */
+const boardCache = new Map<string, { at: number; players: number; rows: { player_id: string; name: string | null; altitude: number; score: number }[] }>();
+const BOARD_MS = 10_000;
+
+export function forgetBoard() {
+  boardCache.clear();
+}
+
 export async function board(db: Db, day: string, mode: Mode, playerId?: string) {
-  const all = await standings(db, day, mode);
-  const ranked = all.filter((r) => !r.replay);
+  const ck = `${day}:${mode}`;
+  let hit = boardCache.get(ck);
+  if (!hit || Date.now() - hit.at > BOARD_MS) {
+    const ranked = (await standings(db, day, mode)).filter((r) => !r.replay);
+    hit = { at: Date.now(), players: ranked.length, rows: ranked.slice(0, 20) };
+    boardCache.set(ck, hit);
+    if (boardCache.size > 8) boardCache.delete(boardCache.keys().next().value!);
+  }
   return {
-    players: ranked.length,
+    players: hit.players,
     settled: day < vnToday(),
-    rows: ranked.slice(0, 20).map((r, i) => ({ rank: i + 1, name: r.name || 'Người thả diều', altitude: r.altitude, score: r.score, me: r.player_id === playerId })),
+    rows: hit.rows.map((r, i) => ({ rank: i + 1, name: r.name || 'Người thả diều', altitude: r.altitude, score: r.score, me: r.player_id === playerId })),
   };
+}
+
+/** Today's board with player ids, for the village head (names to hide). */
+export async function adminBoard(db: Db, day: string) {
+  const rows = await db.query<{ player_id: string; name: string | null; score: number; muted: boolean }>(
+    `select r.player_id, r.name, r.score, exists (select 1 from muted m where m.player_id=r.player_id) as muted
+     from runs r where r.day=$1::date and r.mode='daily' and r.name is not null order by r.score desc limit 200`,
+    [day],
+  );
+  return rows;
+}
+
+/** Takes a player's name off every board, now and later; their scores stay. */
+export async function mutePlayer(db: Db, playerId: string) {
+  await db.query(`insert into muted (player_id) values ($1) on conflict do nothing`, [playerId]);
+  await db.query(`update runs set name=null where player_id=$1`, [playerId]);
+  forgetBoard();
+  return { ok: true };
 }
 
 /** A random active question for Thả vô tận, avoiding the ones this run has already seen. */
 export async function nightQuestion(db: Db, seen: string[]) {
+  // Never one of today's daily prompts (see ensureInSet).
+  const daily = await dailySet(db, vnToday());
   const rows = await db.query<{ id: string }>(
-    `select id from questions where active and not (id = any($1::text[])) order by random() limit 1`,
-    [seen.slice(-200)],
+    `select id from questions where active and not (id = any($1::text[])) and not (id = any($2::text[])) order by random() limit 1`,
+    [seen.slice(-200), daily],
   );
-  const id = rows[0]?.id ?? (await db.query<{ id: string }>(`select id from questions where active order by random() limit 1`))[0].id;
+  const id =
+    rows[0]?.id ??
+    (await db.query<{ id: string }>(`select id from questions where active and not (id = any($1::text[])) order by random() limit 1`, [daily]))[0].id;
   return publicQuestion(await loadQuestion(db, id));
 }
 
