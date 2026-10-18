@@ -8,12 +8,13 @@ import { challengeLink, readChallenge } from '../shareCard';
 import { bankName, vietQr } from '../../shared/banks.js';
 import { THEME_ART } from '../themeArt';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
-import { SKINS, needLabel, skinById, unlocked } from '../skins';
+import { SKINS, needLabel, progress, skinById, unlocked } from '../skins';
 import { previewSvg } from '../kites';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 
 /** Pictures of every kite for the collection, built once. */
 const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
+const KITE_HERO: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id, { flutes: true }))]));
 import { track } from '../track';
 import { album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
@@ -244,10 +245,17 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           </button>
         )}
         <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
-          <span>Bộ sưu tập</span>
-          <b>
-            {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất
-          </b>
+          <span className="bag-txt">
+            <span>Bộ sưu tập</span>
+            <b>
+              {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} diều · {krillFound()} đáp án độc nhất
+            </b>
+          </span>
+          <span className="bag-kites" aria-hidden="true">
+            {SKINS.slice(0, 6).map((x) => (
+              <img key={x.id} src={KITE_PICS[x.id]} alt="" className={unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak }) ? '' : 'off'} />
+            ))}
+          </span>
         </button>
         <div className="home-foot">
           <button className="link-btn" onClick={() => setSheet('feedback')} aria-haspopup="dialog">Góp ý</button>
@@ -332,31 +340,85 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
                 ✕
               </button>
             </div>
-            <div className="card-k" style={{ margin: '12px 0 8px' }}>Cánh diều</div>
-            <div className="skins">
-              {SKINS.map((k) => {
-                const open = unlocked(k, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak });
+            {(() => {
+              const me = { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak };
+              const cur = skinById(skin);
+              const owned = SKINS.filter((k) => unlocked(k, me)).length;
+              const pick = (id: string) => {
+                prefs.skin = id;
+                setSkin(id);
+                sky.setSkin(skinById(id));
+              };
+              const card = (k: (typeof SKINS)[number]) => {
+                const open = unlocked(k, me);
+                const on = skin === k.id;
+                const pr = open ? null : progress(k, me);
                 return (
                   <button
                     key={k.id}
-                    className={`skin${skin === k.id ? ' on' : ''}${open ? '' : ' locked'}${k.prize ? ' prize' : ''}`}
-                    disabled={!open}
-                    onClick={() => {
-                      prefs.skin = k.id;
-                      setSkin(k.id);
-                      sky.setSkin(skinById(k.id));
-                    }}
+                    className={`kc${on ? ' on' : ''}${open ? '' : ' locked'}${k.prize ? ' prize' : ''}`}
+                    style={{ '--s1': k.sky[0], '--s2': k.sky[1] } as CSSProperties}
+                    disabled={!open || on}
+                    aria-pressed={on}
+                    onClick={() => pick(k.id)}
                   >
-                    <span className="skin-art" aria-hidden="true">
+                    <span className="kc-win" aria-hidden="true">
                       <img src={KITE_PICS[k.id]} alt="" />
-                      {!open && <i className="skin-lock">🔒</i>}
+                      {!open && (
+                        <i className="kc-lock">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
+                        </i>
+                      )}
+                      {on && <i className="kc-flag">Đang bay</i>}
                     </span>
-                    <b>{k.name}</b>
-                    <span>{open ? (skin === k.id ? 'Đang dùng' : 'Chọn') : needLabel(k)}</span>
+                    <span className="kc-body">
+                      <b>{k.name}</b>
+                      {k.prize && <span className="kc-story">{k.story}</span>}
+                      {open ? (
+                        <small>{on ? 'Đang dùng' : 'Chạm để thả'}</small>
+                      ) : (
+                        <>
+                          <small>{needLabel(k)}</small>
+                          {pr && (
+                            <span className="kc-bar" role="progressbar" aria-valuenow={Math.round(pr.f * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`Tiến độ: ${pr.text}`}>
+                              <span style={{ width: `${Math.max(4, pr.f * 100)}%` }} />
+                            </span>
+                          )}
+                          {pr && <small className="kc-num">{pr.text}</small>}
+                        </>
+                      )}
+                    </span>
                   </button>
                 );
-              })}
-            </div>
+              };
+              return (
+                <>
+                  <div className="kc-hero" style={{ '--s1': cur.sky[0], '--s2': cur.sky[1] } as CSSProperties}>
+                    <div className="kc-hero-art" aria-hidden="true">
+                      <img src={KITE_HERO[cur.id]} alt="" />
+                    </div>
+                    <div className="kc-hero-txt">
+                      <span className="kc-k">Đang bay</span>
+                      <b>{cur.name}</b>
+                      <p>{cur.story}</p>
+                      <span className="kc-count">
+                        <em>{owned}</em>/{SKINS.length} cánh diều đã mở
+                      </span>
+                    </div>
+                  </div>
+                  <div className="kc-sec">
+                    <span className="card-k">Cánh diều</span>
+                    <small>{SKINS.filter((k) => !k.prize && unlocked(k, me)).length}/{SKINS.filter((k) => !k.prize).length}</small>
+                  </div>
+                  <div className="kcs">{SKINS.filter((k) => !k.prize).map(card)}</div>
+                  <div className="kc-sec gold">
+                    <span className="card-k">Diều báu</span>
+                    <small>Thưởng cho những chuyến bay xa nhất</small>
+                  </div>
+                  <div className="kcs wide">{SKINS.filter((k) => k.prize).map(card)}</div>
+                </>
+              );
+            })()}
             <div className="card-k" style={{ margin: '16px 0 8px' }}>Tầng trời đã chạm</div>
             <div className="layers">
               {MILESTONES.filter((m) => m.alt > 0).map((m) => (
