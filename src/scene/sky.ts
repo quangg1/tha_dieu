@@ -131,6 +131,9 @@ export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
 const log = (alt: number) => Math.log10(Math.max(1, alt));
 const easeInOut = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 
+/** How long each of bé Bi's tap moves lasts (seconds): spinning jump, two hops, a little dance. */
+const KID_MOVE_SECONDS = [1.1, 0.8, 1.2];
+
 interface Particle {
   x: number;
   y: number;
@@ -199,6 +202,11 @@ export class SkyScene {
   private rays = 0;
   private flash = 0;
   private hand = { x: 0, y: 0 };
+  /** Where bé Bi stands on screen (CSS px), for the tap target the home screen lays over him. */
+  private kidBox = { x: 0, y: 0, w: 0, h: 0 };
+  /** A playful move bé Bi is in the middle of, after a tap: which one and when it started. */
+  private kidMove: { kind: number; t0: number } | null = null;
+  private kidMoves = 0;
   private paints: Paints | null = null;
   private reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private ro: ResizeObserver;
@@ -355,6 +363,79 @@ export class SkyScene {
   /** Where the kite is on screen, in CSS pixels. */
   kitePos() {
     return { x: this.kite.x, y: this.kite.sy };
+  }
+
+  /** Bé Bi's spot on screen, so a tap on him can be caught above the canvas. */
+  kidRect() {
+    return { ...this.kidBox };
+  }
+
+  /**
+   * A tap on bé Bi: he does one of his moves in turn (a spinning jump, two happy hops, a little dance), the kite
+   * tugs up on its string and a few sparkles pop. Returns the move's length in seconds.
+   */
+  poke() {
+    if (this.kidMove && this.t - this.kidMove.t0 < KID_MOVE_SECONDS[this.kidMove.kind]) return 0;
+    const kind = this.kidMoves++ % KID_MOVE_SECONDS.length;
+    this.kidMove = { kind, t0: this.t };
+    if (!this.reduce) {
+      this.boost(0.6);
+      const { x, y, w, h } = this.kidBox;
+      for (let i = 0; i < 14; i++) {
+        const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+        const v = 120 + Math.random() * 140;
+        this.parts.push({
+          x: x + w / 2 + (Math.random() - 0.5) * w * 0.5,
+          y: y + h * 0.25,
+          vx: Math.cos(a) * v,
+          vy: Math.sin(a) * v,
+          r: Math.random() * 6.28,
+          vr: (Math.random() - 0.5) * 10,
+          w: 4 + Math.random() * 3,
+          h: 4 + Math.random() * 3,
+          color: ['#ffd66b', '#e5533d', '#ffffff', '#7fd0ff'][i % 4],
+          life: 0,
+          max: 0.9 + Math.random() * 0.5,
+          kind: 'spark',
+        });
+      }
+    }
+    return KID_MOVE_SECONDS[kind];
+  }
+
+  /** The pose for bé Bi's current move: lift (px), turn (radians) and squash, all easing back to rest. */
+  private kidPose(bw: number) {
+    const m = this.kidMove;
+    if (!m) return { dy: 0, rot: 0, sx: 1, sy: 1, dx: 0 };
+    const d = KID_MOVE_SECONDS[m.kind];
+    const u = (this.t - m.t0) / d;
+    if (u >= 1) {
+      this.kidMove = null;
+      return { dy: 0, rot: 0, sx: 1, sy: 1, dx: 0 };
+    }
+    const k = this.reduce ? 0.35 : 1;
+    const hop = (v: number) => Math.sin(Math.PI * clamp(v)); // 0 → 1 → 0
+    if (m.kind === 0) {
+      // Crouch, leap with a full turn, land with a squash.
+      const crouch = u < 0.15 ? hop(u / 0.3) : 0;
+      const air = u >= 0.15 && u < 0.8 ? (u - 0.15) / 0.65 : -1;
+      const land = u >= 0.8 ? hop((u - 0.8) / 0.4) : 0;
+      return {
+        dy: air >= 0 ? hop(air) * bw * 0.9 * k : 0,
+        rot: air >= 0 && !this.reduce ? air * Math.PI * 2 : 0,
+        sx: 1 + (crouch + land) * 0.14 * k,
+        sy: 1 - (crouch + land) * 0.14 * k,
+        dx: 0,
+      };
+    }
+    if (m.kind === 1) {
+      // Two quick happy hops.
+      const v = (u * 2) % 1;
+      return { dy: hop(v) * bw * 0.35 * k, rot: 0, sx: 1 - hop(v) * 0.06 * k, sy: 1 + hop(v) * 0.08 * k, dx: 0 };
+    }
+    // A little dance: sway side to side, bobbing.
+    const sw = Math.sin(u * Math.PI * 6) * (1 - u);
+    return { dy: Math.abs(Math.sin(u * Math.PI * 6)) * bw * 0.12 * k, rot: sw * 0.22 * k, sx: 1, sy: 1, dx: sw * bw * 0.12 * k };
   }
 
   /** The kite leaps: it starts lower, then springs up past its spot and settles. */
@@ -1331,7 +1412,9 @@ export class SkyScene {
       : Math.max(bw / 2 + 24, (W - col) / 2 - 36 - bw / 2);
     const bh = (bw * A.kids.h) / A.kids.w;
     const dyke = yg + P.fields.dyke;
-    this.hand = { x: bx - bw / 2 + A.hand.x * bw, y: dyke + 3 - bh + A.hand.y * bh };
+    const pose = this.kidPose(bw);
+    this.hand = { x: bx - bw / 2 + A.hand.x * bw + pose.dx, y: dyke + 3 - bh + A.hand.y * bh - pose.dy };
+    this.kidBox = { x: bx - bw / 2, y: dyke + 3 - bh, w: bw, h: bh };
     // Distant hills sink more slowly than the village as the kite climbs.
     const far = yk + (yg - yk) * 0.8;
     const near = yk + (yg - yk) * 0.92;
@@ -1363,9 +1446,21 @@ export class SkyScene {
     }
     ctx.fillStyle = 'rgba(30,60,20,.25)';
     ctx.beginPath();
-    ctx.ellipse(bx, dyke + 3, bw * 0.34, bw * 0.05, 0, 0, Math.PI * 2);
+    // The shadow shrinks while he is in the air.
+    const lift = clamp(pose.dy / (bw * 0.9));
+    ctx.ellipse(bx + pose.dx, dyke + 3, bw * 0.34 * (1 - lift * 0.45), bw * 0.05 * (1 - lift * 0.45), 0, 0, Math.PI * 2);
     ctx.fill();
-    this.put(A.kids, bx, dyke + 3, bw, 0.5, 1);
+    if (!this.kidMove) this.put(A.kids, bx, dyke + 3, bw, 0.5, 1);
+    else {
+      // Turn about his middle, squash about his feet.
+      ctx.save();
+      ctx.translate(bx + pose.dx, dyke + 3 - pose.dy);
+      ctx.scale(pose.sx, pose.sy);
+      ctx.translate(0, -bh / 2);
+      ctx.rotate(pose.rot);
+      this.put(A.kids, 0, bh / 2, bw, 0.5, 1);
+      ctx.restore();
+    }
 
   }
 

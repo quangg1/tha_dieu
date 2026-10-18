@@ -968,7 +968,7 @@ async function countable(db: Db, net: string | undefined, day: string, playerId:
 
 /* ------------------------------------------------------------------ events and reports */
 
-export const EVENT_NAMES = new Set(['open', 'invite', 'start', 'retry', 'miss', 'finish', 'share', 'challenge', 'challenge_open', 'lap', 'report', 'error', 'howto', 'bag', 'support', 'themes', 'remind', 'remind_open', 'login', 'login_open', 'merge']);
+export const EVENT_NAMES = new Set(['open', 'invite', 'start', 'retry', 'miss', 'finish', 'share', 'challenge', 'challenge_open', 'lap', 'report', 'error', 'howto', 'bag', 'support', 'themes', 'remind', 'remind_open', 'login', 'login_open', 'merge', 'poke']);
 
 export async function logEvent(db: Db, a: { day: string; name: string; playerId?: string; props?: unknown }) {
   if (!EVENT_NAMES.has(a.name)) throw new GameError(400, 'Sự kiện không hợp lệ.');

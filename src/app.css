@@ -594,3 +594,7 @@ button svg,a svg{flex-shrink:0}
 .acct-note a{color:var(--bi-red-ink)}
 .acct-msg{margin:0;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.92);color:var(--bi-ink);font-size:14px}
 .acct-google{width:100%}
+
+/* An invisible tap target over bé Bi in the painted scene (Home). */
+.kid-poke{position:fixed;z-index:2;padding:0;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:40%}
+.kid-poke:focus-visible{outline:3px solid var(--bi-gold);outline-offset:4px}

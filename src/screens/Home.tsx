@@ -18,6 +18,7 @@ import { RemindSheet } from '../components/RemindSheet';
 const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
 const KITE_HERO: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id, { flutes: true }))]));
 import { track } from '../track';
+import { buzz } from '../haptics';
 import { account, addToAlbum, album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
@@ -106,6 +107,23 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const closeYday = () => {
     if (yday) prefs.ydaySeen = yday.day;
     setYday(null);
+  };
+  // Bé Bi stands in the painted scene; an invisible button over him lets a tap set him moving.
+  const [kid, setKid] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  useEffect(() => {
+    const read = () => {
+      const r = sky.kidRect();
+      setKid((k) => (r.w > 0 && (!k || Math.abs(k.x - r.x) + Math.abs(k.y - r.y) + Math.abs(k.w - r.w) > 1) ? r : k));
+    };
+    read();
+    const id = window.setInterval(read, 400);
+    return () => window.clearInterval(id);
+  }, [sky]);
+  const pokeKid = () => {
+    if (sky.poke()) {
+      buzz(12);
+      track('poke');
+    }
   };
   const canSupport = !!support && !!(support.momo || support.qr || support.card || support.account);
   const [copied, setCopied] = useState(false);
@@ -228,6 +246,15 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         <p className="home-sub">cùng bé <b>Bi</b> thả diều</p>
         <p className="home-tag">Đáp án càng hiếm, diều càng bay cao.</p>
       </div>
+
+      {kid && (
+        <button
+          className="kid-poke"
+          style={{ left: kid.x, top: kid.y, width: kid.w, height: kid.h }}
+          onClick={pokeKid}
+          aria-label="Chọc bé Bi"
+        />
+      )}
 
       <div className="home-spacer" />
 
