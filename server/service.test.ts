@@ -507,3 +507,22 @@ describe('the referee, at the edges', () => {
     expect(seen).toHaveLength(0);
   });
 });
+
+describe('a player the referee keeps turning down', () => {
+  it('stops costing calls after a few refusals; their answers wait for the night shift', async () => {
+    const seen: string[] = [];
+    const no: Referee = async (_p, _n, input) => {
+      seen.push(input);
+      return { valid: false, canonical: '', reason: 'Không phải.' };
+    };
+    const words = ['Rau mây xanh lạ', 'Rau gió núi xa', 'Rau sương sớm lạ', 'Rau trăng khuyết lạ', 'Rau mưa phùn lạ', 'Rau nắng hạ lạ'];
+    for (const w of words) {
+      await S.startTurn(db, { playerId: 'spammy_one', day, mode: 'night', questionId: 'loai-rau' });
+      const r = await S.answer(db, { playerId: 'spammy_one', day, mode: 'night', questionId: 'loai-rau', input: w }, no);
+      expect(r.status).toBe('retry');
+    }
+    expect(seen).toHaveLength(4);
+    const qd = await S.nightQueue(db);
+    expect(qd.submissions.some((s) => s.display === 'Rau nắng hạ lạ')).toBe(true);
+  });
+});

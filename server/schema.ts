@@ -44,6 +44,7 @@ create table if not exists referee_usage (
   calls int not null default 0,
   primary key (player_id, day)
 );
+alter table referee_usage add column if not exists refused int not null default 0;
 
 create table if not exists daily_sets (
   day date primary key,

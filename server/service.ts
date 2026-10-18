@@ -29,9 +29,11 @@ export class GameError extends Error {
 export const DAILY_COUNT = 7;
 /** Seconds a daily turn may stay open: the wind, the referee's think time and network slack. */
 const TURN_GRACE_SECONDS = QUESTION_SECONDS + 10 + 15;
-const REFEREE_CALLS_PER_DAY = 40;
+const REFEREE_CALLS_PER_DAY = 10;
+/** Share of a player's referee calls turned down, after a few, past which their new answers wait for the night shift. */
+const REFUSED_SHARE_LIMIT = 0.6;
 /** Referee calls one network may spend in a day, whatever player ids it invents. */
-const REFEREE_CALLS_PER_NET = 300;
+const REFEREE_CALLS_PER_NET = 60;
 /** Players from one network whose answers count towards the day's rarity. A school or a café shares an address; a script does too. */
 const NET_PLAYERS_COUNTED = 60;
 /** Answers the book did not know that one player may leave for the night shift in a day. */
@@ -535,13 +537,18 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   // The referee, when there is one and the day's limits allow it; past the limits the village decides instead.
   let useReferee = referee !== nullReferee;
   if (useReferee) {
-    const [usage] = await db.query<{ calls: number }>(
+    const [usage] = await db.query<{ calls: number; refused: number }>(
       `insert into referee_usage (player_id, day, calls) values ($1,$2::date,1)
-       on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls`,
+       on conflict (player_id, day) do update set calls = referee_usage.calls + 1 returning calls, refused`,
       [playerId, day],
     );
+    // Someone whose new answers the referee keeps turning down is guessing or spamming: after a few tries their
+    // unknown answers wait for the night shift's batch instead of each costing a call.
+    const tried = usage.calls - 1;
+    const doubtful = tried >= 4 && usage.refused / tried >= REFUSED_SHARE_LIMIT;
     useReferee =
       usage.calls <= REFEREE_CALLS_PER_DAY &&
+      !doubtful &&
       (!net || (await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) &&
       (await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 450)) &&
       // The AI's own per-minute limit (Gemini's free tier allows 15): past it the call would only fail after a wait.
@@ -554,7 +561,11 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   if (wiki) return learnAnswer(db, q, input, wiki.display, 'wiki', 'approved', 3, `Wikidata ${wiki.id}`);
   if (callP) {
     const first = await Promise.race([callP.then((v) => ({ v })), sleep(Math.max(300, deadline - Date.now()))]);
-    if (first && first.v) return applyVerdict(db, q, input, first.v);
+    if (first && first.v) {
+      const r = await applyVerdict(db, q, input, first.v);
+      if (!r.key) await db.query(`update referee_usage set refused = refused + 1 where player_id=$1 and day=$2::date`, [playerId, day]);
+      return r;
+    }
     if (!first) {
       // The referee is slow today: this try does not count, and its verdict, when it comes, teaches the book, so the
       // same answer sent again a moment later is read from the verdict instead of asked twice.
