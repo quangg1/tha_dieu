@@ -34,7 +34,8 @@ async function aiText(text: string, maxTokens: number, timeoutMs: number): Promi
         { timeout: timeoutMs },
       );
       return msg.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
-    } catch {
+    } catch (e) {
+      console.error('claude error', String(e).slice(0, 200));
       return null;
     }
   }
@@ -52,10 +53,17 @@ async function aiText(text: string, maxTokens: number, timeoutMs: number): Promi
         }),
         signal: ctrl.signal,
       });
-      if (!res.ok) return null;
-      const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
-      return data.candidates?.[0]?.content?.parts?.map((x) => x.text ?? '').join('') ?? null;
-    } catch {
+      if (!res.ok) {
+        // Logged without the key: the status and Google's own message say whether it is the model, the key or a quota.
+        console.error('gemini', model, res.status, (await res.text().catch(() => '')).slice(0, 300));
+        return null;
+      }
+      const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[] };
+      const out = data.candidates?.[0]?.content?.parts?.map((x) => x.text ?? '').join('') ?? null;
+      if (!out) console.error('gemini empty', model, JSON.stringify(data).slice(0, 300));
+      return out;
+    } catch (e) {
+      console.error('gemini error', model, String(e).slice(0, 200));
       return null;
     } finally {
       clearTimeout(timer);
