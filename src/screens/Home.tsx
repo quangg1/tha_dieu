@@ -223,7 +223,6 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         <span className="home-kicker">Đố chữ mỗi ngày</span>
         <span className="beta-tag">Bản chơi thử</span>
         <h1 className="home-title" aria-label="Bilion">
-          <img className="logo-mark" src="/logo/bi-head.png" alt="" width="512" height="512" />
           <span aria-hidden="true">Bilion</span>
         </h1>
         <p className="home-sub">cùng bé <b>Bi</b> thả diều</p>
