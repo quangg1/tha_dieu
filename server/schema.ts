@@ -101,6 +101,7 @@ create table if not exists asks (
   told boolean not null default false,
   primary key (player_id, question_id, input_key)
 );
+alter table asks add column if not exists credited int;
 
 create table if not exists submissions (
   question_id text not null,

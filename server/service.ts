@@ -569,7 +569,7 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     if (!first) {
       // The referee is slow today: this try does not count, and its verdict, when it comes, teaches the book, so the
       // same answer sent again a moment later is read from the verdict instead of asked twice.
-      background(callP.then((v) => (v ? applyVerdict(db, q, input, v).then(() => forgetQuestion(q.id)) : null)));
+      background(callP.then((v) => (v ? applyVerdict(db, q, input, v).then(() => creditLearned(db, q.id)) : null)));
       // Still noted for this player, so they hear about it on their next visit if they moved on.
       await notInBook(db, q, input, playerId, day);
       return { key: null, reason: `Trọng tài đang xem “${input.slice(0, 40)}”. Bấm Thả lại sau một giây, hoặc thử đáp án khác.` };
@@ -601,12 +601,73 @@ async function notInBook(db: Db, q: LoadedQuestion, input: string, playerId: str
 }
 
 /** Answers this player typed that the book did not know then but has learned since; each is told once. */
+/**
+ * An answer a player typed on a daily flight, refused then because nobody could vouch for it, has since been
+ * approved (night shift, a late referee verdict, a second look). The player gets its points on that day's flight,
+ * as if it had been known then: the turn takes the better of what it had and the approved answer, and the day's
+ * scores are recomputed so the board shows it. Thả vô tận runs keep their best score as flown.
+ */
+export async function creditLearned(db: Db, questionId: string) {
+  const rows = await db.query<{ player_id: string; input_key: string; display: string; day: string }>(
+    `select player_id, input_key, display, to_char(day,'YYYY-MM-DD') as day from asks
+     where question_id=$1 and credited is null and day >= current_date - 14`,
+    [questionId],
+  );
+  if (!rows.length) return 0;
+  forgetQuestion(questionId);
+  const q = await loadQuestion(db, questionId);
+  const days = new Set<string>();
+  let n = 0;
+  for (const r of rows) {
+    const m = q.matcher.match(r.display);
+    let key = m?.exact ? m.key : null;
+    if (!key) {
+      const [v] = await db.query<{ valid: boolean; canonical_key: string | null }>(`select valid, canonical_key from verdicts where question_id=$1 and input_key=$2`, [questionId, r.input_key]);
+      if (v && !v.valid) {
+        await db.query(`update asks set credited=0 where player_id=$1 and question_id=$2 and input_key=$3`, [r.player_id, questionId, r.input_key]);
+        continue;
+      }
+      key = v?.valid ? v.canonical_key : null;
+    }
+    const entry = key ? q.answers.get(key) : undefined;
+    if (!key || !entry || entry.status === 'rejected') continue;
+    const dq = await dayQuestion(db, r.day, questionId);
+    const tally = (await tallies(db, r.day, [questionId])).get(questionId)!;
+    const tier = tierFromTally(dq, key, entry.prior, tally);
+    const points = TIERS[tier].points;
+    // Only a daily turn that scored less than this answer is worth changing.
+    const up = await db.query(
+      `update turns set answer_key=$5, tier=$6, points=$7, answered_at=coalesce(answered_at, now())
+       where player_id=$1 and day=$2::date and mode='daily' and question_id=$3 and coalesce(points, 0) < $4 and coalesce(tier, -1) <> $6
+       returning 1`,
+      [r.player_id, r.day, questionId, points, key, tier, points],
+    );
+    await db.query(`update asks set credited=$4 where player_id=$1 and question_id=$2 and input_key=$3`, [r.player_id, questionId, r.input_key, up.length ? points : 0]);
+    if (up.length) {
+      days.add(r.day);
+      n++;
+    }
+  }
+  for (const d of days) {
+    // The day's cached scores are stale now, even a finished day's.
+    await db.query(`update day_scores set final=false, computed_at='epoch' where day=$1::date`, [d]);
+    dayCache.delete(d);
+    const scores = await computeScores(db, d);
+    for (const r of rows) {
+      if (r.day !== d) continue;
+      const s2 = scores.get(r.player_id);
+      if (s2) await db.query(`update runs set score=$3, altitude=$4, grid=$5 where player_id=$1 and day=$2::date and mode='daily'`, [r.player_id, d, s2.score, altitudeFor(s2.score), s2.grid]);
+    }
+  }
+  return n;
+}
+
 export async function notices(db: Db, playerId: string) {
-  const rows = await db.query<{ question_id: string; input_key: string; display: string }>(
-    `select question_id, input_key, display from asks where player_id=$1 and not told and day >= current_date - 14 order by day desc limit 40`,
+  const rows = await db.query<{ question_id: string; input_key: string; display: string; credited: number | null }>(
+    `select question_id, input_key, display, credited from asks where player_id=$1 and not told and day >= current_date - 14 order by day desc limit 40`,
     [playerId],
   );
-  const out: { questionId: string; prompt: string; typed: string; answer: string }[] = [];
+  const out: { questionId: string; prompt: string; typed: string; answer: string; points: number }[] = [];
   const told: string[][] = [];
   for (const r of rows) {
     const base = BOOK_BY_ID.get(r.question_id);
@@ -619,7 +680,7 @@ export async function notices(db: Db, playerId: string) {
     const entry = key ? q.answers.get(key) : undefined;
     if (!entry || entry.status === 'rejected') continue;
     told.push([r.question_id, r.input_key]);
-    if (out.length < 5) out.push({ questionId: r.question_id, prompt: q.prompt, typed: r.display, answer: entry.display });
+    if (out.length < 5) out.push({ questionId: r.question_id, prompt: q.prompt, typed: r.display, answer: entry.display, points: r.credited ?? 0 });
   }
   if (told.length) {
     await db.query(
@@ -1499,6 +1560,7 @@ export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
           else await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [qid, open[k].input_key, v.reason]);
           await db.query(`update submissions set status=$3 where question_id=$1 and input_key=$2`, [qid, open[k].input_key, v.valid ? 'accepted' : 'dismissed']);
         }
+        await creditLearned(db, qid);
       }
       // The answers the book is missing.
       const known = [...q.answers.values()].map((x) => x.display);
@@ -1549,7 +1611,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
   if (!batch.day) return { applied: false, reason: 'empty' };
   const [done] = await db.query<{ value: string }>(`select value from meta where key='night_applied'`);
   if (done?.value === batch.day) return { applied: false, reason: 'already', day: batch.day };
-  const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0 };
+  const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0, credited: 0 };
   for (const v of batch.pending) {
     if (!BOOK_BY_ID.has(v.q)) continue;
     const [row] = await db.query<{ display: string }>(`select display from answers where question_id=$1 and key=$2`, [v.q, v.key]);
@@ -1576,6 +1638,8 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
     await db.query(`update submissions set status=$3 where question_id=$1 and input_key=$2`, [v.q, v.key, v.valid ? 'accepted' : 'dismissed']);
     forgetQuestion(v.q);
   }
+  // Players who typed what was just approved get its points on that day's flight.
+  for (const qid of new Set(batch.submissions.filter((v) => v.valid).map((v) => v.q))) out.credited += await creditLearned(db, qid);
   await db.query(`insert into meta (key, value) values ('night_applied', $1) on conflict (key) do update set value=excluded.value`, [batch.day]);
   return out;
 }

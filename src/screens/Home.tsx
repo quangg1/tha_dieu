@@ -83,7 +83,7 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
     api.support().then(setSupport).catch(() => {});
   }, []);
   // Answers this player typed that the book did not know then, and has learned since.
-  const [learned, setLearned] = useState<{ questionId: string; prompt: string; typed: string; answer: string }[]>([]);
+  const [learned, setLearned] = useState<{ questionId: string; prompt: string; typed: string; answer: string; points?: number }[]>([]);
   useEffect(() => {
     if (!stats().best && !stats().nightBest) return;
     api.notices(playerId()).then((r) => setLearned(r.learned)).catch(() => {});
@@ -179,7 +179,8 @@ export default function Home({ sky, soundButton, onPlay, onReview }: { sky: SkyS
           <span className="challenge-k">Sổ của làng vừa học thêm</span>
           {learned.slice(0, 3).map((l) => (
             <p key={l.questionId + l.typed}>
-              Bạn từng gõ <b>“{l.typed}”</b> cho câu “{l.prompt}”. Ca đêm đã ghi vào sổ{l.answer.toLowerCase() !== l.typed.toLowerCase() ? <> là <b>{l.answer}</b></> : ''}, lần sau gõ là được điểm!
+              Bạn từng gõ <b>“{l.typed}”</b> cho câu “{l.prompt}”. Ca đêm đã ghi vào sổ{l.answer.toLowerCase() !== l.typed.toLowerCase() ? <> là <b>{l.answer}</b></> : ''}
+              {l.points ? <>, và cộng bù <b>+{l.points} điểm</b> vào chuyến bay hôm đó.</> : ', lần sau gõ là được điểm!'}
             </p>
           ))}
           <button className="toast-link" onClick={() => setLearned([])}>Đã hiểu</button>

@@ -526,3 +526,27 @@ describe('a player the referee keeps turning down', () => {
     expect(qd.submissions.some((s) => s.display === 'Rau nắng hạ lạ')).toBe(true);
   });
 });
+
+describe('points credited after the night shift', () => {
+  it('gives a daily turn the points of an answer approved later, and the board follows', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const set = await S.dailySet(db, day);
+    const qid = set[0];
+    const pid = 'credit_player';
+    await S.startTurn(db, { playerId: pid, day, mode: 'daily', questionId: qid });
+    const typed = 'Đáp án ca đêm duyệt sau';
+    const r = await S.answer(db, { playerId: pid, day, mode: 'daily', questionId: qid, input: typed }, nullReferee);
+    expect(r.status).toBe('retry');
+    const before = (await S.computeScores(db, day, pid)).get(pid)?.score ?? 0;
+    const qd = await S.nightQueue(db);
+    const item = qd.submissions.find((s) => s.q === qid && s.display === typed)!;
+    expect(item).toBeTruthy();
+    await db.query(`delete from meta where key='night_applied'`);
+    const res = await S.applyNight(db, { day: '2099-03-03', pending: [], submissions: [{ q: qid, key: item.key, valid: true, canonical: typed, reason: 'Có thật.' }] });
+    expect((res as { credited?: number }).credited).toBe(1);
+    const after = (await S.computeScores(db, day, pid)).get(pid)!.score;
+    expect(after).toBeGreaterThan(before);
+    const n = await S.notices(db, pid);
+    expect(n.learned[0]).toMatchObject({ typed, points: after - before });
+  });
+});
