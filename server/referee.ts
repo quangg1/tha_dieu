@@ -89,11 +89,15 @@ function refereePrompt(prompt: string, note: string | undefined, input: string) 
   );
 }
 
-function toVerdict(j: unknown): Verdict | null {
+function toVerdict(j: unknown, input = ''): Verdict | null {
   if (!j || typeof j !== 'object') return null;
   const o = j as Record<string, unknown>;
-  const canonical = String(o.canonical ?? '').trim().slice(0, 60);
-  return { valid: Boolean(o.valid) && canonical.length > 0, canonical, reason: String(o.reason ?? '').slice(0, 160) };
+  if (typeof o.valid !== 'boolean' && o.valid !== 'true' && o.valid !== 'false') return null;
+  const valid = o.valid === true || o.valid === 'true';
+  // A yes without a name keeps the player's own spelling rather than turning into a refusal with a yes for a reason.
+  let canonical = String(o.canonical ?? '').trim().slice(0, 60);
+  if (valid && !canonical) canonical = input.trim().replace(/\s+/g, ' ').slice(0, 60);
+  return { valid: valid && canonical.length > 0, canonical, reason: String(o.reason ?? '').slice(0, 160) };
 }
 
 function json(text: string | null, open: '{' | '['): unknown {
@@ -109,7 +113,7 @@ function json(text: string | null, open: '{' | '['): unknown {
 
 /** The referee during play: a short budget, since the player is waiting (the caller also races it). */
 export const aiReferee: Referee = async (prompt, note, input) =>
-  toVerdict(json(await aiText(refereePrompt(prompt, note, input), 200, 9000), '{'));
+  toVerdict(json(await aiText(refereePrompt(prompt, note, input), 200, 9000), '{'), input);
 
 /** Kept for the dev server and older callers. */
 export const claudeReferee = aiReferee;

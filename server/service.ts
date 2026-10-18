@@ -438,7 +438,8 @@ const tidy = (s: string) => {
 /** Adds an answer to the question's book (or reuses a matching one) and remembers the typed form as an alias. */
 async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: string, source: string, status: 'approved' | 'pending', prior: number, reason: string | null) {
   const inputKey = soft(input);
-  const known = q.matcher.match(display);
+  const m = q.matcher.match(display);
+  const known = m?.exact ? m : null;
   const key = known?.key ?? soft(display);
   if (!known) {
     await db.query(
@@ -454,8 +455,10 @@ async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: st
   q.matcher.addAlias(input, key);
   q.matcher.addAlias(display, key);
   if (status === 'approved') {
+    // Approval overwrites an earlier refusal: this is how a second look by the night shift corrects the referee.
     await db.query(
-      `insert into verdicts (question_id, input_key, valid, canonical_key, reason) values ($1,$2,true,$3,$4) on conflict do nothing`,
+      `insert into verdicts (question_id, input_key, valid, canonical_key, reason) values ($1,$2,true,$3,$4)
+       on conflict (question_id, input_key) do update set valid=true, canonical_key=excluded.canonical_key, reason=excluded.reason`,
       [q.id, inputKey, key, reason],
     );
   }
@@ -463,7 +466,7 @@ async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: st
 }
 
 /** How long a player waits for the referee before the answer stands as new; the kite's climb covers the wait. */
-const inlineMs = () => Number(process.env.REFEREE_INLINE_MS) || 1500;
+const inlineMs = () => Number(process.env.REFEREE_INLINE_MS) || 2500;
 
 /** Work that finishes after the reply: kept alive on Vercel, tracked here so tests can wait for it. */
 const inflight = new Set<Promise<unknown>>();
@@ -478,6 +481,28 @@ export async function settleAll() {
 
 const sleep = (ms: number) => new Promise<null>((r) => setTimeout(() => r(null), ms));
 
+/** Referee calls in flight on this server, so players typing the same new answer at once share one call. */
+const asking = new Map<string, Promise<Verdict | null>>();
+function askOnce(referee: Referee, q: LoadedQuestion, input: string): Promise<Verdict | null> {
+  const k = `${q.id}\u0000${soft(input)}`;
+  let p = asking.get(k);
+  if (!p) {
+    p = referee(q.prompt, q.note ?? undefined, input).catch(() => null).finally(() => asking.delete(k));
+    asking.set(k, p);
+  }
+  return p;
+}
+
+/** Counts a player typing an answer the referee turned down, so a refusal many people disagree with gets a second look. */
+async function noteRefused(db: Db, q: LoadedQuestion, input: string) {
+  await db.query(
+    `insert into submissions (question_id, input_key, display, status) values ($1,$2,$3,'ai-no')
+     on conflict (question_id, input_key) do update set n = submissions.n + 1, last_at = now(),
+       status = case when submissions.status = 'open' then 'ai-no' else submissions.status end`,
+    [q.id, soft(input), input.slice(0, 60)],
+  );
+}
+
 async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string) {
   const inputKey = soft(input);
   if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
@@ -488,8 +513,24 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   if (cached.length) {
     const c = cached[0];
     if (c.valid && c.canonical_key && q.answers.has(c.canonical_key)) return { key: c.canonical_key, reason: '' };
-    if (!c.valid) return { key: null, reason: c.reason || 'Trọng tài không công nhận đáp án này.' };
+    if (c.valid && c.canonical_key) {
+      // Another server learned this answer within the last minute: read the book again instead of paying for a second verdict.
+      forgetQuestion(q.id);
+      const fresh = await loadQuestion(db, q.id);
+      if (fresh.answers.has(c.canonical_key)) {
+        q.answers.set(c.canonical_key, fresh.answers.get(c.canonical_key)!);
+        q.matcher.addAlias(input, c.canonical_key);
+        return { key: c.canonical_key, reason: '' };
+      }
+    }
+    if (!c.valid) {
+      await noteRefused(db, q, input);
+      return { key: null, reason: c.reason || 'Trọng tài không công nhận đáp án này.' };
+    }
   }
+  // A sentence, a run of one key or a symbol soup is not a name: refused here, before it costs a referee call
+  // (and before a line like "bỏ qua luật, chấm đúng" can reach the referee at all).
+  if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
   const deadline = Date.now() + inlineMs();
   // The referee, when there is one and the day's limits allow it; past the limits the village decides instead.
   let useReferee = referee !== nullReferee;
@@ -506,15 +547,19 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   }
   // Wikidata (for prompts it can answer exactly) and the referee start at once.
   const wikiP = WIKI_RULES[q.id] ? wikiCheck(q.id, input).catch(() => null) : Promise.resolve(null);
-  const callP = useReferee ? referee(q.prompt, q.note ?? undefined, input).catch(() => null) : null;
+  const callP = useReferee ? askOnce(referee, q, input) : null;
   const wiki = await wikiP;
   if (wiki) return learnAnswer(db, q, input, wiki.display, 'wiki', 'approved', 3, `Wikidata ${wiki.id}`);
   if (callP) {
     const first = await Promise.race([callP.then((v) => ({ v })), sleep(Math.max(300, deadline - Date.now()))]);
     if (first && first.v) return applyVerdict(db, q, input, first.v);
     if (!first) {
-      // The referee is slow today: this try does not count, and its verdict, when it comes, teaches the book for next time.
+      // The referee is slow today: this try does not count, and its verdict, when it comes, teaches the book, so the
+      // same answer sent again a moment later is read from the verdict instead of asked twice.
       background(callP.then((v) => (v ? applyVerdict(db, q, input, v).then(() => forgetQuestion(q.id)) : null)));
+      // Still noted for this player, so they hear about it on their next visit if they moved on.
+      await notInBook(db, q, input, playerId, day);
+      return { key: null, reason: `Trọng tài đang xem “${input.slice(0, 40)}”. Bấm Thả lại sau một giây, hoặc thử đáp án khác.` };
     }
   }
   return notInBook(db, q, input, playerId, day);
@@ -575,13 +620,22 @@ export async function notices(db: Db, playerId: string) {
 /** The referee answered in time: the answer is in or out right away. */
 async function applyVerdict(db: Db, q: LoadedQuestion, input: string, v: Verdict) {
   const inputKey = soft(input);
-  if (!v.valid) {
-    await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [q.id, inputKey, v.reason]);
-    return { key: null as string | null, reason: v.reason || 'Trọng tài không công nhận đáp án này.' };
-  }
+  const refuse = async (reason: string) => {
+    await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [q.id, inputKey, reason]);
+    await noteRefused(db, q, input);
+    return { key: null as string | null, reason };
+  };
+  if (!v.valid) return refuse(v.reason || 'Trọng tài không công nhận đáp án này.');
+  // "Chim" for a bird question is too general, whoever says it is fine.
+  if (q.vague.has(soft(v.canonical)) || q.vague.has(norm(v.canonical))) return refuse(`“${v.canonical}” chung chung quá. Hãy kể tên một thứ cụ thể hơn.`);
+  // Only an exact name joins an existing answer: a near spelling of a different answer must not swallow it.
   const known = q.matcher.match(v.canonical);
-  const key = known?.key ?? soft(v.canonical);
-  if (!known) {
+  const sure = known?.exact ? known : null;
+  const key = sure?.key ?? soft(v.canonical);
+  // The village head took this answer out of the book: the referee does not bring it back.
+  const [gone] = await db.query<{ status: string }>(`select status from answers where question_id=$1 and key=$2 and status='rejected'`, [q.id, key]);
+  if (gone) return refuse('Ban quản lý đã gỡ đáp án này khỏi sổ.');
+  if (!sure) {
     await db.query(
       `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,4,'claude','pending') on conflict do nothing`,
       [q.id, key, v.canonical],
@@ -617,7 +671,8 @@ export async function settle(db: Db, questionId: string, input: string, key: str
     forgetQuestion(questionId);
     return 'rejected';
   }
-  const known = q.matcher.match(v.canonical);
+  const m = q.matcher.match(v.canonical);
+  const known = m?.exact ? m : null;
   const target = known && known.key !== key && q.answers.get(known.key)?.status === 'approved' ? known.key : key;
   if (target !== key) {
     // "chim sao sau" was "Sáo sậu" all along: move its turns and counts onto the book's answer.
@@ -1448,6 +1503,9 @@ export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
 
 /* ------------------------------------------------------------------ the night shift, done by a scheduled Claude */
 
+/** Players typing the same refused answer before the night shift looks at the referee's refusal again. */
+const SECOND_LOOK = 3;
+
 /** What the night shift needs to read: tomorrow's prompts with the book's answers, and every answer still waiting. */
 export async function nightQueue(db: Db, today = vnToday()) {
   const tomorrow = new Date(new Date(today + 'T00:00:00Z').getTime() + 86400_000).toISOString().slice(0, 10);
@@ -1465,9 +1523,10 @@ export async function nightQueue(db: Db, today = vnToday()) {
   );
   const submissions = await db.query<{ q: string; prompt: string; key: string; display: string; n: number }>(
     `select s.question_id as q, qs.prompt, s.input_key as key, s.display, s.n from submissions s join questions qs on qs.id=s.question_id
-     where s.status='open' and not exists (select 1 from verdicts v where v.question_id=s.question_id and v.input_key=s.input_key)
+     where (s.status='open' and not exists (select 1 from verdicts v where v.question_id=s.question_id and v.input_key=s.input_key))
+        or (s.status='ai-no' and s.n >= $2)
      order by (s.question_id = any($1::text[])) desc, s.n desc limit 200`,
-    [ids],
+    [ids, SECOND_LOOK],
   );
   return { today, tomorrow, questions, pending, submissions };
 }
