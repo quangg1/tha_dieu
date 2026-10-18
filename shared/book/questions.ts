@@ -88,7 +88,7 @@ export const SPECS: Spec[] = [
   q('dv-nuoi', 'Động vật', 'Kể tên một con vật được người nuôi', [S('dongvat', ['nuoi'])], { n: 'Vật nuôi trong nhà, gia súc, gia cầm đều được tính.' }),
   q('dv-phi', 'Động vật', 'Kể tên một con vật sống ở châu Phi', [S('dongvat', ['phi'])]),
   q('dv-vn', 'Động vật', 'Kể tên một loài động vật hoang dã quý hiếm của Việt Nam', [S('dongvat', ['vn'])]),
-  q('dv-sung', 'Động vật', 'Kể tên một con vật có sừng', [S('dongvat', ['sung'])]),
+  q('dv-sung', 'Động vật', 'Kể tên một con vật có sừng', [S('dongvat', ['sung'])], { noKrill: ['Voi ma mút'] }),
   q('dv-doc', 'Động vật', 'Kể tên một con vật có nọc độc', [S('dongvat', ['doc'])]),
   q('dv-dem', 'Động vật', 'Kể tên một con vật hoạt động về đêm', [S('dongvat', ['dem'])]),
   q('dv-bay', 'Động vật', 'Kể tên một con vật biết bay nhưng không phải chim', [S('dongvat', ['bay'], { not: ['chim'] })]),

@@ -103,7 +103,7 @@ export const NARROW: (RawQuestion & { lv?: number })[] = [
 'Christian Louboutin|Louboutin, Jimmy Choo, Gucci, Balenciaga, Prada, Saint Laurent, Golden Goose, UGG, Aldo, Charles & Keith, Pedro, Ecco, Geox, Steve Madden, Nine West, Lacoste, Puma Suede, Yonex, Kappa, Umbro, Diadora, Brooks, Saucony, On Running|On',
 'Thượng Đình, Hồng Thạnh, Lascal, Gosto, Đông Hải']},
 /* ---------------------------------------------------------------- jobs, school, words */
-{id:'n-quan-ham',lv:2,c:'Lịch sử',q:'Kể tên một cấp bậc quân hàm trong Quân đội nhân dân Việt Nam',s:['cap','quanham'],k:'Chuẩn úy',t:[
+{id:'n-quan-ham',lv:2,c:'Lịch sử',q:'Kể tên một cấp bậc quân hàm trong Quân đội nhân dân Việt Nam',s:['cap','quanham'],k:'Đại úy quân nhân chuyên nghiệp|Đại úy QNCN',t:[
 'Đại tướng, Thượng tá, Đại úy',
 'Trung tướng, Thiếu tướng, Đại tá, Trung tá, Thiếu tá, Thượng úy, Trung úy, Thiếu úy',
 'Binh nhất, Binh nhì, Hạ sĩ, Trung sĩ, Thượng sĩ',
