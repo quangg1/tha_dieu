@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><style>
+      .outline{stroke:#2b0909;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+      .thin{stroke:#2b0909;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+      .bamboo{fill:none;stroke:#c8862e;stroke-width:4;stroke-linecap:round;opacity:.72}
+    </style></defs><rect width="512" height="512" rx="112" fill="#6db6e0"/><svg x="0" y="0" width="512" height="512" viewBox="31.19999999999999 -27.80000000000001 507.6 507.6"><!-- Head and ears -->
+  <g>
+    <path d="M128 258c-14-9-34-6-45 7-15 17-10 48 7 61 12 9 33 9 47 2Z" fill="#ffd0ad" class="outline"/>
+    <path d="M109 278c-15-7-22 16-8 27 8 6 17 5 26 2" fill="none" stroke="#f57c62" stroke-width="7" stroke-linecap="round"/>
+    <path d="M438 258c14-9 34-6 45 7 15 17 10 48-7 61-12 9-33 9-47 2Z" fill="#ffd0ad" class="outline"/>
+    <path d="M459 278c15-7 22 16 8 27-8 6-17 5-26 2" fill="none" stroke="#f57c62" stroke-width="7" stroke-linecap="round"/>
+    <path d="M119 225c0-87 67-152 160-152 93 0 161 66 161 157v53c0 70-51 108-157 108-107 0-160-38-160-108Z" fill="#ffd0ad" class="outline"/>
+
+    <!-- Hair -->
+    <path d="M119 250c-12-56 8-105 44-136l-57 23c15-29 44-48 79-57l-31-7c54-23 132-23 193-3l-13-17c24-2 47 9 57 31 11-9 27-12 42-6l-18 13c42 18 66 58 66 99-12-14-29-22-45-26 6 23 6 43 0 64-4-35-21-70-44-98-24 31-58 45-94 49l18-29c-28 25-61 36-101 37l19-27c-25 19-51 30-78 34l15-34c-27 24-46 52-52 90Z" fill="#351512" class="outline"/>
+    <path d="M164 116c48-33 119-41 181-19" fill="none" stroke="#48201a" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+
+    <!-- Brows, eyes, cheeks, mouth -->
+    <path d="M178 212c10-11 27-12 38-2M349 210c10-11 27-11 37 1" fill="none" class="thin"/>
+    <ellipse cx="207" cy="271" rx="32" ry="39" fill="#2a0d0b" class="thin"/>
+    <ellipse cx="362" cy="271" rx="32" ry="39" fill="#2a0d0b" class="thin"/>
+    <ellipse cx="214" cy="258" rx="12" ry="15" fill="#fff"/>
+    <circle cx="192" cy="279" r="7" fill="#fff"/>
+    <ellipse cx="370" cy="257" rx="12" ry="15" fill="#fff"/>
+    <circle cx="348" cy="279" r="7" fill="#fff"/>
+    <ellipse cx="177" cy="322" rx="21" ry="16" fill="#fb7e91"/>
+    <ellipse cx="391" cy="322" rx="21" ry="16" fill="#fb7e91"/>
+    <path d="M248 305h72c0 28-16 47-36 47s-36-19-36-47Z" fill="#260909" class="thin"/>
+    <path d="M254 314c8-4 19-6 30-6s22 2 30 6c-5 21-17 33-30 33s-25-12-30-33Z" fill="#ff778a"/>
+  </g>
+
+  </svg></svg>
