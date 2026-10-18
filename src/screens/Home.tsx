@@ -12,6 +12,7 @@ import { CheckIcon, CloseIcon, KiteIcon, LetterIcon } from '../glyphs';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { RemindSheet } from '../components/RemindSheet';
 import { BagSheet } from '../components/BagSheet';
+import { FriendsSheet } from '../components/Friends';
 
 import { track } from '../track';
 import { buzz } from '../haptics';
@@ -120,6 +121,28 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
       track('poke');
     }
   };
+  // A friend's invitation (?ban=CODE): whose it is, then one tap to join their board.
+  const [friendInv, setFriendInv] = useState<{ code: string; name: string; joined?: boolean } | null>(null);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+  useEffect(() => {
+    const code = new URLSearchParams(location.search).get('ban');
+    if (!code || !/^[A-Za-z2-9]{8}$/.test(code)) return;
+    api.friendWho(code).then((r) => setFriendInv({ code: code.toUpperCase(), name: r.name })).catch(() => {});
+  }, []);
+  const acceptInvite = async () => {
+    if (!friendInv) return;
+    try {
+      const r = await api.friendJoin({ playerId: playerId(), code: friendInv.code, name: prefs.name || undefined });
+      setFriendInv({ ...friendInv, name: r.name, joined: true });
+      track('friend_join');
+      const url = new URL(location.href);
+      url.searchParams.delete('ban');
+      history.replaceState(null, '', url.pathname + (url.search === '?' ? '' : url.search) + url.hash);
+    } catch (e) {
+      setFriendInv(null);
+      setInvited(e instanceof Error ? e.message : '');
+    }
+  };
   const canSupport = !!support && !!(support.momo || support.qr || support.card || support.account);
   const [copied, setCopied] = useState(false);
   const [payTab, setPayTab] = useState<'bank' | 'qr'>('bank');
@@ -199,6 +222,26 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             {CHALLENGE.t ? ` (${CHALLENGE.t})` : ''}
             {CHALLENGE.d === vnDay() ? ` hôm nay và ${challengeBanner(seedOf(CHALLENGE.n, CHALLENGE.a))}` : ` ngày ${CHALLENGE.d.slice(8, 10)}/${CHALLENGE.d.slice(5, 7)}. Thử sức với chuyến bay hôm nay nhé!`}
           </p>
+        </div>
+      )}
+
+      {friendInv && (
+        <div className="challenge">
+          <span className="challenge-k">Lời mời đua diều</span>
+          {friendInv.joined ? (
+            <p>
+              Bạn và <b>{friendInv.name}</b> đã ở chung bảng bạn bè. Bay xong mỗi ngày là thấy ai cao hơn.
+            </p>
+          ) : (
+            <p>
+              <b>{friendInv.name}</b> rủ bạn đua thả diều mỗi ngày trên bảng bạn bè.
+            </p>
+          )}
+          {friendInv.joined ? (
+            <button className="toast-link" onClick={() => { setFriendInv(null); setFriendsOpen(true); }}>Xem bảng bạn bè</button>
+          ) : (
+            <button className="toast-link" onClick={() => void acceptInvite()}>Nhận lời</button>
+          )}
         </div>
       )}
 
@@ -314,6 +357,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
                 ['Gói chủ đề', 'Tết, Hoa Đăng, Lặn Biển, Âm Nhạc', () => { setThemes(true); track('themes'); }, 'Sắp có'],
                 ['Bilion của tôi', account() ? `Đã đăng nhập${account()!.name ? ': ' + account()!.name : ''}` : 'Đăng nhập Google, giữ lịch sử trên mọi máy', () => onAccount()],
                 ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
+                ['Bảng bạn bè', 'Đua điểm với bạn bè mỗi ngày', () => { setFriendsOpen(true); track('friends'); }],
                 ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
                 ['Nhắc chơi mỗi ngày', 'Thêm lời nhắc vào lịch của bạn', () => { setSheet('remind'); track('remind_open'); }],
                 ['Góp ý', 'Báo lỗi, đề xuất câu hỏi', () => setSheet('feedback')],
@@ -368,6 +412,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
       )}
 
       {bag && <BagSheet sky={sky} onClose={() => setBag(false)} />}
+      {friendsOpen && <FriendsSheet onClose={() => setFriendsOpen(false)} />}
 
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}

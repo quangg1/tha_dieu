@@ -658,3 +658,35 @@ describe('accounts', () => {
     A.setVerifier(null);
   });
 });
+
+describe('friends', () => {
+  it('invites by public code, hides today\'s scores until you finish, and keeps a seven-day race', async () => {
+    const F = await import('./friends.js');
+    const a = 'friend_aaaa_0001';
+    const b = 'friend_bbbb_0001';
+    const mineA = await F.myCode(db, a, 'Lan');
+    expect(mineA.code).toMatch(/^[A-Z2-9]{8}$/);
+    expect((await F.whoIs(db, mineA.code)).name).toBe('Lan');
+    await expect(F.join(db, a, mineA.code)).rejects.toThrow();
+    expect((await F.join(db, b, mineA.code, 'Minh')).name).toBe('Lan');
+    // Lan finishes today with a score; Minh has not flown yet: Lan's score stays hidden from Minh.
+    await db.query(`insert into runs (player_id, day, mode, name, score, altitude, grid) values ($1, $2::date, 'daily', 'Lan', 230, 1200, '1234560')`, [a, day]);
+    const yday = S.vnToday(new Date(Date.now() - 86_400_000));
+    await db.query(`insert into runs (player_id, day, mode, name, score, altitude, grid) values ($1, $2::date, 'daily', 'Minh', 90, 400, '1111111')`, [b, yday]);
+    const fb = await F.friendsBoard(db, b);
+    expect(fb.friends).toBe(1);
+    const lan = fb.rows.find((r) => !r.me)!;
+    expect(lan.name).toBe('Lan');
+    expect(lan.flew).toBe(true);
+    expect(lan.score).toBeNull();
+    expect(lan.week).toBe(0);
+    expect(fb.rows.find((r) => r.me)!.week).toBe(90);
+    expect(JSON.stringify(fb)).not.toContain(a);
+    // Lan has finished, so she sees everything.
+    const fa = await F.friendsBoard(db, a);
+    expect(fa.rows.find((r) => r.me)!.score).toBe(230);
+    expect(fa.rows.find((r) => !r.me)!.week).toBe(90);
+    await F.leave(db, b, mineA.code);
+    expect((await F.friendsBoard(db, b)).friends).toBe(0);
+  });
+});

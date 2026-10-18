@@ -6,6 +6,7 @@ import { getDb, type Db } from './db.js';
 import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
 import * as A from './account.js';
+import * as F from './friends.js';
 import { NIGHT_VERDICTS } from '../shared/book/night-verdicts.js';
 
 let ready: Promise<void> | null = null;
@@ -185,6 +186,35 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     method: 'POST',
     async run({ db, auth }) {
       return A.logout(db, auth);
+    },
+  },
+  // Friends: the board, an invitation's owner, accepting and leaving (player ids stay secret; codes are public).
+  friends: {
+    method: 'GET',
+    async run({ db, query }) {
+      const pid = S.checkPlayer(query.get('playerId'));
+      const name = query.get('name');
+      if (name) await F.myCode(db, pid, name);
+      return F.friendsBoard(db, pid);
+    },
+  },
+  friendwho: {
+    method: 'GET',
+    async run({ db, query }) {
+      return F.whoIs(db, query.get('code'));
+    },
+  },
+  friendjoin: {
+    method: 'POST',
+    async run({ db, body, net }) {
+      if (!(await S.hit(db, `fj:${net}`, S.vnToday(), 40))) throw new S.GameError(429, 'Thử lại sau nhé.');
+      return F.join(db, S.checkPlayer(body.playerId), body.code, body.name);
+    },
+  },
+  friendleave: {
+    method: 'POST',
+    async run({ db, body }) {
+      return F.leave(db, S.checkPlayer(body.playerId), body.code);
     },
   },
   board: {

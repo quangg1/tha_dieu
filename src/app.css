@@ -611,3 +611,6 @@ button svg,a svg{flex-shrink:0}
 .acct-kites{display:flex;gap:4px}
 .acct-kites img{width:26px;height:26px}
 .acct-kites img.off{opacity:.3;filter:grayscale(1)}
+.fr-board .board-row{grid-template-columns:28px minmax(0,1fr) auto auto}
+.fr-days{font-size:12px;color:var(--bi-muted)}
+.fr-board .board-row b{font-variant-numeric:tabular-nums}

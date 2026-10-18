@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { CEILING_L, DAY_BANDS, TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
-import { api, type BoardRow, type FinishResult } from '../api';
+import { api, type FriendsBoard, type BoardRow, type FinishResult } from '../api';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
@@ -13,6 +13,7 @@ import { musicLevel, type Summary } from './Game';
 import { track } from '../track';
 import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/PlayerStats';
 import { FeedbackSheet } from '../components/FeedbackSheet';
+import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
 import { CheckIcon, FlagIcon } from '../glyphs';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
@@ -75,6 +76,15 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   }, [result.reveal]);
 
   const loadBoard = () => api.board(mode, pid).then(setBoard).catch(() => setBoard(null));
+  // Friends' scores for today, now that this flight is done.
+  const [friends, setFriends] = useState<FriendsBoard | null>(null);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+  const [invited, setInvited] = useState('');
+  useEffect(() => {
+    if (mode !== 'daily') return;
+    api.friends(pid, prefs.name || undefined).then(setFriends).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result.score]);
   useEffect(() => {
     void loadBoard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,6 +184,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
       }
       prefs.name = n;
       setSaved(true);
+      if (mode === 'daily') api.friends(pid, n).then(setFriends).catch(() => {});
       void loadBoard();
     } catch (e) {
       flash(e instanceof Error ? e.message : 'Chưa lưu được tên.');
@@ -314,7 +325,25 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
         </section>
 
-        <section className="card">
+                {mode === 'daily' && friends && (
+          <section className="card">
+            <div className="card-k card-k-row">
+              <span>Bạn bè hôm nay</span>
+              {friends.friends > 0 && <button className="toast-link" onClick={() => setFriendsOpen(true)}>Xem cả tuần</button>}
+            </div>
+            {friends.friends > 0 ? (
+              <FriendsList board={friends} tab="today" compact />
+            ) : (
+              <p className="row-q" style={{ margin: 0 }}>Rủ bạn bè cùng chơi để đua điểm với nhau mỗi ngày.</p>
+            )}
+            <button className="invite-btn" onClick={() => void shareInvite(friends.code).then((m) => { setInvited(m); if (m) setTimeout(() => setInvited(''), 3000); })}>
+              {invited || 'Mời bạn bè vào bảng'}
+            </button>
+          </section>
+        )}
+        {friendsOpen && <FriendsSheet onClose={() => setFriendsOpen(false)} />}
+
+<section className="card">
           <div className="card-k card-k-row">
             <span>Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'}</span>
             {board && <small>{board.players.toLocaleString('vi-VN')} người chơi</small>}

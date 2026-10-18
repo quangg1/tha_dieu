@@ -6,6 +6,7 @@ import { MyRecord } from '../components/PlayerStats';
 import { BagSheet, KITE_PICS } from '../components/BagSheet';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { RemindSheet } from '../components/RemindSheet';
+import { FriendsSheet } from '../components/Friends';
 import type { SkyScene } from '../scene/sky';
 import { SKINS, unlocked } from '../skins';
 import { account, album, enterAccount, krillFound, leaveAccount, playerId, refreshAccount, stats } from '../store';
@@ -14,7 +15,7 @@ import { track } from '../track';
 type Pending = { session: string; device: string; days: number; profile: { name: string | null; email: string | null } };
 
 export default function Account({ soundButton, onHome, sky }: { soundButton: ReactNode; onHome: () => void; sky?: SkyScene | null }) {
-  const [sheet, setSheet] = useState<'bag' | 'remind' | 'feedback' | null>(null);
+  const [sheet, setSheet] = useState<'bag' | 'remind' | 'feedback' | 'friends' | null>(null);
   const [acc, setAcc] = useState(account());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -169,6 +170,12 @@ export default function Account({ soundButton, onHome, sky }: { soundButton: Rea
 
         {msg && <p className="acct-msg" role="status">{msg}</p>}
 
+        <section className="card acct-card">
+          <div className="card-k">Đua cùng bạn bè</div>
+          <p className="acct-p">Mời bạn bè và so điểm mỗi ngày sau khi bay xong, cộng dồn cả tuần.</p>
+          <button className="pill-btn ghost" onClick={() => { setSheet('friends'); track('friends'); }}>Bảng bạn bè ›</button>
+        </section>
+
         <section className="card">
           <div className="card-k">{acc ? 'Thành tích của tài khoản' : 'Trên máy này'}</div>
           <MyRecord s={st} krill={krillFound()} />
@@ -212,6 +219,7 @@ export default function Account({ soundButton, onHome, sky }: { soundButton: Rea
       {sheet === 'bag' && <BagSheet sky={sky} onClose={() => setSheet(null)} />}
       {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
+      {sheet === 'friends' && <FriendsSheet onClose={() => setSheet(null)} />}
     </main>
   );
 }

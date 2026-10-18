@@ -220,6 +220,22 @@ create table if not exists sessions (
   last_at timestamptz not null default now()
 );
 
+-- Friends: each player has a public invite code (their player id stays secret) and the name friends see.
+create table if not exists friend_codes (
+  player_id text primary key,
+  code text not null unique,
+  name text,
+  created_at timestamptz not null default now()
+);
+
+-- Who races whom, stored both ways.
+create table if not exists friendships (
+  player_id text not null,
+  friend text not null,
+  at timestamptz not null default now(),
+  primary key (player_id, friend)
+);
+
 -- Device histories folded into an account, for the record.
 create table if not exists account_merges (
   user_id text not null,

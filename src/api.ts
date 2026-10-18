@@ -123,7 +123,33 @@ export interface AccountMe {
 
 const bearer = (session: string) => ({ authorization: `Bearer ${session}` });
 
+export interface FriendRow {
+  code: string;
+  name: string;
+  me: boolean;
+  flew: boolean;
+  score: number | null;
+  altitude: number | null;
+  grid: string | null;
+  week: number;
+  days: number;
+}
+
+export interface FriendsBoard {
+  day: string;
+  code: string;
+  name: string | null;
+  done: boolean;
+  friends: number;
+  rows: FriendRow[];
+}
+
 export const api = {
+  friends: (playerId: string, name?: string) =>
+    call<FriendsBoard>(`friends?playerId=${encodeURIComponent(playerId)}${name ? `&name=${encodeURIComponent(name)}` : ''}`),
+  friendWho: (code: string) => call<{ name: string }>(`friendwho?code=${encodeURIComponent(code)}`),
+  friendJoin: (b: { playerId: string; code: string; name?: string }) => call<{ name: string }>('friendjoin', b),
+  friendLeave: (b: { playerId: string; code: string }) => call<{ ok: boolean }>('friendleave', b),
   account: {
     login: (b: { jwt: string; playerId: string }) =>
       call<{ session: string; playerId: string; created: boolean; deviceDays: number; profile: { name: string | null; email: string | null } }>('account/login', b),

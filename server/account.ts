@@ -157,6 +157,16 @@ export async function merge(db: Db, auth: string, fromRaw: unknown) {
        and not exists (select 1 from asks x where x.player_id = $2 and x.question_id = asks.question_id and x.input_key = asks.input_key)`,
     [from, acc.player_id],
   );
+  // Friends made on this device race the account from now on.
+  await db.query(
+    `insert into friendships (player_id, friend) select $2, friend from friendships where player_id = $1 and friend <> $2 on conflict do nothing`,
+    [from, acc.player_id],
+  );
+  await db.query(
+    `insert into friendships (player_id, friend) select player_id, $2 from friendships where friend = $1 and player_id <> $2 on conflict do nothing`,
+    [from, acc.player_id],
+  );
+  await db.query(`delete from friendships where player_id = $1 or friend = $1`, [from]);
   // A name the village head took off the board stays off on the account too.
   await db.query(`insert into muted (player_id) select $2 where exists (select 1 from muted where player_id = $1) on conflict do nothing`, [from, acc.player_id]);
   await db.query(
