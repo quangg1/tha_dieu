@@ -8,6 +8,7 @@ import { MORE2 } from './more2.js';
 import { NARROW } from './narrow.js';
 import { MORE3 } from './night.js';
 import { MORE4 } from './more4.js';
+import { MORE5 } from './more5.js';
 import { LEXICONS } from './index.js';
 import { foldColours } from './prune.js';
 
@@ -391,7 +392,7 @@ export const RETIRED = new Set<string>(
 /** The hand-written thickening passes, in order. */
 function thicken(q: QuestionDef, id: string): QuestionDef {
   let out = q;
-  for (const more of [MORE, MORE2, MORE4, MORE3]) if (more[id]) out = addMore(out, more[id], more === MORE4);
+  for (const more of [MORE, MORE2, MORE4, MORE5, MORE3]) if (more[id]) out = addMore(out, more[id], more === MORE4);
   return out;
 }
 

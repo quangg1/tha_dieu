@@ -229,7 +229,7 @@ export const DROP: Record<string, string[]> = {
   'tv-qua-1tieng': ['Măng'],
   'tv-qua-chu-m': ['Mọng nước', 'Măng tre'],
   'tv-qua-chua': ['Ô mai'],
-  'tv-qua-do': ['Me', 'Chùm ruột', 'Quả thanh trà', 'Đu đủ chín'],
+  'tv-qua-do': ['Me', 'Chùm ruột', 'Quả thanh trà', 'Đu đủ chín', 'Quả mua', 'Quả sim', 'Quả sim chín'],
   'tv-quoc-hoa': ['Hoa nữ hoàng', 'Hoa ngải tây', 'Hoa đuôi chồn', 'Hoa phượng tím', 'Hoa đinh tử', 'Hoa păng xê'],
   'tv-rau-thom': ['Rau má', 'Rau mầm', 'Rau dớn', 'Rau sắng', 'Lá bép', 'Rau càng cua', 'Mắc khén', 'Hạt dổi', 'Thảo quả', 'Hạt thì là'],
   'tv-sao': ['Sao Kim'],
@@ -248,6 +248,13 @@ export const DROP: Record<string, string[]> = {
   'x-dan': ['Đàn ching', 'Đàn sampler'],
   'x-nuoc': ['Ếch phi tiêu độc', 'Ếch phi tiêu xanh', 'Ếch phi tiêu vàng', 'Ếch cây mắt đỏ', 'Ếch bay', 'Ếch cây sần Bắc Bộ', 'Cua dừa', 'Cua đỏ đảo Giáng Sinh', 'Linh dương Sitatunga', 'Kỳ giông lửa', 'Ếch giun', 'Ếch giun Việt Nam'],
   'xe-thuy': ['Tàu lặn', 'Tàu lặn biển sâu'],
+};
+
+/** Spellings attached to the wrong answer (a kite under "glider", a flower under "cherry"): the answer stays, they go. */
+export const UNALIAS: Record<string, string[]> = {
+  'xe-tho': ['Diều'],
+  'tv-qua-do': ['Hoa anh đào', 'Sakura'],
+  'kn-hangxe': ['Yamaha Audio'],
 };
 
 /** Answers merged into another answer of the same question (main name → target main name). */
@@ -295,15 +302,24 @@ export function foldColours(q: QuestionDef): QuestionDef {
 function dropAndMerge(q: QuestionDef): QuestionDef {
   const drop = new Set((DROP[q.id] ?? []).map(lower));
   const merge = MERGE[q.id] ?? {};
-  if (!drop.size && !Object.keys(merge).length) return q;
+  const unalias = new Set((UNALIAS[q.id] ?? []).map(lower));
+  if (!drop.size && !Object.keys(merge).length && !unalias.size) return q;
   const main = (a: QuestionDef['answers'][number]) => lower(a.aliases[0] ?? a.display);
+  const loose = q.answers.flatMap((a) => a.aliases.filter((x) => unalias.has(lower(x))));
+  const trimmed = q.answers.map((a) => {
+    const aliases = a.aliases.filter((x) => !unalias.has(lower(x)));
+    if (aliases.length === a.aliases.length || !aliases.length) return a;
+    return { ...a, aliases, display: unalias.has(lower(a.display)) ? aliases[0] : a.display };
+  });
+  q = { ...q, answers: trimmed };
   let answers = q.answers.filter((a) => a.key === q.krillKey || !drop.has(main(a)));
   // What the struck answers were called, so a player typing one hears at once that it does not fit (instead of the
   // referee being asked, and perhaps teaching it back to the book).
   // Toneless spellings count too ("chim canh cut"), as "n:" keys, unless an answer still in the book reads the same.
   const names = (a: QuestionDef['answers'][number]) => [a.key, ...a.aliases.map(soft), ...a.aliases.map((x) => 'n:' + norm(x))];
   const kept = new Set(answers.flatMap(names));
-  const struck = q.answers.filter((a) => !answers.includes(a)).flatMap(names).filter((k) => k && k !== 'n:' && !kept.has(k));
+  const gone = [...q.answers.filter((a) => !answers.includes(a)).flatMap(names), ...loose.flatMap((x) => [soft(x), 'n:' + norm(x)])];
+  const struck = gone.filter((k) => k && k !== 'n:' && !kept.has(k));
   if (struck.length) STRUCK.set(q.id, new Set([...(STRUCK.get(q.id) ?? []), ...struck]));
   for (const [from, to] of Object.entries(merge)) {
     const src = answers.find((a) => main(a) === lower(from));
