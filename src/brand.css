@@ -1,0 +1,43 @@
+/*
+ * Bilion's one theme. Every screen (home, flight, result, collection, account, the privacy page, and every theme
+ * pack) is drawn with these colours, so the app always looks like itself.
+ *
+ * Two layers, never mixed:
+ *   --bi-*    the brand: ink, paper, the kite red, the gold of Cung Trăng. Buttons, cards, type, badges, links.
+ *             No pack, skin or screen redefines them.
+ *   --pack-*  what a theme pack (Tết, Hoa Đăng, Lặn Biển, Âm Nhạc…) brings: its scenery and one accent, used only
+ *             inside the pack's scene (the artwork frame, a thin accent line, the pack's own tag dot). A pack sets
+ *             them with [data-pack="…"] on the element that shows it, so the rest of the app is untouched.
+ * Kite skins only colour the kite and the sky canvas, never the interface.
+ */
+:root {
+  /* Brand: the kite red and its darker inks */
+  --bi-red: #e5533d;
+  --bi-red-ink: #c2412d;
+  --bi-red-dark: #b23a26;
+  --bi-red-soft: #fff0ec;
+  /* Brand: ink and paper */
+  --bi-ink: #0f2747;
+  --bi-ink-2: #33415a;
+  --bi-muted: #5b6778;
+  --bi-faint: #8a97a8;
+  --bi-paper: #ffffff;
+  --bi-paper-2: #eef2f7;
+  --bi-line: #dfe4ec;
+  /* Brand: the gold of the hidden answer */
+  --bi-gold: #ffd66b;
+  --bi-gold-ink: #b07d10;
+  /* Brand: the day sky behind everything */
+  --bi-sky-top: #a7d8ee;
+  --bi-sky: #6db6e0;
+
+  /* Pack layer: neutral until a pack sets it */
+  --pack-scene: var(--bi-sky);
+  --pack-accent: var(--bi-red);
+}
+
+/* Theme packs: scenery and accent only. */
+[data-pack='tet'] { --pack-scene: #6e1a14; --pack-accent: #f2b630; }
+[data-pack='hoadang'] { --pack-scene: #1b1530; --pack-accent: #ffb84d; }
+[data-pack='lanbien'] { --pack-scene: #071a2c; --pack-accent: #4cc3f0; }
+[data-pack='amnhac'] { --pack-scene: #1e1036; --pack-accent: #a98bff; }

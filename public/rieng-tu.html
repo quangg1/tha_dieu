@@ -7,14 +7,17 @@
 <meta name="description" content="Bilion lưu gì về người chơi, để làm gì, và cách xóa." />
 <link rel="icon" href="/icon.svg" />
 <style>
-  :root { --bg: #eef6fb; --paper: #fff; --ink: #0f2747; --muted: #4a5f7d; --line: #d5e3ef; --accent: #e5533d; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0d1a2c; --paper: #13243b; --ink: #e8f0f8; --muted: #a7b8cc; --line: #24395a; --accent: #ff8a6b; } }
+  /* Bilion's one theme (src/brand.css): the same ink, paper and kite red as the game. */
+  :root { --bi-red: #e5533d; --bi-red-ink: #c2412d; --bi-ink: #0f2747; --bi-muted: #5b6778; --bi-paper: #ffffff; --bi-line: #dfe4ec; --bi-sky-top: #a7d8ee; --bi-sky: #6db6e0;
+          --bg: linear-gradient(180deg, var(--bi-sky-top), var(--bi-sky)); --paper: var(--bi-paper); --ink: var(--bi-ink); --muted: var(--bi-muted); --line: var(--bi-line); --accent: var(--bi-red-ink); }
+  @media (prefers-color-scheme: dark) { :root { --bg: linear-gradient(180deg, #1d4a80, #101c3d); --paper: #13243b; --ink: #e8f0f8; --muted: #a7b8cc; --line: #24395a; --accent: #ff8a6b; } }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); background-attachment: fixed; color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   main { max-width: 680px; margin: 0 auto; padding: 28px 16px 48px; }
   a { color: var(--accent); }
-  .back { display: inline-block; margin-bottom: 18px; font-weight: 600; text-decoration: none; }
-  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  .back { display: inline-block; margin-bottom: 18px; padding: 8px 14px; border-radius: 999px; background: var(--paper); font-weight: 700; text-decoration: none; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; color: var(--ink); text-shadow: 0 3px 0 var(--bi-red); }
+  .lede { color: var(--ink) !important; opacity: .82; }
   .lede { color: var(--muted); margin: 0 0 24px; }
   section { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin: 0 0 14px; }
   h2 { font-size: 18px; margin: 0 0 8px; }

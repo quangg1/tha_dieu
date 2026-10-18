@@ -39,10 +39,10 @@ function useCountdown() {
 
 /** Theme packs shown as a locked preview until they launch. */
 const THEMES = [
-  { id: 'tet', name: 'Tết', tag: 'Ra mắt dịp Tết', bg: '#6e1a14', color: '#ffd36b', desc: 'Mỗi đáp án làm cây mai nhà bé Bi nở thêm hoa. Càng hiếm, hoa nở càng rộ, kèm lì xì, bánh chưng và pháo hoa đêm giao thừa.', measure: 'Thước đo: lộc xuân, số hoa nở' },
-  { id: 'hoadang', name: 'Hoa Đăng', tag: 'Đêm rằm Hội An', bg: '#1b1530', color: '#ffcf6b', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
-  { id: 'lanbien', name: 'Lặn Biển', tag: 'Xuống đáy đại dương', bg: '#071a2c', color: '#7fdcff', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
-  { id: 'amnhac', name: 'Âm Nhạc', tag: 'Đại nhạc hội', bg: '#1e1036', color: '#c9a8ff', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
+  { id: 'tet', name: 'Tết', tag: 'Ra mắt dịp Tết', desc: 'Mỗi đáp án làm cây mai nhà bé Bi nở thêm hoa. Càng hiếm, hoa nở càng rộ, kèm lì xì, bánh chưng và pháo hoa đêm giao thừa.', measure: 'Thước đo: lộc xuân, số hoa nở' },
+  { id: 'hoadang', name: 'Hoa Đăng', tag: 'Đêm rằm Hội An', desc: 'Thả đèn trên sông Hoài đêm rằm. Đáp án càng hiếm, đèn trôi càng xa: qua Chùa Cầu, ra Cửa Đại, tới biển Đông.', measure: 'Thước đo: mét sông trôi' },
+  { id: 'lanbien', name: 'Lặn Biển', tag: 'Xuống đáy đại dương', desc: 'Lặn từ rạn san hô Nha Trang xuống vùng biển tối nơi cá tự phát sáng, rồi tới đáy vực sâu 11 km.', measure: 'Thước đo: mét độ sâu' },
+  { id: 'amnhac', name: 'Âm Nhạc', tag: 'Đại nhạc hội', desc: 'Mỗi đáp án là một nốt nhạc. Càng hiếm, nốt bay càng cao và khán phòng càng đông, từ sân khấu làng tới đại nhạc hội.', measure: 'Thước đo: khán giả cổ vũ' },
 ];
 
 /** Lunar New Year 2027 (6 February), for the Tết pack's countdown. */
@@ -349,7 +349,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             <p className="sup-note">Cùng một câu đố, những bầu trời mới. Luật chơi giữ nguyên, mỗi gói đổi khung cảnh, nhạc nền và thước đo của chuyến đi.</p>
             <div className="themes">
               {THEMES.map((t, i) => (
-                <div key={t.id} className={`theme-card${i === 0 ? ' featured' : ''}`} style={{ '--bg': t.bg, '--c': t.color } as CSSProperties}>
+                <div key={t.id} className={`theme-card${i === 0 ? ' featured' : ''}`} data-pack={t.id}>
                   <div className="theme-art" dangerouslySetInnerHTML={{ __html: THEME_ART[t.id] }} />
                   <span className="theme-lock">
                     <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
