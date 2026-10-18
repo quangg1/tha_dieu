@@ -543,7 +543,9 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
     useReferee =
       usage.calls <= REFEREE_CALLS_PER_DAY &&
       (!net || (await hit(db, `ref:${net}`, day, REFEREE_CALLS_PER_NET))) &&
-      (await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 5000));
+      (await hit(db, 'ref:all', day, Number(process.env.REFEREE_DAILY_MAX) || 450)) &&
+      // The AI's own per-minute limit (Gemini's free tier allows 15): past it the call would only fail after a wait.
+      (await hit(db, `ref:min:${new Date().toISOString().slice(0, 16)}`, day, Number(process.env.REFEREE_PER_MINUTE) || 14));
   }
   // Wikidata (for prompts it can answer exactly) and the referee start at once.
   const wikiP = WIKI_RULES[q.id] ? wikiCheck(q.id, input).catch(() => null) : Promise.resolve(null);
