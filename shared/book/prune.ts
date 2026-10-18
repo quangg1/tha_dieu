@@ -3,6 +3,7 @@
 // name still scores, as that answer. Colours that name a different species or product stay apart ("Cá voi xanh",
 // "Tiêu đen", "Phượng tím", "Rượu vang đỏ"), and so do colour questions, where "Xanh lam" is the answer itself.
 import type { QuestionDef } from '../match.js';
+import { norm, soft } from '../normalize.js';
 
 const COLOURS = new Set(['đỏ', 'vàng', 'xanh', 'trắng', 'đen', 'tím', 'hồng', 'cam', 'nâu', 'xám', 'bạc', 'lục', 'lam']);
 
@@ -254,6 +255,15 @@ export const MERGE: Record<string, Record<string, string>> = {
   'tv-hoa-chu-h': { 'Hồng ngoại Pháp': 'Hồng ngoại', 'Hồng môn trắng': 'Hồng môn đỏ' },
 };
 
+/** Per question, the soft keys of every name of a struck answer (filled as the book is built). */
+export const STRUCK = new Map<string, Set<string>>();
+
+/** True when the input is one of the names the tidy-up struck from this question. */
+export function struck(qid: string, input: string): boolean {
+  const s = STRUCK.get(qid);
+  return !!s && (s.has(soft(input)) || s.has('n:' + norm(input)));
+}
+
 const lower = (s: string) => s.normalize('NFC').toLowerCase();
 
 /** Folds colour variants into their plain answer. The day's hidden answer is never folded away. */
@@ -288,6 +298,13 @@ function dropAndMerge(q: QuestionDef): QuestionDef {
   if (!drop.size && !Object.keys(merge).length) return q;
   const main = (a: QuestionDef['answers'][number]) => lower(a.aliases[0] ?? a.display);
   let answers = q.answers.filter((a) => a.key === q.krillKey || !drop.has(main(a)));
+  // What the struck answers were called, so a player typing one hears at once that it does not fit (instead of the
+  // referee being asked, and perhaps teaching it back to the book).
+  // Toneless spellings count too ("chim canh cut"), as "n:" keys, unless an answer still in the book reads the same.
+  const names = (a: QuestionDef['answers'][number]) => [a.key, ...a.aliases.map(soft), ...a.aliases.map((x) => 'n:' + norm(x))];
+  const kept = new Set(answers.flatMap(names));
+  const struck = q.answers.filter((a) => !answers.includes(a)).flatMap(names).filter((k) => k && k !== 'n:' && !kept.has(k));
+  if (struck.length) STRUCK.set(q.id, new Set([...(STRUCK.get(q.id) ?? []), ...struck]));
   for (const [from, to] of Object.entries(merge)) {
     const src = answers.find((a) => main(a) === lower(from));
     const dst = answers.find((a) => main(a) === lower(to));

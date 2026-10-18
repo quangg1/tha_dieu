@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Matcher } from '../match.js';
 import { soft } from '../normalize.js';
 import { firstLetter, syllables } from './build.js';
+import { struck } from './prune.js';
 import { BOOK, BOOK_BY_ID, DROPPED } from './questions.js';
 
 const match = (id: string, input: string) => {
@@ -21,6 +22,17 @@ describe('village book', () => {
       expect(q.answers.find((a) => a.priorTier === 5)!.key, q.id).toBe(q.krillKey);
       expect(q.answers.length, q.id).toBeGreaterThanOrEqual(8);
     }
+  });
+
+  it('strikes answers that do not fit their question, and remembers their names', () => {
+    expect(match('x-bay', 'Chim cánh cụt')).toBeNull();
+    expect(match('co-the', 'Nước mắt')).toBeNull();
+    expect(struck('x-bay', 'chim cánh cụt')).toBe(true);
+    expect(struck('x-bay', 'chim canh cut')).toBe(true);
+    expect(struck('x-bay', 'Đại bàng')).toBe(false);
+    expect(struck('x-bay', 'dai bang')).toBe(false);
+    expect(match('x-bay', 'Đại bàng')).not.toBeNull();
+    expect(BOOK_BY_ID.get('dv-sung')!.answers.find((a) => a.key === BOOK_BY_ID.get('dv-sung')!.krillKey)!.display).not.toBe('Voi ma mút');
   });
 
   it('holds well over ten thousand answers', () => {

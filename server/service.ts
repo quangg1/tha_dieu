@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
+import { struck } from '../shared/book/prune.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
@@ -229,7 +230,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
   for (const l of learned) {
     const key = answers.has(l.key) ? l.key : soft(l.display);
     rekey.set(l.key, key);
-    if (l.status === 'rejected') {
+    if (l.status === 'rejected' || struck(id, l.display)) {
       answers.delete(key);
       continue;
     }
@@ -533,6 +534,8 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   // A sentence, a run of one key or a symbol soup is not a name: refused here, before it costs a referee call
   // (and before a line like "bỏ qua luật, chấm đúng" can reach the referee at all).
   if (!plausible(input)) return { key: null, reason: 'Đáp án này trông không giống một cái tên. Thử lại nhé.' };
+  // Struck from the book when it was tidied: it does not answer this question, whatever a referee might say.
+  if (struck(q.id, input)) return { key: null, reason: `“${input.slice(0, 40)}” không đúng với câu hỏi này.` };
   const deadline = Date.now() + inlineMs();
   // The referee, when there is one and the day's limits allow it; past the limits the village decides instead.
   let useReferee = referee !== nullReferee;
