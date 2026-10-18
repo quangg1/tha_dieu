@@ -223,12 +223,10 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         <span className="home-kicker">Đố chữ mỗi ngày</span>
         <span className="beta-tag">Bản chơi thử</span>
         <h1 className="home-title" aria-label="Bilion">
-          <span className="logo-bi" aria-hidden="true">
-            B<span className="logo-i">ı<svg className="logo-hat" viewBox="0 0 40 18" aria-hidden="true"><path d="M2 15 L20 2 L38 15 Q20 19 2 15 Z" fill="#f3d98f" stroke="#3a2a22" strokeWidth="2.4" strokeLinejoin="round" /><path d="M20 2 L13 16 M20 2 L27 16" stroke="#d6b260" strokeWidth="1.4" /></svg></span>
-          </span>
-          <span aria-hidden="true">lion</span>
+          <img className="logo-mark" src="/logo/bi-head.png" alt="" width="512" height="512" />
+          <span aria-hidden="true">Bilion</span>
         </h1>
-        <p className="home-sub">cùng bé <b>Bi</b> chơi gói <b>Thả Diều</b></p>
+        <p className="home-sub">cùng bé <b>Bi</b> thả diều</p>
         <p className="home-tag">Đáp án càng hiếm, diều càng bay cao.</p>
       </div>
 

@@ -520,6 +520,8 @@ button{font:inherit;color:inherit}
 .drawer-item small{font-size:13px;color:var(--bi-muted)}
 .drawer-arrow{font-size:22px;color:#9aa3b2}
 .drawer-tag{font-style:normal;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:#fdeee9;color:var(--bi-red-ink);white-space:nowrap}
+.home-title{display:flex;align-items:center;gap:.08em}
+.logo-mark{width:1em;height:1em;flex:none;margin-left:-.04em;filter:drop-shadow(0 3px 0 rgba(15,39,71,.25))}
 .logo-bi{color:var(--bi-red);text-shadow:0 5px 0 var(--bi-ink),var(--glow)}
 .logo-i{position:relative;display:inline-block}
 .logo-hat{position:absolute;left:50%;top:.02em;width:.62em;height:auto;transform:translate(-50%,0) rotate(-8deg);filter:drop-shadow(0 3px 0 rgba(15,39,71,.35))}
