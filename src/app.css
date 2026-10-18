@@ -598,3 +598,16 @@ button svg,a svg{flex-shrink:0}
 /* An invisible tap target over bé Bi in the painted scene (Home). */
 .kid-poke{position:fixed;z-index:2;padding:0;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:40%}
 .kid-poke:focus-visible{outline:3px solid var(--bi-gold);outline-offset:4px}
+.mine-btn{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;min-height:48px;padding:10px 14px;border:1px solid var(--bi-line);border-radius:14px;background:var(--bi-paper-2);color:var(--bi-ink);font:inherit;text-align:left;cursor:pointer}
+.mine-btn span:first-child{font-weight:800}
+.mine-btn small{flex:1;color:var(--bi-muted);font-size:13px}
+.mine-arrow{font-size:22px;line-height:1;color:var(--bi-faint)}
+.acct-list{gap:0;padding:6px 18px}
+.acct-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:10px 0;border:0;border-bottom:1px solid var(--bi-line);background:none;color:var(--bi-ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+.acct-row:last-child{border-bottom:0}
+.acct-row span:first-child{display:flex;flex-direction:column;gap:2px}
+.acct-row b{font-weight:800}
+.acct-row small{color:var(--bi-muted);font-size:13px}
+.acct-kites{display:flex;gap:4px}
+.acct-kites img{width:26px;height:26px}
+.acct-kites img.off{opacity:.3;filter:grayscale(1)}

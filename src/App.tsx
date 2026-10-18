@@ -81,7 +81,7 @@ export default function App() {
       )}
       {screen.name === 'account' && (
         <Suspense fallback={null}>
-          <Account soundButton={soundButton} onHome={() => setScreen({ name: 'home' })} />
+          <Account sky={sky} soundButton={soundButton} onHome={() => setScreen({ name: 'home' })} />
         </Suspense>
       )}
       {sky && screen.name === 'home' && <Home sky={sky} soundButton={soundButton} onPlay={(mode) => setScreen({ name: 'play', mode, run: Date.now() })} onReview={(summary) => setScreen({ name: 'result', summary })} onAccount={() => setScreen({ name: 'account' })} />}

@@ -1,5 +1,5 @@
-import { type CSSProperties, useEffect, useState, type ReactNode } from 'react';
-import { DAY_BANDS, MILESTONES, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { useEffect, useState, type ReactNode } from 'react';
+import { DAY_BANDS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
@@ -8,18 +8,14 @@ import { challengeLink, readChallenge } from '../shareCard';
 import { bankName, vietQr } from '../../shared/banks.js';
 import { THEME_ART } from '../themeArt';
 import { challengeBanner, seedOf, tauntLine } from '../quips';
-import { SKINS, needLabel, progress, skinById, unlocked } from '../skins';
-import { previewSvg } from '../kites';
 import { CheckIcon, CloseIcon, KiteIcon, LetterIcon } from '../glyphs';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { RemindSheet } from '../components/RemindSheet';
+import { BagSheet } from '../components/BagSheet';
 
-/** Pictures of every kite for the collection, built once. */
-const KITE_PICS: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id))]));
-const KITE_HERO: Record<string, string> = Object.fromEntries(SKINS.map((k) => [k.id, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(previewSvg(k.id, { flutes: true }))]));
 import { track } from '../track';
 import { buzz } from '../haptics';
-import { account, addToAlbum, album, krillFound, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
+import { account, addToAlbum, msToNextDay, playerId, prefs, stats, today, vnDay } from '../store';
 import type { Summary } from './Game';
 
 /** A friend's result from a challenge link, read once and kept for this visit. */
@@ -76,7 +72,6 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
     }
     track('theme_want', { id });
   };
-  const [skin, setSkin] = useState(prefs.skin);
   const [invited, setInvited] = useState('');
   const [sheet, setSheet] = useState<'feedback' | 'support' | 'remind' | null>(null);
   const [support, setSupport] = useState<Support | null>(null);
@@ -192,11 +187,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         <button className="icon-btn menu-btn" onClick={() => setMenu(true)} aria-label="Mở menu" aria-haspopup="dialog">
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
-        <div className="home-stats">
-          {st.best > 0 && <span className="stat-chip">Cao nhất <b>{formatAlt(st.best)}</b></span>}
-          {st.streak > 0 && <span className="stat-chip">Chuỗi <b>{st.streak} ngày</b></span>}
-          {st.nightBest > 0 && <span className="stat-chip">Thả vô tận <b>{formatAlt(st.nightBest)}</b></span>}
-        </div>
+        <span />
         <span className="hud-sound">{soundButton}</span>
       </div>
 
@@ -302,33 +293,12 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             <LetterIcon /> {invited || 'Thách bạn bè bay cao hơn'}
           </button>
         )}
-        <button className="bag-btn" onClick={() => { setBag(true); track('bag'); }} aria-haspopup="dialog">
-          <span className="bag-txt">
-            <span>Bộ sưu tập</span>
-            <b>
-              {SKINS.filter((x) => unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} cánh diều đã mở
-            </b>
-          </span>
-          <span className="bag-kites" aria-hidden="true">
-            {SKINS.slice(0, 6).map((x) => (
-              <img key={x.id} src={KITE_PICS[x.id]} alt="" className={unlocked(x, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak }) ? '' : 'off'} />
-            ))}
-          </span>
+
+        <button className="mine-btn" onClick={onAccount}>
+          <span>Bilion của tôi</span>
+          <small>{account() ? 'Đã đồng bộ' : 'Chuỗi ngày, bộ sưu tập'}</small>
+          <span className="mine-arrow" aria-hidden="true">›</span>
         </button>
-        <button className="acct-btn" onClick={onAccount}>
-          {account() ? <>Bilion của tôi · <b>đã đồng bộ</b></> : <>Giữ chuỗi ngày trên mọi máy · <b>Đăng nhập</b></>}
-        </button>
-        <div className="home-foot">
-          <button className="link-btn" onClick={() => { setSheet('remind'); track('remind_open'); }} aria-haspopup="dialog">Nhắc chơi</button>
-          <span aria-hidden="true">·</span>
-          <button className="link-btn" onClick={() => setSheet('feedback')} aria-haspopup="dialog">Góp ý</button>
-          {canSupport && (
-            <>
-              <span aria-hidden="true">·</span>
-              <button className="link-btn" onClick={() => { setSheet('support'); track('support'); }} aria-haspopup="dialog">Ủng hộ tác giả</button>
-            </>
-          )}
-        </div>
       </section>
 
       {menu && (
@@ -397,118 +367,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         </div>
       )}
 
-      {bag && (
-        <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Bộ sưu tập" onClick={() => setBag(false)}>
-          <section className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-head">
-              <h2>Bộ sưu tập</h2>
-              <button className="sheet-x" onClick={() => setBag(false)} aria-label="Đóng">
-                <CloseIcon />
-              </button>
-            </div>
-            {(() => {
-              const me = { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak };
-              const cur = skinById(skin);
-              const owned = SKINS.filter((k) => unlocked(k, me)).length;
-              const pick = (id: string) => {
-                prefs.skin = id;
-                setSkin(id);
-                sky.setSkin(skinById(id));
-              };
-              const card = (k: (typeof SKINS)[number]) => {
-                const open = unlocked(k, me);
-                const on = skin === k.id;
-                const pr = open ? null : progress(k, me);
-                return (
-                  <button
-                    key={k.id}
-                    className={`kc${on ? ' on' : ''}${open ? '' : ' locked'}${k.prize ? ' prize' : ''}`}
-                    style={{ '--s1': k.sky[0], '--s2': k.sky[1] } as CSSProperties}
-                    disabled={!open || on}
-                    aria-pressed={on}
-                    onClick={() => pick(k.id)}
-                  >
-                    <span className="kc-win" aria-hidden="true">
-                      <img src={KITE_PICS[k.id]} alt="" />
-                      {!open && (
-                        <i className="kc-lock">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
-                        </i>
-                      )}
-                      {on && <i className="kc-flag">Đang bay</i>}
-                    </span>
-                    <span className="kc-body">
-                      <b>{k.name}</b>
-                      {k.prize && <span className="kc-story">{k.story}</span>}
-                      {open ? (
-                        <small>{on ? 'Đang dùng' : 'Chạm để thả'}</small>
-                      ) : (
-                        <>
-                          <small>{needLabel(k)}</small>
-                          {pr && (
-                            <span className="kc-bar" role="progressbar" aria-valuenow={Math.round(pr.f * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`Tiến độ: ${pr.text}`}>
-                              <span style={{ width: `${Math.max(4, pr.f * 100)}%` }} />
-                            </span>
-                          )}
-                          {pr && <small className="kc-num">{pr.text}</small>}
-                        </>
-                      )}
-                    </span>
-                  </button>
-                );
-              };
-              return (
-                <>
-                  <div className="kc-hero" style={{ '--s1': cur.sky[0], '--s2': cur.sky[1] } as CSSProperties}>
-                    <div className="kc-hero-art" aria-hidden="true">
-                      <img src={KITE_HERO[cur.id]} alt="" />
-                    </div>
-                    <div className="kc-hero-txt">
-                      <span className="kc-k">Đang bay</span>
-                      <b>{cur.name}</b>
-                      <p>{cur.story}</p>
-                      <span className="kc-count">
-                        <em>{owned}</em>/{SKINS.length} cánh diều đã mở
-                      </span>
-                    </div>
-                  </div>
-                  <div className="kc-sec">
-                    <span className="card-k">Cánh diều</span>
-                    <small>{SKINS.filter((k) => !k.prize && unlocked(k, me)).length}/{SKINS.filter((k) => !k.prize).length}</small>
-                  </div>
-                  <div className="kcs">{SKINS.filter((k) => !k.prize).map(card)}</div>
-                  <div className="kc-sec gold">
-                    <span className="card-k">Diều báu</span>
-                    <small>Thưởng cho những chuyến bay xa nhất</small>
-                  </div>
-                  <div className="kcs wide">{SKINS.filter((k) => k.prize).map(card)}</div>
-                </>
-              );
-            })()}
-            <div className="card-k" style={{ margin: '16px 0 8px' }}>Tầng trời đã chạm</div>
-            <div className="layers">
-              {MILESTONES.filter((m) => m.alt > 0).map((m) => (
-                <span key={m.name} className={Math.max(st.best, st.nightBest) >= m.alt ? 'on' : ''}>
-                  {m.name}
-                </span>
-              ))}
-            </div>
-            <div className="card-k" style={{ margin: '16px 0 8px' }}>Đáp án độc nhất: đã tìm ra {krillFound()}</div>
-            <div className="album">
-              {Object.values(album()).length === 0 && <p className="row-q">Đáp án độc nhất của mỗi ngày mở lúc nửa đêm, sau khi cả làng đã bay xong.</p>}
-              {Object.values(album())
-                .sort((a, b) => (a.day < b.day ? 1 : -1))
-                .slice(0, 60)
-                .map((e) => (
-                  <div key={e.day + e.prompt} className={`album-row${e.found ? ' found' : ''}`}>
-                    <span>{e.prompt}</span>
-                    <b>{e.krill}</b>
-                  </div>
-                ))}
-            </div>
-          </section>
-        </div>
-      )}
+      {bag && <BagSheet sky={sky} onClose={() => setBag(false)} />}
 
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}

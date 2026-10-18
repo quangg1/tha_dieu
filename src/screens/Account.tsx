@@ -3,12 +3,18 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { api } from '../api';
 import { authEnabled, backFromGoogle, finishGoogle, signOutGoogle, startGoogle } from '../auth';
 import { MyRecord } from '../components/PlayerStats';
-import { account, enterAccount, krillFound, leaveAccount, playerId, refreshAccount, stats } from '../store';
+import { BagSheet, KITE_PICS } from '../components/BagSheet';
+import { FeedbackSheet } from '../components/FeedbackSheet';
+import { RemindSheet } from '../components/RemindSheet';
+import type { SkyScene } from '../scene/sky';
+import { SKINS, unlocked } from '../skins';
+import { account, album, enterAccount, krillFound, leaveAccount, playerId, refreshAccount, stats } from '../store';
 import { track } from '../track';
 
 type Pending = { session: string; device: string; days: number; profile: { name: string | null; email: string | null } };
 
-export default function Account({ soundButton, onHome }: { soundButton: ReactNode; onHome: () => void }) {
+export default function Account({ soundButton, onHome, sky }: { soundButton: ReactNode; onHome: () => void; sky?: SkyScene | null }) {
+  const [sheet, setSheet] = useState<'bag' | 'remind' | 'feedback' | null>(null);
   const [acc, setAcc] = useState(account());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -168,7 +174,44 @@ export default function Account({ soundButton, onHome }: { soundButton: ReactNod
           <MyRecord s={st} krill={krillFound()} />
           <p className="acct-note">Chuỗi tính theo số ngày bay liên tiếp; ngày mới bắt đầu lúc 0 giờ, giờ Việt Nam.</p>
         </section>
+        <section className="card acct-list">
+          <button className="acct-row" onClick={() => { setSheet('bag'); track('bag'); }}>
+            <span>
+              <b>Bộ sưu tập</b>
+              <small>{SKINS.filter((k) => unlocked(k, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak })).length}/{SKINS.length} cánh diều · {Object.keys(album()).length} đáp án độc nhất</small>
+            </span>
+            <span className="acct-kites" aria-hidden="true">
+              {SKINS.slice(0, 4).map((k) => (
+                <img key={k.id} src={KITE_PICS[k.id]} alt="" className={unlocked(k, { best: Math.max(st.best, st.nightBest), krill: krillFound(), streak: st.streak }) ? '' : 'off'} />
+              ))}
+            </span>
+          </button>
+          <button className="acct-row" onClick={() => { setSheet('remind'); track('remind_open'); }}>
+            <span>
+              <b>Nhắc chơi mỗi ngày</b>
+              <small>Thêm lời nhắc vào lịch của bạn</small>
+            </span>
+            <span className="mine-arrow" aria-hidden="true">›</span>
+          </button>
+          <button className="acct-row" onClick={() => setSheet('feedback')}>
+            <span>
+              <b>Góp ý</b>
+              <small>Báo lỗi, đề xuất câu hỏi</small>
+            </span>
+            <span className="mine-arrow" aria-hidden="true">›</span>
+          </button>
+          <a className="acct-row" href="/rieng-tu.html">
+            <span>
+              <b>Quyền riêng tư</b>
+              <small>Bilion lưu gì về bạn</small>
+            </span>
+            <span className="mine-arrow" aria-hidden="true">›</span>
+          </a>
+        </section>
       </div>
+      {sheet === 'bag' && <BagSheet sky={sky} onClose={() => setSheet(null)} />}
+      {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}
+      {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
     </main>
   );
 }
