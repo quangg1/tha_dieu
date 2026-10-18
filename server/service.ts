@@ -466,7 +466,7 @@ async function learnAnswer(db: Db, q: LoadedQuestion, input: string, display: st
 }
 
 /** How long a player waits for the referee before the answer stands as new; the kite's climb covers the wait. */
-const inlineMs = () => Number(process.env.REFEREE_INLINE_MS) || 2500;
+const inlineMs = () => Number(process.env.REFEREE_INLINE_MS) || 3500;
 
 /** Work that finishes after the reply: kept alive on Vercel, tracked here so tests can wait for it. */
 const inflight = new Set<Promise<unknown>>();
