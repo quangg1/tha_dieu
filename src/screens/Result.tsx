@@ -4,7 +4,8 @@ import { api, type FriendsBoard, type BoardRow, type FinishResult } from '../api
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
-import { challengeLink, renderCard, shareCard } from '../shareCard';
+import { challengeLink, shareCard } from '../shareCard';
+import { renderKiteCard } from '../kiteCard';
 import { bragLine, momentLine, nightVerdict, seedOf, tauntLine } from '../quips';
 import { skinById } from '../skins';
 import { rudeName } from '../../shared/names.js';
@@ -122,18 +123,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const shareImage = async () => {
     setBusy(true);
     try {
-      const blob = await renderCard({
+      const blob = await renderKiteCard({
         dayLabel: mode === 'daily' ? dayLabel : 'Thả vô tận',
         title: `${title}.`,
         subtitle,
-        quote: brag,
         altitude: result.altitude,
+        score: result.score,
         milestone: reached.alt ? reached.name : '',
         beaten: result.players > 1 ? result.beaten : null,
         grid: result.grid,
         link,
-        kite: skinById(prefs.skin),
-        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.72, kiteY: 0.24, decade: 0.3, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36 }),
+        skin: prefs.skin,
+        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.74, kiteY: 0.2, decade: 0.3, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
       });
       if (!blob) throw new Error();
       const how = await shareCard(blob, text, link);

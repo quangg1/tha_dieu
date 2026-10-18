@@ -572,3 +572,4 @@ export function previewSvg(id: string, opts: { flutes?: boolean } = {}) {
   const top = fl ? k.top - 34 : 0;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 ${top} 136 ${(bottom - top).toFixed(0)}">${short}${fl ? flutesSvg(k.top) : ''}${body}</svg>`;
 }
+

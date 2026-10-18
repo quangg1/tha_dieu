@@ -110,6 +110,8 @@ export interface SkyLayout {
   column?: number;
   /** Upper bound on the kite width in pixels. */
   kiteMax?: number;
+  /** Leave the kite out (a share card draws its own). */
+  noKite?: boolean;
   /** Where the village sits on the log scale; lower values leave more open sky under the kite at take-off. */
   ground?: number;
   /** Vertical band (fractions of the height) holding the page's text; on narrow screens the ruler keeps quiet there. */
@@ -672,7 +674,7 @@ export class SkyScene {
     this.drawStreaks();
     if (this.layout.ruler) this.drawRuler();
     this.drawRays();
-    this.drawKite();
+    if (!this.layout.noKite) this.drawKite();
     this.drawParts();
     if (this.flash > 0) {
       ctx.fillStyle = `rgba(255,246,214,${this.flash * 0.7})`;
