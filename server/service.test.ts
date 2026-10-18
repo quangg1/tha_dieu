@@ -15,6 +15,8 @@ const referee: Referee = async (_p, _n, input) => {
 };
 
 beforeAll(async () => {
+  // Many referee calls run within one minute here; the live per-minute cap is not what these tests check.
+  process.env.REFEREE_PER_MINUTE = '100000';
   setWikiFetch(async () => new Response('', { status: 503 }));
   db = await pglite();
   const r = await S.setup(db);
@@ -548,5 +550,26 @@ describe('points credited after the night shift', () => {
     expect(after).toBeGreaterThan(before);
     const n = await S.notices(db, pid);
     expect(n.learned[0]).toMatchObject({ typed, points: after - before });
+  });
+});
+
+describe('the night shift reviews what the book learned', () => {
+  it('takes out a junk answer the referee let in, and refuses it afterwards without asking again', async () => {
+    const yes: Referee = async () => ({ valid: true, canonical: 'Rau nhựa dẻo', reason: 'Có thật.' });
+    await S.startTurn(db, { playerId: 'review_a', day, mode: 'night', questionId: 'loai-rau' });
+    expect((await S.answer(db, { playerId: 'review_a', day, mode: 'night', questionId: 'loai-rau', input: 'Rau nhựa dẻo' }, yes)).status).toBe('landed');
+    const qd = await S.nightQueue(db);
+    const item = qd.learned.find((l) => l.q === 'loai-rau' && l.display === 'Rau nhựa dẻo')!;
+    expect(item).toBeTruthy();
+    await db.query(`delete from meta where key='night_applied'`);
+    const res = await S.applyNight(db, { day: '2099-04-04', pending: [], submissions: [], learned: [{ q: 'loai-rau', key: item.key, keep: false, reason: 'Không có loại rau này.' }] });
+    expect((res as { removed?: number }).removed).toBe(1);
+    const seen: string[] = [];
+    const spy: Referee = async (_p, _n, input) => { seen.push(input); return { valid: true, canonical: input, reason: 'x' }; };
+    await S.startTurn(db, { playerId: 'review_b', day, mode: 'night', questionId: 'loai-rau' });
+    const again = await S.answer(db, { playerId: 'review_b', day, mode: 'night', questionId: 'loai-rau', input: 'Rau nhựa dẻo' }, spy);
+    expect(again).toMatchObject({ status: 'retry', reason: 'Không có loại rau này.' });
+    expect(seen).toHaveLength(0);
+    expect((await S.nightQueue(db)).learned.some((l) => l.key === item.key)).toBe(false);
   });
 });

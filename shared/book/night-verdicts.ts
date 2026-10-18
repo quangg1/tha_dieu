@@ -13,7 +13,17 @@ export interface NightVerdict {
   reason: string;
 }
 
-export const NIGHT_VERDICTS: { day: string; pending: NightVerdict[]; submissions: NightVerdict[] } = {
+/** A second look at an answer the book learned from players, the referee or Wikidata: keep it, or take it out. */
+export interface NightReview {
+  q: string;
+  /** The answer's key, as listed under `learned` in the queue. */
+  key: string;
+  keep: boolean;
+  /** Why it goes, in one short Vietnamese sentence (shown to players who type it again). */
+  reason: string;
+}
+
+export const NIGHT_VERDICTS: { day: string; pending: NightVerdict[]; submissions: NightVerdict[]; learned?: NightReview[] } = {
   day: '2026-10-17',
   pending: [
     { q: 'pop-hoat-hinh-chieu-rap', key: 'mởcửara', valid: false, canonical: 'Mở cửa ra', reason: 'Không có phim hoạt hình chiếu rạp nào tên “Mở cửa ra”.' },

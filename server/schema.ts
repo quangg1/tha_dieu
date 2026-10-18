@@ -20,6 +20,7 @@ create table if not exists answers (
   created_at timestamptz not null default now(),
   primary key (question_id, key)
 );
+alter table answers add column if not exists reviewed boolean not null default false;
 
 create table if not exists aliases (
   question_id text not null references questions(id) on delete cascade,

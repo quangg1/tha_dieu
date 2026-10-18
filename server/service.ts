@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
-import type { NightVerdict } from '../shared/book/night-verdicts.js';
+import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
 import { norm, soft } from '../shared/normalize.js';
 import {
@@ -1603,15 +1603,36 @@ export async function nightQueue(db: Db, today = vnToday()) {
      order by (s.question_id = any($1::text[])) desc, s.n desc limit 200`,
     [ids, SECOND_LOOK],
   );
-  return { today, tomorrow, questions, pending, submissions };
+  // What the book learned without a person checking it (the live referee, Wikidata, crowd), for a second look.
+  const learned = await db.query<{ q: string; prompt: string; key: string; display: string; source: string; plays: number }>(
+    `select a.question_id as q, qs.prompt, a.key, a.display, a.source, coalesce(c.n,0)::int as plays
+     from answers a join questions qs on qs.id=a.question_id left join counts c on c.question_id=a.question_id and c.answer_key=a.key
+     where a.source <> 'seed' and a.status <> 'rejected' and not a.reviewed order by a.created_at limit 200`,
+  );
+  return { today, tomorrow, questions, pending, submissions, learned };
 }
 
 /** Applies the night shift's verdicts once per batch (by its day); safe to call again. */
-export async function applyNight(db: Db, batch: { day: string; pending: NightVerdict[]; submissions: NightVerdict[] }) {
+export async function applyNight(db: Db, batch: { day: string; pending: NightVerdict[]; submissions: NightVerdict[]; learned?: NightReview[] }) {
   if (!batch.day) return { applied: false, reason: 'empty' };
   const [done] = await db.query<{ value: string }>(`select value from meta where key='night_applied'`);
   if (done?.value === batch.day) return { applied: false, reason: 'already', day: batch.day };
-  const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0, credited: 0 };
+  const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0, credited: 0, kept: 0, removed: 0 };
+  for (const r of batch.learned ?? []) {
+    if (!BOOK_BY_ID.has(r.q)) continue;
+    if (r.keep) {
+      await db.query(`update answers set reviewed=true, status=case when status='pending' then 'approved' else status end where question_id=$1 and key=$2 and source <> 'seed'`, [r.q, r.key]);
+      out.kept++;
+    } else {
+      // Out of the book, and every spelling that led to it is refused from now on with the night shift's reason.
+      const gone = await db.query(`update answers set reviewed=true, status='rejected' where question_id=$1 and key=$2 and source <> 'seed' returning 1`, [r.q, r.key]);
+      if (gone.length) {
+        await db.query(`update verdicts set valid=false, canonical_key=null, reason=$3 where question_id=$1 and canonical_key=$2`, [r.q, r.key, r.reason || 'Ca đêm đã gỡ đáp án này khỏi sổ.']);
+        out.removed++;
+      }
+    }
+    forgetQuestion(r.q);
+  }
   for (const v of batch.pending) {
     if (!BOOK_BY_ID.has(v.q)) continue;
     const [row] = await db.query<{ display: string }>(`select display from answers where question_id=$1 and key=$2`, [v.q, v.key]);
