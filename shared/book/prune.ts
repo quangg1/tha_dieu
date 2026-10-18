@@ -41,10 +41,22 @@ Canh rau dền đỏ|Cá rô phi đỏ`
     .filter(Boolean),
 );
 
+/** Answers that are not answers to their question at all, found when tidying (by main name). */
+export const DROP: Record<string, string[]> = {
+  'tv-hoa-chu-h': ['Hoa hoa giấy', 'Hoàng hậu', 'Hải quỳ hoa', 'Hoa hậu', 'Hoàng nữ'],
+  'phuong-tien': ['Trạm vũ trụ'],
+};
+
+/** Answers merged into another answer of the same question (main name → target main name). */
+export const MERGE: Record<string, Record<string, string>> = {
+  'tv-hoa-chu-h': { 'Hồng ngoại Pháp': 'Hồng ngoại', 'Hồng môn trắng': 'Hồng môn đỏ' },
+};
+
 const lower = (s: string) => s.normalize('NFC').toLowerCase();
 
 /** Folds colour variants into their plain answer. The day's hidden answer is never folded away. */
 export function foldColours(q: QuestionDef): QuestionDef {
+  q = dropAndMerge(q);
   if (q.id.startsWith('ms-') || q.id.startsWith('mau-') || q.family === 'mausac' || q.category === 'Màu sắc') return q;
   const byName = new Map<string, number>();
   q.answers.forEach((a, i) => byName.set(lower(a.aliases[0] ?? a.display), i));
@@ -65,5 +77,20 @@ export function foldColours(q: QuestionDef): QuestionDef {
   const answers = q.answers
     .map((a, i) => (extra.has(i) ? { ...a, aliases: [...a.aliases, ...extra.get(i)!.filter((x) => !a.aliases.includes(x))] } : a))
     .filter((_, i) => !gone.has(i));
+  return { ...q, answers, traps: q.traps?.filter((t) => answers.some((a) => a.key === t)) };
+}
+
+function dropAndMerge(q: QuestionDef): QuestionDef {
+  const drop = new Set((DROP[q.id] ?? []).map(lower));
+  const merge = MERGE[q.id] ?? {};
+  if (!drop.size && !Object.keys(merge).length) return q;
+  const main = (a: QuestionDef['answers'][number]) => lower(a.aliases[0] ?? a.display);
+  let answers = q.answers.filter((a) => a.key === q.krillKey || !drop.has(main(a)));
+  for (const [from, to] of Object.entries(merge)) {
+    const src = answers.find((a) => main(a) === lower(from));
+    const dst = answers.find((a) => main(a) === lower(to));
+    if (!src || !dst || src === dst || src.key === q.krillKey) continue;
+    answers = answers.filter((a) => a !== src).map((a) => (a === dst ? { ...a, aliases: [...a.aliases, ...src.aliases.filter((x) => !a.aliases.includes(x))] } : a));
+  }
   return { ...q, answers, traps: q.traps?.filter((t) => answers.some((a) => a.key === t)) };
 }
