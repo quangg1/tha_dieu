@@ -47,8 +47,10 @@ describe('matching', () => {
     expect(display('loai-chim', 'chim lửa')).toBeNull();
   });
   it('does not offer a different name that only looks close once the tones are gone', () => {
-    expect(display('dd-song', 'Hoàng Hà')).toBeNull();
-    expect(display('dd-song', 'Song Hong')).toBe('Sông Hồng');
+    const m = new Matcher(['sông'], [{ key: 'songhong', aliases: ['Sông Hồng', 'Sông Cái', 'Hồng Hà'] }]);
+    expect(m.match('Hoàng Hà')).toBeNull();
+    expect(m.match('Hong Ha')?.key).toBe('songhong');
+    expect(m.match('Sông Hồnng')?.key).toBe('songhong');
   });
   it('finds the hidden answer', () => {
     const m = matcher('nhac-cu').match('dan moi');
