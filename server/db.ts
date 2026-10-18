@@ -4,6 +4,8 @@ import postgres from 'postgres';
 export interface Db {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>;
   exec(text: string): Promise<void>;
+  /** Runs statements in one transaction holding an advisory lock, so instances doing the same work take turns. */
+  execLocked(lock: number, text: string): Promise<void>;
 }
 
 let shared: Promise<Db> | null = null;
@@ -25,6 +27,13 @@ export async function connect(url: string): Promise<Db> {
     async exec(text: string) {
       await sql.unsafe(text);
     },
+    async execLocked(lock: number, text: string) {
+      // postgres.js only allows a transaction through sql.begin when it keeps a pool of connections.
+      await sql.begin(async (tx) => {
+        await tx.unsafe('select pg_advisory_xact_lock($1)', [lock]);
+        await tx.unsafe(text);
+      });
+    },
   };
 }
 
@@ -36,6 +45,9 @@ export async function pglite(): Promise<Db> {
       return (await db.query<T>(text, params)).rows;
     },
     async exec(text: string) {
+      await db.exec(text);
+    },
+    async execLocked(_lock: number, text: string) {
       await db.exec(text);
     },
   };

@@ -49,7 +49,7 @@ export const DB_VERSION = `${BOOK_VERSION}.${createHash('sha256').update(SCHEMA)
 export async function setup(db: Db) {
   // A new deploy wakes several instances at once and each runs setup; the layout changes take table-wide
   // locks, so two of them at the same moment deadlock. One lock for the whole layout makes them take turns.
-  await db.exec(`begin; select pg_advisory_xact_lock(7151); ${SCHEMA}; commit;`);
+  await db.execLocked(7151, SCHEMA);
   const ids = BOOK.map((q) => q.id);
   await db.query(
     `insert into questions (id, category, prompt, note, strip, krill_key, active)
