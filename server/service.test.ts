@@ -342,6 +342,14 @@ describe('day by day', () => {
     expect(S.tierFor(dq, q.krillKey, 4, 0, 5)).not.toBe(5);
   });
 
+  it('falls back to the book\'s hidden answer when the day\'s was struck from the book', async () => {
+    const d = '2032-09-09';
+    await db.query(`insert into daily_krill (day, question_id, krill_key) values ($1::date, 'n-quan-ham', 'chuẩnúy') on conflict do nothing`, [d]);
+    const dq = await S.dayQuestion(db, d, 'n-quan-ham');
+    expect(dq.krillKey).toBe((await S.loadQuestion(db, 'n-quan-ham')).krillKey);
+    expect(dq.answers.has(dq.krillKey)).toBe(true);
+  });
+
   it('takes rarity from the book and earlier days, never from today\'s players', async () => {
     // An answer the book thought rare but that earlier days gave everywhere is not rare any more.
     expect([0, 1, 6]).toContain(S.tierFor({ krillKey: 'zz', traps: new Set() }, 'a', 4, 36, 40));

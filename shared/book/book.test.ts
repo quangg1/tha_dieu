@@ -31,6 +31,8 @@ describe('village book', () => {
     expect(struck('x-bay', 'chim canh cut')).toBe(true);
     expect(struck('x-bay', 'Đại bàng')).toBe(false);
     expect(struck('x-bay', 'dai bang')).toBe(false);
+    expect(struck('n-quan-ham', 'Chuẩn úy')).toBe(true);
+    expect(struck('n-quan-ham', 'Đại úy')).toBe(false);
     expect(match('x-bay', 'Đại bàng')).not.toBeNull();
     expect(BOOK_BY_ID.get('dv-sung')!.answers.find((a) => a.key === BOOK_BY_ID.get('dv-sung')!.krillKey)!.display).not.toBe('Voi ma mút');
   });

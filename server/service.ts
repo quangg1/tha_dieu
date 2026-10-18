@@ -375,6 +375,8 @@ export async function krillFor(db: Db, day: string, q: LoadedQuestion): Promise<
 export async function dayQuestion(db: Db, day: string, id: string): Promise<LoadedQuestion> {
   const q = await loadQuestion(db, id);
   const krillKey = await krillFor(db, day, q);
+  // A hidden answer the book has since struck (it did not fit the prompt) gives way to the book's own.
+  if (krillKey !== q.krillKey && !q.answers.has(krillKey)) return q;
   return krillKey === q.krillKey ? q : { ...q, krillKey };
 }
 

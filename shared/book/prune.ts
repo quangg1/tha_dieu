@@ -265,6 +265,10 @@ export const MERGE: Record<string, Record<string, string>> = {
 /** Per question, the soft keys of every name of a struck answer (filled as the book is built). */
 export const STRUCK = new Map<string, Set<string>>();
 
+/** Names refused outright though no longer in the book at all (a hidden answer that did not fit, since replaced). */
+const REFUSE: Record<string, string[]> = { 'n-quan-ham': ['Chuẩn úy'] };
+for (const [id, names] of Object.entries(REFUSE)) STRUCK.set(id, new Set(names.flatMap((n) => [soft(n), 'n:' + norm(n)])));
+
 /** True when the input is one of the names the tidy-up struck from this question. */
 export function struck(qid: string, input: string): boolean {
   const s = STRUCK.get(qid);
