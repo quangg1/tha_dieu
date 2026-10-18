@@ -23,6 +23,77 @@ export const nullReferee: Referee = async () => null;
 type Provider = 'claude' | 'gemini' | null;
 const provider = (): Provider => (process.env.ANTHROPIC_API_KEY ? 'claude' : process.env.GEMINI_API_KEY ? 'gemini' : null);
 
+/**
+ * Gemini models retire and new keys cannot use old ones (gemini-2.5-flash answers 404 "no longer available to new
+ * users"). GEMINI_MODEL wins when set; otherwise the cheap, quick models are tried in order and the first that answers
+ * is kept for this server's lifetime. A yes-or-no on one name needs no thinking, so the Lite models are first.
+ */
+const GEMINI_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+let geminiModel: string | null = null;
+/**
+ * How to keep the model from thinking: older models take a zero budget, newer ones a level. A model that refuses one
+ * is asked the next way; with no control at all the output budget grows so thinking cannot use it all up.
+ */
+const THINKING = ['budget', 'level', 'none'] as const;
+let thinkingMode = 0;
+
+async function geminiCall(model: string, text: string, maxTokens: number, signal: AbortSignal, mode: number) {
+  const how = THINKING[mode];
+  const generationConfig: Record<string, unknown> = { temperature: 0, maxOutputTokens: how === 'budget' ? maxTokens : Math.max(maxTokens, 1500), responseMimeType: 'application/json' };
+  if (how === 'budget') generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  if (how === 'level') generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY! },
+    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }], generationConfig }),
+    signal,
+  });
+}
+
+async function geminiText(text: string, maxTokens: number, timeoutMs: number): Promise<string | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  const candidates = process.env.GEMINI_MODEL ? [process.env.GEMINI_MODEL] : geminiModel ? [geminiModel] : GEMINI_MODELS;
+  try {
+    for (const model of candidates) {
+      let res = await geminiCall(model, text, maxTokens, ctrl.signal, thinkingMode);
+      while (res.status === 400 && thinkingMode < THINKING.length - 1) {
+        const body = await res.text().catch(() => '');
+        if (!/think/i.test(body)) {
+          console.error('gemini', model, 400, body.slice(0, 300));
+          return null;
+        }
+        thinkingMode++;
+        res = await geminiCall(model, text, maxTokens, ctrl.signal, thinkingMode);
+      }
+      if (res.status === 404) {
+        // Retired or unknown for this key: try the next model.
+        console.error('gemini', model, 404, (await res.text().catch(() => '')).slice(0, 160));
+        continue;
+      }
+      if (!res.ok) {
+        // Logged without the key: the status and Google's own message say whether it is the key or a quota.
+        console.error('gemini', model, res.status, (await res.text().catch(() => '')).slice(0, 300));
+        return null;
+      }
+      if (geminiModel !== model) {
+        geminiModel = model;
+        console.log('gemini model', model, THINKING[thinkingMode]);
+      }
+      const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[] };
+      const out = data.candidates?.[0]?.content?.parts?.filter((x) => !x.thought).map((x) => x.text ?? '').join('') ?? null;
+      if (!out) console.error('gemini empty', model, JSON.stringify(data).slice(0, 300));
+      return out;
+    }
+    return null;
+  } catch (e) {
+    console.error('gemini error', String(e).slice(0, 200));
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** One text reply from whichever AI has a key, or null (no key, slow, or an error). */
 async function aiText(text: string, maxTokens: number, timeoutMs: number): Promise<string | null> {
   const p = provider();
@@ -39,36 +110,7 @@ async function aiText(text: string, maxTokens: number, timeoutMs: number): Promi
       return null;
     }
   }
-  if (p === 'gemini') {
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY! },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: maxTokens, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } },
-        }),
-        signal: ctrl.signal,
-      });
-      if (!res.ok) {
-        // Logged without the key: the status and Google's own message say whether it is the model, the key or a quota.
-        console.error('gemini', model, res.status, (await res.text().catch(() => '')).slice(0, 300));
-        return null;
-      }
-      const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[] };
-      const out = data.candidates?.[0]?.content?.parts?.map((x) => x.text ?? '').join('') ?? null;
-      if (!out) console.error('gemini empty', model, JSON.stringify(data).slice(0, 300));
-      return out;
-    } catch (e) {
-      console.error('gemini error', model, String(e).slice(0, 200));
-      return null;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
+  if (p === 'gemini') return geminiText(text, maxTokens, timeoutMs);
   return null;
 }
 
