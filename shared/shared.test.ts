@@ -46,6 +46,10 @@ describe('matching', () => {
     expect(display('trai-cay', 'cmm')).toBeNull();
     expect(display('loai-chim', 'chim lửa')).toBeNull();
   });
+  it('does not offer a different name that only looks close once the tones are gone', () => {
+    expect(display('dd-song', 'Hoàng Hà')).toBeNull();
+    expect(display('dd-song', 'Song Hong')).toBe('Sông Hồng');
+  });
   it('finds the hidden answer', () => {
     const m = matcher('nhac-cu').match('dan moi');
     expect(m?.key).toBe(Q['nhac-cu'].krillKey);

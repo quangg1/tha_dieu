@@ -314,4 +314,9 @@ export const MORE4: Record<string, string[]> = {
     'QQ, Kuaishou, Bilibili, iMessage, FaceTime, Yahoo 360|Yahoo! 360, Hahalolo, 9GAG, Medium',
     'Band|Naver Band, Vimeo, Dailymotion, Orkut, Friendster, Yik Yak, Periscope, Truth Social, Substack, Google Hangouts|Hangouts, Google Talk, Badoo, Hinge, Nextdoor, Goodreads, Lark|Larksuite',
   ),
+  // ---------------------------------------------------------------- Banks: stock codes and the names people say
+  'pop-ngan-hang': T(
+    'MB Bank|MBB, Vietcombank|Vietcom|Ngân hàng Ngoại thương, Techcombank|Techcom|Kỹ Thương, BIDV|Ngân hàng Đầu tư và Phát triển, Agribank|Ngân hàng Nông nghiệp, VietinBank|CTG|Ngân hàng Công Thương, Sacombank|STB|Sacom|Sài Gòn Thương Tín, VPBank|VPB|Việt Nam Thịnh Vượng, HDBank|HDB, TPBank|TPB, Eximbank|EIB|Ngân hàng Xuất Nhập Khẩu, LPBank|LPB, SeABank|SSB|Đông Nam Á, Nam A Bank|NAB, Bac A Bank|BAB, Kienlongbank|KLB, ABBank|ABB, NCB|NVB, Saigonbank|SGB|Sài Gòn Công Thương, Vietcapital Bank|BVB, PGBank|PGB|Xăng dầu Petrolimex, VietBank|VBB, SHB|Sài Gòn Hà Nội, VIB|Ngân hàng Quốc Tế, PVcomBank|Đại Chúng',
+    'VietABank|VAB|Việt Á, Co-opBank|Ngân hàng Hợp tác xã',
+  ),
 };

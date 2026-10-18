@@ -84,6 +84,11 @@ interface Cand {
  * 2. Without tones, when only one answer is spelled that way. If several are ("de" = dê or dế), the most common is offered for confirmation.
  * 3. A small typo budget on longer words, offered for confirmation.
  */
+/** Whether the player typed Vietnamese tone or vowel marks (or đ). */
+function marked(s: string) {
+  return /[\u00c0-\u1ef9]/.test(s.normalize('NFC'));
+}
+
 export class Matcher {
   private readonly exactMap = new Map<string, Cand>();
   private readonly strippedMap = new Map<string, Cand>();
@@ -151,20 +156,31 @@ export class Matcher {
     }
     let best: Cand | null = null;
     let bestD = Infinity;
-    for (const n of looses) {
+    const consider = (n: string, pool: Iterable<[string, Cand | Cand[]]>) => {
       const lim = fuzzyLimit(n.length);
-      if (!lim) continue;
-      for (const [alias, list] of this.loose) {
+      if (!lim) return;
+      for (const [alias, v] of pool) {
         if (alias.length < 5) continue;
         const d = editDistance(n, alias, lim);
         if (d > lim) continue;
-        const c = [...list].sort((a, b) => a.rank - b.rank)[0];
+        const c = Array.isArray(v) ? [...v].sort((a, b) => a.rank - b.rank)[0] : v;
         if (d < bestD || (d === bestD && best && c.rank < best.rank)) {
           bestD = d;
           best = c;
         }
       }
+    };
+    if (marked(raw)) {
+      // Typed with tones: a typo is measured with the tones kept. Otherwise "Hoàng Hà" (the Yellow River) would sit
+      // one letter from "Hồng Hà" once the marks are gone, and be offered as the Red River.
+      for (const s of softs) {
+        consider(s, this.exactMap);
+        consider(s, this.strippedMap);
+      }
+    } else {
+      for (const n of looses) consider(n, this.loose);
     }
-    return best ? { key: best.key, exact: false } : null;
+    const found = best as Cand | null;
+    return found ? { key: found.key, exact: false } : null;
   }
 }
