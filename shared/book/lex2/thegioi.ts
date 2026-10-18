@@ -500,4 +500,258 @@ export default `
 2 Tháp Jeddah
 2 Tháp Canton|Quảng Châu Tháp
 2 Cầu Cảng Hồng Kông - Châu Hải - Ma Cao|Cầu Hồng Kông - Ma Cao
+
+@
+@ nui
+4 Núi Olympus #
+4 Núi Sinai #
+4 Núi Rushmore #
+3 Núi Fansipan #
+3 Núi Kailash #
+3 Núi Ararat #
+3 Núi Hoàng Sơn #
+3 Núi Thái Sơn #
+3 Núi Nga Mi #
+3 Núi Võ Đang #
+3 Núi Hoa Sơn #
+3 Núi Phổ Đà #
+3 Núi Bạch Đầu|Núi Paektu #
+3 Núi Hallasan #
+3 Núi Bromo #
+3 Núi lửa Merapi #
+3 Núi lửa Krakatoa #
+3 Núi Pinatubo #
+3 Núi Mayon #
+3 Núi St. Helens #
+3 Núi Rainier #
+3 Núi Phú Sĩ|Núi Fuji|Fujiyama #
+3 Núi Eiger #
+3 Núi Jungfrau #
+3 Núi Zugspitze #
+3 Núi Ben Nevis #
+3 Núi Snowdon #
+3 Núi Olympus Mons #
+3 Núi Uluru|Ayers Rock #
+3 Núi Roraima #
+3 Núi Fitz Roy #
+3 Núi Cotopaxi #
+3 Núi Chimborazo #
+3 Núi Mauna Kea #
+3 Núi Kenya #
+3 Núi Rwenzori #
+3 Đỉnh Lhotse #
+3 Đỉnh Makalu #
+3 Đỉnh Cho Oyu #
+3 Đỉnh Annapurna #
+3 Đỉnh Nanga Parbat #
+3 Đỉnh Manaslu #
+3 Đỉnh Puncak Jaya #
+3 Dãy Karakoram #
+3 Dãy Hindu Kush #
+3 Dãy Thiên Sơn #
+3 Dãy Côn Lôn #
+3 Dãy Altai #
+3 Dãy Kavkaz|Dãy Caucasus #
+3 Dãy Carpathian #
+3 Dãy Appalachian #
+3 Dãy Sierra Nevada #
+3 Dãy Drakensberg #
+3 Dãy Hoàng Liên Sơn #
+3 Dãy Scandinavia #
+2 Dãy Zagros #
+2 Dãy Dolomites #
+2 Dãy Great Dividing #
+2 Dãy Brooks #
+@ samac
+3 Sa mạc Victoria lớn|Sa mạc Great Victoria #
+3 Sa mạc Great Sandy #
+3 Sa mạc Simpson #
+3 Sa mạc Patagonia #
+3 Sa mạc Chihuahua #
+3 Sa mạc Rub' al Khali|Rub al Khali #
+3 Sa mạc Negev #
+3 Sa mạc Sinai #
+3 Sa mạc Karakum #
+3 Sa mạc Kyzylkum #
+3 Sa mạc Dasht-e Kavir #
+3 Sa mạc Syria #
+3 Sa mạc Nubia #
+3 Sa mạc Danakil #
+3 Sa mạc Thung lũng Chết|Death Valley #
+3 Sa mạc Nam Cực #
+3 Sa mạc Bắc Cực #
+3 Sa mạc Lut #
+3 Sa mạc Tengger #
+3 Sa mạc Ordos #
+2 Sa mạc Badain Jaran #
+2 Sa mạc Kumtag #
+2 Sa mạc Great Basin #
+2 Sa mạc Painted #
+@ dao
+4 Đảo Bali #
+4 Đảo Phuket #
+4 Đảo Jeju #
+3 Đảo Madagascar #
+3 Đảo New Guinea #
+3 Đảo Iceland #
+3 Đảo Ireland #
+3 Đảo Anh|Đảo Great Britain #
+3 Đảo Honshu #
+3 Đảo Kyushu #
+3 Đảo Shikoku #
+3 Đảo Okinawa #
+3 Đảo Đài Loan #
+3 Đảo Sri Lanka #
+3 Đảo Cuba #
+3 Đảo Jamaica #
+3 Đảo Puerto Rico #
+3 Đảo Hispaniola #
+3 Đảo Sulawesi #
+3 Đảo Lombok #
+3 Đảo Penang #
+3 Đảo Sentosa #
+3 Đảo Koh Samui #
+3 Đảo Koh Phi Phi|Phi Phi #
+3 Đảo Maldives #
+3 Đảo Seychelles #
+3 Đảo Mauritius #
+3 Đảo Fiji #
+3 Đảo Phục Sinh|Đảo Easter #
+3 Đảo Capri #
+3 Đảo Mykonos #
+3 Đảo Rhodes #
+3 Đảo Cyprus|Đảo Síp #
+3 Đảo Malta #
+3 Đảo Ibiza #
+3 Đảo Tenerife #
+3 Đảo Madeira #
+3 Đảo Svalbard #
+3 Đảo Baffin #
+3 Đảo Vancouver #
+3 Đảo Manhattan #
+3 Đảo Maui #
+3 Đảo Saipan #
+3 Đảo Guam #
+2 Đảo Zanzibar #
+2 Đảo Socotra #
+2 Đảo Lord Howe #
+2 Đảo Christmas #
+2 Đảo Raja Ampat #
+2 Đảo Siargao #
+2 Đảo Cebu #
+2 Đảo Bohol #
+@ ho
+4 Hồ Superior #
+3 Hồ Huron #
+3 Hồ Erie #
+3 Hồ Ontario #
+3 Hồ Aral|Biển Aral #
+3 Hồ Ladoga #
+3 Hồ Onega #
+3 Hồ Issyk-Kul #
+3 Hồ Balkhash #
+3 Hồ Thanh Hải #
+3 Hồ Động Đình #
+3 Hồ Bà Dương #
+3 Hồ Thái Hồ #
+3 Hồ Nhật Nguyệt #
+3 Hồ Biwa #
+3 Hồ Kawaguchi #
+3 Hồ Tahoe #
+3 Hồ Crater #
+3 Hồ Muối Lớn|Great Salt Lake #
+3 Hồ Moraine #
+3 Hồ Lucerne #
+3 Hồ Constance|Hồ Bodensee #
+3 Hồ Garda #
+3 Hồ Maggiore #
+3 Hồ Bled #
+3 Hồ Hallstatt #
+3 Hồ Annecy #
+3 Hồ Ohrid #
+3 Hồ Van #
+3 Hồ Chad #
+3 Hồ Turkana #
+3 Hồ Nakuru #
+3 Hồ Retba|Hồ Hồng Senegal #
+3 Hồ Hillier #
+3 Hồ Peyto #
+3 Hồ Pangong #
+3 Hồ Dal #
+3 Hồ Nam Co #
+3 Hồ Kaindy #
+3 Hồ Spotted|Hồ Đốm #
+3 Hồ Salar de Uyuni|Salar de Uyuni #
+2 Hồ Vostok #
+2 Hồ Taupo #
+2 Hồ Tekapo #
+2 Hồ Wakatipu #
+@ song
+3 Sông Ganges|Ganga #
+3 Sông Indus #
+3 Sông Tây Giang #
+3 Sông Hoàng Phố #
+3 Sông Tần Hoài #
+3 Sông Ly Giang #
+3 Sông Áp Lục #
+3 Sông Đồ Môn #
+3 Sông Tumen #
+3 Sông Sumida #
+3 Sông Kamo #
+3 Sông Pasig #
+3 Sông Kapuas #
+3 Sông Mahakam #
+3 Sông Sepik #
+3 Sông Fly #
+3 Sông Darling #
+3 Sông Waikato #
+3 Sông Ohio #
+3 Sông Tennessee #
+3 Sông Arkansas #
+3 Sông Snake #
+3 Sông Potomac #
+3 Sông Fraser #
+3 Sông Nelson #
+3 Sông Madeira #
+3 Sông São Francisco #
+3 Sông Uruguay #
+3 Sông Paraguay #
+3 Sông Magdalena #
+3 Sông Douro #
+3 Sông Guadalquivir #
+3 Sông Garonne #
+3 Sông Dordogne #
+3 Sông Main #
+3 Sông Weser #
+3 Sông Arno #
+3 Sông Shannon #
+3 Sông Severn #
+3 Sông Avon #
+3 Sông Dniester #
+3 Sông Ural #
+3 Sông Kama #
+3 Sông Irtysh #
+3 Sông Kolyma #
+3 Sông Syr Darya #
+3 Sông Amu Darya #
+3 Sông Helmand #
+3 Sông Karun #
+3 Sông Kabul #
+3 Sông Sutlej #
+3 Sông Narmada #
+3 Sông Godavari #
+3 Sông Kaveri #
+3 Sông Meghna #
+3 Sông Nile Xanh #
+3 Sông Nile Trắng #
+3 Sông Ubangi #
+3 Sông Kasai #
+3 Sông Okavango #
+3 Sông Senegal #
+3 Sông Volta #
+2 Sông Spree #
+2 Sông Vltava #
+2 Sông Neckar #
+2 Sông Inn #
+@
 `;
