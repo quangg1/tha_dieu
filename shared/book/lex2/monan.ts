@@ -1514,4 +1514,201 @@ export default `
 1 Mắm chua cá lóc
 1 Mắm chua tôm
 1 Mắm chua cá trèn
+
+@
+@ nam
+4 Bánh mì Sài Gòn #
+4 Gỏi cuốn #
+4 Bún riêu cua Sài Gòn #
+3 Hủ tiếu Nam Vang #
+3 Hủ tiếu Mỹ Tho #
+3 Hủ tiếu Sa Đéc #
+3 Bánh canh ghẹ #
+3 Bánh canh giò heo #
+3 Bún nước kèn #
+3 Bún cá Châu Đốc #
+3 Bún mắm nêm #
+3 Bánh xèo miền Tây #
+3 Bánh ít lá gai #
+3 Bánh chuối nướng #
+3 Bánh bò nướng #
+3 Bánh lá dừa #
+3 Bánh tét lá cẩm #
+3 Bánh củ cải #
+3 Chuối nếp nướng #
+3 Xôi chiên phồng #
+3 Gà nướng lu #
+3 Vịt nấu chao #
+3 Lẩu dê #
+3 Cá linh kho mía #
+3 Cá kèo kho rau răm #
+3 Ốc len xào dừa #
+3 Chuột đồng nướng #
+3 Mắm kho #
+3 Gỏi cá trích Phú Quốc #
+3 Bò nướng lá lốt #
+3 Bò bảy món #
+3 Cơm cháy kho quẹt #
+3 Canh khổ qua dồn thịt #
+3 Canh chua cá lóc #
+3 Lẩu thả Phan Thiết #
+3 Bánh căn Phan Thiết #
+2 Bún kèn Phú Quốc #
+2 Bánh tằm khoai mì #
+2 Bánh bò thốt nốt An Giang #
+2 Bánh pía Sóc Trăng #
+2 Bánh xèo rau rừng #
+2 Hủ tiếu cá Cà Mau #
+2 Ba khía muối #
+2 Tôm khô Cà Mau #
+2 Lạp xưởng Cần Đước #
+2 Nem Lai Vung #
+2 Kẹo dừa Bến Tre #
+2 Bánh phồng Sơn Đốc #
+2 Cốm dẹp Sóc Trăng #
+@ bac
+4 Bún cá rô đồng #
+4 Phở bò tái #
+4 Nem rán #
+3 Bún ốc nguội #
+3 Bún riêu cua đồng #
+3 Bún mọc dọc mùng #
+3 Bánh đa trộn #
+3 Bánh tôm Hồ Tây #
+3 Bánh mì pate Hải Phòng|Bánh mì que #
+3 Bánh đa cua Hải Phòng #
+3 Nem cua bể #
+3 Bánh cuốn Thanh Trì #
+3 Bánh chưng Tranh Khúc #
+3 Bún thang Hà Nội #
+3 Gà luộc lá chanh #
+3 Giò lụa|Chả lụa Ước Lễ #
+3 Chả quế #
+3 Canh măng #
+3 Canh bóng #
+3 Dưa hành #
+3 Thịt kho đông #
+3 Xôi gấc #
+3 Xôi lạc #
+3 Xôi khúc #
+3 Ốc luộc #
+3 Phở trộn #
+3 Phở sốt vang #
+3 Miến gà #
+3 Bánh đúc nóng #
+3 Bánh đúc lạc #
+3 Bánh tẻ Phú Nhi #
+3 Bánh gai Ninh Giang #
+3 Bánh cáy làng Nguyễn #
+3 Chả mực Hạ Long #
+3 Sá sùng Quan Lạn #
+3 Cơm cháy Ninh Bình #
+3 Dê núi Ninh Bình #
+3 Gỏi cá nhệch #
+2 Nem chua Thanh Hóa #
+2 Chè kho #
+2 Chè hoa cau #
+2 Ô mai Hàng Đường #
+2 Kẹo lạc #
+2 Bánh đậu xanh Hải Dương #
+2 Rươu chưng #
+2 Chả rươi Tứ Kỳ #
+2 Cốm làng Vòng #
+2 Ruốc tôm #
+@ taybac
+3 Xôi nếp nương #
+3 Cơm lam Tây Bắc #
+3 Cá hồi Sa Pa #
+3 Lẩu cá hồi #
+3 Lẩu cá tầm #
+3 Gà đồi nướng #
+3 Gà nướng mắc khén #
+3 Cá nướng pa pỉnh tộp #
+3 Thịt bò khô gác bếp #
+3 Măng nứa xào #
+3 Rau cải mèo xào #
+3 Su su xào #
+3 Chả cá Hồ Ba Bể #
+3 Phở chua Lạng Sơn #
+3 Vịt quay Lạng Sơn #
+3 Khâu nhục Lạng Sơn #
+3 Bánh cuốn Cao Bằng #
+3 Phở vịt quay Cao Bằng #
+3 Bánh khảo Cao Bằng #
+3 Lạp sườn Cao Bằng #
+3 Bánh dày Hà Giang #
+3 Cháo ấu tẩu Hà Giang #
+3 Bánh tam giác mạch #
+3 Rượu ngô men lá #
+3 Thắng dền #
+3 Thịt chua Phú Thọ #
+2 Bò hấp lá móc mật #
+2 Nộm da trâu #
+2 Canh rau sắn #
+2 Canh vịt măng chua #
+2 Ốc đá Mai Châu #
+2 Cơm lam Mai Châu #
+2 Bánh trứng kiến Lạng Sơn #
+2 Xôi nếp cẩm #
+2 Trám đen om #
+2 Ruốc thịt trâu #
+@ banh ngoai
+4 Bánh mì baguette #
+4 Bánh sừng bò|Croissant #
+4 Bánh tart trứng #
+4 Bánh pizza|Pizza #
+3 Bánh donut|Donut #
+3 Bánh waffle|Waffle #
+3 Bánh pancake|Pancake #
+3 Bánh crepe|Crepe #
+3 Bánh macaron|Macaron #
+3 Bánh tiramisu|Tiramisu #
+3 Bánh cheesecake|Cheesecake #
+3 Bánh brownie|Brownie #
+3 Bánh muffin|Muffin #
+3 Bánh cupcake|Cupcake #
+3 Bánh cookie|Cookie #
+3 Bánh mochi|Mochi #
+3 Bánh dorayaki|Dorayaki #
+3 Bánh taiyaki|Taiyaki #
+3 Bánh trung thu Hồng Kông #
+3 Bánh bao xá xíu #
+3 Bánh pía Đài Loan #
+3 Bánh dứa Đài Loan #
+3 Bánh su kem|Choux #
+3 Bánh éclair|Éclair #
+3 Bánh mille-feuille|Mille-feuille #
+3 Bánh Opera #
+3 Bánh Black Forest #
+3 Bánh red velvet #
+3 Bánh pretzel|Pretzel #
+3 Bánh bagel|Bagel #
+3 Bánh scone|Scone #
+3 Bánh strudel táo|Apple strudel #
+3 Bánh panettone|Panettone #
+3 Bánh churros|Churros #
+3 Bánh baklava|Baklava #
+3 Bánh madeleine|Madeleine #
+3 Bánh canelé|Canelé #
+3 Bánh pavlova|Pavlova #
+3 Bánh Bông lan Castella|Castella #
+2 Bánh focaccia|Focaccia #
+2 Bánh ciabatta|Ciabatta #
+2 Bánh brioche|Brioche #
+2 Bánh naan|Naan #
+2 Bánh chapati|Chapati #
+2 Bánh tortilla|Tortilla #
+2 Bánh empanada|Empanada #
+2 Bánh samosa|Samosa #
+2 Bánh profiterole #
+2 Bánh financier #
+2 Bánh galette des rois #
+2 Bánh kouign-amann #
+2 Bánh Sachertorte #
+2 Bánh lamington #
+2 Bánh stollen #
+2 Bánh mooncake #
+2 Bánh tteok|Tteok #
+2 Bánh melonpan #
+@
 `;

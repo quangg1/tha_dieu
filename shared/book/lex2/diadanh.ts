@@ -584,4 +584,164 @@ export default `
 2 Buôn Hồ
 2 Thái Bình
 2 Hải Dương
+
+@
+@ hn
+4 Phố đi bộ Hồ Gươm #
+4 Bảo tàng Lịch sử Quốc gia #
+4 Bảo tàng Mỹ thuật Việt Nam #
+3 Phố Tạ Hiện #
+3 Phố sách 19/12 #
+3 Phố Hàng Đào #
+3 Phố Hàng Bạc #
+3 Phố Hàng Gai #
+3 Phố Phan Đình Phùng #
+3 Phố Hoàng Diệu #
+3 Đường Thanh Niên #
+3 Nhà hát múa rối Thăng Long #
+3 Đền Hai Bà Trưng #
+3 Đền Voi Phục #
+3 Đền Bạch Mã #
+3 Đình Kim Liên #
+3 Chùa Láng #
+3 Chùa Bà Đá #
+3 Chùa Hà #
+3 Làng gốm Bát Tràng #
+3 Làng lụa Vạn Phúc #
+3 Công viên Thống Nhất #
+3 Công viên Bách Thảo #
+3 Vườn quốc gia Ba Vì #
+3 Khu di tích Phủ Chủ tịch #
+3 Nhà sàn Bác Hồ #
+3 Bảo tàng Hà Nội #
+3 Bảo tàng Lịch sử Quân sự Việt Nam #
+3 Bảo tàng Phòng không - Không quân #
+3 Bãi đá sông Hồng #
+3 Bãi giữa sông Hồng #
+3 Ga Hà Nội #
+3 Nhà thờ Cửa Bắc #
+3 Nhà thờ Hàm Long #
+3 Chợ Hôm #
+3 Chợ Long Biên #
+3 Chợ đêm phố cổ #
+3 Hồ Gươm Plaza|Tràng Tiền Plaza #
+3 Phố Tràng Tiền #
+3 Kem Tràng Tiền #
+3 Royal City #
+3 Times City #
+3 Vinhomes Ocean Park #
+3 Hồ Đồng Mô #
+3 Suối Hai #
+3 Khoang Xanh #
+3 Chùa Mía #
+2 Làng cổ Cự Đà #
+2 Làng Ước Lễ #
+2 Đình Chu Quyến #
+2 Chùa Đậu #
+2 Chùa Bối Khê #
+2 Hồ Quan Sơn #
+2 Đền Gióng Sóc Sơn #
+@ hcm
+4 Phố đi bộ Bùi Viện #
+4 Tòa nhà Bitexco|Bitexco Financial Tower #
+3 Công viên Lê Văn Tám #
+3 Công viên Gia Định #
+3 Công viên Văn hóa Đầm Sen #
+3 Khu du lịch Văn Thánh #
+3 Khu du lịch Bình Quới #
+3 Bảo tàng Mỹ thuật TP HCM #
+3 Bảo tàng Áo dài #
+3 Bảo tàng Y học cổ truyền FITO #
+3 Bảo tàng Thành phố Hồ Chí Minh #
+3 Hội trường Thống Nhất #
+3 Ủy ban Nhân dân Thành phố|Tòa thị chính Sài Gòn #
+3 Nhà hát Lớn Sài Gòn #
+3 Đường sách Sài Gòn #
+3 Hẻm 76 Đồng Khởi|Thương xá Tax #
+3 Phố đèn lồng Lương Nhữ Học #
+3 Chợ Bình Tây #
+3 Chợ hoa Hồ Thị Kỷ #
+3 Chợ Hồ Thị Kỷ #
+3 Chợ đêm Bến Thành #
+3 Chùa Xá Lợi #
+3 Chùa Phổ Quang #
+3 Chùa Huệ Nghiêm #
+3 Chùa Ông Bổn #
+3 Chùa Bà Chợ Lớn #
+3 Miếu Ông Bổn #
+3 Nhà thờ Huyện Sỹ #
+3 Nhà thờ Cha Tam #
+3 Nhà thờ Thủ Thiêm #
+3 Thiền viện Trúc Lâm Chánh Giác #
+3 Sala Thủ Thiêm|Khu đô thị Thủ Thiêm #
+3 Cầu Phú Mỹ #
+3 Cầu Mống #
+3 Cầu Khánh Hội #
+3 Đường hầm Thủ Thiêm|Hầm sông Sài Gòn #
+3 Metro số 1|Tuyến metro Bến Thành - Suối Tiên #
+3 Phố Nhật Lê Thánh Tôn|Little Tokyo #
+3 Khu phố Hàn Quốc Phú Mỹ Hưng #
+3 Hồ Bán Nguyệt #
+3 Cầu Ánh Sao Phú Mỹ Hưng #
+3 Rừng Sác Cần Giờ #
+3 Đảo Khỉ Cần Giờ #
+3 Biển Cần Giờ #
+3 Vinhomes Central Park #
+3 Bảo tàng Lịch sử Việt Nam tại TP HCM #
+2 Đình Minh Hương Gia Thạnh #
+2 Hội quán Nghĩa An #
+2 Hội quán Tuệ Thành #
+2 Lăng Lê Văn Duyệt #
+2 Nhà cổ Huỳnh Thủy Lê #
+2 Chung cư 42 Nguyễn Huệ #
+@ tn
+4 Hồ Tuyền Lâm Đà Lạt #
+3 Thác Bảo Đại #
+3 Thác Ba Tầng #
+3 Thác Đắk G'Lun #
+3 Thác Lưu Ly #
+3 Thác Dray K'nao #
+3 Thác Thủy Tiên #
+3 Hồ Yaly #
+3 Hồ Ea Kao #
+3 Hồ Ea Súp #
+3 Núi Chư Đăng Ya #
+3 Núi Ngọc Linh #
+3 Đỉnh Bidoup #
+3 Vườn quốc gia Bidoup - Núi Bà #
+3 Vườn quốc gia Chư Mom Ray #
+3 Vườn quốc gia Kon Ka Kinh #
+3 Vườn quốc gia Tà Đùng #
+3 Khu du lịch Ma Thiên Lãnh|Thung lũng Ma Thiên Lãnh #
+3 Làng Kon K'Tu #
+3 Làng Plei Ơp #
+3 Buôn Trí A #
+3 Buôn Akô Dhông #
+3 Bảo tàng Thế giới Cà phê #
+3 Nhà thờ Chính tòa Kon Tum|Nhà thờ gỗ Kon Tum #
+3 Tòa Giám mục Kon Tum #
+3 Chùa Minh Thành #
+3 Chùa Sắc tứ Khải Đoan #
+3 Ngục Kon Tum #
+3 Quảng trường Đại Đoàn Kết Pleiku #
+3 Đồi chè Biển Hồ #
+3 Hàng thông trăm tuổi Biển Hồ #
+3 Cánh đồng hoa dã quỳ Chư Đăng Ya #
+3 Vườn hoa Đà Lạt|Vườn hoa Thành phố Đà Lạt #
+3 Quảng trường Lâm Viên #
+3 Cáp treo Đà Lạt #
+3 Đường hầm điêu khắc Đà Lạt #
+3 Ga cổ Đà Lạt #
+3 Nhà ga xe lửa Đà Lạt #
+3 Đồi chè Cầu Đất #
+3 Đồi Robin #
+3 Thung lũng Vàng #
+3 Làng hoa Vạn Thành #
+3 Hồ Đankia - Suối Vàng|Hồ Suối Vàng #
+2 Thác Ba Tầng Bảo Lộc #
+2 Đồi cỏ hồng Đà Lạt #
+2 Rừng thông Bản Đôn #
+2 Hồ Phú Ninh Đắk Nông #
+2 Công viên địa chất Đắk Nông #
+@
 `;

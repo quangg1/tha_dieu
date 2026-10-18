@@ -506,4 +506,49 @@ export default `
 2 Sô cô la nóng|Chocolate nóng
 2 Ovaltine nóng
 2 Milo dằm|Milo dầm
+
+@
+@ sua
+3 Sữa tươi #
+3 Sữa đặc|Sữa ông Thọ #
+3 Sữa bột #
+3 Sữa chua #
+3 Sữa chua nếp cẩm #
+3 Sữa chua mít #
+3 Sữa chua trân châu #
+3 Sữa tươi trân châu #
+3 Cà phê sữa nóng #
+3 Cacao sữa #
+3 Milo sữa #
+3 Matcha latte #
+3 Trà sữa ô long #
+3 Trà sữa hoa nhài #
+3 Trà sữa socola #
+3 Trà sữa dâu #
+3 Sinh tố bơ sữa #
+3 Sữa chuối #
+3 Sữa dâu #
+3 Sữa socola #
+3 Sữa hạt điều #
+3 Sữa hạt macca #
+3 Sữa bí đỏ #
+3 Sữa khoai môn #
+3 Sữa ngô|Sữa bắp non #
+3 Flat white #
+3 Mocha #
+3 Macchiato #
+3 Cà phê muối #
+3 Cà phê trứng #
+3 Cà phê cốt dừa #
+3 Sữa lạc|Sữa đậu phộng #
+2 Kumis|Sữa ngựa lên men #
+2 Ayran #
+2 Eggnog #
+2 Chai latte|Trà masala sữa #
+2 Teh tarik #
+2 Milkshake vani #
+2 Yakult #
+2 Sữa trâu #
+2 Sữa lạc đà #
+@
 `;
