@@ -1,11 +1,17 @@
 import postgres from 'postgres';
 
-/** The small slice of a Postgres client the game needs: parameterized queries returning rows. */
-export interface Db {
+/** A parameterized query runner, either the pooled client or one transaction. */
+export interface Querier {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>;
+}
+
+/** The small slice of a Postgres client the game needs: parameterized queries returning rows. */
+export interface Db extends Querier {
   exec(text: string): Promise<void>;
   /** Runs statements in one transaction holding an advisory lock, so instances doing the same work take turns. */
   execLocked(lock: number, text: string): Promise<void>;
+  /** Runs several parameterized statements in one transaction: all commit together, or none do (rolled back on error). */
+  tx<T>(fn: (q: Querier) => Promise<T>): Promise<T>;
 }
 
 let shared: Promise<Db> | null = null;
@@ -34,6 +40,10 @@ export async function connect(url: string): Promise<Db> {
         await tx.unsafe(text);
       });
     },
+    async tx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
+      const run = sql.begin(async (tx) => fn({ query: async (text, params = []) => (await tx.unsafe(text, params as never[])) as unknown as never[] }));
+      return (await run) as unknown as T;
+    },
   };
 }
 
@@ -49,6 +59,10 @@ export async function pglite(): Promise<Db> {
     },
     async execLocked(_lock: number, text: string) {
       await db.exec(text);
+    },
+    async tx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
+      const run = db.transaction(async (tx) => fn({ query: async <R>(text: string, params: unknown[] = []) => (await tx.query<R>(text, params)).rows }));
+      return (await run) as unknown as T;
     },
   };
 }

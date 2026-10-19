@@ -760,21 +760,24 @@ export async function settle(db: Db, questionId: string, input: string, key: str
   const target = known && known.key !== key && q.answers.get(known.key)?.status === 'approved' ? known.key : key;
   if (target !== key) {
     // "chim sao sau" was "Sáo sậu" all along: move its turns and counts onto the book's answer.
-    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [questionId, inputKey, target]);
-    await db.query(`update turns set answer_key=$3 where question_id=$1 and answer_key=$2`, [questionId, key, target]);
-    await db.query(
-      `insert into counts (question_id, answer_key, n) select question_id, $3, n from counts where question_id=$1 and answer_key=$2
-       on conflict (question_id, answer_key) do update set n = counts.n + excluded.n`,
-      [questionId, key, target],
-    );
-    await db.query(`delete from counts where question_id=$1 and answer_key=$2`, [questionId, key]);
-    await db.query(
-      `insert into day_counts (day, question_id, answer_key, n) select day, question_id, $3, n from day_counts where question_id=$1 and answer_key=$2
-       on conflict (day, question_id, answer_key) do update set n = day_counts.n + excluded.n`,
-      [questionId, key, target],
-    );
-    await db.query(`delete from day_counts where question_id=$1 and answer_key=$2`, [questionId, key]);
-    await db.query(`update answers set status='rejected' where question_id=$1 and key=$2 and status='pending' and source='crowd'`, [questionId, key]);
+    // One transaction: the merge-then-delete must not half-finish, or the moved counts would be double-counted.
+    await db.tx(async (q) => {
+      await q.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [questionId, inputKey, target]);
+      await q.query(`update turns set answer_key=$3 where question_id=$1 and answer_key=$2`, [questionId, key, target]);
+      await q.query(
+        `insert into counts (question_id, answer_key, n) select question_id, $3, n from counts where question_id=$1 and answer_key=$2
+         on conflict (question_id, answer_key) do update set n = counts.n + excluded.n`,
+        [questionId, key, target],
+      );
+      await q.query(`delete from counts where question_id=$1 and answer_key=$2`, [questionId, key]);
+      await q.query(
+        `insert into day_counts (day, question_id, answer_key, n) select day, question_id, $3, n from day_counts where question_id=$1 and answer_key=$2
+         on conflict (day, question_id, answer_key) do update set n = day_counts.n + excluded.n`,
+        [questionId, key, target],
+      );
+      await q.query(`delete from day_counts where question_id=$1 and answer_key=$2`, [questionId, key]);
+      await q.query(`update answers set status='rejected' where question_id=$1 and key=$2 and status='pending' and source='crowd'`, [questionId, key]);
+    });
   } else {
     await db.query(`update answers set status='approved', source='ai', display=$3 where question_id=$1 and key=$2 and status='pending'`, [questionId, key, v.canonical || tidy(input)]);
     await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict do nothing`, [questionId, soft(v.canonical), key]);
@@ -1451,7 +1454,9 @@ export async function nightQuestion(db: Db, seen: string[]) {
   );
   const id =
     rows[0]?.id ??
-    (await db.query<{ id: string }>(`select id from questions where active and not (id = any($1::text[])) order by random() limit 1`, [daily]))[0].id;
+    (await db.query<{ id: string }>(`select id from questions where active and not (id = any($1::text[])) order by random() limit 1`, [daily]))[0]?.id;
+  // When every active question is already on today's flight (a small book), there is nothing left to ask.
+  if (!id) throw new GameError(404, 'Hết câu để thả rồi. Quay lại sau nhé.');
   return publicQuestion(await loadQuestion(db, id));
 }
 
