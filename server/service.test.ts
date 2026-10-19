@@ -582,6 +582,46 @@ describe('points credited after the night shift', () => {
   });
 });
 
+describe('a credited turn and the rare streak', () => {
+  it('gives the credited turn its streak bonus and extends the streak of the rare turns after it', async () => {
+    const { nullReferee } = await import('./referee.js');
+    const { TIERS, isRare, streakBonus } = await import('../shared/scoring.js');
+    const set = await S.dailySet(db, day);
+    const pid = 'streak_credit_p';
+    const put = (qid: string, tier: number, points: number, at: string) =>
+      db.query(
+        `insert into turns (player_id, day, mode, question_id, started_at, answered_at, answer_key, tier, points)
+         values ($1,$2::date,'daily',$3, now() + $4::interval, now() + $4::interval, 'x', $5, $6)`,
+        [pid, day, qid, at, tier, points],
+      );
+    // Two rare answers (Hiếm), then one the book did not know, then another rare one.
+    await put(set[2], 2, 45, '-10 minutes');
+    await put(set[3], 2, 45 + streakBonus(2), '-9 minutes');
+    await S.startTurn(db, { playerId: pid, day, mode: 'daily', questionId: set[1] });
+    const typed = 'Đáp án chuỗi hiếm duyệt sau';
+    expect((await S.answer(db, { playerId: pid, day, mode: 'daily', questionId: set[1], input: typed }, nullReferee)).status).toBe('retry');
+    await put(set[4], 2, 45 + streakBonus(3), '+1 minutes');
+
+    const item = (await S.nightQueue(db)).submissions.find((s) => s.q === set[1] && s.display === typed)!;
+    expect(item).toBeTruthy();
+    await db.query(`delete from meta where key='night_applied'`);
+    await S.applyNight(db, { day: '2099-04-04', pending: [], submissions: [{ q: set[1], key: item.key, valid: true, canonical: typed, reason: 'Có thật.' }] });
+
+    const turns = await db.query<{ question_id: string; tier: number; points: number }>(
+      `select question_id, tier, points from turns where player_id=$1 and day=$2::date and mode='daily'`,
+      [pid, day],
+    );
+    const at = (qid: string) => turns.find((t) => t.question_id === qid)!;
+    expect(isRare(at(set[1]).tier)).toBe(true);
+    expect(at(set[1]).points).toBe(TIERS[at(set[1]).tier].points + streakBonus(3));
+    expect(at(set[4]).points).toBe(45 + streakBonus(4));
+    expect(at(set[2]).points).toBe(45);
+    // The board reads the new total, not a stale day_scores row.
+    const total = turns.reduce((s, t) => s + t.points, 0);
+    expect((await S.scoreDay(db, day)).get(pid)?.score).toBe(total);
+  });
+});
+
 describe('the night shift reviews what the book learned', () => {
   it('takes out a junk answer the referee let in, and refuses it afterwards without asking again', async () => {
     const yes: Referee = async () => ({ valid: true, canonical: 'Rau nhựa dẻo', reason: 'Có thật.' });

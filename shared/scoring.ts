@@ -96,9 +96,15 @@ export const NIGHT_POINTS_PER_DECADE = 30;
 
 /** Altitude in metres for a score: ten times higher every 65 points (every 30 in Thả vô tận). */
 export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily'): number {
-  if (points <= 0) return 0;
-  return Math.pow(10, points / (mode === 'night' ? NIGHT_POINTS_PER_DECADE : POINTS_PER_DECADE));
+  if (!Number.isFinite(points) || points <= 0) return 0;
+  // A daily flight cannot score more than seven hidden answers with full streaks; a bad stored turn must not top the board.
+  const p = mode === 'night' ? points : Math.min(points, MAX_DAILY_POINTS);
+  // A very long night keeps lapping the sky, but stays a finite number (10^308 is where doubles end).
+  return Math.pow(10, Math.min(MAX_ALT_EXPONENT, p / (mode === 'night' ? NIGHT_POINTS_PER_DECADE : POINTS_PER_DECADE)));
 }
+
+/** Highest power of ten an altitude may reach: about eleven laps of the sky, far below where a double overflows. */
+export const MAX_ALT_EXPONENT = 300;
 
 /** log10 of the edge of the observable universe (46,5 tỷ năm ánh sáng): the top of the sky. Past it, a wormhole leads back to the meadow. */
 export const CEILING_L = Math.log10(4.4e26);

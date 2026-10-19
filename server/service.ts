@@ -334,6 +334,28 @@ async function currentStreak(db: Db, a: { playerId: string; day: string; mode: M
   return s;
 }
 
+/**
+ * Walks one player's daily flight in order and gives each turn the rare-streak bonus it would have had if every answer
+ * had been known when it was typed (the same rule as currentStreak). Used after a turn is credited later: the credited
+ * turn gets its bonus, and so do the rare turns after it whose streak it now extends. Points only ever go up.
+ */
+async function restreak(db: Db, playerId: string, day: string) {
+  const rows = await db.query<{ question_id: string; tier: number | null; points: number | null }>(
+    `select question_id, tier, points from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null order by answered_at, started_at`,
+    [playerId, day],
+  );
+  let run = 0;
+  for (const r of rows) {
+    run = isRare(r.tier) ? run + 1 : 0;
+    const base = r.tier != null && r.tier >= 0 ? TIERS[r.tier]?.points : undefined;
+    if (base == null) continue;
+    const want = base + streakBonus(run);
+    if ((r.points ?? 0) < want) {
+      await db.query(`update turns set points=$4 where player_id=$1 and day=$2::date and mode='daily' and question_id=$3 and coalesce(points, 0) < $4`, [playerId, day, r.question_id, want]);
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ the hidden answer, day by day */
 
 const krillCache = new Map<string, string>();
@@ -627,6 +649,7 @@ export async function creditLearned(db: Db, questionId: string) {
   forgetQuestion(questionId);
   const q = await loadQuestion(db, questionId);
   const days = new Set<string>();
+  const touched = new Set<string>();
   let n = 0;
   for (const r of rows) {
     const m = q.matcher.match(r.display);
@@ -645,22 +668,30 @@ export async function creditLearned(db: Db, questionId: string) {
     const tally = (await tallies(db, r.day, [questionId])).get(questionId)!;
     const tier = tierFromTally(dq, key, entry.prior, tally);
     const points = TIERS[tier].points;
-    // Only a daily turn that scored less than this answer is worth changing.
+    // Only a daily turn that scored less than this answer is worth changing. The streak bonus is added by restreak below.
+    // A turn never closed keeps its place in the flight (started_at), not the moment the night shift got to it.
     const up = await db.query(
-      `update turns set answer_key=$5, tier=$6, points=$7, answered_at=coalesce(answered_at, now())
+      `update turns set answer_key=$5, tier=$6, points=$7, answered_at=coalesce(answered_at, started_at)
        where player_id=$1 and day=$2::date and mode='daily' and question_id=$3 and coalesce(points, 0) < $4 and coalesce(tier, -1) <> $6
        returning 1`,
       [r.player_id, r.day, questionId, points, key, tier, points],
     );
-    await db.query(`update asks set credited=$4 where player_id=$1 and question_id=$2 and input_key=$3`, [r.player_id, questionId, r.input_key, up.length ? points : 0]);
+    // Only the first run to reach this ask records it: a second run at the same time must not overwrite the credit with 0.
+    await db.query(`update asks set credited=$4 where player_id=$1 and question_id=$2 and input_key=$3 and credited is null`, [r.player_id, questionId, r.input_key, up.length ? points : 0]);
     if (up.length) {
       days.add(r.day);
+      touched.add(`${r.day}|${r.player_id}`);
       n++;
     }
   }
+  for (const t of touched) {
+    const [d, pid] = t.split('|');
+    await restreak(db, pid, d);
+  }
   for (const d of days) {
-    // The day's cached scores are stale now, even a finished day's.
-    await db.query(`update day_scores set final=false, computed_at='epoch' where day=$1::date`, [d]);
+    // The day's cached scores are stale now, even a finished day's. The stamp is unique to this reset, so a recompute
+    // that started before it (and read the old turns) cannot write its result over it (see scoreDay).
+    await db.query(`update day_scores set final=false, computed_at=clock_timestamp() - interval '1 day' where day=$1::date`, [d]);
     dayCache.delete(d);
     const scores = await computeScores(db, d);
     for (const r of rows) {
@@ -1210,11 +1241,14 @@ export async function scoreDay(db: Db, day: string): Promise<DayScores> {
     if (claimed.length || !row || row.age > 3600) {
       scores = await computeScores(db, day);
       const data = Object.fromEntries([...scores].map(([k, v]) => [k, [v.score, v.grid]]));
+      // Written only if nobody marked the day stale while this ran (creditLearned): otherwise these scores, read from the
+      // turns before the change, would be stored as final and the credit would never reach the board.
       const [u] = await db.query<{ stamp: string }>(
-        `update day_scores set data=$2::jsonb, computed_at=now(), final=$3 where day=$1::date returning computed_at::text as stamp`,
-        [day, JSON.stringify(data), day < vnToday()],
+        `update day_scores set data=$2::jsonb, computed_at=now(), final=$3 where day=$1::date and computed_at::text = $4 returning computed_at::text as stamp`,
+        [day, JSON.stringify(data), day < vnToday(), row?.stamp ?? ''],
       );
-      stamp = u?.stamp ?? '';
+      if (!u) return scores;
+      stamp = u.stamp;
     } else {
       // Another instance is recomputing right now: the last result, at most a minute old, will do.
       scores = await load();

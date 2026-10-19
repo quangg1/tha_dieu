@@ -372,6 +372,21 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
   },
 };
 
+/**
+ * The client's address, from a source it cannot forge. Vercel overwrites X-Forwarded-For at its edge, so there the
+ * header is the client. Behind another proxy (TRUST_PROXY set), that proxy appends the address it saw, so the last
+ * hop is trusted, never the first (which the client may have written). Otherwise only the socket counts.
+ */
+export function clientIp(headers: IncomingMessage['headers'], socketAddr: string | undefined, env: NodeJS.ProcessEnv = process.env): string {
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim() || '';
+  if (env.VERCEL) return one(headers['x-real-ip']) || one(headers['x-forwarded-for']).split(',')[0].trim() || socketAddr || '';
+  if (env.TRUST_PROXY) {
+    const hops = one(headers['x-forwarded-for']).split(',').map((s) => s.trim()).filter(Boolean);
+    if (hops.length) return hops[hops.length - 1];
+  }
+  return socketAddr ?? '';
+}
+
 async function readBody(req: Req): Promise<Record<string, unknown>> {
   if (req.body && typeof req.body === 'object') return req.body as Record<string, unknown>;
   if (typeof req.body === 'string') return req.body ? JSON.parse(req.body) : {};
@@ -404,7 +419,7 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
     const db = opts.db ?? (await getDb());
     if (!opts.db) await ensureReady(db);
     // A coarse device mark (network address and browser), hashed, so a replay in a private tab stays off the board.
-    const ip = String(req.headers['x-forwarded-for'] ?? req.socket?.remoteAddress ?? '').split(',')[0].trim();
+    const ip = clientIp(req.headers, req.socket?.remoteAddress);
     const dev = createHash('sha256').update(`${ip}|${req.headers['user-agent'] ?? ''}`).digest('hex').slice(0, 24);
     const net = createHash('sha256').update(`net|${ip}`).digest('hex').slice(0, 24);
     // A burst limit per network on everything players send, so a script cannot flood the counts or the referee.

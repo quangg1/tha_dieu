@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BANK } from './bank.js';
 import { Matcher, parseRaw } from './match.js';
 import { norm } from './normalize.js';
-import { TIERS_BY_RANK, altitudeFor, bandFor, crossed, formatAlt, isRare, tierFromCounts, streakBonus } from './scoring.js';
+import { MAX_ALT_EXPONENT, MAX_DAILY_POINTS, TIERS_BY_RANK, altitudeFor, bandFor, crossed, formatAlt, isRare, tierFromCounts, streakBonus } from './scoring.js';
 
 const Q = Object.fromEntries(BANK.map((r) => [r.id, parseRaw(r)]));
 const matcher = (id: string) => new Matcher(Q[id].strip, Q[id].answers);
@@ -84,6 +84,15 @@ describe('scoring', () => {
     expect(altitudeFor(65)).toBeCloseTo(10);
     expect(altitudeFor(130)).toBeCloseTo(100);
     expect(altitudeFor(0)).toBe(0);
+  });
+  it('stays finite and bounded whatever score it is given', () => {
+    expect(altitudeFor(NaN)).toBe(0);
+    expect(altitudeFor(Infinity)).toBe(0);
+    // A daily score past the most a day can give (a bad stored turn) cannot fly higher than that maximum.
+    expect(altitudeFor(1_000_000)).toBe(altitudeFor(MAX_DAILY_POINTS));
+    // A very long night keeps lapping the sky but never overflows to Infinity.
+    expect(Number.isFinite(altitudeFor(20_000, 'night'))).toBe(true);
+    expect(altitudeFor(20_000, 'night')).toBe(Math.pow(10, MAX_ALT_EXPONENT));
   });
   it('formats Vietnamese units', () => {
     expect(formatAlt(1280)).toBe('1.280 m');
