@@ -87,7 +87,11 @@ describe('scoring', () => {
     expect(altitudeFor(0, 'daily', old)).toBe(0);
   });
   it('flies Nối gió flights by the square root of the score', () => {
-    expect(altitudeFor((5.8 * 4) ** 2, 'daily', GIO_FROM)).toBeCloseTo(1e4, 0);
+    // The first answers lift the kite visibly; a perfect day just passes the Moon.
+    expect(altitudeFor(70, 'daily', GIO_FROM)).toBeGreaterThan(150);
+    expect(altitudeFor(1000, 'daily', GIO_FROM)).toBeGreaterThan(100_000);
+    expect(altitudeFor(MAX_GIO_POINTS, 'daily', GIO_FROM)).toBeGreaterThan(384_400_000);
+    expect(altitudeFor(MAX_GIO_POINTS * 0.8, 'daily', GIO_FROM)).toBeLessThan(384_400_000);
     expect(altitudeFor(1_000_000)).toBe(altitudeFor(MAX_GIO_POINTS));
     expect(MAX_GIO_POINTS).toBe(4700);
   });

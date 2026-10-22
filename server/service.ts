@@ -156,11 +156,17 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
   const cached = setCache.get(day);
   if (cached) return cached;
   const found = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
-  if (found.length) {
-    setCache.set(day, found[0].question_ids);
-    return found[0].question_ids;
-  }
   const active = new Set((await db.query<{ id: string }>(`select id from questions where active`)).map((r) => r.id));
+  if (found.length) {
+    // Today's or a future set drawn before some of its questions were retired is redrawn, as long as nobody has played it.
+    const stale = day >= vnToday() && found[0].question_ids.some((id) => !active.has(id));
+    const played = stale && (await db.query(`select 1 from asks where day=$1::date limit 1`, [day])).length > 0;
+    if (!stale || played) {
+      setCache.set(day, found[0].question_ids);
+      return found[0].question_ids;
+    }
+    await db.query(`delete from daily_sets where day=$1::date`, [day]);
+  }
   const pool = BOOK.filter((q) => active.has(q.id));
   const recentRows = await db.query<{ day: string; question_ids: string[] }>(
     `select to_char(day, 'YYYY-MM-DD') as day, question_ids from daily_sets where day < $1::date and day >= $1::date - 42`,

@@ -160,12 +160,15 @@ export function flightPoints(tiers: readonly (number | null | undefined)[], day?
 /** The most a daily flight can score under Nối gió: seven hidden answers in a row. */
 export const MAX_GIO_POINTS = flightPoints([5, 5, 5, 5, 5, 5, 5]).reduce((s, x) => s + x.points, 0);
 /** Under Nối gió, log10 of the altitude grows with the square root of the score: wide gaps in points, fair gaps in sky. */
-export const GIO_ROOT = 5.8;
+/** Nối gió height curve: log10(metres) = GIO_ALT_A · points^GIO_ALT_K. A low power lifts the first answers off the
+ * ground (two decent answers clear the bamboo, about 100-300 m) while a perfect day only just reaches the Moon. */
+export const GIO_ALT_K = 0.3;
+export const GIO_ALT_A = 8.6 / Math.pow(4700, GIO_ALT_K);
 
 /**
  * Altitude in metres for a score. Thả vô tận: ten times higher every 30 points. A daily flight before GIO_FROM: every
- * 65 points. From GIO_FROM: 10^(√points / 5.8), so 350 points is about 2 km, 1.000 points about 230 km (past the edge
- * of space), 2.000 points past the Moon's distance is out of reach until about 2.500.
+ * 65 points. From GIO_FROM: 10^(GIO_ALT_A · points^0.3): 25 points is about 60 m, 70 about 270 m, 300 about 6 km,
+ * 1.000 about 250 km (past the edge of space), 2.000 about 4.500 km; only a near-perfect day reaches the Moon.
  */
 export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily', day?: string): number {
   if (!Number.isFinite(points) || points <= 0) return 0;
@@ -173,7 +176,7 @@ export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily', d
     // A very long night keeps lapping the sky, but stays a finite number (10^308 is where doubles end).
     return Math.pow(10, Math.min(MAX_ALT_EXPONENT, points / NIGHT_POINTS_PER_DECADE));
   }
-  if (usesGio(mode, day)) return Math.pow(10, Math.sqrt(Math.min(points, MAX_GIO_POINTS)) / GIO_ROOT);
+  if (usesGio(mode, day)) return Math.pow(10, GIO_ALT_A * Math.pow(Math.min(points, MAX_GIO_POINTS), GIO_ALT_K));
   // A daily flight cannot score more than seven hidden answers with full streaks; a bad stored turn must not top the board.
   return Math.pow(10, Math.min(points, MAX_DAILY_POINTS) / POINTS_PER_DECADE);
 }
