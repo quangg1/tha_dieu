@@ -1,6 +1,6 @@
 // Player statistics, Krillion style: where today's flight sits among everyone's, the rarity of each answer,
 // the day's bands, and the player's own record over time.
-import { DAY_BANDS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { BAND_RULES, DAY_BANDS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { TIER_COLOR, TierIcon } from '../icons';
 import type { LocalRow, Stats } from '../store';
 
@@ -119,8 +119,9 @@ export function RarityStrings({ rows }: { rows: LocalRow[] }) {
 }
 
 /** The day's titles by height, with the player's own highlighted. */
-export function DayBands({ altitude }: { altitude: number }) {
-  const mine = bandFor(altitude);
+export function DayBands({ altitude, band }: { altitude: number; band?: number }) {
+  // From Nối gió the band is a place in the village (band given); before it, a height.
+  const mine = band === undefined ? bandFor(altitude) : DAY_BANDS[band];
   return (
     <div className="pst-bands">
       {DAY_BANDS.map((b, i) => {
@@ -129,7 +130,7 @@ export function DayBands({ altitude }: { altitude: number }) {
         return (
           <div key={b.min} className={`pst-band${b === mine ? ' on' : ''}`}>
             <TierIcon tier={b.tier} size={26} />
-            <span className="pst-range">{i === 0 ? `dưới ${formatAlt(next!.min)}` : `từ ${formatAlt(b.min)}`}</span>
+            <span className="pst-range">{band !== undefined ? BAND_RULES[i] : i === 0 ? `dưới ${formatAlt(next!.min)}` : `từ ${formatAlt(b.min)}`}</span>
             <span className="pst-bname">
               <b>{name}</b> {line}
             </span>

@@ -58,11 +58,44 @@ export const DAY_BANDS: readonly DayBand[] = [
   { min: 10_000, tier: 2, verdict: 'Bay bổng. Qua khỏi lũy tre. Khá đấy.' },
   { min: 500_000, tier: 3, verdict: 'Chót vót. Cả xóm ngước nhìn.' },
   { min: 17_000_000, tier: 4, verdict: 'Tít mây xanh. Bỏ cả làng phía sau.' },
-  { min: 384_400_000, tier: 5, verdict: 'Cung Trăng. Hết trời để bay. Không tưởng.' },
+  { min: 384_400_000, tier: 5, verdict: 'Cung Trăng. Đứng trên cả làng hôm nay.' },
 ];
 
 export function bandFor(altitude: number): DayBand {
   return [...DAY_BANDS].reverse().find((b) => altitude >= b.min) ?? DAY_BANDS[0];
+}
+
+/**
+ * From GIO_FROM the day's band is a place in the village, not a height: every day someone reaches Cung Trăng, a hard
+ * set of questions is as fair as an easy one, and the top never turns into sky nobody sees. Shares of the day's players
+ * (best first) for bands 5 down to 1; band 5 also goes to the top three. Below RANK_MIN_PLAYERS the shares are noise,
+ * so points stand in for them.
+ */
+export const RANK_SHARES: readonly number[] = [0.85, 0.6, 0.3, 0.1, 0.01];
+export const RANK_MIN_PLAYERS = 30;
+export const BAND_POINTS: readonly number[] = [0, 100, 300, 700, 1300, 2200];
+/** How each band is earned, for the rules and the result screen. */
+export const BAND_RULES: readonly string[] = [
+  'nhóm cuối của làng',
+  'trong top 85%',
+  'trong top 60%',
+  'trong top 30%',
+  'trong top 10%',
+  'top 1% hoặc ba người cao nhất',
+];
+
+export function dayBand(o: { altitude: number; score: number; rank: number; players: number; day?: string }): number {
+  if (!usesGio('daily', o.day)) return DAY_BANDS.indexOf(bandFor(o.altitude));
+  if (o.score <= 0) return 0;
+  if (o.players >= RANK_MIN_PLAYERS && o.rank > 0) {
+    const top = o.rank / o.players;
+    if (o.rank <= 3 || top <= RANK_SHARES[4]) return 5;
+    for (let b = 4; b >= 1; b--) if (top <= RANK_SHARES[b - 1]) return b;
+    return 0;
+  }
+  let b = 0;
+  BAND_POINTS.forEach((p, i) => { if (o.score >= p && p > 0) b = i; });
+  return b;
 }
 
 export const QUESTION_SECONDS = 25;
@@ -159,11 +192,10 @@ export function flightPoints(tiers: readonly (number | null | undefined)[], day?
 
 /** The most a daily flight can score under Nối gió: seven hidden answers in a row. */
 export const MAX_GIO_POINTS = flightPoints([5, 5, 5, 5, 5, 5, 5]).reduce((s, x) => s + x.points, 0);
-/** Under Nối gió, log10 of the altitude grows with the square root of the score: wide gaps in points, fair gaps in sky. */
 /** Nối gió height curve: log10(metres) = GIO_ALT_A · points^GIO_ALT_K. A low power lifts the first answers off the
  * ground (two decent answers clear the bamboo, about 100-300 m) while a perfect day only just reaches the Moon. */
 export const GIO_ALT_K = 0.3;
-export const GIO_ALT_A = 8.6 / Math.pow(4700, GIO_ALT_K);
+export const GIO_ALT_A = 8.6 / Math.pow(MAX_GIO_POINTS, GIO_ALT_K);
 
 /**
  * Altitude in metres for a score. Thả vô tận: ten times higher every 30 points. A daily flight before GIO_FROM: every

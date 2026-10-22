@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { CEILING_L, DAY_BANDS, TIERS, bandFor, formatAlt, lastMilestone, nextMilestone } from '../../shared/scoring.js';
+import { BAND_RULES, RANK_MIN_PLAYERS, CEILING_L, DAY_BANDS, GIO_POINTS, TIERS, TIERS_BY_RANK, basePoints, dayBand, flightPoints, formatAlt, gioMultiplier, lastMilestone, nextMilestone, usesGio } from '../../shared/scoring.js';
 import { api, type FriendsBoard, type BoardRow, type FinishResult } from '../api';
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
@@ -17,6 +17,7 @@ import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/Playe
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
 import { CheckIcon, FlagIcon } from '../glyphs';
+import { JourneyArrival, JourneyCard, JourneySheet } from '../components/Journey';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
@@ -103,10 +104,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const krills = result.reveal?.filter((r) => r.tier === 5).length ?? 0;
   // The daily bands fit seven answers; Thả vô tận is judged by how far up the sky this run actually went.
   const night = mode === 'night' ? nightVerdict(result.altitude, CEILING_L, seed) : null;
-  const [dayTitle, ...rest] = bandFor(result.altitude).verdict.split('. ');
+  const dBand = dayBand({ altitude: result.altitude, score: result.score, rank: result.rank, players: result.players, day });
+  const [dayTitle, ...rest] = DAY_BANDS[dBand].verdict.split('. ');
   const title = night ? night.title : dayTitle;
   const subtitle = night ? night.subtitle : rest.join('. ');
-  const band = night ? night.band : DAY_BANDS.indexOf(bandFor(result.altitude));
+  const band = night ? night.band : dBand;
+  const gio = mode === 'daily' && usesGio('daily', day);
+  // Each answer's points as flown, so the result can show base × gió for every row.
+  const flown = mode === 'daily' ? flightPoints(rows.map((r) => r.tier), day) : [];
+  // Hành trình: today's flight is already added to the total; show it arriving.
+  const st = stats();
+  const gained = mode === 'daily' && !result.replay && st.lastDay === day ? result.score : 0;
+  const [journeyOpen, setJourneyOpen] = useState(false);
   const brag = night ? night.brag : bragLine(band, { krills, beaten: result.beaten, players: result.players, seed });
   // The flight's rarest answer, if it is rare enough to be worth a screenshot.
   const moment = rows
@@ -231,12 +240,19 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         </div>
         <span className="result-note">
           {/* Height is the picture of the score: shown, but second. */}
-          Diều lên {formatAlt(shown)}{reached.alt ? `, qua ${reached.name}` : ''}. {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
+          Diều lên {formatAlt(shown)}{reached.alt ? `, qua ${reached.name}` : ''}.{mode === 'night' ? (upcoming ? ` Mốc tiếp theo: ${upcoming.name}.` : ' Bạn đã vượt cả Sông Ngân.') : ''}
           {result.replay ? ' Lượt chơi lại trên thiết bị này không lên bảng diều.' : ''}
         </span>
       </div>
 
       <div className="result-body">
+        {mode === 'daily' && (
+          <>
+            <JourneyArrival before={st.total - gained} after={st.total} />
+            <JourneyCard total={st.total} gained={gained} onOpen={() => setJourneyOpen(true)} />
+          </>
+        )}
+        {journeyOpen && <JourneySheet onClose={() => setJourneyOpen(false)} />}
         <section className="card card--dark share-card">
           <div className="card-k">Khoe với bạn bè</div>
           <div className="share-row" aria-hidden="true">
@@ -269,11 +285,38 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <section className="card">
           <div className="card-k">{mode === 'daily' ? 'Bảy cú gió của bạn' : 'Những cú gió của bạn'}</div>
           {mode === 'daily' && <RarityStrings rows={rows} />}
+          {mode === 'daily' && (
+            <details className="why">
+              <summary>Vì sao bạn được {result.score.toLocaleString('vi-VN')} điểm?</summary>
+              <p>Mỗi đáp án được chấm theo <b>số người trong làng cũng nghĩ ra nó</b>: càng ít người nói, bậc càng hiếm, điểm càng cao.</p>
+              <div className="why-tiers">
+                {TIERS_BY_RANK.filter((t) => t.index !== 6).map((t) => (
+                  <span key={t.index}><TierIcon tier={t.index} size={22} /><b>{basePoints(t.index, 'daily', day)}</b></span>
+                ))}
+              </div>
+              {gio ? (
+                <p><b>Nối gió</b>: đáp án Hiếm trở lên làm gió mạnh thêm, mỗi bậc gió nhân điểm thêm 0,25 (tối đa ×4). Khá hiếm giữ gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1. Vì vậy cùng một bậc, câu trả lời sau một chuỗi hiếm được nhiều điểm hơn. Tổng điểm là cộng điểm cả bảy câu, như bảng dưới.</p>
+              ) : (
+                <p>Hai đáp án hiếm liên tiếp trở lên được cộng thêm điểm thưởng chuỗi. Tổng điểm là cộng điểm cả bảy câu.</p>
+              )}
+              {gio && (
+                <>
+                  <p><b>Bậc của ngày</b> xếp theo thứ hạng của bạn trong làng hôm nay, nên ngày câu khó hay dễ đều công bằng:</p>
+                  <ul className="why-bands">
+                    {[5, 4, 3, 2, 1].map((b) => (
+                      <li key={b} className={b === band ? 'me' : ''}><b>{DAY_BANDS[b].verdict.split('.')[0]}</b><span>{BAND_RULES[b]}</span></li>
+                    ))}
+                  </ul>
+                  {result.players < RANK_MIN_PLAYERS && <p className="why-note">Làng hôm nay còn dưới {RANK_MIN_PLAYERS} người, nên tạm xếp bậc theo điểm.</p>}
+                </>
+              )}
+            </details>
+          )}
           {mode === 'daily' && result.reveal?.some((r) => !r.krill) && (
             <p className="rv-meta rv-lock-note">Đáp án làng giấu mở lúc 0 giờ đêm nay, để không ai chuyền tay cho người chơi sau.</p>
           )}
           <div className="rows">
-            {rows.map((r) => (
+            {rows.map((r, i) => (
               <div className="row" key={r.questionId + r.points + r.display}>
                 <TierIcon tier={r.tier >= 0 ? r.tier : null} size={40} />
                 <span style={{ minWidth: 0 }}>
@@ -292,7 +335,12 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                     );
                   })()}
                 </span>
-                <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
+                <span className="pts-wrap">
+                  <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
+                  {gio && r.tier >= 0 && flown[i] && gioMultiplier(flown[i].wind) > 1 && (
+                    <small className="pts-why">{GIO_POINTS[r.tier]} × gió {gioMultiplier(flown[i].wind).toLocaleString('vi-VN')}</small>
+                  )}
+                </span>
                 {r.display && r.tier >= 0 && (
                   <button
                     className={`flag-btn${flagged.has(r.questionId) ? ' on' : ''}`}
@@ -376,7 +424,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           {mode === 'daily' && (
             <div className="more-part">
               <div className="card-k">Bậc của ngày</div>
-              <DayBands altitude={result.altitude} />
+              <DayBands altitude={result.altitude} band={gio ? band : undefined} />
             </div>
           )}
           <div className="more-part">

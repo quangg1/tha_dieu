@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { DAY_BANDS, GIO_POINTS, TIERS, TIERS_BY_RANK, bandFor, formatAlt, usesGio } from '../../shared/scoring.js';
+import { BAND_RULES, DAY_BANDS, GIO_POINTS, RANK_MIN_PLAYERS, TIERS, TIERS_BY_RANK, dayBand, formatAlt, usesGio } from '../../shared/scoring.js';
+import { JourneyCard, JourneySheet } from '../components/Journey';
 import { flute } from '../audio/flute';
 import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
@@ -150,6 +151,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const [payTab, setPayTab] = useState<'bank' | 'qr'>('bank');
 
 
+  const [journey, setJourney] = useState(false);
   const st = stats();
   const rec = today();
   const done = rec && rec.day === vnDay() && rec.result ? rec : null;
@@ -183,9 +185,10 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const invite = async () => {
     const r = done?.result;
     if (!r) return;
-    const title = bandFor(r.altitude).verdict.split('. ')[0];
+    const b = dayBand({ altitude: r.altitude, score: r.score, rank: r.rank, players: r.players, day: done!.day });
+    const title = DAY_BANDS[b].verdict.split('. ')[0];
     const url = challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title });
-    const text = `🪁 ${tauntLine(DAY_BANDS.indexOf(bandFor(r.altitude)), r.altitude, seedOf(done!.day, r.score))}`;
+    const text = `🪁 ${tauntLine(b, r.altitude, seedOf(done!.day, r.score))}`;
     track('challenge', { from: 'home' });
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -340,6 +343,8 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
           </button>
         )}
 
+        <JourneyCard compact total={st.total} onOpen={() => { setJourney(true); track('journey'); }} />
+
         <button className="mine-btn" onClick={onAccount}>
           <span>Bilion của tôi</span>
           <small>{account() ? 'Đã đồng bộ' : 'Chuỗi ngày, bộ sưu tập'}</small>
@@ -470,6 +475,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         </div>
       )}
 
+      {journey && <JourneySheet onClose={() => setJourney(false)} />}
       {howto && (
         <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Cách chơi" onClick={() => setHowto(false)}>
           <section className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -479,26 +485,67 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
                 <CloseIcon />
               </button>
             </div>
-            <ol className="rules">
-              <li>Mỗi câu <b>ghi điểm một đáp án hợp lệ</b>, đáp án đầu tiên có trong sổ của làng là đáp án được chốt. Không có đúng sai, chỉ có đáp án phổ biến và đáp án hiếm.</li>
-              <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm của từng đáp án được ghi sẵn trong sổ của làng và chỉnh dần theo những ngày trước, nên <b>điểm hiện ra là điểm chốt</b>, chơi sớm hay muộn cũng như nhau.</li>
-              <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Đáp án chưa có trong sổ thì không tính: <b>thử đáp án khác</b> tới khi hết gió, không bị trừ gì. Bé Bi ghi lại; nếu đúng, sổ học thêm và lần sau bạn ghé sẽ được báo.</li>
-              <li>Mỗi câu có <b>một đáp án làng giấu</b>, tìm ra là độc nhất. Nhưng coi chừng: đáp án tưởng độc mà cả làng cùng nghĩ chỉ được hạng <b>Khôn lỏi</b>.</li>
-              {gioToday && <li><b>Nối gió</b>: đáp án Hiếm trở lên làm gió mạnh thêm (Hiếm +1, Rất hiếm +2, Cực hiếm và Độc nhất +3), mỗi bậc gió nhân điểm thêm 0,25, tối đa <b>×4</b>. Khá hiếm giữ nguyên gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1. Liên tiếp càng hiếm, điểm càng vọt.</li>}
-              <li>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, bờ vũ trụ, Cung Trăng, rồi tới những vì sao.</li>
-              <li><b>Thả vô tận</b>: câu hỏi ngẫu nhiên nối tiếp nhau, chơi tới khi hết gió. Cả lượt dùng <b>chung một đồng hồ gió</b>: bắt đầu 45 giây, gió còn lại chuyển sang câu sau. Mỗi đáp án nạp thêm gió (Thường +3 giây, càng hiếm càng nhiều, Độc nhất +14 giây), nên trả lời nhanh và hiếm thì bay mãi. Vượt qua rìa vũ trụ, diều chui qua lỗ giun sang <b>vòng 2</b> (trời hoàng hôn) rồi <b>vòng 3</b> (đêm hội), mở khóa diều phượng hoàng và diều rồng.</li>
-            </ol>
-            <div className="tier-list">
-              {TIERS_BY_RANK.map((t) => (
-                <div key={t.index} className="tier-item">
-                  <TierIcon tier={t.index} size={36} />
-                  <div>
-                    <b>{t.name}</b>
-                    <span>{TIERS[t.index].line}</span>
-                  </div>
-                  <em>{gioToday ? GIO_POINTS[t.index] : TIERS[t.index].points}</em>
+            <div className="rules-x">
+              <section>
+                <h3>1. Mỗi ngày một chuyến bay</h3>
+                <p>7 câu hỏi, mỗi câu 25 giây gió. Gõ một đáp án bất kỳ đúng với câu hỏi. Không có đúng sai, chỉ có đáp án <b>phổ biến</b> và đáp án <b>hiếm</b>.</p>
+                <p>Đáp án chưa có trong sổ của làng thì không tính: <b>cứ thử đáp án khác</b> tới khi hết gió, không bị trừ gì. Gõ thiếu dấu hay nhầm chính tả, diều sẽ hỏi lại để bạn chốt.</p>
+              </section>
+              <section>
+                <h3>2. Điểm mỗi câu: càng ít người nghĩ ra, càng nhiều điểm</h3>
+                <p>Bậc của đáp án dựa vào <b>bao nhiêu người trong làng cũng nghĩ ra nó</b>. Bậc đã ghi sẵn trong sổ, nên điểm hiện ra là điểm chốt, chơi sớm hay muộn như nhau.</p>
+                <div className="tier-list">
+                  {TIERS_BY_RANK.map((t) => (
+                    <div key={t.index} className="tier-item">
+                      <TierIcon tier={t.index} size={34} />
+                      <div>
+                        <b>{t.name}</b>
+                        <span>{TIERS[t.index].line}</span>
+                      </div>
+                      <em>{gioToday ? GIO_POINTS[t.index] : TIERS[t.index].points}</em>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                <p>Mỗi câu có <b>một đáp án làng giấu</b>: tìm ra là Độc nhất. Còn đáp án tưởng độc mà cả làng cùng nghĩ chỉ được <b>Khôn lỏi</b>.</p>
+              </section>
+              {gioToday && (
+                <section>
+                  <h3>3. Nối gió: hiếm liên tiếp, điểm nhân lên</h3>
+                  <p>Đáp án Hiếm làm gió mạnh thêm 1 bậc, Rất hiếm thêm 2, Cực hiếm và Độc nhất thêm 3. Mỗi bậc gió nhân điểm thêm 0,25, tối đa <b>×4</b>. Khá hiếm giữ nguyên gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1.</p>
+                  <p className="why-note">Ví dụ 4 câu liên tiếp:</p>
+                  <div className="gio-example">
+                    <span><TierIcon tier={2} size={22} /> Hiếm: gió 1 → 50 × 1,25 = <b>63</b></span>
+                    <span><TierIcon tier={3} size={22} /> Rất hiếm: gió 3 → 80 × 1,75 = <b>140</b></span>
+                    <span><TierIcon tier={4} size={22} /> Cực hiếm: gió 6 → 120 × 2,5 = <b>300</b></span>
+                    <span><TierIcon tier={0} size={22} /> Thường: gió lặng → 10 × 1 = <b>10</b></span>
+                  </div>
+                  <p>Tổng điểm của ngày là cộng điểm cả 7 câu. Trên màn kết quả, mỗi câu đều ghi rõ điểm gốc × gió.</p>
+                </section>
+              )}
+              <section>
+                <h3>{gioToday ? '4' : '3'}. Bậc của ngày: so với cả làng</h3>
+                {gioToday ? (
+                  <>
+                    <p>Bậc xếp theo <b>thứ hạng của bạn trong làng hôm đó</b>, nên ngày câu khó hay dễ đều công bằng, và ngày nào cũng có người lên Cung Trăng.</p>
+                    <ul className="why-bands">
+                      {[5, 4, 3, 2, 1].map((b) => (
+                        <li key={b}><b>{DAY_BANDS[b].verdict.split('.')[0]}</b><span>{BAND_RULES[b]}</span></li>
+                      ))}
+                    </ul>
+                    <p className="why-note">Khi làng còn dưới {RANK_MIN_PLAYERS} người chơi trong ngày, bậc tạm xếp theo điểm.</p>
+                  </>
+                ) : (
+                  <p>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, bờ vũ trụ, tới Cung Trăng.</p>
+                )}
+              </section>
+              <section>
+                <h3>{gioToday ? '5' : '4'}. Hành trình: đi xa nhờ chơi đều và chơi giỏi</h3>
+                <p>Điểm mỗi chuyến bay ngày được <b>cộng dồn</b> thành một hành trình, từ lũy tre, Fansipan, bờ vũ trụ, Cung Trăng, Sao Hỏa… tới Sông Ngân. Mỗi ngày chỉ một chuyến, nên ai chơi đều và trả lời hiếm sẽ đi xa nhất. Hành trình không bao giờ bị lùi.</p>
+              </section>
+              <section>
+                <h3>{gioToday ? '6' : '5'}. Thả vô tận: một hơi bay được bao xa</h3>
+                <p>Câu hỏi nối tiếp nhau, chung <b>một đồng hồ gió</b>: bắt đầu 45 giây, mỗi đáp án nạp thêm gió (Thường +3 giây, càng hiếm càng nhiều, Độc nhất +14 giây). Trả lời nhanh và hiếm thì bay mãi, qua rìa vũ trụ sang vòng 2, vòng 3. Thả vô tận có bảng xếp hạng riêng và <b>không cộng vào hành trình</b>, để không ai đi tắt bằng cách chơi thật nhiều.</p>
+              </section>
             </div>
           </section>
         </div>
