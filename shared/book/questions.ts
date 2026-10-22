@@ -11,6 +11,8 @@ import { MORE4 } from './more4.js';
 import { MORE5 } from './more5.js';
 import { LEXICONS } from './index.js';
 import { foldColours } from './prune.js';
+import { CALIBRATE } from './calibrate.js';
+import { RELEASE } from './release.js';
 
 const S = (lex: string, all?: string[], extra: Partial<Source> = {}): Source => ({ lex, all, ...extra });
 
@@ -404,6 +406,9 @@ export const HARD_TO_BE_RARE_FAILS = new Set<string>(
     'dv-tuyet tv-caycn tv-qua-chu-c tv-hoa-chu-h dp-bac dp-trung dp-nam dp-bien-gioi dp-chu-b dd-tp-bien dd-bien dd-dao dd-vqg qg-dd qg-trungdong qg-asean qg-chu-b qg-chu-c qg-chu-m qg-chu-s nv-nguyen nv-nhacsi-vn nv-bongda-vn nv-triet nv-thamhiem nv-khoa-vn vh-cotich-tg vh-tacpham-vn vh-nv-vn ng-thucong qa-truyenthong xe-thuy xe-tho xe-chuyendung ms-xanh ms-vn tt-bong tt-nuoc tt-vo tt-doi nc-hoi nc-go hh-khi hh-phongxa tv-chomsao tv-sao tv-tau nn-vn',
     // A long tail of everyday things anyone can name on purpose (body parts, vehicles, languages, units, kitchen and household things): a rare answer is a deliberate pick, not a hard one.
     'nhac-cu phuong-tien nha-khoa-hoc co-the ngon-ngu loai-banh tro-choi-dan-gian song-ho nhan-vat-lich-su co-tich pop-mon-han pop-mon-nhat dv-giong-cho tv-go-quy tv-ve-tinh n-banh-bot-gao ma-chao ma-lau ma-canh ma-goi du-tra du-cocon dd-nui tg-kientruc tg-tunhien nv-hoasi ng-tho vh-lehoi tt-dantoc tv-hemt nn-laptrinh nn-as kn-nganh kn-thoitiet kn-hangcn do-dung-hoc-tap n-giuong n-don-dep n-trang-suc n-hang-khong n-xe-2banh vh-ngayle dd-tp nn-eu pop-nha-mang kn-tiente ct-mat ct-doi ct-xuong ct-noi n-ban-tay kn-hinh kn-donvi',
+    // Prompts whose rare answers are built, not remembered: any dish, drink, job or object plus a word ("bún" + any meat,
+    // "cà phê" + any flavour, "bác sĩ" + any specialty, "ghế" + any room) makes a new answer, so rarity costs nothing.
+    'n-ghe n-dao n-bep-dien n-ao-khoac n-do-nghe n-mu n-pt-bay n-quan n-truong-hoc n-doan-phim n-nuoc-cham n-tieng-keu n-viet-tat n-mon-bun n-banh-trang n-mon-tet ma-soi ma-che ma-xoi n-mon-ca ma-mam ma-com du-cafe du-truyenthong ng-yte vh-nghethuat',
   ]
     .join(' ')
     .split(/\s+/),
@@ -442,7 +447,7 @@ function keepRules<T extends QuestionDef>(q: T, spec: Spec): T {
 
 function assemble() {
   const out: QuestionDef[] = [];
-  for (const raw of [...BANK, ...NARROW]) {
+  for (const raw of [...BANK, ...NARROW, ...RELEASE]) {
     const base = parseRaw(raw);
     const ext = EXTEND[raw.id];
     const qd00 = ext ? extendQuestion(base, ext, LEXICONS) : base;
@@ -462,7 +467,36 @@ function assemble() {
     else dropped.push(spec.id);
   }
   out.push(...NUMBER_QUESTIONS.map((n) => ({ ...n, traps: resolveTraps(n.answers, TRAPS[n.id]) })));
-  return { questions: out.map(foldColours), dropped };
+  return { questions: out.map(foldColours).map(calibrate), dropped };
+}
+
+/**
+ * Sets the hand-checked starting tiers (calibrate.ts). A name the question does not know yet becomes a new answer at
+ * that tier; the hidden answer keeps its place.
+ */
+/** Names calibrate.ts added as new answers, for the book checker. */
+export const CALIBRATE_ADDED: string[] = [];
+export function calibrate(q: QuestionDef): QuestionDef {
+  const lines = CALIBRATE[q.id];
+  if (!lines) return q;
+  const answers = q.answers.map((a) => ({ ...a }));
+  const byName = new Map<string, (typeof answers)[number]>();
+  for (const a of answers) for (const n of [a.display, ...a.aliases]) byName.set(soft(n), a);
+  for (const [t, line] of Object.entries(lines)) {
+    const tier = Number(t);
+    for (const name of line.split(',').map((x) => x.trim()).filter(Boolean)) {
+      const hit = byName.get(soft(name));
+      if (hit) {
+        if (hit.key !== q.krillKey) hit.priorTier = tier;
+        continue;
+      }
+      const added = { key: soft(name), display: name, priorTier: tier, aliases: [name] };
+      answers.push(added);
+      byName.set(soft(name), added);
+      CALIBRATE_ADDED.push(`${q.id}: ${name}`);
+    }
+  }
+  return { ...q, answers };
 }
 
 const assembled = assemble();
