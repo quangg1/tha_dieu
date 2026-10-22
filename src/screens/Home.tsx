@@ -151,6 +151,13 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const [payTab, setPayTab] = useState<'bank' | 'qr'>('bank');
 
 
+  // The streak still counts while yesterday (or today) was flown; after a missed day it is gone.
+  const liveStreak = (() => {
+    const s0 = stats();
+    if (!s0.lastDay || !s0.streak) return 0;
+    const y = new Date(Date.now() + 7 * 3600_000 - 86_400_000).toISOString().slice(0, 10);
+    return s0.lastDay >= y ? s0.streak : 0;
+  })();
   const [journey, setJourney] = useState(false);
   const st = stats();
   const rec = today();
@@ -306,16 +313,24 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
               {WEEKDAY[d.getUTCDay()]}, {d.getUTCDate()}/{d.getUTCMonth() + 1}
             </b>
           </div>
-          <div className="home-ladder" aria-hidden="true">
-            {TIERS_BY_RANK.filter((t) => t.index !== 6).map((t) => (
-              <TierIcon key={t.index} tier={t.index} size={22} />
-            ))}
-          </div>
+          {liveStreak > 0 ? (
+            <span className={`streak-chip${done ? ' done' : ''}`} title="Chuỗi ngày thả diều liên tiếp">
+              <i aria-hidden="true">🔥</i>
+              <b>{liveStreak}</b>
+              <small>ngày</small>
+            </span>
+          ) : (
+            <div className="home-ladder" aria-hidden="true">
+              {TIERS_BY_RANK.filter((t) => t.index !== 6).map((t) => (
+                <TierIcon key={t.index} tier={t.index} size={22} />
+              ))}
+            </div>
+          )}
         </div>
         {done ? (
           <>
             <p className="home-line">
-              Diều đã bay <b>{formatAlt(done.result!.altitude)}</b>. Chuyến mới sau <span className="countdown">{countdown}</span>
+              Hôm nay bạn được <b>{done.result!.score.toLocaleString('vi-VN')} điểm</b>. Chuyến mới sau <span className="countdown">{countdown}</span>
             </p>
             <button className="next-btn" onClick={() => onReview({ mode: 'daily', rows: done.rows, result: done.result! })}>
               Xem kết quả
@@ -323,8 +338,8 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
           </>
         ) : (
           <>
-            <p className="home-line">7 câu hỏi, mỗi câu 25 giây gió và một lần trả lời</p>
-            <button className="next-btn" onClick={() => go('daily')}>
+            <p className="home-line">{liveStreak > 0 ? `Thả hôm nay để giữ chuỗi ${liveStreak} ngày. ` : ''}7 câu hỏi, mỗi câu 25 giây gió.</p>
+            <button className="next-btn shine" onClick={() => go('daily')}>
               Thả diều <KiteIcon />
             </button>
           </>

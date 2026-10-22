@@ -205,6 +205,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const [score, setScore] = useState(0);
   const scoreRef = useRef(0);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  // The big moment for Cực hiếm and Độc nhất: a full-screen burst over the result, gone after a beat or a tap.
+  const [burst, setBurst] = useState<{ tier: number; text: string; points: number } | null>(null);
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [quitArmed, setQuitArmed] = useState(false);
   const [pulling, setPulling] = useState(false);
@@ -577,6 +579,10 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     buzz(rank >= 5 ? [30, 40, 30, 40, 120] : rank >= 3 ? [30, 50, 60] : rank === 1 ? [80, 40, 20] : 25);
     flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
     flute.setLevel(musicLevel(after));
+    if (rank >= 5 && !reduce) {
+      setBurst({ tier, text: r.display!, points: r.points! });
+      timers.current.push(window.setTimeout(() => setBurst(null), 2300));
+    }
     setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, gio: r.gio, calm: gio && wind > 0 && (r.gio ?? 1) <= 1, share: r.share, judged: r.judged, altitude: after, milestone: m, crowd: r.crowd });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2600);
@@ -615,7 +621,24 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const sideFell = (phase === 'reveal' && !!reveal?.fell) || (phase === 'result' && outcome?.tier === KHON_LOI);
 
   return (
-    <main className={`stage play${dark ? ' night' : ''}`} onClick={() => phase === 'reveal' && skipReveal.current?.()}>
+    <main className={`stage play${dark ? ' night' : ''}${gio && wind > 0 ? ` windy w${Math.min(4, Math.ceil(wind / 3))}` : ''}`} onClick={() => phase === 'reveal' && skipReveal.current?.()}>
+      {gio && wind > 0 && (
+        <div className="wind-streaks" aria-hidden="true">
+          {Array.from({ length: Math.min(10, 2 + wind) }, (_, i) => <span key={i} style={{ ['--i' as string]: i }} />)}
+        </div>
+      )}
+      {burst && (
+        <div className="rare-burst" style={{ '--c': TIER_COLOR[burst.tier] } as CSSProperties} onClick={(e) => { e.stopPropagation(); setBurst(null); }} role="status">
+          <div className="rb-rays" aria-hidden="true" />
+          <div className="rb-sparks" aria-hidden="true">
+            {Array.from({ length: 18 }, (_, i) => <span key={i} style={{ ['--i' as string]: i }} />)}
+          </div>
+          <TierIcon tier={burst.tier} size={120} className="rb-icon" />
+          <b className="rb-title">{TIERS[burst.tier].name}!</b>
+          <span className="rb-answer">“{burst.text}”</span>
+          <span className="rb-pts">+{burst.points} điểm</span>
+        </div>
+      )}
       <header className="hud" ref={hudRef}>
         <button className="hud-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
           <BackIcon />
@@ -699,7 +722,9 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
 
         {phase === 'result' && outcome && (
           <div className={`block out-block${outcome.kind === 'landed' ? '' : ' miss'}`} style={{ '--c': outcome.kind === 'landed' ? TIER_COLOR[outcome.tier!] : '#6b7280' } as CSSProperties}>
-            <TierIcon tier={outcome.kind === 'landed' ? outcome.tier! : null} size={76} className="out-icon" />
+            <span className={`out-halo${outcome.kind === 'landed' && rankOf(outcome.tier!) >= 3 ? ' on' : ''}`} aria-hidden="true">
+              <TierIcon tier={outcome.kind === 'landed' ? outcome.tier! : null} size={76} className="out-icon" />
+            </span>
             {outcome.kind === 'landed' ? (
               <>
                 <h2 className="out-title">{TIERS[outcome.tier!].name}</h2>

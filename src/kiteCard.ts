@@ -24,6 +24,10 @@ export interface KiteCardData {
   points?: number[];
   link: string;
   skin: string;
+  /** The flight's rarest answer, if any was rare. */
+  rare?: { text: string; tier: number };
+  /** Where the player's long trip has reached. */
+  station?: string;
   /** The sky at the player's height, painted without a kite at the card's size. */
   scene?: HTMLCanvasElement;
 }
@@ -327,7 +331,12 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   const yAlt = top + 36 + titleH + 22 + subH + 30 + 88;
   const yMeta = yAlt + 52;
   const second = [d.milestone ? `qua ${d.milestone}` : '', d.beaten != null ? `cao hơn ${d.beaten}% làng` : ''].filter(Boolean).join(' · ');
-  const bottom = yMeta + 40;
+  // Extra lines: the rarest answer and the long trip, each on its own row.
+  const extras: { text: string; color?: string }[] = [];
+  if (d.rare) extras.push({ text: `“${d.rare.text}” · ${TIERS[d.rare.tier]?.name ?? ''}`, color: TIER_COLOR[d.rare.tier] });
+  if (d.station) extras.push({ text: `Hành trình: ${d.station}` });
+  const yExtra = yMeta + 66;
+  const bottom = yMeta + 40 + extras.length * 54;
   ctx.save();
   ctx.fillStyle = 'rgba(10,20,42,.62)';
   ctx.shadowColor = 'rgba(4,10,30,.35)';
@@ -355,14 +364,34 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   ctx.font = `600 ${sub.size}px ${BODY}`;
   sub.lines.forEach((l, i) => ctx.fillText(l, X + 2, ySub + i * (sub.size + 10)));
 
+  // Points lead (they decide the boards); the height follows in the line below.
   ctx.font = `900 100px ${DISPLAY}`;
   ctx.fillStyle = '#ffd66b';
-  ctx.fillText(formatAlt(d.altitude), X, yAlt);
-  const meta = [`${d.score.toLocaleString('vi-VN')} điểm`, second].filter(Boolean).join(' · ');
+  const scoreText = d.score.toLocaleString('vi-VN');
+  ctx.fillText(scoreText, X, yAlt);
+  const sw = ctx.measureText(scoreText).width;
+  ctx.font = `800 40px ${DISPLAY}`;
+  ctx.fillText('điểm', X + sw + 16, yAlt);
+  const meta = [`diều ${formatAlt(d.altitude)}`, second].filter(Boolean).join(' · ');
   const fitted = fitText(ctx, meta, 600, BODY, PW - 72, 32, 24);
   ctx.font = `600 ${fitted.size}px ${BODY}`;
   ctx.fillStyle = 'rgba(255,255,255,.88)';
   ctx.fillText(fitted.lines[0], X + 2, yMeta + 4);
+  extras.forEach((e, i) => {
+    const y = yExtra + i * 54;
+    let x = X + 2;
+    if (e.color) {
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      ctx.arc(x + 12, y - 10, 12, 0, Math.PI * 2);
+      ctx.fill();
+      x += 36;
+    }
+    const f = fitText(ctx, e.text, 700, BODY, PW - 72 - (x - X), 30, 22);
+    ctx.font = `700 ${f.size}px ${BODY}`;
+    ctx.fillStyle = e.color ? '#ffffff' : 'rgba(255,233,170,.95)';
+    ctx.fillText(f.lines[0], x, y);
+  });
 
   // Footer: the invitation and the address.
   ctx.fillStyle = 'rgba(255,253,246,.96)';

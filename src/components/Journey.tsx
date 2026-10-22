@@ -38,7 +38,7 @@ export function JourneyCard({ total, gained = 0, onOpen, compact }: { total: num
   return (
     <button className={`journey-card${compact ? ' compact' : ''}`} onClick={onOpen} aria-label="Mở hành trình">
       <div className="jc-head">
-        <span className="jc-k">{compact && j.next ? `Hành trình · còn ${fmt(j.next.at - total)} điểm` : 'Hành trình của bạn'}</span>
+        <span className="jc-k">Hành trình của bạn</span>
         <span className="jc-total">
           {fmt(shownTotal)} <small>điểm</small>
           {gained > 0 && <em className="jc-gain">+{fmt(gained)}</em>}
@@ -57,6 +57,7 @@ export function JourneyCard({ total, gained = 0, onOpen, compact }: { total: num
           <span className="jc-stop next">
             <i aria-hidden="true">{j.next.icon}</i>
             <b>{j.next.name}</b>
+            <small className="jc-left">còn {fmt(Math.max(0, j.next.at - total))}</small>
           </span>
         ) : (
           <span className="jc-stop next"><b>Cuối đường</b></span>

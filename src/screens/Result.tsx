@@ -18,12 +18,14 @@ import { FeedbackSheet } from '../components/FeedbackSheet';
 import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
 import { CheckIcon, FlagIcon } from '../glyphs';
 import { JourneyArrival, JourneyCard, JourneySheet } from '../components/Journey';
+import { journeyAt } from '../../shared/journey.js';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
   const pid = playerId();
   const [result, setResult] = useState<FinishResult>(summary.result);
   const [shown, setShown] = useState(0);
+  const [scoreShown, setScoreShown] = useState(0);
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
   const [feedback, setFeedback] = useState(false);
   const [name, setName] = useState(prefs.name);
@@ -46,17 +48,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     sky.setNervous(false);
     flute.setLevel(musicLevel(result.altitude));
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return setShown(result.altitude);
+    if (reduce) { setScoreShown(result.score); return setShown(result.altitude); }
     const t0 = performance.now();
     let raf = 0;
     const step = (now: number) => {
       const p = Math.min(1, (now - t0) / 1800);
       setShown(Math.pow(10, Math.log10(Math.max(1, result.altitude)) * (1 - Math.pow(1 - p, 3))));
+      setScoreShown(result.score * (1 - Math.pow(1 - p, 3)));
       if (p < 1) raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [sky, result.altitude]);
+  }, [sky, result.altitude, result.score]);
 
   // Scores settle as the village plays: refresh today's figures when the page opens.
   useEffect(() => {
@@ -148,6 +151,8 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         beaten: result.players > 1 ? result.beaten : null,
         grid: result.grid,
         points: mode === 'daily' ? rows.map((r) => r.points) : undefined,
+        rare: moment ? { text: moment.r.display!, tier: moment.r.tier } : undefined,
+        station: mode === 'daily' ? journeyAt(st.total).here.name : undefined,
         link,
         skin: prefs.skin,
         scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.74, kiteY: 0.2, decade: 0.5, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
@@ -217,15 +222,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <span />
         <span className="hud-sound">{soundButton}</span>
       </div>
-      <div className="result-hero">
+      <div className={`result-hero${mode === 'daily' ? ` band-${band}` : ' band-3'}`}>
         <span className="result-kicker">{mode === 'daily' ? `Chuyến bay ${dayLabel}` : 'Thả vô tận'}</span>
+        {mode === 'daily' && result.score > 0 && (
+          <span className="band-pill"><i aria-hidden="true">{['🌾', '🎋', '☁️', '🌌', '✨', '🌕'][band]}</i>Bậc {band + 1}/6{gio && result.players >= RANK_MIN_PLAYERS ? ` · ${BAND_RULES[band]}` : ''}</span>
+        )}
         <span className="result-title">{title}.</span>
         <span className="result-sub">{subtitle}</span>
         <span className="result-brag">“{brag}”</span>
         <div className="result-stats">
           <div className="stat-main">
-            <b>{result.score.toLocaleString('vi-VN')}</b>
-            <span>điểm{mode === 'daily' && result.score > 0 ? `, ${band + 1 >= 6 ? 'bậc cao nhất' : `bậc ${band + 1}/6`}` : ''}</span>
+            <b>{Math.round(scoreShown).toLocaleString('vi-VN')}</b>
+            <span>điểm</span>
           </div>
           <div>
             <b>{result.players > 1 ? `#${result.rank}` : '—'}</b>
