@@ -20,6 +20,8 @@ export interface KiteCardData {
   milestone: string;
   beaten: number | null;
   grid: string;
+  /** Points each answer earned, in order (daily flights), shown in the bows' knots. */
+  points?: number[];
   link: string;
   skin: string;
   /** The sky at the player's height, painted without a kite at the card's size. */
@@ -84,7 +86,7 @@ function darken(hex: string, f: number) {
 }
 
 /** One bow tied across the tail: two rounded wings, a knot in the middle with the points. */
-function bow(ctx: CanvasRenderingContext2D, at: Pt, angle: number, size: number, tier: number | null, n: number) {
+function bow(ctx: CanvasRenderingContext2D, at: Pt, angle: number, size: number, tier: number | null, n: number, pts?: number) {
   const miss = tier == null;
   const col = miss ? '#ffffff' : TIER_COLOR[tier];
   const gold = tier === 5;
@@ -167,8 +169,8 @@ function bow(ctx: CanvasRenderingContext2D, at: Pt, angle: number, size: number,
   ctx.fillStyle = miss ? '#ffffff' : darken(col, tier === 0 ? 0.45 : 0.25);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const label = miss ? '–' : String(TIERS[tier].points);
-  ctx.font = `900 ${Math.round(r * (label.length > 2 ? 0.82 : 1.02))}px ${DISPLAY}`;
+  const label = miss ? '–' : String(pts ?? TIERS[tier].points);
+  ctx.font = `900 ${Math.round(r * (label.length > 3 ? 0.66 : label.length > 2 ? 0.82 : 1.02))}px ${DISPLAY}`;
   ctx.fillText(label, 0, 2);
   ctx.restore();
   if (gold) sparkles(ctx, at, size);
@@ -297,7 +299,7 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   cells.forEach((ch, i) => {
     const { p, a } = tailAt(segs, at[i]);
     const tier = ch === 'x' ? null : Number(ch);
-    bow(ctx, p, a, 128 - i * 4, Number.isNaN(tier as number) ? null : tier, i);
+    bow(ctx, p, a, 128 - i * 4, Number.isNaN(tier as number) ? null : tier, i, d.points?.[i]);
   });
 
   // Words, top left.

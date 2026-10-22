@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BANK } from './bank.js';
 import { Matcher, parseRaw } from './match.js';
 import { norm } from './normalize.js';
-import { MAX_ALT_EXPONENT, MAX_DAILY_POINTS, TIERS_BY_RANK, altitudeFor, bandFor, crossed, formatAlt, isRare, tierFromCounts, streakBonus } from './scoring.js';
+import { GIO_FROM, GIO_MAX, MAX_GIO_POINTS, flightPoints, gioMultiplier, windAfter, MAX_ALT_EXPONENT, MAX_DAILY_POINTS, TIERS_BY_RANK, altitudeFor, bandFor, crossed, formatAlt, isRare, tierFromCounts, streakBonus } from './scoring.js';
 
 const Q = Object.fromEntries(BANK.map((r) => [r.id, parseRaw(r)]));
 const matcher = (id: string) => new Matcher(Q[id].strip, Q[id].answers);
@@ -80,16 +80,32 @@ describe('scoring', () => {
     expect(tierFromCounts(4, 300, 1000)).toBe(0);
     expect(tierFromCounts(0, 1, 2000)).toBe(4);
   });
-  it('grows ten times every 65 points', () => {
-    expect(altitudeFor(65)).toBeCloseTo(10);
-    expect(altitudeFor(130)).toBeCloseTo(100);
-    expect(altitudeFor(0)).toBe(0);
+  it('grows ten times every 65 points on days before Nối gió', () => {
+    const old = '2026-10-22';
+    expect(altitudeFor(65, 'daily', old)).toBeCloseTo(10);
+    expect(altitudeFor(130, 'daily', old)).toBeCloseTo(100);
+    expect(altitudeFor(0, 'daily', old)).toBe(0);
+  });
+  it('flies Nối gió flights by the square root of the score', () => {
+    expect(altitudeFor((5.8 * 4) ** 2, 'daily', GIO_FROM)).toBeCloseTo(1e4, 0);
+    expect(altitudeFor(1_000_000)).toBe(altitudeFor(MAX_GIO_POINTS));
+    expect(MAX_GIO_POINTS).toBe(4700);
+  });
+  it('raises the wind with rarer answers in a row and drops it on a common one', () => {
+    // Thường, Rất hiếm, Cực hiếm, Khá hiếm (holds), miss (drops), Hiếm, Độc nhất.
+    const f = flightPoints([0, 3, 4, 1, -1, 2, 5], GIO_FROM);
+    expect(f.map((x) => x.wind)).toEqual([0, 2, 5, 5, 0, 1, 4]);
+    expect(f.map((x) => x.points)).toEqual([10, 120, 270, 56, 0, 63, 400]);
+    expect(windAfter(11, 5)).toBe(GIO_MAX);
+    expect(gioMultiplier(GIO_MAX)).toBe(4);
+    // Before the switch, the same flight scores the old way.
+    expect(flightPoints([2, 2, 2], '2026-10-01').map((x) => x.points)).toEqual([45, 50, 55]);
   });
   it('stays finite and bounded whatever score it is given', () => {
     expect(altitudeFor(NaN)).toBe(0);
     expect(altitudeFor(Infinity)).toBe(0);
     // A daily score past the most a day can give (a bad stored turn) cannot fly higher than that maximum.
-    expect(altitudeFor(1_000_000)).toBe(altitudeFor(MAX_DAILY_POINTS));
+    expect(altitudeFor(1_000_000, 'daily', '2026-10-01')).toBe(altitudeFor(MAX_DAILY_POINTS, 'daily', '2026-10-01'));
     // A very long night keeps lapping the sky but never overflows to Infinity.
     expect(Number.isFinite(altitudeFor(20_000, 'night'))).toBe(true);
     expect(altitudeFor(20_000, 'night')).toBe(Math.pow(10, MAX_ALT_EXPONENT));
@@ -109,10 +125,11 @@ describe('scoring', () => {
     expect(isRare(6)).toBe(false);
     expect(isRare(2)).toBe(true);
   });
-  it('titles the day by total score', () => {
+  it('titles the day by how high the kite flew', () => {
     expect(bandFor(0).verdict).toMatch(/^Tà tà/);
-    expect(bandFor(300).verdict).toMatch(/^Bay bổng/);
-    expect(bandFor(700).verdict).toMatch(/^Cung Trăng/);
+    expect(bandFor(altitudeFor(300, 'daily', '2026-10-01')).verdict).toMatch(/^Bay bổng/);
+    expect(bandFor(altitudeFor(700, 'daily', '2026-10-01')).verdict).toMatch(/^Cung Trăng/);
+    expect(bandFor(4e8).verdict).toMatch(/^Cung Trăng/);
   });
   it('caps the streak bonus', () => {
     expect(streakBonus(1)).toBe(0);
@@ -142,5 +159,17 @@ describe('board names', () => {
     for (const ok of ['Nguyễn Văn An', 'Đeo kính', 'Các bạn ơi', 'Cặp đôi', 'Lan Chi', 'Bé Bi', 'Hoàng Anh Tuấn']) expect(rudeName(ok), ok).toBe(false);
     expect(boardName('  Bé   Bi  ')).toBe('Bé Bi');
     expect(boardName('đồ ngu')).toBeNull();
+  });
+});
+
+describe('chat shorthand', () => {
+  it('reads "ko", "k" and "đc" as the words they stand for', () => {
+    const m = new Matcher(['bai'], [
+      { key: 'ctktvn', aliases: ['Chúng Ta Không Thuộc Về Nhau'], priorTier: 3 },
+      { key: 'vk', aliases: ['Vitamin K'], priorTier: 2 },
+    ]);
+    expect(m.match('chúng ta ko thuộc về nhau')?.key).toBe('ctktvn');
+    expect(m.match('Chúng ta k thuộc về nhau')?.exact).toBe(true);
+    expect(m.match('Vitamin K')?.key).toBe('vk');
   });
 });

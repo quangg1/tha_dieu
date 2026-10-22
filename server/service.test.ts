@@ -22,6 +22,11 @@ beforeAll(async () => {
   const r = await S.setup(db);
   expect(r.questions).toBeGreaterThan(30);
   await S.setup(db); // idempotent
+  // Today's flight is pinned, so the prompts these tests fly in Thả vô tận by name are never in it, whatever the shuffle.
+  await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2)`, [
+    day,
+    ['trai-cay', 'pop-topping', 'sinh-vat-bien', 'mau-sac', 'pop-mi-goi', 'con-trung', 'gia-vi'],
+  ]);
 }, 60_000);
 
 describe('daily set', () => {
@@ -141,7 +146,8 @@ describe('runs', () => {
   it('computes altitude on the server and ranks players', async () => {
     const r1 = await S.finish(db, { playerId: 'player_test_0001', day, mode: 'daily', name: 'Lan' });
     expect(r1.score).toBe(10);
-    expect(r1.altitude).toBeCloseTo(Math.pow(10, 10 / 65));
+    const { altitudeFor } = await import('../shared/scoring.js');
+    expect(r1.altitude).toBeCloseTo(altitudeFor(10, 'daily', day));
     expect(r1.grid).toMatch(/^0x{6}$/);
     const b = await S.board(db, day, 'daily', 'player_test_0001');
     expect(b.rows[0].me).toBe(true);
@@ -585,7 +591,9 @@ describe('points credited after the night shift', () => {
 describe('a credited turn and the rare streak', () => {
   it('gives the credited turn its streak bonus and extends the streak of the rare turns after it', async () => {
     const { nullReferee } = await import('./referee.js');
-    const { TIERS, isRare, streakBonus } = await import('../shared/scoring.js');
+    const { isRare, flightPoints } = await import('../shared/scoring.js');
+    // Points as the rules of this day give them (Nối gió from 23/10/2026, the rare-streak bonus before).
+    const fp = (tiers: number[]) => flightPoints(tiers, day).map((x) => x.points);
     const set = await S.dailySet(db, day);
     const pid = 'streak_credit_p';
     const put = (qid: string, tier: number, points: number, at: string) =>
@@ -595,12 +603,12 @@ describe('a credited turn and the rare streak', () => {
         [pid, day, qid, at, tier, points],
       );
     // Two rare answers (Hiếm), then one the book did not know, then another rare one.
-    await put(set[2], 2, 45, '-10 minutes');
-    await put(set[3], 2, 45 + streakBonus(2), '-9 minutes');
+    await put(set[2], 2, fp([2])[0], '-10 minutes');
+    await put(set[3], 2, fp([2, 2])[1], '-9 minutes');
     await S.startTurn(db, { playerId: pid, day, mode: 'daily', questionId: set[1] });
     const typed = 'Đáp án chuỗi hiếm duyệt sau';
     expect((await S.answer(db, { playerId: pid, day, mode: 'daily', questionId: set[1], input: typed }, nullReferee)).status).toBe('retry');
-    await put(set[4], 2, 45 + streakBonus(3), '+1 minutes');
+    await put(set[4], 2, fp([2, 2, 2])[2], '+1 minutes');
 
     const item = (await S.nightQueue(db)).submissions.find((s) => s.q === set[1] && s.display === typed)!;
     expect(item).toBeTruthy();
@@ -613,9 +621,10 @@ describe('a credited turn and the rare streak', () => {
     );
     const at = (qid: string) => turns.find((t) => t.question_id === qid)!;
     expect(isRare(at(set[1]).tier)).toBe(true);
-    expect(at(set[1]).points).toBe(TIERS[at(set[1]).tier].points + streakBonus(3));
-    expect(at(set[4]).points).toBe(45 + streakBonus(4));
-    expect(at(set[2]).points).toBe(45);
+    const want = fp([2, 2, at(set[1]).tier, 2]);
+    expect(at(set[1]).points).toBe(want[2]);
+    expect(at(set[4]).points).toBe(want[3]);
+    expect(at(set[2]).points).toBe(want[0]);
     // The board reads the new total, not a stale day_scores row.
     const total = turns.reduce((s, t) => s + t.points, 0);
     expect((await S.scoreDay(db, day)).get(pid)?.score).toBe(total);
@@ -728,5 +737,28 @@ describe('friends', () => {
     expect(fa.rows.find((r) => !r.me)!.week).toBe(90);
     await F.leave(db, b, mineA.code);
     expect((await F.friendsBoard(db, b)).friends).toBe(0);
+  });
+});
+
+describe('Thả vô tận board', () => {
+  it('ranks each player by their best run in the period and finds the player below the top', async () => {
+    const yday = S.vnToday(new Date(Date.now() - 86_400_000));
+    const old = S.vnToday(new Date(Date.now() - 30 * 86_400_000));
+    const put = (p: string, d: string, name: string | null, score: number) =>
+      db.query(`insert into runs (player_id, day, mode, name, score, altitude, grid) values ($1,$2::date,'night',$3,$4,$5,'0')`, [p, d, name, score, Math.pow(10, score / 30)]);
+    await put('nb_a', day, 'An', 300);
+    await put('nb_a', yday, null, 450);
+    await put('nb_b', old, 'Bình', 900);
+    await put('nb_c', day, 'Chi', 200);
+    S.forgetBoard();
+    const today = await S.nightBoard(db, 'day', 'nb_c');
+    expect(today.rows.filter((r) => ['An', 'Chi'].includes(r.name)).map((r) => [r.name, r.score])).toEqual([['An', 300], ['Chi', 200]]);
+    const week = await S.nightBoard(db, 'week', 'nb_a');
+    const an = week.rows.find((r) => r.me)!;
+    expect(an.score).toBe(450);
+    expect(an.name).toBe('An');
+    expect(week.rows.some((r) => r.name === 'Bình')).toBe(false);
+    const all = await S.nightBoard(db, 'all');
+    expect(all.rows.findIndex((r) => r.name === 'Bình')).toBeLessThan(all.rows.findIndex((r) => r.name === 'An'));
   });
 });

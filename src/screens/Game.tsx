@@ -7,6 +7,10 @@ import {
   KHON_LOI,
   TIERS,
   altitudeFor,
+  basePoints,
+  flightPoints,
+  gioMultiplier,
+  usesGio,
   rankOf,
   crossed,
   formatAlt,
@@ -44,6 +48,9 @@ interface Outcome {
   tier?: number;
   points?: number;
   bonus?: number;
+  /** Nối gió: the multiplier the answer was scored with, and whether a wind was lost to it. */
+  gio?: number;
+  calm?: boolean;
   share?: number | null;
   judged?: boolean;
   reason?: string;
@@ -115,8 +122,11 @@ function useRoll(value: number) {
   return shown;
 }
 
+/** A wind multiplier the Vietnamese way: ×1,75. */
+const fmtGio = (m: number) => m.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+
 /** The rarity ladder: six rungs from Thường to Độc nhất, lit one by one as an answer climbs. */
-function Ladder({ step, tier, fell, side, done }: { step: number; tier: number | null; fell: boolean; side?: boolean; done?: boolean }) {
+function Ladder({ step, tier, fell, side, done, pts }: { step: number; tier: number | null; fell: boolean; side?: boolean; done?: boolean; pts: (t: number) => number }) {
   const khon = tier === KHON_LOI;
   return (
     <div className={`ladder${side ? ' ladder--side' : ''}${fell ? ' ladder--fell' : ''}`} aria-hidden="true">
@@ -131,7 +141,7 @@ function Ladder({ step, tier, fell, side, done }: { step: number; tier: number |
             <li key={t} className={`rung${lit ? ' lit' : ''}${here ? ' here' : ''}${final ? ' final' : ''}`} style={{ '--c': TIER_COLOR[t] } as CSSProperties}>
               <TierIcon tier={t} size={side ? 30 : 28} />
               <span className="rung-name">{TIERS[t].name}</span>
-              <span className="rung-pts">{TIERS[t].points}</span>
+              <span className="rung-pts">{pts(t)}</span>
             </li>
           );
         })}
@@ -139,7 +149,7 @@ function Ladder({ step, tier, fell, side, done }: { step: number; tier: number |
       {fell && (
         <div className="ladder-khon" style={{ '--c': TIER_COLOR[KHON_LOI] } as CSSProperties}>
           <TierIcon tier={KHON_LOI} size={28} />
-          <span>Khôn lỏi, {TIERS[KHON_LOI].points} điểm</span>
+          <span>Khôn lỏi, {pts(KHON_LOI)} điểm</span>
         </div>
       )}
     </div>
@@ -212,11 +222,15 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const coachDone = useRef<(() => void) | null>(null);
   const [shake, setShake] = useState(0);
 
-  const altitude = altitudeFor(score, mode);
+  const altitude = altitudeFor(score, mode, day);
+  // Nối gió: the wind this flight carries now, from every turn so far in the order flown.
+  const gio = usesGio(mode, day);
+  const pts = (t: number) => basePoints(t, mode, day);
+  const wind = gio ? flightPoints(rows.map((r) => r.tier), day).at(-1)?.wind ?? 0 : 0;
   const shownScore = useRoll(score);
   const shownAlt = useRoll(altitude);
   const lap = lapOf(shownAlt).lap;
-  const dark = lap >= 3 || Math.log10(Math.max(1, lapOf(altitudeFor(shownScore, mode)).inner)) >= 4.3;
+  const dark = lap >= 3 || Math.log10(Math.max(1, lapOf(altitudeFor(shownScore, mode, day)).inner)) >= 4.3;
   const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const hudRef = useRef<HTMLElement>(null);
@@ -283,7 +297,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     else flute.wrong();
     sky.dip(kind === 'late' ? 1.4 : 1);
     pushRow({ questionId: question.id, prompt: question.prompt, display: null, tier: -1, points: 0, input: inputText });
-    setOutcome({ kind, input: inputText, reason, altitude: altitudeFor(scoreRef.current, mode) });
+    setOutcome({ kind, input: inputText, reason, altitude: altitudeFor(scoreRef.current, mode, day) });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2400);
   };
@@ -430,7 +444,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         const s = prev.reduce((a, r) => a + r.points, 0);
         scoreRef.current = s;
         setScore(s);
-        sky.setAltitude(altitudeFor(s, mode), false);
+        sky.setAltitude(altitudeFor(s, mode, d), false);
         const done = new Set(prev.map((r) => r.questionId));
         const from = questions.findIndex((x) => !done.has(x.id));
         await openDaily(questions, from < 0 ? questions.length : from, d);
@@ -543,8 +557,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     }
 
     const tier = r.tier!;
-    const before = altitudeFor(scoreRef.current, mode);
-    const after = altitudeFor(scoreRef.current + r.points!, mode);
+    const before = altitudeFor(scoreRef.current, mode, day);
+    const after = altitudeFor(scoreRef.current + r.points!, mode, day);
     const rank = rankOf(tier);
     const m = crossed(before, after);
     if (lapOf(after).lap > lapOf(before).lap) track('lap', { lap: lapOf(after).lap, mode });
@@ -563,7 +577,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     buzz(rank >= 5 ? [30, 40, 30, 40, 120] : rank >= 3 ? [30, 50, 60] : rank === 1 ? [80, 40, 20] : 25);
     flute.strike(TIERS[tier].flutes, tier === CUNG_TRANG);
     flute.setLevel(musicLevel(after));
-    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, share: r.share, judged: r.judged, altitude: after, milestone: m, crowd: r.crowd });
+    setOutcome({ kind: 'landed', input: text, display: r.display, tier, points: r.points, bonus: r.bonus, gio: r.gio, calm: gio && wind > 0 && (r.gio ?? 1) <= 1, share: r.share, judged: r.judged, altitude: after, milestone: m, crowd: r.crowd });
     setPhase('result');
     if (mode === 'night') autoNext.current = window.setTimeout(() => next(), 2600);
   };
@@ -640,7 +654,14 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           )}
         </div>
         <div className="hud-panel right">
-          <span className="k">Điểm</span>
+          <span className="k score-k">
+            {gio && (
+              <span className={`gio-tag${wind > 0 ? ' on' : ''}`} key={wind} title="Nối gió: trả lời hiếm liên tiếp, gió càng mạnh, điểm càng nhân lên">
+                gió ×{fmtGio(gioMultiplier(wind))}
+              </span>
+            )}
+            Điểm
+          </span>
           <span className="v gold">{Math.round(shownScore)}</span>
         </div>
         <span className="hud-sound">{soundButton}</span>
@@ -674,7 +695,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         {phase === 'reveal' && reveal && (
           <div className="block reveal-block">
             <p className="reveal-answer">“{reveal.text}”</p>
-            <Ladder step={reveal.step} tier={reveal.tier} fell={reveal.fell} />
+            <Ladder step={reveal.step} tier={reveal.tier} fell={reveal.fell} pts={pts} />
             <span className="reveal-skip">chạm để xem ngay</span>
           </div>
         )}
@@ -693,7 +714,12 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
                 <p className="out-line">{answerQuip(outcome.tier!, seedOf(outcome.display ?? '', outcome.altitude))}</p>
                 <div className="chips">
                   {mode === 'night' && <span className="chip">+{TIERS[outcome.tier!].wind} giây gió</span>}
-                  {outcome.bonus ? <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span> : null}
+                  {outcome.gio && outcome.gio > 1 ? (
+                    <span className="chip gio-chip">{pts(outcome.tier!)} × gió {fmtGio(outcome.gio)}</span>
+                  ) : outcome.bonus ? (
+                    <span className="chip">gồm +{outcome.bonus} chuỗi hiếm</span>
+                  ) : null}
+                  {outcome.calm && <span className="chip">gió lặng, về ×1</span>}
                   {outcome.share != null && !outcome.crowd && <span className="chip">{outcome.share.toLocaleString('vi-VN')}% người chơi cũng nghĩ ra</span>}
                   {outcome.judged && <span className="chip">đáp án mới, trọng tài vừa công nhận</span>}
                   {outcome.milestone && <span className="chip mile">Vượt mốc {outcome.milestone.name}</span>}
@@ -728,7 +754,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
               {LADDER.map((t) => (
                 <span key={t}>
                   <TierIcon tier={t} size={30} />
-                  <small>{TIERS[t].points}</small>
+                  <small>{pts(t)}</small>
                 </span>
               ))}
             </div>

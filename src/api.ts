@@ -36,6 +36,8 @@ export interface AnswerResult {
   tier?: TierIndex;
   points?: number;
   bonus?: number;
+  /** Nối gió: the multiplier this answer was scored with. */
+  gio?: number;
   judged?: boolean;
   share?: number | null;
   crowd?: Crowd;
@@ -57,6 +59,24 @@ export interface FinishResult {
   reveal?: Reveal[];
   /** The day's scores in buckets of w points, for the curve. */
   dist?: { w: number; counts: number[] };
+}
+
+export interface NightBoardRow {
+  rank: number;
+  name: string;
+  score: number;
+  altitude: number;
+  /** The day the run was flown. */
+  day: string;
+  me: boolean;
+}
+
+export interface NightBoard {
+  period: 'day' | 'week' | 'all';
+  players: number;
+  rows: NightBoardRow[];
+  /** The player's own best run when it is below the top twenty. */
+  me: NightBoardRow | null;
 }
 
 export interface BoardRow {
@@ -168,6 +188,7 @@ export const api = {
   miss: (b: { playerId: string; day: string; mode: string; questionId: string }) => call<{ ok: boolean }>('miss', b),
   finish: (b: { playerId: string; day: string; mode: string; name?: string; since?: string; runSince?: string }) => call<FinishResult>('finish', b),
   board: (mode: string, playerId: string) => call<{ players: number; settled?: boolean; rows: BoardRow[] }>(`board?mode=${mode}&playerId=${encodeURIComponent(playerId)}`),
+  nightBoard: (period: 'day' | 'week' | 'all', playerId: string) => call<NightBoard>(`board/night?period=${period}&playerId=${encodeURIComponent(playerId)}`),
   yesterday: (playerId: string) => call<{ day: string; reveal: Reveal[] }>(`yesterday?playerId=${encodeURIComponent(playerId)}`),
   report: (b: { questionId: string; input: string; kind: 'rejected' | 'accepted'; note?: string }) => call<{ ok: boolean }>('report', b),
   gate: (s: string) => call<{ ok: boolean }>(`gate?s=${encodeURIComponent(s)}`),

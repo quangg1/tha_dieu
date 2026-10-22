@@ -45,12 +45,12 @@ export function FriendsList({ board, tab, compact = false }: { board: FriendsBoa
             {tab === 'week'
               ? `${r.week.toLocaleString('vi-VN')} điểm`
               : r.score != null
-                ? formatAlt(r.altitude ?? 0)
+                ? `${r.score.toLocaleString('vi-VN')} điểm`
                 : r.flew
                   ? 'Đã bay'
                   : 'Chưa bay'}
           </b>
-          {tab === 'week' && <small className="fr-days">{r.days}/7 ngày</small>}
+          {tab === 'week' ? <small className="fr-days">{r.days}/7 ngày</small> : r.score != null ? <small className="fr-days">{formatAlt(r.altitude ?? 0)}</small> : <small />}
         </div>
       ))}
     </div>

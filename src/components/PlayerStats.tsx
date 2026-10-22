@@ -118,9 +118,9 @@ export function RarityStrings({ rows }: { rows: LocalRow[] }) {
   );
 }
 
-/** The day's titles by score, with the player's own highlighted. */
-export function DayBands({ score }: { score: number }) {
-  const mine = bandFor(score);
+/** The day's titles by height, with the player's own highlighted. */
+export function DayBands({ altitude }: { altitude: number }) {
+  const mine = bandFor(altitude);
   return (
     <div className="pst-bands">
       {DAY_BANDS.map((b, i) => {
@@ -129,7 +129,7 @@ export function DayBands({ score }: { score: number }) {
         return (
           <div key={b.min} className={`pst-band${b === mine ? ' on' : ''}`}>
             <TierIcon tier={b.tier} size={26} />
-            <span className="pst-range">{next ? `${b.min}–${next.min - 1}` : `${b.min}+`}</span>
+            <span className="pst-range">{i === 0 ? `dưới ${formatAlt(next!.min)}` : `từ ${formatAlt(b.min)}`}</span>
             <span className="pst-bname">
               <b>{name}</b> {line}
             </span>

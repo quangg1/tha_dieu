@@ -389,6 +389,27 @@ export const RETIRED = new Set<string>(
   tv-hoa-trang tv-hoa-do`.split(/\s+/),
 );
 
+/**
+ * Bilion asks prompts whose common answers come to mind at once but whose rare answers are genuinely hard to find
+ * in 25 seconds: a rare answer must take knowledge or a good memory, not just a decision to avoid the obvious.
+ * These fail that test (October 2026 review). They stay in the book, so old days still open, but are never asked.
+ */
+export const HARD_TO_BE_RARE_FAILS = new Set<string>(
+  [
+    // Closed lists everyone learned at school, and number prompts: every member is as easy to name as any other, so picking a rare one takes no knowledge, only a choice (Asian countries, school subjects, provinces, zodiac animals, capitals, primes).
+    'chau-a kn-monhoc tinh-thanh dp-bien dp-34 n-con-giap n-inside-out pop-bts-bp n-quan-ham hh-1chu so-nguyen-to so-chinh-phuong so-nam-nhuan thu-do td-eu td-as td-af td-my qg-eu qg-af qg-my qg-dao qg-noi qg-eu27 qg-chu-t qg-chu-n qg-1tieng',
+    // Fandom lists with no end (anime, K-pop, singers, dramas, game heroes, Pokémon): a fan has hundreds of titles at hand, the book can never hold them all, and any title past the top few lands as rare.
+    'pop-anime pop-kpop pop-ca-si pop-phim-han pop-phim-hoa-ngu pop-hoat-hinh-chieu-rap pop-phim-viet pop-gameshow pop-sieu-anh-hung pop-lien-quan pop-pokemon pop-marvel',
+    // No obvious answer at the head: players scatter, so nearly every answer is rare and points come too easily.
+    'dv-tuyet tv-caycn tv-qua-chu-c tv-hoa-chu-h dp-bac dp-trung dp-nam dp-bien-gioi dp-chu-b dd-tp-bien dd-bien dd-dao dd-vqg qg-dd qg-trungdong qg-asean qg-chu-b qg-chu-c qg-chu-m qg-chu-s nv-nguyen nv-nhacsi-vn nv-bongda-vn nv-triet nv-thamhiem nv-khoa-vn vh-cotich-tg vh-tacpham-vn vh-nv-vn ng-thucong qa-truyenthong xe-thuy xe-tho xe-chuyendung ms-xanh ms-vn tt-bong tt-nuoc tt-vo tt-doi nc-hoi nc-go hh-khi hh-phongxa tv-chomsao tv-sao tv-tau nn-vn',
+    // A long tail of everyday things anyone can name on purpose (body parts, vehicles, languages, units, kitchen and household things): a rare answer is a deliberate pick, not a hard one.
+    'nhac-cu phuong-tien nha-khoa-hoc co-the ngon-ngu loai-banh tro-choi-dan-gian song-ho nhan-vat-lich-su co-tich pop-mon-han pop-mon-nhat dv-giong-cho tv-go-quy tv-ve-tinh n-banh-bot-gao ma-chao ma-lau ma-canh ma-goi du-tra du-cocon dd-nui tg-kientruc tg-tunhien nv-hoasi ng-tho vh-lehoi tt-dantoc tv-hemt nn-laptrinh nn-as kn-nganh kn-thoitiet kn-hangcn do-dung-hoc-tap n-giuong n-don-dep n-trang-suc n-hang-khong n-xe-2banh vh-ngayle dd-tp nn-eu pop-nha-mang kn-tiente ct-mat ct-doi ct-xuong ct-noi n-ban-tay kn-hinh kn-donvi',
+  ]
+    .join(' ')
+    .split(/\s+/),
+);
+for (const id of HARD_TO_BE_RARE_FAILS) RETIRED.add(id);
+
 /** The hand-written thickening passes, in order. */
 function thicken(q: QuestionDef, id: string): QuestionDef {
   let out = q;

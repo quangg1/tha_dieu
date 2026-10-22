@@ -7,6 +7,7 @@ import { BagSheet, KITE_PICS } from '../components/BagSheet';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { RemindSheet } from '../components/RemindSheet';
 import { FriendsSheet } from '../components/Friends';
+import { NightBoardSheet } from '../components/NightBoard';
 import type { SkyScene } from '../scene/sky';
 import { SKINS, unlocked } from '../skins';
 import { account, album, enterAccount, krillFound, leaveAccount, playerId, refreshAccount, stats } from '../store';
@@ -15,7 +16,7 @@ import { track } from '../track';
 type Pending = { session: string; device: string; days: number; profile: { name: string | null; email: string | null } };
 
 export default function Account({ soundButton, onHome, sky }: { soundButton: ReactNode; onHome: () => void; sky?: SkyScene | null }) {
-  const [sheet, setSheet] = useState<'bag' | 'remind' | 'feedback' | 'friends' | null>(null);
+  const [sheet, setSheet] = useState<'bag' | 'remind' | 'feedback' | 'friends' | 'night' | null>(null);
   const [acc, setAcc] = useState(account());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -173,7 +174,10 @@ export default function Account({ soundButton, onHome, sky }: { soundButton: Rea
         <section className="card acct-card">
           <div className="card-k">Đua cùng bạn bè</div>
           <p className="acct-p">Mời bạn bè và so điểm mỗi ngày sau khi bay xong, cộng dồn cả tuần.</p>
-          <button className="pill-btn ghost" onClick={() => { setSheet('friends'); track('friends'); }}>Bảng bạn bè ›</button>
+          <div className="home-row">
+            <button className="pill-btn ghost" onClick={() => { setSheet('friends'); track('friends'); }}>Bảng bạn bè ›</button>
+            <button className="pill-btn ghost" onClick={() => { setSheet('night'); track('night_board'); }}>Bảng Thả vô tận ›</button>
+          </div>
         </section>
 
         <section className="card">
@@ -220,6 +224,7 @@ export default function Account({ soundButton, onHome, sky }: { soundButton: Rea
       {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'friends' && <FriendsSheet onClose={() => setSheet(null)} />}
+      {sheet === 'night' && <NightBoardSheet onClose={() => setSheet(null)} />}
     </main>
   );
 }

@@ -127,7 +127,7 @@ export interface SkyLayout {
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
   home: { kiteX: 0.64, kiteY: 0.34, decade: 0.95, kiteSize: 0.26, ruler: false, kiteMax: 170, column: 560, ground: -0.3 },
   play: { kiteX: 0.5, kiteY: 0.19, decade: 0.45, kiteSize: 0.2, ruler: true, top: 70, column: 680, kiteMax: 96, ground: -1.36, text: [0.33, 0.74], bottom: 92 },
-  result: { kiteX: 0.32, kiteY: 0.2, decade: 0.3, kiteSize: 0.16, ruler: false, column: 520, kiteMax: 130 },
+  result: { kiteX: 0.32, kiteY: 0.2, decade: 0.55, kiteSize: 0.16, ruler: false, column: 520, kiteMax: 130 },
 };
 
 const log = (alt: number) => Math.log10(Math.max(1, alt));
@@ -666,6 +666,7 @@ export class SkyScene {
     this.drawStars();
     this.drawSun();
     this.drawDeepSpace();
+    this.drawEarth();
     this.drawOrbit();
     this.drawAir();
     this.drawFarUniverse();
@@ -1130,15 +1131,122 @@ export class SkyScene {
 
   /* ---------------------------------------------------------------- orbit: Kármán line, ISS, Vinasat */
 
+  /**
+   * How much of the Earth seen from orbit shows: none in the air, all of it once the kite is past the edge of space
+   * (about 160 km), fading away out by the Moon, where the Earth is a dot.
+   */
+  private earthA() {
+    return clamp((this.camL - 5.0) / 0.25) * (1 - clamp((this.camL - 8.3) / 0.4));
+  }
+
+  /**
+   * The Earth below, at its true apparent size: from height h its disc spans asin(R / (R + h)) on each side of straight
+   * down. At 250 km that is a horizon barely curved; at 3.500 km a ball filling the bottom of the screen; from the
+   * geostationary ring a small marble. The log-scale sky cannot show this by placing things, so the globe is drawn
+   * from the camera's height instead.
+   */
+  private drawEarth() {
+    const a = this.earthA();
+    if (a <= 0) return;
+    const { ctx, W, H } = this;
+    const R = 6.371e6;
+    const h = Math.pow(10, this.camL);
+    const theta = Math.asin(R / (R + h));
+    const r = 0.35 * Math.max(W, H) * Math.tan(theta);
+    const cx = W / 2;
+    const cy = Math.max(H * 0.8, H * 0.7 + r);
+    ctx.save();
+    ctx.globalAlpha = a;
+    // Atmosphere: a soft blue halo fading out from the limb, and a bright hairline on it.
+    const hr = r + Math.min(r * 0.08, 50) + 14;
+    const halo = ctx.createRadialGradient(cx, cy, r * 0.98, cx, cy, hr);
+    halo.addColorStop(0, 'rgba(130,205,255,.55)');
+    halo.addColorStop(0.35, 'rgba(110,190,255,.18)');
+    halo.addColorStop(1, 'rgba(110,190,255,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, hr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(190,235,255,.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.clip();
+    const sea = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.45, r * 0.05, cx, cy, r);
+    sea.addColorStop(0, '#6cc2ff');
+    sea.addColorStop(0.55, '#2b76c9');
+    sea.addColorStop(1, '#0c3168');
+    ctx.fillStyle = sea;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    // Land and cloud bands drifting slowly with the Earth's turning.
+    const spin = this.t * 0.012;
+    const land: [number, number, number, number, number][] = [
+      [0.1, -0.55, 0.32, 0.16, 0.4], [0.55, -0.2, 0.26, 0.22, -0.3], [1.3, -0.45, 0.4, 0.18, 0.2],
+      [1.9, 0.15, 0.22, 0.3, 0.5], [2.6, -0.3, 0.3, 0.14, -0.2], [3.4, 0.05, 0.36, 0.2, 0.1],
+      [4.3, -0.6, 0.28, 0.12, 0.3], [5.1, -0.1, 0.24, 0.26, -0.4],
+    ];
+    for (const [lon, lat, rw, rh, rot] of land) {
+      const ang = lon + spin;
+      const c = Math.sin(ang);
+      if (Math.cos(ang) < -0.1) continue;
+      const x = cx + c * r * 0.85;
+      const y = cy + lat * r;
+      const squash = Math.max(0.15, Math.cos(ang));
+      // Each land mass is a few overlapping lobes, so it reads as a coastline rather than an egg.
+      ctx.fillStyle = 'rgba(92,168,90,.9)';
+      ctx.beginPath();
+      for (let k = 0; k < 5; k++) {
+        const kx = Math.cos(k * 2.4 + lon * 3) * rw * 0.55;
+        const ky = Math.sin(k * 1.7 + lon * 5) * rh * 0.6;
+        const kr = (0.45 + 0.25 * Math.sin(k * 3.1 + lon)) * Math.min(rw, rh) * 1.4;
+        ctx.ellipse(x + kx * r * squash, y + ky * r, kr * r * squash, kr * r * 0.8, rot, 0, Math.PI * 2);
+        ctx.closePath();
+      }
+      ctx.fill();
+      ctx.fillStyle = 'rgba(205,184,120,.4)';
+      ctx.beginPath();
+      ctx.ellipse(x + rw * r * squash * 0.15, y - rh * r * 0.15, rw * r * squash * 0.35, rh * r * 0.3, rot, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.45)';
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) {
+      const y = cy - r * 0.8 + i * r * 0.27;
+      const off = ((spin * 1.6 + i * 0.37) % 1) * r * 2;
+      ctx.lineWidth = Math.max(2, r * 0.035);
+      ctx.beginPath();
+      ctx.moveTo(cx - r + off - r * 0.5, y);
+      ctx.quadraticCurveTo(cx - r + off, y - r * 0.05, cx - r + off + r * 0.45, y + r * 0.02);
+      ctx.stroke();
+    }
+    // Night on the far side, and the rim of air seen edge-on.
+    const night = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    night.addColorStop(0.45, 'rgba(4,10,30,0)');
+    night.addColorStop(1, 'rgba(4,10,30,.75)');
+    ctx.fillStyle = night;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    const rim = ctx.createRadialGradient(cx, cy, r * 0.82, cx, cy, r);
+    rim.addColorStop(0, 'rgba(150,215,255,0)');
+    rim.addColorStop(1, 'rgba(170,225,255,.55)');
+    ctx.fillStyle = rim;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    ctx.restore();
+  }
+
   private drawOrbit() {
     const { ctx, W, H } = this;
     const A = ART!;
-    // The edge of space: a glowing limb of atmosphere with aurora curtains above it.
-    if (this.visible(5, H * 0.4)) {
+    // The edge of space: a glowing limb of atmosphere with aurora curtains above it, until the globe takes over.
+    const limb = 1 - this.earthA();
+    if (limb > 0 && this.visible(5, H * 0.4)) {
       const y = this.y(5);
       const R = W * 2.4;
       const cy = y + R;
       ctx.save();
+      ctx.globalAlpha = limb;
       ctx.globalCompositeOperation = 'lighter';
       for (let i = 0; i < 26; i++) {
         const x = (i / 25) * W;
@@ -1191,6 +1299,8 @@ export class SkyScene {
     const { ctx, W, H } = this;
     const A = ART!;
     const P = this.P;
+    // From orbit the planes and balloons are far below, lost against the globe.
+    if (this.earthA() > 0.5) return;
     // A weather balloon drifting in the stratosphere.
     if (this.visible(4.48, 260)) {
       const w = Math.min(this.U * 0.14, 80);

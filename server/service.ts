@@ -14,6 +14,13 @@ import {
   isRare,
   altitudeFor,
   streakBonus,
+  basePoints,
+  flightPoints,
+  gioMultiplier,
+  gioPoints,
+  GIO_POINTS,
+  usesGio,
+  windAfter,
   tierFromCounts,
   type TierIndex,
 } from '../shared/scoring.js';
@@ -334,6 +341,15 @@ async function currentStreak(db: Db, a: { playerId: string; day: string; mode: M
   return s;
 }
 
+/** The wind a Nối gió flight carries into its next answer: every answered turn of the day, in the order flown. */
+async function currentWind(db: Db, a: { playerId: string; day: string }) {
+  const rows = await db.query<{ tier: number | null }>(
+    `select tier from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null order by answered_at, started_at`,
+    [a.playerId, a.day],
+  );
+  return flightPoints(rows.map((r) => r.tier), a.day).at(-1)?.wind ?? 0;
+}
+
 /**
  * Walks one player's daily flight in order and gives each turn the rare-streak bonus it would have had if every answer
  * had been known when it was typed (the same rule as currentStreak). Used after a turn is credited later: the credited
@@ -344,14 +360,12 @@ async function restreak(db: Db, playerId: string, day: string) {
     `select question_id, tier, points from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null order by answered_at, started_at`,
     [playerId, day],
   );
-  let run = 0;
-  for (const r of rows) {
-    run = isRare(r.tier) ? run + 1 : 0;
-    const base = r.tier != null && r.tier >= 0 ? TIERS[r.tier]?.points : undefined;
-    if (base == null) continue;
-    const want = base + streakBonus(run);
-    if ((r.points ?? 0) < want) {
-      await db.query(`update turns set points=$4 where player_id=$1 and day=$2::date and mode='daily' and question_id=$3 and coalesce(points, 0) < $4`, [playerId, day, r.question_id, want]);
+  const want = flightPoints(rows.map((r) => r.tier), day);
+  for (const [i, r] of rows.entries()) {
+    if (r.tier == null || r.tier < 0) continue;
+    const w = want[i].points;
+    if ((r.points ?? 0) < w) {
+      await db.query(`update turns set points=$4 where player_id=$1 and day=$2::date and mode='daily' and question_id=$3 and coalesce(points, 0) < $4`, [playerId, day, r.question_id, w]);
     }
   }
 }
@@ -667,7 +681,7 @@ export async function creditLearned(db: Db, questionId: string) {
     const dq = await dayQuestion(db, r.day, questionId);
     const tally = (await tallies(db, r.day, [questionId])).get(questionId)!;
     const tier = tierFromTally(dq, key, entry.prior, tally);
-    const points = TIERS[tier].points;
+    const points = basePoints(tier, 'daily', r.day);
     // Only a daily turn that scored less than this answer is worth changing. The streak bonus is added by restreak below.
     // A turn never closed keeps its place in the flight (started_at), not the moment the night shift got to it.
     const up = await db.query(
@@ -687,6 +701,13 @@ export async function creditLearned(db: Db, questionId: string) {
   for (const t of touched) {
     const [d, pid] = t.split('|');
     await restreak(db, pid, d);
+    // The notice tells the player what the answer finally earned, wind or streak bonus included.
+    await db.query(
+      `update asks a set credited = t.points from turns t
+       where a.player_id=$1 and a.question_id=$3 and a.day=$2::date and a.credited > 0
+         and t.player_id=a.player_id and t.day=a.day and t.mode='daily' and t.question_id=a.question_id and t.points > a.credited`,
+      [pid, d, questionId],
+    );
   }
   for (const d of days) {
     // The day's cached scores are stale now, even a finished day's. The stamp is unique to this reset, so a recompute
@@ -697,7 +718,7 @@ export async function creditLearned(db: Db, questionId: string) {
     for (const r of rows) {
       if (r.day !== d) continue;
       const s2 = scores.get(r.player_id);
-      if (s2) await db.query(`update runs set score=$3, altitude=$4, grid=$5 where player_id=$1 and day=$2::date and mode='daily'`, [r.player_id, d, s2.score, altitudeFor(s2.score), s2.grid]);
+      if (s2) await db.query(`update runs set score=$3, altitude=$4, grid=$5 where player_id=$1 and day=$2::date and mode='daily'`, [r.player_id, d, s2.score, altitudeFor(s2.score, 'daily', d), s2.grid]);
     }
   }
   return n;
@@ -834,6 +855,8 @@ export interface AnswerResult {
   tier?: TierIndex;
   points?: number;
   bonus?: number;
+  /** Nối gió: the multiplier this answer was scored with (×1 to ×4). */
+  gio?: number;
   judged?: boolean;
   /** Percentage of today's players who gave the same answer, once enough people have played. */
   share?: number | null;
@@ -939,9 +962,21 @@ export async function answer(
   const entry = q.answers.get(key)!;
   const tally = (await tallies(db, a.day, [q.id])).get(q.id)!;
   const tier = tierFromTally(q, key, entry.prior, tally);
-  const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
-  const bonus = streakBonus(streak);
-  const points = TIERS[tier].points + bonus;
+  // Nối gió (daily flights from GIO_FROM): rarer answers in a row raise the wind, and the wind multiplies the points.
+  // Before it, and in Thả vô tận: base points plus a small bonus for a run of rare answers.
+  let points: number;
+  let bonus: number;
+  let gio: number | undefined;
+  if (usesGio(a.mode, a.day)) {
+    const wind = windAfter(await currentWind(db, a), tier);
+    points = gioPoints(tier, wind);
+    bonus = points - GIO_POINTS[tier];
+    gio = gioMultiplier(wind);
+  } else {
+    const streak = isRare(tier) ? (await currentStreak(db, a)) + 1 : 0;
+    bonus = streakBonus(streak);
+    points = TIERS[tier].points + bonus;
+  }
   const updated = await db.query(
     `update turns set answered_at=now(), answer_key=$5, tier=$6, points=$7
      where player_id=$1 and day=$2::date and mode=$3 and question_id=$4 and answered_at is null returning 1`,
@@ -965,7 +1000,7 @@ export async function answer(
     tally.todayTotal = todayTotal;
   }
   const share = todayTotal >= 30 ? Math.round((mineCount / todayTotal) * 1000) / 10 : null;
-  return { status: 'landed', input, display: entry.display, tier, points, bonus, judged, share, crowd: crowdFrom(q, key, tally) };
+  return { status: 'landed', input, display: entry.display, tier, points, bonus, gio, judged, share, crowd: crowdFrom(q, key, tally) };
 }
 
 /** Adds one to a counter for this window and says whether it is still within the limit. */
@@ -1306,7 +1341,7 @@ async function standings(db: Db, day: string, mode: Mode, own?: { playerId: stri
     if (r.dev) seenDev.add(r.dev);
     const s = scores?.get(r.player_id);
     const score = s ? s.score : r.score;
-    return { player_id: r.player_id, name: r.name, score, altitude: s ? altitudeFor(score) : r.altitude, grid: s ? s.grid : r.grid, replay };
+    return { player_id: r.player_id, name: r.name, score, altitude: s ? altitudeFor(score, 'daily', day) : r.altitude, grid: s ? s.grid : r.grid, replay };
   });
   return out.sort((a, b) => b.altitude - a.altitude);
 }
@@ -1397,7 +1432,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     score = rows.reduce((s, r) => s + (r.points ?? 0), 0);
     grid = rows.map((r) => (r.tier == null || r.tier < 0 ? 'x' : String(r.tier))).join('').slice(0, 60);
   }
-  const altitude = altitudeFor(score, a.mode);
+  const altitude = altitudeFor(score, a.mode, a.day);
   await db.query(
     `insert into runs (player_id, day, mode, name, score, altitude, grid, dev, fresh) values ($1,$2::date,$3,$4,$5,$6,$7,$8,$9)
      on conflict (player_id, day, mode) do update set
@@ -1416,7 +1451,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
   const settled = a.day < vnToday();
   // How the day's scores spread, for the curve on the result screen: counts per bucket of points, no names.
   const top = Math.max(score, ...ranked.map((r) => r.score));
-  const w = a.mode === 'daily' ? 20 : Math.max(20, Math.ceil(top / 40 / 10) * 10);
+  const w = a.mode === 'daily' && !usesGio('daily', a.day) ? 20 : Math.max(20, Math.ceil(top / 40 / 10) * 10);
   const counts = new Array(Math.max(42, Math.ceil((top + 1) / w))).fill(0);
   for (const r of ranked) counts[Math.min(counts.length - 1, Math.floor(Math.max(0, r.score) / w))]++;
   if (me?.replay) counts[Math.min(counts.length - 1, Math.floor(score / w))]++;
@@ -1442,6 +1477,7 @@ const BOARD_MS = 10_000;
 
 export function forgetBoard() {
   boardCache.clear();
+  nightCache.clear();
 }
 
 export async function board(db: Db, day: string, mode: Mode, playerId?: string) {
@@ -1457,6 +1493,55 @@ export async function board(db: Db, day: string, mode: Mode, playerId?: string) 
     players: hit.players,
     settled: day < vnToday(),
     rows: hit.rows.map((r, i) => ({ rank: i + 1, name: r.name || 'Người thả diều', altitude: r.altitude, score: r.score, me: r.player_id === playerId })),
+  };
+}
+
+const nightCache = new Map<string, { at: number; players: number; rows: { player_id: string; name: string | null; score: number; altitude: number; day: string }[] }>();
+
+/**
+ * Thả vô tận's board over a period: each player's best run (runs already keeps the best run of each day), ranked by
+ * score. The player's own place comes back even when it is below the top twenty.
+ */
+export async function nightBoard(db: Db, period: 'day' | 'week' | 'all', playerId?: string) {
+  const today = vnToday();
+  const since = period === 'day' ? today : period === 'week' ? vnToday(new Date(Date.now() - 6 * 86_400_000)) : '2000-01-01';
+  const ck = `${period}:${today}`;
+  let hit = nightCache.get(ck);
+  if (!hit || Date.now() - hit.at > BOARD_MS) {
+    const best = await db.query<{ player_id: string; name: string | null; score: number; altitude: number; day: string }>(
+      `select distinct on (player_id) player_id, name, score, altitude, to_char(day,'YYYY-MM-DD') as day
+       from runs where mode='night' and day >= $1::date and score > 0
+       order by player_id, score desc, day asc`,
+      [since],
+    );
+    // A name given on any run in the period stands in for a best run flown before the player chose one.
+    const named = await db.query<{ player_id: string; name: string }>(
+      `select distinct on (player_id) player_id, name from runs where mode='night' and day >= $1::date and name is not null order by player_id, day desc`,
+      [since],
+    );
+    const names = new Map(named.map((r) => [r.player_id, r.name]));
+    const muted = new Set((await db.query<{ player_id: string }>(`select player_id from muted`)).map((r) => r.player_id));
+    const rows = best
+      .map((r) => ({ ...r, score: Number(r.score), altitude: Number(r.altitude), name: muted.has(r.player_id) ? null : r.name ?? names.get(r.player_id) ?? null }))
+      .sort((a, b) => b.score - a.score || a.day.localeCompare(b.day));
+    hit = { at: Date.now(), players: rows.length, rows };
+    nightCache.set(ck, hit);
+    if (nightCache.size > 6) nightCache.delete(nightCache.keys().next().value!);
+  }
+  const mine = playerId ? hit.rows.findIndex((r) => r.player_id === playerId) : -1;
+  const shape = (r: (typeof hit.rows)[number], i: number) => ({
+    rank: i + 1,
+    name: r.name || 'Người thả diều',
+    score: r.score,
+    altitude: r.altitude,
+    day: r.day,
+    me: r.player_id === playerId,
+  });
+  return {
+    period,
+    players: hit.players,
+    rows: hit.rows.slice(0, 20).map(shape),
+    me: mine >= 20 ? shape(hit.rows[mine], mine) : null,
   };
 }
 

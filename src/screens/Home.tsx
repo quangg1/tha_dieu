@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { DAY_BANDS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { DAY_BANDS, GIO_POINTS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
@@ -13,6 +13,7 @@ import { FeedbackSheet } from '../components/FeedbackSheet';
 import { RemindSheet } from '../components/RemindSheet';
 import { BagSheet } from '../components/BagSheet';
 import { FriendsSheet } from '../components/Friends';
+import { NightBoardSheet } from '../components/NightBoard';
 
 import { track } from '../track';
 import { buzz } from '../haptics';
@@ -124,6 +125,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   // A friend's invitation (?ban=CODE): whose it is, then one tap to join their board.
   const [friendInv, setFriendInv] = useState<{ code: string; name: string; joined?: boolean } | null>(null);
   const [friendsOpen, setFriendsOpen] = useState(false);
+  const [nightBoard, setNightBoard] = useState(false);
   useEffect(() => {
     const code = new URLSearchParams(location.search).get('ban');
     if (!code || !/^[A-Za-z2-9]{8}$/.test(code)) return;
@@ -179,9 +181,9 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const invite = async () => {
     const r = done?.result;
     if (!r) return;
-    const title = bandFor(r.score).verdict.split('. ')[0];
+    const title = bandFor(r.altitude).verdict.split('. ')[0];
     const url = challengeLink(location.origin, { n: prefs.name || 'Một người bạn', a: r.altitude, d: done!.day, t: title });
-    const text = `🪁 ${tauntLine(DAY_BANDS.indexOf(bandFor(r.score)), r.altitude, seedOf(done!.day, r.score))}`;
+    const text = `🪁 ${tauntLine(DAY_BANDS.indexOf(bandFor(r.altitude)), r.altitude, seedOf(done!.day, r.score))}`;
     track('challenge', { from: 'home' });
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -358,6 +360,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
                 ['Bilion của tôi', account() ? `Đã đăng nhập${account()!.name ? ': ' + account()!.name : ''}` : 'Đăng nhập Google, giữ lịch sử trên mọi máy', () => onAccount()],
                 ['Bộ sưu tập', 'Diều đã mở khóa và đáp án độc nhất', () => { setBag(true); track('bag'); }],
                 ['Bảng bạn bè', 'Đua điểm với bạn bè mỗi ngày', () => { setFriendsOpen(true); track('friends'); }],
+                ['Bảng Thả vô tận', 'Ai bay xa nhất hôm nay, tuần này, mọi lúc', () => { setNightBoard(true); track('night_board'); }],
                 ['Cách chơi', 'Luật chơi và cách tính điểm', () => { setHowto(true); track('howto'); }],
                 ['Nhắc chơi mỗi ngày', 'Thêm lời nhắc vào lịch của bạn', () => { setSheet('remind'); track('remind_open'); }],
                 ['Góp ý', 'Báo lỗi, đề xuất câu hỏi', () => setSheet('feedback')],
@@ -413,6 +416,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
 
       {bag && <BagSheet sky={sky} onClose={() => setBag(false)} />}
       {friendsOpen && <FriendsSheet onClose={() => setFriendsOpen(false)} />}
+      {nightBoard && <NightBoardSheet onClose={() => setNightBoard(false)} onPlay={() => { setNightBoard(false); go('night'); }} />}
 
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'remind' && <RemindSheet onClose={() => setSheet(null)} />}
@@ -479,7 +483,8 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
               <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm của từng đáp án được ghi sẵn trong sổ của làng và chỉnh dần theo những ngày trước, nên <b>điểm hiện ra là điểm chốt</b>, chơi sớm hay muộn cũng như nhau.</li>
               <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Đáp án chưa có trong sổ? <b>Thử đáp án khác</b>, không bị trừ gì. Bé Bi ghi lại cho ca đêm xem; nếu đúng, sổ học thêm và lần sau bạn ghé sẽ được báo.</li>
               <li>Mỗi câu có <b>một đáp án làng giấu</b>, tìm ra là độc nhất. Nhưng coi chừng: đáp án tưởng độc mà cả làng cùng nghĩ chỉ được hạng <b>Khôn lỏi</b>.</li>
-              <li>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, Cung Trăng, rồi tới những vì sao.</li>
+              <li><b>Nối gió</b>: đáp án Hiếm trở lên làm gió mạnh thêm (Hiếm +1, Rất hiếm +2, Cực hiếm và Độc nhất +3), mỗi bậc gió nhân điểm thêm 0,25, tối đa <b>×4</b>. Khá hiếm giữ nguyên gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1. Liên tiếp càng hiếm, điểm càng vọt.</li>
+              <li>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, bờ vũ trụ, Cung Trăng, rồi tới những vì sao.</li>
               <li><b>Thả vô tận</b>: câu hỏi ngẫu nhiên nối tiếp nhau, chơi tới khi hết gió. Cả lượt dùng <b>chung một đồng hồ gió</b>: bắt đầu 45 giây, gió còn lại chuyển sang câu sau. Mỗi đáp án nạp thêm gió (Thường +3 giây, càng hiếm càng nhiều, Độc nhất +14 giây), nên trả lời nhanh và hiếm thì bay mãi. Vượt qua rìa vũ trụ, diều chui qua lỗ giun sang <b>vòng 2</b> (trời hoàng hôn) rồi <b>vòng 3</b> (đêm hội), mở khóa diều phượng hoàng và diều rồng.</li>
             </ol>
             <div className="tier-list">
@@ -490,7 +495,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
                     <b>{t.name}</b>
                     <span>{TIERS[t.index].line}</span>
                   </div>
-                  <em>{t.points}</em>
+                  <em>{GIO_POINTS[t.index]}</em>
                 </div>
               ))}
             </div>

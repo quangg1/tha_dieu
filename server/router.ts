@@ -223,6 +223,14 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return S.board(db, S.vnToday(), mode(query.get('mode')), query.get('playerId') ?? undefined);
     },
   },
+  // Thả vô tận's long board: each player's best run today, over the last seven days, or ever.
+  'board/night': {
+    method: 'GET',
+    async run({ db, query }) {
+      const p = query.get('period');
+      return S.nightBoard(db, p === 'week' || p === 'all' ? p : 'day', query.get('playerId') ?? undefined);
+    },
+  },
   event: {
     method: 'POST',
     async run({ db, body, net }) {

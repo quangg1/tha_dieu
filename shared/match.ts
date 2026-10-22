@@ -118,6 +118,24 @@ export function namesBrands(questionId: string) {
   return BRAND_QUESTIONS.has(questionId);
 }
 
+/** Chat shorthand for whole words; letters that are also answers on their own ("A", "e") are left alone. */
+const SHORTHAND: Record<string, string> = {
+  ko: 'không', k: 'không', kh: 'không', kg: 'không', khg: 'không', hok: 'không', hk: 'không', khum: 'không', hem: 'không',
+  đc: 'được', dc: 'được', đk: 'được', dk: 'được', j: 'gì', gi: 'gì', ng: 'người', ngta: 'người ta', cx: 'cũng', cg: 'cũng',
+  vs: 'với', mk: 'mình', mik: 'mình', trc: 'trước', bt: 'biết', ns: 'nói', lm: 'làm', ntn: 'như thế nào', nc: 'nước',
+  '&': 'và', 'n\'': 'và',
+};
+
+/** The input with chat shorthand spelled out, word by word. */
+export function expandShorthand(input: string): string {
+  return input
+    .normalize('NFC')
+    .trim()
+    .split(/\s+/)
+    .map((w) => SHORTHAND[w.toLowerCase()] ?? w)
+    .join(' ');
+}
+
 /** Whether the player typed Vietnamese tone or vowel marks (or đ). */
 function marked(s: string) {
   return /[\u00c0-\u1ef9]/.test(s.normalize('NFC'));
@@ -184,7 +202,20 @@ export class Matcher {
     this.loose.set(n, list);
   }
 
+  /**
+   * Finds the answer, then tries again with chat shorthand spelled out ("ko" → "không", "đc" → "được"), because players
+   * type song and film titles the way they text: "Chúng ta ko thuộc về nhau".
+   */
   match(input: string): MatchResult | null {
+    const first = this.matchOne(input);
+    if (first?.exact) return first;
+    const long = expandShorthand(input);
+    if (long === input.trim()) return first;
+    const second = this.matchOne(long);
+    return second && (second.exact || !first) ? second : first;
+  }
+
+  private matchOne(input: string): MatchResult | null {
     const raw = input.trim();
     if (!raw) return null;
     const st = stripWords(raw, this.strip);

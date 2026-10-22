@@ -45,23 +45,24 @@ export function isRare(tier: number | null | undefined): boolean {
 }
 
 export interface DayBand {
+  /** Lowest altitude of the band, in metres: the same sky under any scoring. */
   min: number;
   tier: TierIndex;
   verdict: string;
 }
 
-/** The day's title, by total score. */
+/** The day's title, by how high the kite flew (the old score bands of 150/260/370/470/570 points, as heights). */
 export const DAY_BANDS: readonly DayBand[] = [
   { min: 0, tier: 0, verdict: 'Tà tà. Trời còn rộng lắm.' },
-  { min: 150, tier: 1, verdict: 'Lưng chừng. Bay cùng cả làng.' },
-  { min: 260, tier: 2, verdict: 'Bay bổng. Qua khỏi lũy tre. Khá đấy.' },
-  { min: 370, tier: 3, verdict: 'Chót vót. Cả xóm ngước nhìn.' },
-  { min: 470, tier: 4, verdict: 'Tít mây xanh. Bỏ cả làng phía sau.' },
-  { min: 570, tier: 5, verdict: 'Cung Trăng. Hết trời để bay. Không tưởng.' },
+  { min: 200, tier: 1, verdict: 'Lưng chừng. Bay cùng cả làng.' },
+  { min: 10_000, tier: 2, verdict: 'Bay bổng. Qua khỏi lũy tre. Khá đấy.' },
+  { min: 500_000, tier: 3, verdict: 'Chót vót. Cả xóm ngước nhìn.' },
+  { min: 17_000_000, tier: 4, verdict: 'Tít mây xanh. Bỏ cả làng phía sau.' },
+  { min: 384_400_000, tier: 5, verdict: 'Cung Trăng. Hết trời để bay. Không tưởng.' },
 ];
 
-export function bandFor(score: number): DayBand {
-  return [...DAY_BANDS].reverse().find((b) => score >= b.min) ?? DAY_BANDS[0];
+export function bandFor(altitude: number): DayBand {
+  return [...DAY_BANDS].reverse().find((b) => altitude >= b.min) ?? DAY_BANDS[0];
 }
 
 export const QUESTION_SECONDS = 25;
@@ -94,13 +95,87 @@ export function streakBonus(streak: number): number {
 /** Thả vô tận climbs faster, so that a long night can pass the edge of the universe and start a new lap. */
 export const NIGHT_POINTS_PER_DECADE = 30;
 
-/** Altitude in metres for a score: ten times higher every 65 points (every 30 in Thả vô tận). */
-export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily'): number {
+/* ------------------------------------------------------------------ Nối gió: the daily scoring from 23/10/2026 */
+
+/**
+ * The day the daily flight switches to Nối gió. Days before it keep the scoring they were flown with (base points plus a
+ * small rare-streak bonus, ten times higher every 65 points), so old boards and records never change.
+ */
+export const GIO_FROM = '2026-10-23';
+
+/** Whether a flight is scored with Nối gió. Thả vô tận keeps its own scoring: its laps are tuned to it. */
+export function usesGio(mode: 'daily' | 'night', day?: string): boolean {
+  return mode === 'daily' && (!day || day >= GIO_FROM);
+}
+
+/** Base points per tier index under Nối gió: each tier is worth well over the one below it. */
+export const GIO_POINTS: readonly number[] = [10, 25, 50, 80, 120, 200, 15];
+/**
+ * Wind each tier adds. A rarer answer adds more; Khá hiếm keeps the wind as it is; Thường, Khôn lỏi or a miss lets it drop.
+ */
+export const GIO_GAIN: readonly (number | null)[] = [null, 0, 1, 2, 3, 3, null];
+/** Each level of wind adds a quarter to the points, up to twelve levels (×4). */
+export const GIO_STEP = 0.25;
+export const GIO_MAX = 12;
+
+/** Wind after an answer of this tier (null or a negative tier is a miss). */
+export function windAfter(wind: number, tier: number | null | undefined): number {
+  const g = tier == null || tier < 0 ? null : GIO_GAIN[tier] ?? null;
+  return g == null ? 0 : Math.min(GIO_MAX, wind + g);
+}
+
+/** The multiplier a level of wind gives. */
+export function gioMultiplier(wind: number): number {
+  return 1 + GIO_STEP * Math.max(0, Math.min(GIO_MAX, wind));
+}
+
+/** Points for an answer under Nối gió, with the wind it leaves behind. */
+export function gioPoints(tier: number, wind: number): number {
+  return Math.round((GIO_POINTS[tier] ?? 0) * gioMultiplier(wind));
+}
+
+/** What a tier is worth before any bonus, under the rules of that flight. */
+export function basePoints(tier: number, mode: 'daily' | 'night' = 'daily', day?: string): number {
+  return usesGio(mode, day) ? GIO_POINTS[tier] ?? 0 : TIERS[tier]?.points ?? 0;
+}
+
+/**
+ * Points for each turn of a daily flight, in the order flown (a null or negative tier is a miss): Nối gió from GIO_FROM,
+ * base points plus the rare-streak bonus before it.
+ */
+export function flightPoints(tiers: readonly (number | null | undefined)[], day?: string): { points: number; wind: number }[] {
+  const gio = usesGio('daily', day);
+  let wind = 0;
+  let run = 0;
+  return tiers.map((t) => {
+    if (gio) {
+      wind = windAfter(wind, t);
+      return { points: t == null || t < 0 ? 0 : gioPoints(t, wind), wind };
+    }
+    run = isRare(t) ? run + 1 : 0;
+    return { points: t == null || t < 0 ? 0 : (TIERS[t]?.points ?? 0) + streakBonus(run), wind: 0 };
+  });
+}
+
+/** The most a daily flight can score under Nối gió: seven hidden answers in a row. */
+export const MAX_GIO_POINTS = flightPoints([5, 5, 5, 5, 5, 5, 5]).reduce((s, x) => s + x.points, 0);
+/** Under Nối gió, log10 of the altitude grows with the square root of the score: wide gaps in points, fair gaps in sky. */
+export const GIO_ROOT = 5.8;
+
+/**
+ * Altitude in metres for a score. Thả vô tận: ten times higher every 30 points. A daily flight before GIO_FROM: every
+ * 65 points. From GIO_FROM: 10^(√points / 5.8), so 350 points is about 2 km, 1.000 points about 230 km (past the edge
+ * of space), 2.000 points past the Moon's distance is out of reach until about 2.500.
+ */
+export function altitudeFor(points: number, mode: 'daily' | 'night' = 'daily', day?: string): number {
   if (!Number.isFinite(points) || points <= 0) return 0;
+  if (mode === 'night') {
+    // A very long night keeps lapping the sky, but stays a finite number (10^308 is where doubles end).
+    return Math.pow(10, Math.min(MAX_ALT_EXPONENT, points / NIGHT_POINTS_PER_DECADE));
+  }
+  if (usesGio(mode, day)) return Math.pow(10, Math.sqrt(Math.min(points, MAX_GIO_POINTS)) / GIO_ROOT);
   // A daily flight cannot score more than seven hidden answers with full streaks; a bad stored turn must not top the board.
-  const p = mode === 'night' ? points : Math.min(points, MAX_DAILY_POINTS);
-  // A very long night keeps lapping the sky, but stays a finite number (10^308 is where doubles end).
-  return Math.pow(10, Math.min(MAX_ALT_EXPONENT, p / (mode === 'night' ? NIGHT_POINTS_PER_DECADE : POINTS_PER_DECADE)));
+  return Math.pow(10, Math.min(points, MAX_DAILY_POINTS) / POINTS_PER_DECADE);
 }
 
 /** Highest power of ten an altitude may reach: about eleven laps of the sky, far below where a double overflows. */

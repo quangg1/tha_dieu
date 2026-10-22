@@ -6,6 +6,7 @@ import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
 import { challengeLink, shareCard } from '../shareCard';
 import { renderKiteCard } from '../kiteCard';
+import { NightBoardList } from '../components/NightBoard';
 import { bragLine, momentLine, nightVerdict, seedOf, tauntLine } from '../quips';
 import { skinById } from '../skins';
 import { rudeName } from '../../shared/names.js';
@@ -76,7 +77,12 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.reveal]);
 
-  const loadBoard = () => api.board(mode, pid).then(setBoard).catch(() => setBoard(null));
+  // The night board refetches after a name is saved, so the new name shows on it.
+  const [nightTick, setNightTick] = useState(0);
+  const loadBoard = () => {
+    setNightTick((n) => n + 1);
+    return api.board(mode, pid).then(setBoard).catch(() => setBoard(null));
+  };
   // Friends' scores for today, now that this flight is done.
   const [friends, setFriends] = useState<FriendsBoard | null>(null);
   const [friendsOpen, setFriendsOpen] = useState(false);
@@ -97,10 +103,10 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const krills = result.reveal?.filter((r) => r.tier === 5).length ?? 0;
   // The daily bands fit seven answers; Thả vô tận is judged by how far up the sky this run actually went.
   const night = mode === 'night' ? nightVerdict(result.altitude, CEILING_L, seed) : null;
-  const [dayTitle, ...rest] = bandFor(result.score).verdict.split('. ');
+  const [dayTitle, ...rest] = bandFor(result.altitude).verdict.split('. ');
   const title = night ? night.title : dayTitle;
   const subtitle = night ? night.subtitle : rest.join('. ');
-  const band = night ? night.band : DAY_BANDS.indexOf(bandFor(result.score));
+  const band = night ? night.band : DAY_BANDS.indexOf(bandFor(result.altitude));
   const brag = night ? night.brag : bragLine(band, { krills, beaten: result.beaten, players: result.players, seed });
   // The flight's rarest answer, if it is rare enough to be worth a screenshot.
   const moment = rows
@@ -115,7 +121,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const text = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
     const head = mode === 'daily' ? `🪁 Bilion · Thả Diều ${dayLabel}` : '🪁 Bilion · Thả vô tận';
-    const height = `Diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
+    const height = `${result.score.toLocaleString('vi-VN')} điểm · diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
     return [head, `${title}. ${subtitle}`, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
@@ -132,9 +138,10 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         milestone: reached.alt ? reached.name : '',
         beaten: result.players > 1 ? result.beaten : null,
         grid: result.grid,
+        points: mode === 'daily' ? rows.map((r) => r.points) : undefined,
         link,
         skin: prefs.skin,
-        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.74, kiteY: 0.2, decade: 0.3, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
+        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.74, kiteY: 0.2, decade: 0.5, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
       });
       if (!blob) throw new Error();
       const how = await shareCard(blob, text, link);
@@ -206,6 +213,10 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <span className="result-sub">{subtitle}</span>
         <span className="result-brag">“{brag}”</span>
         <div className="result-stats">
+          <div>
+            <b>{result.score.toLocaleString('vi-VN')}</b>
+            <span>điểm{mode === 'daily' && result.score > 0 ? `, ${band + 1 >= 6 ? 'bậc cao nhất' : `bậc ${band + 1}/6`}` : ''}</span>
+          </div>
           <div>
             <b>{formatAlt(shown)}</b>
             <span>{reached.alt ? `qua ${reached.name}` : 'độ cao'}</span>
@@ -347,7 +358,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
 <section className="card">
           <div className="card-k card-k-row">
             <span>Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'}</span>
-            {board && <small>{board.players.toLocaleString('vi-VN')} người chơi</small>}
+            {board && mode === 'daily' && <small>{board.players.toLocaleString('vi-VN')} người chơi</small>}
           </div>
           {!saved && (
             <form className="name-row" onSubmit={(e) => { e.preventDefault(); void saveName(); }}>
@@ -356,29 +367,33 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
               <button className="pill-btn" type="submit" disabled={!name.trim()}>Lưu</button>
             </form>
           )}
+          {mode === 'night' ? (
+            <NightBoardList refresh={nightTick} />
+          ) : (
           <div className="board">
             {board?.rows.map((r) => (
               <div key={r.rank} className={`board-row${r.me ? ' me' : ''}`}>
                 <span className="board-rank">{r.rank}</span>
                 <span>{r.me ? `${r.name} (bạn)` : r.name}</span>
-                <span className="board-alt">{formatAlt(r.altitude)}</span>
+                <span className="board-alt">{r.score.toLocaleString('vi-VN')} điểm<small>{formatAlt(r.altitude)}</small></span>
               </div>
             ))}
             {board && !meInBoard && !result.replay && (
               <div className="board-row me">
                 <span className="board-rank">{result.rank}</span>
                 <span>Bạn</span>
-                <span className="board-alt">{formatAlt(result.altitude)}</span>
+                <span className="board-alt">{result.score.toLocaleString('vi-VN')} điểm<small>{formatAlt(result.altitude)}</small></span>
               </div>
             )}
             {!board && <p className="row-q" style={{ margin: 0 }}>Chưa tải được bảng diều.</p>}
           </div>
+          )}
         </section>
 
         {mode === 'daily' && (
           <section className="card">
             <div className="card-k">Bậc của ngày</div>
-            <DayBands score={result.score} />
+            <DayBands altitude={result.altitude} />
           </section>
         )}
 

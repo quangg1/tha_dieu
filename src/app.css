@@ -614,3 +614,24 @@ button svg,a svg{flex-shrink:0}
 .fr-board .board-row{grid-template-columns:28px minmax(0,1fr) auto auto}
 .fr-days{font-size:12px;color:var(--bi-muted)}
 .fr-board .board-row b{font-variant-numeric:tabular-nums}
+
+/* Nối gió: the wind multiplier beside the score, glowing brighter the stronger it blows. */
+.score-k{display:flex;align-items:center;gap:6px}
+.gio-tag{padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.75);font-family:var(--font-display);font-size:12px;font-weight:800;letter-spacing:0}
+.gio-tag.on{background:linear-gradient(135deg,#ffd66b,#ff9f43);color:#3d2200;box-shadow:0 0 12px rgba(255,190,80,.55);animation:gio-pop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes gio-pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.chip.gio-chip{background:linear-gradient(135deg,#ffd66b,#ff9f43);color:#3d2200}
+@media (prefers-reduced-motion: reduce){.gio-tag.on{animation:none}}
+/* Boards rank by points; the height is the picture, set small under them. */
+.board-alt{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.board-alt small{font-family:var(--font-body);font-size:11.5px;font-weight:600;color:var(--bi-muted)}
+/* Thả vô tận board */
+.nb{display:flex;flex-direction:column;gap:10px}
+.nb-name{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.nb-name small{font-size:11.5px;font-weight:600;color:var(--bi-muted)}
+.nb-gap{text-align:center;color:var(--bi-muted);line-height:1;padding:2px 0}
+.nb-empty{margin:6px 0 !important}
+.nb-count{margin:0}
+/* Four tiles on the result hero (points first): two by two on phones, one row when there is room. */
+.result-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:640px){.result-stats{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}}
