@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { DAY_BANDS, GIO_POINTS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { DAY_BANDS, GIO_POINTS, TIERS, TIERS_BY_RANK, bandFor, formatAlt, usesGio } from '../../shared/scoring.js';
 import { flute } from '../audio/flute';
 import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
@@ -155,6 +155,8 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const done = rec && rec.day === vnDay() && rec.result ? rec : null;
   const countdown = useCountdown();
   const d = new Date(Date.now() + 7 * 3600_000);
+  // The rules page follows today's scoring, so it never promises Nối gió before it is switched on.
+  const gioToday = usesGio('daily', d.toISOString().slice(0, 10));
 
   useEffect(() => {
     // Phones: the flyer stands just above the card and the kite sits clear of the title.
@@ -274,8 +276,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
       )}
 
       <div className="home-hero">
-        <span className="home-kicker">Đố chữ mỗi ngày</span>
-        <span className="beta-tag">Bản chơi thử</span>
+        <span className="home-kicker">Đố chữ mỗi ngày <em className="kicker-beta">bản chơi thử</em></span>
         <h1 className="home-title" aria-label="Bilion">
           <span aria-hidden="true">Bilion</span>
         </h1>
@@ -479,11 +480,11 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
               </button>
             </div>
             <ol className="rules">
-              <li>Mỗi câu hỏi, bạn chỉ được <b>thả một đáp án</b>. Không có đúng sai, chỉ có đáp án hợp lệ và đáp án hiếm.</li>
+              <li>Mỗi câu <b>ghi điểm một đáp án hợp lệ</b>, đáp án đầu tiên có trong sổ của làng là đáp án được chốt. Không có đúng sai, chỉ có đáp án phổ biến và đáp án hiếm.</li>
               <li>Đáp án <b>càng ít người nghĩ tới</b> càng nhiều điểm. Độ hiếm của từng đáp án được ghi sẵn trong sổ của làng và chỉnh dần theo những ngày trước, nên <b>điểm hiện ra là điểm chốt</b>, chơi sớm hay muộn cũng như nhau.</li>
-              <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Đáp án chưa có trong sổ? <b>Thử đáp án khác</b>, không bị trừ gì. Bé Bi ghi lại cho ca đêm xem; nếu đúng, sổ học thêm và lần sau bạn ghé sẽ được báo.</li>
+              <li>Gõ thiếu dấu hay nhầm chính tả? Diều hỏi lại để bạn chốt. Câu chung chung như “chim” sẽ được nhắc kể cụ thể hơn. Đáp án chưa có trong sổ thì không tính: <b>thử đáp án khác</b> tới khi hết gió, không bị trừ gì. Bé Bi ghi lại; nếu đúng, sổ học thêm và lần sau bạn ghé sẽ được báo.</li>
               <li>Mỗi câu có <b>một đáp án làng giấu</b>, tìm ra là độc nhất. Nhưng coi chừng: đáp án tưởng độc mà cả làng cùng nghĩ chỉ được hạng <b>Khôn lỏi</b>.</li>
-              <li><b>Nối gió</b>: đáp án Hiếm trở lên làm gió mạnh thêm (Hiếm +1, Rất hiếm +2, Cực hiếm và Độc nhất +3), mỗi bậc gió nhân điểm thêm 0,25, tối đa <b>×4</b>. Khá hiếm giữ nguyên gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1. Liên tiếp càng hiếm, điểm càng vọt.</li>
+              {gioToday && <li><b>Nối gió</b>: đáp án Hiếm trở lên làm gió mạnh thêm (Hiếm +1, Rất hiếm +2, Cực hiếm và Độc nhất +3), mỗi bậc gió nhân điểm thêm 0,25, tối đa <b>×4</b>. Khá hiếm giữ nguyên gió; Thường, Khôn lỏi hay hết gió thì gió lặng, về ×1. Liên tiếp càng hiếm, điểm càng vọt.</li>}
               <li>Điểm càng cao, diều càng lên xa: qua ngọn tre, tầng mây, bờ vũ trụ, Cung Trăng, rồi tới những vì sao.</li>
               <li><b>Thả vô tận</b>: câu hỏi ngẫu nhiên nối tiếp nhau, chơi tới khi hết gió. Cả lượt dùng <b>chung một đồng hồ gió</b>: bắt đầu 45 giây, gió còn lại chuyển sang câu sau. Mỗi đáp án nạp thêm gió (Thường +3 giây, càng hiếm càng nhiều, Độc nhất +14 giây), nên trả lời nhanh và hiếm thì bay mãi. Vượt qua rìa vũ trụ, diều chui qua lỗ giun sang <b>vòng 2</b> (trời hoàng hôn) rồi <b>vòng 3</b> (đêm hội), mở khóa diều phượng hoàng và diều rồng.</li>
             </ol>
@@ -495,7 +496,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
                     <b>{t.name}</b>
                     <span>{TIERS[t.index].line}</span>
                   </div>
-                  <em>{GIO_POINTS[t.index]}</em>
+                  <em>{gioToday ? GIO_POINTS[t.index] : TIERS[t.index].points}</em>
                 </div>
               ))}
             </div>

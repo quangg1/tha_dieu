@@ -200,6 +200,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   };
 
   const meInBoard = board?.rows.some((r) => r.me);
+  const revealBy = new Map((result.reveal ?? []).map((r) => [r.questionId, r]));
 
   return (
     <main className="stage result">
@@ -213,17 +214,13 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         <span className="result-sub">{subtitle}</span>
         <span className="result-brag">“{brag}”</span>
         <div className="result-stats">
-          <div>
+          <div className="stat-main">
             <b>{result.score.toLocaleString('vi-VN')}</b>
             <span>điểm{mode === 'daily' && result.score > 0 ? `, ${band + 1 >= 6 ? 'bậc cao nhất' : `bậc ${band + 1}/6`}` : ''}</span>
           </div>
           <div>
-            <b>{formatAlt(shown)}</b>
-            <span>{reached.alt ? `qua ${reached.name}` : 'độ cao'}</span>
-          </div>
-          <div>
-            <b>{result.players > 1 ? `${result.beaten}%` : '—'}</b>
-            <span>{result.players > 1 ? `cao hơn người chơi, hạng ${result.rank}/${result.players.toLocaleString('vi-VN')}` : 'bạn thả đầu tiên'}</span>
+            <b>{result.players > 1 ? `#${result.rank}` : '—'}</b>
+            <span>{result.players > 1 ? `trên ${result.players.toLocaleString('vi-VN')} người, hơn ${result.beaten}%` : 'bạn thả đầu tiên'}</span>
           </div>
           {mode === 'daily' && (
             <div>
@@ -233,8 +230,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           )}
         </div>
         <span className="result-note">
-          {result.replay ? 'Lượt chơi lại trên thiết bị này không lên bảng diều. ' : ''}
-          {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
+          {/* Height is the picture of the score: shown, but second. */}
+          Diều lên {formatAlt(shown)}{reached.alt ? `, qua ${reached.name}` : ''}. {upcoming ? `Mốc tiếp theo: ${upcoming.name}.` : 'Bạn đã vượt cả Sông Ngân.'}
+          {result.replay ? ' Lượt chơi lại trên thiết bị này không lên bảng diều.' : ''}
         </span>
       </div>
 
@@ -268,43 +266,12 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </section>
         )}
 
-        <section className="card beta-card">
-          <div>
-            <b>Đây là bản chơi thử</b>
-            <span>Bạn thấy thế nào? Một câu góp ý giúp game hay hơn rất nhiều.</span>
-          </div>
-          <button className="pill-btn" onClick={() => { setFeedback(true); track('report', { kind: 'feedback_open' }); }}>Góp ý</button>
-        </section>
-
-        <section className="card">
-          <div className="card-k">So với cả làng</div>
-          <DayCurve dist={result.dist} score={result.score} beaten={result.beaten} players={result.players} mode={mode} />
-        </section>
-
-        {mode === 'daily' && result.reveal && (
-          <section className="card reveal-card">
-            <div className="card-k">Đáp án độc nhất hôm nay</div>
-            {result.reveal.some((r) => !r.krill) && (
-              <p className="rv-meta rv-lock-note">Đáp án độc nhất bạn chưa tìm ra sẽ mở lúc nửa đêm, để không ai chuyền tay cho người chơi sau. Sáng mai mở Bilion là thấy.</p>
-            )}
-            {result.reveal.map((r) => (
-              <div key={r.questionId} className="rv">
-                <span className="rv-q">{r.prompt}</span>
-                <div className="rv-a">
-                  <TierIcon tier={5} size={22} />
-                  {r.krill ? <b>{r.krill}</b> : <b className="rv-locked">Mở lúc 0 giờ</b>}
-                  {r.tier === 5 && <span className="rv-found">bạn tìm ra!</span>}
-                </div>
-                {r.top && <span className="rv-meta">Cả làng hay nói: {r.top}</span>}
-                {r.mine && r.tier !== 5 && <span className="rv-meta">Bạn nói: {r.mine}</span>}
-              </div>
-            ))}
-          </section>
-        )}
-
         <section className="card">
           <div className="card-k">{mode === 'daily' ? 'Bảy cú gió của bạn' : 'Những cú gió của bạn'}</div>
           {mode === 'daily' && <RarityStrings rows={rows} />}
+          {mode === 'daily' && result.reveal?.some((r) => !r.krill) && (
+            <p className="rv-meta rv-lock-note">Đáp án làng giấu mở lúc 0 giờ đêm nay, để không ai chuyền tay cho người chơi sau.</p>
+          )}
           <div className="rows">
             {rows.map((r) => (
               <div className="row" key={r.questionId + r.points + r.display}>
@@ -314,6 +281,16 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                   <span className="row-q">
                     {r.tier >= 0 && <em className="row-t" style={{ color: TIER_COLOR[r.tier] }}>{TIERS[r.tier].name}</em>} {r.prompt}
                   </span>
+                  {(() => {
+                    const rv = revealBy.get(r.questionId);
+                    if (!rv) return null;
+                    return (
+                      <span className="row-rv">
+                        {rv.top && <span>Cả làng hay nói: {rv.top}</span>}
+                        {rv.krill && r.tier !== 5 && <span>Làng giấu: <b>{rv.krill}</b></span>}
+                      </span>
+                    );
+                  })()}
                 </span>
                 <b className="pts">{r.points ? `+${r.points}` : '0'}</b>
                 {r.display && r.tier >= 0 && (
@@ -337,25 +314,18 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
         </section>
 
-                {mode === 'daily' && friends && (
+        {mode === 'daily' && friends && friends.friends > 0 && (
           <section className="card">
             <div className="card-k card-k-row">
               <span>Bạn bè hôm nay</span>
               {friends.friends > 0 && <button className="toast-link" onClick={() => setFriendsOpen(true)}>Xem cả tuần</button>}
             </div>
-            {friends.friends > 0 ? (
-              <FriendsList board={friends} tab="today" compact />
-            ) : (
-              <p className="row-q" style={{ margin: 0 }}>Rủ bạn bè cùng chơi để đua điểm với nhau mỗi ngày.</p>
-            )}
-            <button className="invite-btn" onClick={() => void shareInvite(friends.code).then((m) => { setInvited(m); if (m) setTimeout(() => setInvited(''), 3000); })}>
-              {invited || 'Mời bạn bè vào bảng'}
-            </button>
+            <FriendsList board={friends} tab="today" compact />
           </section>
         )}
         {friendsOpen && <FriendsSheet onClose={() => setFriendsOpen(false)} />}
 
-<section className="card">
+        <section className="card">
           <div className="card-k card-k-row">
             <span>Bảng diều {mode === 'daily' ? 'hôm nay' : 'Thả vô tận'}</span>
             {board && mode === 'daily' && <small>{board.players.toLocaleString('vi-VN')} người chơi</small>}
@@ -388,19 +358,37 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
             {!board && <p className="row-q" style={{ margin: 0 }}>Chưa tải được bảng diều.</p>}
           </div>
           )}
+          {mode === 'daily' && friends && friends.friends === 0 && (
+            <button className="invite-btn" onClick={() => void shareInvite(friends.code).then((m) => { setInvited(m); if (m) setTimeout(() => setInvited(''), 3000); })}>
+              {invited || 'Rủ bạn bè vào bảng riêng'}
+            </button>
+          )}
         </section>
 
-        {mode === 'daily' && (
-          <section className="card">
-            <div className="card-k">Bậc của ngày</div>
-            <DayBands altitude={result.altitude} />
-          </section>
-        )}
+        <details className="card more-card">
+          <summary className="card-k">Xem thêm: so với cả làng, bậc của ngày, thành tích</summary>
+          {result.players >= 5 && (
+            <div className="more-part">
+              <div className="card-k">So với cả làng</div>
+              <DayCurve dist={result.dist} score={result.score} beaten={result.beaten} players={result.players} mode={mode} />
+            </div>
+          )}
+          {mode === 'daily' && (
+            <div className="more-part">
+              <div className="card-k">Bậc của ngày</div>
+              <DayBands altitude={result.altitude} />
+            </div>
+          )}
+          <div className="more-part">
+            <div className="card-k">Thành tích của bạn</div>
+            <MyRecord s={stats()} krill={krillFound()} />
+          </div>
+        </details>
 
-        <section className="card">
-          <div className="card-k">Thành tích của bạn</div>
-          <MyRecord s={stats()} krill={krillFound()} />
-        </section>
+        <p className="beta-line">
+          Bản chơi thử: chỗ nào khó hiểu?{' '}
+          <button className="toast-link" onClick={() => { setFeedback(true); track('report', { kind: 'feedback_open' }); }}>Góp ý một câu</button>
+        </p>
 
         <div className="home-row">
           <button className="pill-btn ghost" onClick={onHome}>Về bãi cỏ</button>

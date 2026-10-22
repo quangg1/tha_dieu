@@ -75,6 +75,7 @@ button{font:inherit;color:inherit}
 .hud-panel.right{align-items:flex-end}
 .hud-panel .k{font-size:13px;font-weight:700;letter-spacing:.01em;color:rgba(255,255,255,.72);white-space:nowrap;line-height:1}
 .hud-panel .v{font-family:var(--font-display);font-weight:800;font-size:clamp(17px,5.4vw,24px);line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hud-panel .v.dim{font-size:clamp(15px,4.6vw,20px);opacity:.92}
 .hud-panel .v small{font-size:.55em;font-weight:700;margin-left:3px;opacity:.85}
 .hud-panel .v.gold{color:var(--bi-gold)}
 .hud .pips{display:flex;gap:4px;margin:0}
@@ -217,6 +218,7 @@ button{font:inherit;color:inherit}
 .stage.home{max-width:520px}
 .home-hero{display:flex;flex-direction:column;gap:6px;margin-top:6vh}
 .home-kicker{align-self:flex-start;padding:4px 11px;border-radius:999px;background:var(--bi-red);color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;box-shadow:0 4px 12px rgba(229,83,61,.3)}
+.kicker-beta{font-style:normal;font-weight:600;opacity:.85;margin-left:4px;padding-left:7px;border-left:1px solid rgba(255,255,255,.5)}
 .home-title{margin:0;font-family:var(--font-display);font-weight:900;font-size:clamp(64px,19vw,104px);line-height:.9;color:var(--ink);text-shadow:0 5px 0 var(--bi-red),var(--glow);letter-spacing:-.01em}
 .home-tag{margin:6px 0 0;font-size:18px;font-weight:600;color:var(--ink);text-shadow:var(--glow);max-width:16ch}
 .home-spacer{flex:1;min-height:24px}
@@ -224,7 +226,7 @@ button{font:inherit;color:inherit}
 .home-card .next-btn{width:100%;animation:none}
 .home-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .home-card-head .k{display:block;font-size:13px;font-weight:700;letter-spacing:.01em;color:var(--bi-muted)}
-.home-card-head b{font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1.15}
+.home-card-head b{font-family:var(--font-display);font-weight:800;font-size:clamp(18px,5.6vw,22px);line-height:1.15;white-space:nowrap}
 .home-ladder{display:flex;gap:3px}
 .home-line{margin:0;font-size:15px;font-weight:500;color:var(--bi-ink-2)}
 .home-line b{color:var(--bi-ink)}
@@ -529,7 +531,6 @@ button{font:inherit;color:inherit}
 @media (min-width:900px){
   .home-top{position:fixed;left:24px;right:24px;top:calc(env(safe-area-inset-top,0px) + 18px);z-index:5}
   .home-top .home-stats{justify-content:center}
-  .home-hero .beta-tag{align-self:center}
   .home-hero{margin-top:calc(8vh + 54px)}
 }
 .chip.pend{background:#fff4d6;color:#8a5a00;border:1px dashed #e0a800}
@@ -635,3 +636,15 @@ button svg,a svg{flex-shrink:0}
 /* Four tiles on the result hero (points first): two by two on phones, one row when there is room. */
 .result-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (min-width:640px){.result-stats{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}}
+
+/* result, trimmed: points lead, extras fold away */
+.result-stats .stat-main{grid-column:1/-1}
+.result-stats .stat-main b{font-size:40px;color:#ffd166}
+.row-rv{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:3px;font-size:12.5px;color:var(--bi-muted)}
+.row-rv b{color:var(--bi-ink)}
+.more-card summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;margin:0}
+.more-card summary::-webkit-details-marker{display:none}
+.more-card summary::after{content:'›';font-size:20px;transform:rotate(90deg);transition:transform .2s}
+.more-card[open] summary::after{transform:rotate(-90deg)}
+.more-part{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.beta-line{margin:2px 0 0;text-align:center;font-size:14px;color:rgba(255,255,255,.85);text-shadow:var(--glow)}

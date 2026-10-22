@@ -643,7 +643,7 @@ async function notInBook(db: Db, q: LoadedQuestion, input: string, playerId: str
       [playerId, q.id, inputKey, input.slice(0, 60), day],
     );
   }
-  return { key: null, reason: `Sổ của làng chưa có “${input.slice(0, 40)}”. Thử đáp án khác nhé, bé Bi đã ghi lại cho ca đêm xem.` };
+  return { key: null, reason: `Sổ của làng chưa có “${input.slice(0, 40)}”. Thử đáp án khác nhé. Bé Bi đã ghi lại, làng sẽ xét và báo bạn nếu đúng.` };
 }
 
 /** Answers this player typed that the book did not know then but has learned since; each is told once. */
@@ -1821,7 +1821,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
       // Out of the book, and every spelling that led to it is refused from now on with the night shift's reason.
       const gone = await db.query(`update answers set reviewed=true, status='rejected' where question_id=$1 and key=$2 and source <> 'seed' returning 1`, [r.q, r.key]);
       if (gone.length) {
-        await db.query(`update verdicts set valid=false, canonical_key=null, reason=$3 where question_id=$1 and canonical_key=$2`, [r.q, r.key, r.reason || 'Ca đêm đã gỡ đáp án này khỏi sổ.']);
+        await db.query(`update verdicts set valid=false, canonical_key=null, reason=$3 where question_id=$1 and canonical_key=$2`, [r.q, r.key, r.reason || 'Làng đã gỡ đáp án này khỏi sổ.']);
         out.removed++;
       }
     }
@@ -1841,7 +1841,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
     if (!row) continue;
     if (v.valid && v.canonical.trim()) {
       const q = await loadQuestion(db, v.q);
-      await learnAnswer(db, q, row.display, v.canonical.trim().slice(0, 60), 'ai', 'approved', 3, v.reason || 'Ca đêm công nhận');
+      await learnAnswer(db, q, row.display, v.canonical.trim().slice(0, 60), 'ai', 'approved', 3, v.reason || 'Làng công nhận');
       out.learned++;
     } else {
       await db.query(

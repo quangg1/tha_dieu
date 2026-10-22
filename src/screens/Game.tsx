@@ -621,15 +621,15 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           <BackIcon />
         </button>
         <div className="hud-panel">
-          {/* Where the kite is now: the last landmark passed, so the climb reads as a journey. */}
-          <span className="k zone" title="Khu vực diều đang bay">
-            {lap > 1 ? `Vòng ${lap}, ` : ''}
-            {lastMilestone(shownAlt).name}
+          <span className="k score-k">
+            {gio && (
+              <span className={`gio-tag${wind > 0 ? ' on' : ''}`} key={wind} title="Nối gió: trả lời hiếm liên tiếp, gió càng mạnh, điểm càng nhân lên">
+                gió ×{fmtGio(gioMultiplier(wind))}
+              </span>
+            )}
+            Điểm
           </span>
-          <span className="v">
-            {altNum}
-            <small>{altUnit}</small>
-          </span>
+          <span className="v gold">{Math.round(shownScore)}</span>
         </div>
         <div className="hud-panel mid">
           {mode === 'daily' ? (
@@ -653,16 +653,13 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
             </>
           )}
         </div>
-        <div className="hud-panel right">
-          <span className="k score-k">
-            {gio && (
-              <span className={`gio-tag${wind > 0 ? ' on' : ''}`} key={wind} title="Nối gió: trả lời hiếm liên tiếp, gió càng mạnh, điểm càng nhân lên">
-                gió ×{fmtGio(gioMultiplier(wind))}
-              </span>
-            )}
-            Điểm
+        <div className="hud-panel right" title={`Diều đang ở: ${lap > 1 ? `vòng ${lap}, ` : ''}${lastMilestone(shownAlt).name}`}>
+          {/* Points decide the boards; height is the picture of them, so it sits second. */}
+          <span className="k">{lap > 1 ? `Vòng ${lap} · ` : ''}Độ cao</span>
+          <span className="v dim">
+            {altNum}
+            <small>{altUnit}</small>
           </span>
-          <span className="v gold">{Math.round(shownScore)}</span>
         </div>
         <span className="hud-sound">{soundButton}</span>
         {quitArmed && <span className="quit-tag">Bấm lần nữa để rời</span>}
@@ -768,7 +765,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       <div className="play-dock">
         {(phase === 'intro' || phase === 'loading') && (
           <div className="intro-pill" aria-live="polite">
-            {phase === 'loading' ? 'Đang đón gió…' : <>Gió lên sau <b>{intro}</b></>}
+            {phase === 'loading' ? 'Đang đón gió…' : <>Đọc câu hỏi đi, ô gõ đáp án mở sau <b>{intro}</b></>}
           </div>
         )}
         {(phase === 'asking' || phase === 'judging') && (
