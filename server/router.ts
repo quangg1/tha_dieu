@@ -13,6 +13,9 @@ let ready: Promise<void> | null = null;
 
 /** Requests one network may send in a minute. A player sends about three per question; a busy café a few dozen. */
 const BURST_PER_MINUTE = Number(process.env.BURST_PER_MINUTE) || 240;
+/** Thả vô tận prompts one network may draw in a day, and answers it may send: generous for people, tight for scripts. */
+const NIGHT_DRAWS_PER_NET = Number(process.env.NIGHT_DRAWS_PER_NET) || 800;
+const ANSWERS_PER_NET = Number(process.env.ANSWERS_PER_NET) || 3000;
 
 /** Creates the tables, or resyncs the questions table, the first time a server instance meets a database from another book version. */
 function ensureReady(db: Db) {
@@ -86,6 +89,8 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
   answer: {
     method: 'POST',
     async run({ db, body, referee, net }) {
+      // One network probing the book with many fresh players: far beyond what a household or café types in a day.
+      if (net && !(await S.hit(db, `an:${net}`, S.vnToday(), ANSWERS_PER_NET))) throw new S.GameError(429, 'Mạng của bạn đã gửi quá nhiều câu trả lời hôm nay. Thử lại sau nhé.');
       return S.answer(
         db,
         { playerId: S.checkPlayer(body.playerId), day: needToday(body.day), mode: mode(body.mode), questionId: String(body.questionId), input: String(body.input ?? ''), net },
@@ -141,7 +146,9 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
   },
   night: {
     method: 'POST',
-    async run({ db, body }) {
+    async run({ db, body, net }) {
+      // A long Thả vô tận run draws a few hundred prompts; a script walking the whole book draws far more.
+      if (net && !(await S.hit(db, `nq:${net}`, S.vnToday(), NIGHT_DRAWS_PER_NET))) throw new S.GameError(429, 'Bạn đã bay rất nhiều hôm nay. Nghỉ chút rồi quay lại nhé!');
       const seen = Array.isArray(body.seen) ? body.seen.map(String) : [];
       return { day: S.vnToday(), question: await S.nightQuestion(db, seen) };
     },
