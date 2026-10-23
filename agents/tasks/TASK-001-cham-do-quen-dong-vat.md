@@ -129,9 +129,19 @@ Lúc duyệt hai task kia tôi viết rằng `pop` "không lệch theo một chi
 
 Ba kho, ba người chấm, cùng một chiều: `dongvat` **+0,40** · `monan` **+0,24** · `thucvat` **+0,54**. Chiều ngược chỉ là thiểu số nhỏ (58 ca ở `monan`, 35 ở `thucvat`) và **bằng 0** ở `dongvat`. Đã sửa `decisions.md`.
 
-### Một giới hạn khi đọc con số +0,40
+### Đã xác nhận: TASK-001 do DeepSeek chấm — và điều đó làm con số **đáng tin hơn**, không kém tin hơn
 
-Nếu TASK-001 do DeepSeek chấm (chính nó nói vậy trong báo cáo TASK-003) thì bản này nằm trên thang thấp hơn thang chung ~0,4 mức, nên khoảng cách thật giữa kho và độ quen thực tế **còn rộng hơn** +0,40. Cần chủ dự án xác nhận model nào đã chấm.
+Chủ dự án xác nhận 2026-10-23. Ghi chú cũ ở đây đoán rằng vì vậy +0,40 đang "nói nhẹ" khoảng cách thật. **Ngược lại.** Ba phép so trên cùng bộ 120 từ:
+
+| | Thang | Lệch so với TASK-001 |
+|---|---|---|
+| TASK-001 — DeepSeek, `RUBRIC.md` (định tính) | mốc | — |
+| TASK-004 — HY3, `rubric-do-quen.md` (định lượng) | trùng | **+0,03** |
+| TASK-003 — DeepSeek, `rubric-do-quen.md` | thấp hơn | **−0,43** |
+
+Cùng một model, hai rubric, lệch 0,43. Hai model khác nhau, hai rubric khác nhau, lệch 0,03. Nên khoảng lệch là của **rubric**, không của model: các mốc phần trăm trong rubric định lượng ("≥60/100 người nói ra") bị DeepSeek đọc chặt hơn HY3 đọc.
+
+Hệ quả: bản này nằm đúng trên thang mà hai nguồn độc lập gặp nhau, nên **+0,40 đọc được như nó là**. Bản cần hiệu chỉnh là `monan` của TASK-003 (thấp hơn thang đồng thuận ~0,46 mức), không phải bản này.
 
 ### Chưa làm, chờ chủ dự án
 

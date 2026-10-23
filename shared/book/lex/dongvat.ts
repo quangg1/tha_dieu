@@ -10,17 +10,17 @@ export default `
 5 Bò|Con bò|Bò sữa|Cow # sung
 4 Ngựa|Con ngựa|Horse # giap
 4 Dê|Con dê|Goat # giap sung
-3 Cừu|Con cừu|Sheep # sung
-3 Thỏ|Con thỏ|Rabbit
-2 Lừa|Con lừa|Donkey
-2 Chuột lang|Bọ ú|Guinea pig
-2 Chuột hamster|Hamster
+5 Cừu|Con cừu|Sheep # sung
+5 Thỏ|Con thỏ|Rabbit
+5 Lừa|Con lừa|Donkey
+4 Chuột lang|Bọ ú|Guinea pig
+4 Chuột hamster|Hamster
 2 La|Con la|Mule
-1 Ngựa bạch|Ngựa trắng
-1 Bò tót # rung vn sung
-1 Dê núi # rung sung
+3 Ngựa bạch|Ngựa trắng
+3 Bò tót # rung vn sung
+3 Dê núi # rung sung
 1 Lạc đà Alpaca|Alpaca
-1 Chó Phú Quốc
+3 Chó Phú Quốc
 1 Chó H'Mông cộc đuôi|Chó Mông cộc
 @ thu 4chan
 5 Voi|Con voi|Elephant # phi rung vn
@@ -49,7 +49,7 @@ export default `
 3 Tinh tinh|Chimpanzee # phi rung
 3 Khỉ đột|Gorilla # phi rung
 3 Gấu túi|Koala|Gấu koala # uc
-3 Lạc đà|Camel
+5 Lạc đà|Camel
 3 Nhím|Con nhím|Hedgehog|Porcupine # dem
 3 Chồn|Con chồn # rung dem
 3 Sơn dương # rung sung
@@ -62,7 +62,7 @@ export default `
 3 Sói đồng cỏ|Coyote
 3 Khỉ đuôi dài # rung vn
 3 Vượn|Con vượn # rung vn
-2 Chồn hôi|Skunk # dem
+4 Chồn hôi|Skunk # dem
 2 Tatu|Armadillo
 2 Thú ăn kiến|Anteater
 2 Lười|Con lười|Sloth # rung
@@ -74,10 +74,10 @@ export default `
 2 Bò rừng|Bò bison|Bison # sung
 2 Bò Tây Tạng|Yak # sung
 2 Linh dương đầu bò|Wildebeest|Linh dương nhảy # phi sung
-2 Lợn rừng|Heo rừng # rung vn
+4 Lợn rừng|Heo rừng # rung vn
 2 Lợn lòi # rung
-2 Gấu xám|Grizzly
-2 Gấu nâu
+4 Gấu xám|Grizzly
+4 Gấu nâu
 2 Gấu trúc đỏ|Red panda
 2 Lạc đà không bướu|Llama
 2 Nai sừng tấm|Moose # sung
@@ -85,14 +85,14 @@ export default `
 2 Chuột túi Wallaby|Wallaby # uc
 2 Gấu mèo|Raccoon # dem
 2 Chuột chũi|Mole
-2 Chuột đồng
+4 Chuột đồng
 2 Chuột chù
 2 Sóc bay # bay rung dem
 2 Vượn cáo|Lemur # rung
 2 Khỉ đầu chó|Baboon # phi
 2 Khỉ mặt đỏ # rung vn
 2 Hải ly|Beaver # nuocngot
-2 Rái cá|Otter # nuocngot
+4 Rái cá|Otter # nuocngot
 2 Hổ Đông Dương # rung vn
 2 Hổ Bengal
 2 Sư tử trắng
@@ -107,7 +107,7 @@ export default `
 2 Chồn sương|Chồn ferret|Ferret
 2 Chồn mactet # rung
 2 Cầy vằn # rung vn dem
-2 Chuột nhắt # nuoi
+4 Chuột nhắt # nuoi
 1 Sao la|Kỳ lân châu Á # rung vn sung
 1 Mang Trường Sơn # rung vn sung
 1 Mang lớn|Mang Vũ Quang # rung vn sung
@@ -115,7 +115,7 @@ export default `
 1 Voọc mũi hếch # rung vn
 1 Voọc Cát Bà|Voọc đầu vàng # rung vn
 1 Voọc mông trắng # rung vn
-1 Voọc|Con voọc # rung vn
+3 Voọc|Con voọc # rung vn
 1 Vượn đen má trắng # rung vn
 1 Vượn Cao Vít # rung vn
 1 Cu li|Culi # rung vn dem
@@ -130,7 +130,7 @@ export default `
 1 Khỉ vòi|Proboscis monkey # rung
 1 Khỉ mũi hếch
 1 Linh dương Saiga|Saiga # sung
-1 Lạc đà hai bướu|Bactrian
+3 Lạc đà hai bướu|Bactrian
 1 Hươu đùi vằn
 1 Báo mây|Báo gấm|Clouded leopard # rung vn
 1 Mèo cá # rung dem
@@ -138,43 +138,43 @@ export default `
 1 Chồn bạc má # rung vn
 1 Rái cá vuốt bé # nuocngot vn
 1 Khỉ mặt chó|Mandrill # phi
-1 Voi ma mút|Ma mút|Mammoth # tuyet sung
-1 Hổ răng kiếm|Smilodon # tuyet
+4 Voi ma mút|Ma mút|Mammoth # tuyet sung
+4 Hổ răng kiếm|Smilodon # tuyet
 1 Tê giác Java|Tê giác một sừng # tuyet vn sung
 1 Bò rừng châu Âu|Aurochs # tuyet sung
-1 Linh cẩu đốm # phi dem
-1 Chó sói đỏ|Sói lửa|Dhole # rung vn
-1 Thỏ rừng # rung
+3 Linh cẩu đốm # phi dem
+3 Chó sói đỏ|Sói lửa|Dhole # rung vn
+3 Thỏ rừng # rung
 1 Thỏ vằn|Thỏ vằn Trường Sơn # rung vn
-1 Sóc đen # rung vn
+3 Sóc đen # rung vn
 1 Sóc chuột|Chipmunk
-1 Sóc đất
-1 Chuột nhảy|Gerbil
-1 Chuột khổng lồ # rung
+3 Sóc đất
+3 Chuột nhảy|Gerbil
+3 Chuột khổng lồ # rung
 1 Cầy giông # rung vn dem
 1 Cầy mực|Binturong # rung vn dem
 1 Hươu vàng # rung vn sung
 1 Nai cà tông # rung vn sung
 1 Bò banteng|Bò rừng banteng # rung vn sung
-1 Trâu rừng # rung vn sung
+3 Trâu rừng # rung vn sung
 1 Hà mã lùn # phi nuocngot
 1 Khỉ đuôi lợn # rung vn
-1 Khỉ vàng # rung vn
+3 Khỉ vàng # rung vn
 1 Khỉ cộc # rung vn
 1 Khỉ nhện
 1 Khỉ sóc
 1 Tinh tinh lùn|Bonobo # phi rung
 1 Vượn tay trắng # rung
-1 Lửng mật|Honey badger # phi dem
+3 Lửng mật|Honey badger # phi dem
 1 Chồn vàng
 1 Linh dương Gazen|Gazelle # phi sung
 1 Linh dương Impala|Impala # phi sung
 1 Ngựa vằn núi # phi
-1 Lừa hoang
-1 Ngựa hoang|Ngựa Przewalski
+3 Lừa hoang
+3 Ngựa hoang|Ngựa Przewalski
 @ thu bay dem
 4 Dơi|Con dơi|Bat
-1 Dơi quỷ|Dơi hút máu|Vampire bat
+3 Dơi quỷ|Dơi hút máu|Vampire bat
 1 Dơi ngựa|Cáo bay|Flying fox
 @ thu bien
 5 Cá voi|Cá ông|Whale
@@ -188,8 +188,8 @@ export default `
 2 Rái cá biển|Sea otter
 2 Lợn biển|Manatee|Lợn biển Manatee
 1 Kỳ lân biển|Narwhal # cuc sung
-1 Cá voi trắng|Beluga # cuc
-1 Cá nhà táng|Cá voi nhà táng|Sperm whale
+3 Cá voi trắng|Beluga # cuc
+3 Cá nhà táng|Cá voi nhà táng|Sperm whale
 1 Cá voi đầu cong|Bowhead # cuc
 1 Cá voi mõm khoằm
 1 Cá heo sông|Cá heo nước ngọt # nuocngot
@@ -203,19 +203,19 @@ export default `
 5 Gà|Gà trống|Gà mái|Con gà|Chicken # giap
 4 Vịt|Con vịt|Duck
 4 Ngỗng|Con ngỗng|Goose
-3 Bồ câu|Chim bồ câu|Pigeon|Dove
+5 Bồ câu|Chim bồ câu|Pigeon|Dove
 3 Ngan|Vịt xiêm|Con ngan
 3 Chim cút|Cút|Quail
-2 Gà tây|Turkey
-2 Gà Đông Tảo|Gà chân voi
+4 Gà tây|Turkey
+4 Gà Đông Tảo|Gà chân voi
 2 Gà ác
 2 Gà tre
-2 Gà chọi|Gà nòi
+4 Gà chọi|Gà nòi
 2 Gà Hồ
 2 Vịt bầu
 2 Vịt cỏ
 1 Gà Mía
-1 Gà ri
+3 Gà ri
 1 Gà Tò
 1 Gà lôi trắng # rung vn
 @ chim bay
@@ -296,15 +296,15 @@ export default `
 2 Diều|Diều mướp
 2 Kim oanh
 2 Sẻ đồng
-1 Chim Dodo|Dodo # tuyet
+3 Chim Dodo|Dodo # tuyet
 1 Chim Moa|Moa # tuyet
 1 Chim cánh cụt lớn|Great auk # tuyet
 1 Bồ câu viễn khách|Passenger pigeon # tuyet
 1 Thần ưng|Kền kền Andes|Condor
-1 Chim chích chòe lửa
-1 Chim khướu|Khướu
+3 Chim chích chòe lửa
+3 Chim khướu|Khướu
 1 Khướu Ngọc Linh # vn
-1 Gà so
+3 Gà so
 1 Gà tiền mặt đỏ|Gà tiền # rung vn
 1 Trĩ sao # rung vn
 1 Gà lôi lam mào trắng # rung vn
@@ -339,15 +339,15 @@ export default `
 1 Chim bìm bịp lớn
 1 Phượng hoàng đất # rung vn
 1 Kền kền đầu đỏ
-1 Đại bàng đầu trọc|Đại bàng hói|Bald eagle
+3 Đại bàng đầu trọc|Đại bàng hói|Bald eagle
 1 Chim ưng biển|Ó cá|Osprey
 1 Chim cánh cụt Adelie
 1 Chim cánh cụt vua
 1 Vịt mỏ thìa
-1 Vịt uyên ương|Uyên ương|Mandarin duck
+3 Vịt uyên ương|Uyên ương|Mandarin duck
 1 Le hôi
 1 Mòng két
-1 Chim sâu
+3 Chim sâu
 1 Chim cút nhật
 @ bosat
 5 Rắn|Con rắn|Snake # giap
@@ -372,7 +372,7 @@ export default `
 2 Rắn ráo
 2 Rắn nước # nuocngot
 2 Rắn biển # bien doc
-2 Rắn chuông|Rattlesnake # doc
+4 Rắn chuông|Rattlesnake # doc
 2 Rắn mamba|Mamba # phi doc
 2 Trăn gấm
 2 Trăn Anaconda|Anaconda # nuocngot
@@ -388,13 +388,13 @@ export default `
 2 Rồng đất # vn
 2 Thằn lằn bay|Thằn lằn bay Draco # bay
 2 Rắn mối
-1 Rùa Hồ Gươm|Cụ Rùa|Giải Sin-hoe|Rùa Thượng Hải # nuocngot vn
+3 Rùa Hồ Gươm|Cụ Rùa|Giải Sin-hoe|Rùa Thượng Hải # nuocngot vn
 1 Giải|Giải khổng lồ # nuocngot vn
 1 Rùa hộp
 1 Rùa mai mềm
 1 Rùa cổ rắn
 1 Cá sấu mõm dài|Gharial # nuocngot
-1 Cá sấu nước mặn|Cá sấu cửa sông # bien
+3 Cá sấu nước mặn|Cá sấu cửa sông # bien
 1 Rắn roi
 1 Rắn sọc dưa
 1 Rắn hổ chúa
@@ -403,8 +403,8 @@ export default `
 1 Thằn lằn cá sấu|Thằn lằn cá sấu Việt Nam # vn
 1 Thằn lằn sừng|Horned lizard
 1 Rắn mù
-1 Khủng long|Dinosaur # tuyet
-1 Khủng long bạo chúa|T-Rex|Tyrannosaurus # tuyet
+5 Khủng long|Dinosaur # tuyet
+4 Khủng long bạo chúa|T-Rex|Tyrannosaurus # tuyet
 1 Thằn lằn bay Pterosaur|Dực long|Pterodactyl # tuyet bay
 1 Thằn lằn cá|Ngư long # tuyet bien
 @ luongcu nuocngot
@@ -449,7 +449,7 @@ export default `
 3 Cá chọi|Cá xiêm|Betta # nuoi
 3 Cá Koi|Koi # nuoi
 3 Cá rồng|Arowana|Kim long # nuoi
-3 Lươn|Con lươn|Eel
+5 Lươn|Con lươn|Eel
 2 Cá lăng
 2 Cá trôi
 2 Cá ngạnh
@@ -467,7 +467,7 @@ export default `
 2 Cá hoàng đế # nuoi
 2 Cá piranha|Piranha|Cá răng đao
 2 Cá tầm|Sturgeon
-2 Cá chình|Chình # bien
+4 Cá chình|Chình # bien
 2 Cá anh vũ|Anh vũ # vn
 2 Cá lóc bông
 2 Cá bông lau
@@ -494,8 +494,8 @@ export default `
 1 Cá bỗng
 1 Cá cháy # bien vn
 1 Cá Arapaima|Hải tượng|Cá hải tượng
-1 Cá phổi|Lungfish
-1 Cá trê vàng
+3 Cá phổi|Lungfish
+3 Cá trê vàng
 1 Cá leo
 1 Cá trà sóc|Cá ngựa xám
 1 Cá thát lát cườm
@@ -559,13 +559,13 @@ export default `
 2 Cá lồng đèn|Cá vây chân|Anglerfish
 2 Cá đuôi gai
 2 Cá ngựa vằn
-1 Cá mập Megalodon|Megalodon # tuyet
+4 Cá mập Megalodon|Megalodon # tuyet
 1 Cá vây tay|Coelacanth
 1 Cá mập Greenland
 1 Cá mập yêu tinh|Goblin shark
 1 Cá rìu|Hatchetfish
 1 Cá răng nanh|Fangtooth
-1 Cá giọt nước|Blobfish
+3 Cá giọt nước|Blobfish
 1 Cá mập trắng đuôi dài
 1 Cá mái chèo|Oarfish
 1 Cá thu ảo
@@ -636,7 +636,7 @@ export default `
 2 Ruồi vàng
 2 Mòng|Con mòng
 2 Dĩn|Muỗi dĩn
-2 Sâu bướm|Bướm phượng
+4 Sâu bướm|Bướm phượng
 2 Bướm vua|Monarch
 2 Bướm phượng cánh kiếm
 2 Châu chấu voi
@@ -650,7 +650,7 @@ export default `
 2 Bọ cạp nước # nuocngot
 2 Bọ que khổng lồ
 2 Bướm khế
-1 Kiến ba khoang # doc
+3 Kiến ba khoang # doc
 1 Bọ cánh cứng Hercules|Kiến vương Hercules
 1 Kẹp kìm khổng lồ
 1 Bọ hung sừng
@@ -668,10 +668,10 @@ export default `
 1 Ong khoái
 1 Ong ruồi đen
 1 Muỗi mắt
-1 Bọ chó
-1 Ruồi xanh
-1 Ruồi nhà
-1 Nhặng|Con nhặng
+3 Bọ chó
+3 Ruồi xanh
+4 Ruồi nhà
+3 Nhặng|Con nhặng
 1 Ve kim
 1 Sâu đo bướm
 @ contrung
@@ -679,7 +679,7 @@ export default `
 4 Sâu|Con sâu|Sâu róm|Caterpillar
 4 Rận|Chấy|Chí|Louse
 4 Bọ chét|Flea
-3 Mối|Con mối|Termite
+5 Mối|Con mối|Termite
 3 Rệp|Rệp giường|Bedbug
 3 Mọt|Con mọt|Mọt gạo
 3 Tằm|Con tằm|Silkworm # nuoi
@@ -709,7 +709,7 @@ export default `
 @ chandot
 4 Nhện|Con nhện|Spider # doc
 4 Bọ cạp|Bò cạp|Scorpion # doc
-3 Rết|Con rết|Centipede # doc
+5 Rết|Con rết|Centipede # doc
 3 Ve chó|Bọ ve|Tick
 2 Nhện độc|Nhện góa phụ đen|Black widow # doc
 2 Nhện Tarantula|Tarantula # doc
@@ -728,9 +728,9 @@ export default `
 5 Cua|Con cua|Crab # bien nuocngot
 4 Tôm hùm|Lobster # bien
 4 Ghẹ|Con ghẹ # bien
-3 Cua đồng # nuocngot
+5 Cua đồng # nuocngot
 3 Tôm càng xanh|Tôm càng # nuocngot
-3 Tôm sú # bien
+5 Tôm sú # bien
 3 Tôm thẻ # bien
 3 Tôm tít|Tôm tích|Bề bề|Mantis shrimp # bien
 3 Cua hoàng đế|King crab # bien cuc
@@ -738,12 +738,12 @@ export default `
 3 Còng|Con còng # bien
 3 Ba khía # bien
 3 Cáy|Con cáy # nuocngot
-2 Cua biển # bien
+4 Cua biển # bien
 2 Cua gạch # bien
 2 Cua lột # bien
 2 Cua dừa|Coconut crab # bien
 2 Cua nhện Nhật Bản|Cua nhện # bien
-2 Tép|Con tép # nuocngot
+5 Tép|Con tép # nuocngot
 2 Tôm đất # nuocngot
 2 Tôm hùm đất|Crawfish|Crayfish # nuocngot
 2 Tôm krill|Krill|Moi|Tôm moi # bien
@@ -771,7 +771,7 @@ export default `
 4 Sò|Con sò # bien
 4 Ốc sên|Sên # nuoi
 4 Nghêu|Ngao|Clam # bien
-3 Hến|Con hến # nuocngot
+5 Hến|Con hến # nuocngot
 3 Trai|Con trai|Trai ngọc|Oyster # bien nuocngot
 3 Hàu|Con hàu # bien
 3 Vẹm|Vẹm xanh|Mussel # bien
@@ -849,8 +849,8 @@ export default `
 2 Giun kim
 2 Sá sùng # bien
 2 Giun nhiều tơ|Giun biển # bien
-1 Vắt|Con vắt # rung
-1 Giun quế
+3 Vắt|Con vắt # rung
+3 Giun quế
 1 Giun dẹp
-1 Giun đũa
+4 Giun đũa
 `;

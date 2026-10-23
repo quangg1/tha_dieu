@@ -2,6 +2,16 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 21:45
+- **Đã sửa `pop` kho động vật: 133 mục** (75 dòng trong `lex/dongvat.ts`, 58 trong `lex2/dongvat.ts`). Chỉ sửa các chỗ lệch ≥ 2 mức so với bản chấm TASK-001, lấy đúng mức của bản chấm. Không đụng 682 chỗ lệch 1 mức — trong tầm nhiễu của một người chấm.
+- Kiểm sau khi sửa: so lại với bản chấm còn **0 ca lệch ≥ 2 mức**, lệch ≤1 mức 100%, lệch TB +0,40 → +0,28. Phân bố `pop` của kho: 1628/334/154/65/28 → **1523/316/241/88/41**.
+- `npx vitest run` 89/89 đạt · `tsc --noEmit` sạch · `check:questions` **0 lỗi · 11 chú ý**, đúng bằng trước khi sửa (so bằng `git stash`), không chú ý nào liên quan độ quen.
+- Tác dụng thật: `newAnswerPrior` giờ cho `Khủng long`, `Lừa`, `Tép`, `Cừu`, `Thỏ`, `Bồ câu`, `Cua đồng`, `Hến`, `Mối` bậc đầu **Thường** (trước là Hiếm), `Ruồi nhà`, `Giòi`, `Voi ma mút` bậc **Khá hiếm**.
+- **Chủ dự án xác nhận TASK-001 do DeepSeek chấm** — và điều đó làm con số đáng tin **hơn**, không kém. Cùng một model, hai rubric: lệch 0,43. Hai model khác nhau, hai rubric khác nhau: lệch 0,03. Nên khoảng lệch là của **rubric** (mốc phần trăm trong `rubric-do-quen.md` bị DeepSeek đọc chặt hơn HY3), không của model. Bản TASK-001 nằm đúng trên thang hai nguồn đồng thuận nên +0,40 đọc được như nó là; đã sửa ghi chú cũ trong TASK-001 và hai dòng trong `decisions.md`.
+- **Bản duy nhất còn cần hiệu chỉnh: `monan` của TASK-003** — thấp hơn thang đồng thuận ~0,46 mức, nên khoảng cách thật giữa kho `monan` và độ quen thực tế gần **+0,7** chứ không phải +0,24.
+- **Chưa làm:** sửa `pop` cho `monan` và `thucvat` (chờ quyết cách hiệu chỉnh bản `monan` trước); 9 từ `?` của `thucvat` nghi là mảnh tên bị cắt khi tách kho; 7 từ `?` của `dongvat` cần soát tay.
+- **Chờ chủ dự án:** các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); truy vấn số 2 của báo cáo WorkBuddy.
+
 ## 2026-10-23 21:35
 - **Duyệt TASK-001: `đã nhận`.** 2.209 dòng, 0 lệch thứ tự, `pop` nguyên 1–5, phân bố khớp từng số với báo cáo, 14/14 từ neo `RUBRIC.md` đúng mức, 7 dòng `?` đúng, 0 từ trùng chấm khác mức. Phiếu này chỉ có tên chính (0 dòng bí danh) nên không mắc lỗi phiếu của TASK-003/004. Nit: dòng cuối `Vắt xanh` thiếu ô `ghi_chu` rỗng, 3 cột thay vì 4.
 - Lý do duyệt muộn là lỗi kế hoạch của Claude: tiêu chí tự đặt lúc giao ("so với bản chấm riêng của Claude") chờ một bản chấm thứ ba không bao giờ có. Bộ 120 từ chồng đã thay được phép so đó.

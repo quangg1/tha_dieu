@@ -96,7 +96,7 @@ export default `
 1 Sơn dương Sumatra # sung
 1 Hổ Mã Lai
 1 Hổ Sumatra
-1 Hổ Siberia|Hổ Amur
+3 Hổ Siberia|Hổ Amur
 1 Hổ Bali # tuyet
 1 Hổ Java # tuyet
 1 Hổ Caspi # tuyet
@@ -164,7 +164,7 @@ export default `
 1 Bò Watusi|Ankole-Watusi # sung nuoi
 1 Bò Highland|Highland cattle # sung nuoi
 1 Bò Brahman # sung nuoi
-1 Bò Wagyu|Wagyu # nuoi
+3 Bò Wagyu|Wagyu # nuoi
 1 Bò Holstein|Bò sữa Hà Lan # nuoi
 1 Trâu Murrah # sung nuoi
 1 Trâu lùn Anoa|Anoa # sung
@@ -189,20 +189,20 @@ export default `
 2 Ngựa Ả Rập|Arabian horse # nuoi
 1 Ngựa Mông Cổ # nuoi
 1 Ngựa lùn Shetland|Shetland pony # nuoi
-1 Ngựa thồ|Ngựa kéo # nuoi
+3 Ngựa thồ|Ngựa kéo # nuoi
 2 Lợn ỉ # nuoi
-1 Lợn Móng Cái # nuoi
-1 Lợn mán # nuoi
-1 Lợn cắp nách # nuoi
+3 Lợn Móng Cái # nuoi
+3 Lợn mán # nuoi
+3 Lợn cắp nách # nuoi
 1 Lợn Ba Xuyên # nuoi
 1 Lợn Duroc|Duroc # nuoi
 1 Lợn Yorkshire|Yorkshire # nuoi
 1 Lợn Landrace|Landrace # nuoi
-1 Lợn mini|Heo mini|Heo cảnh # nuoi
+3 Lợn mini|Heo mini|Heo cảnh # nuoi
 1 Lợn hươu|Babirusa # sung
 1 Lợn Peccary|Peccary
 1 Dê Bách Thảo # nuoi
-1 Dê cỏ # nuoi
+3 Dê cỏ # nuoi
 1 Dê Boer|Boer # nuoi
 1 Dê Saanen # nuoi
 1 Dê lùn|Dê cảnh # nuoi
@@ -211,12 +211,12 @@ export default `
 1 Cừu Merino|Merino # nuoi
 1 Cừu Phan Rang # nuoi
 1 Thỏ Hà Lan # nuoi
-1 Thỏ tai cụp|Thỏ Lop # nuoi
+3 Thỏ tai cụp|Thỏ Lop # nuoi
 1 Thỏ Angora # nuoi
 1 Thỏ Newzealand|Thỏ New Zealand # nuoi
 1 Thỏ sư tử|Lionhead # nuoi
 1 Chuột lang Abyssinian # nuoi
-1 Chuột Chinchilla|Chinchilla|Sóc Chinchilla # nuoi
+3 Chuột Chinchilla|Chinchilla|Sóc Chinchilla # nuoi
 1 Chuột nhảy sa mạc|Gerbil # nuoi
 1 Chuột Hamster Winter White|Hamster trắng # nuoi
 1 Chuột Hamster Robo|Hamster Robo # nuoi
@@ -228,7 +228,7 @@ export default `
 1 Macmot|Marmot|Sóc núi
 1 Chuột Lemming|Lemming # cuc
 1 Chuột nước|Muskrat # nuocngot
-1 Chuột Capybara|Capybara
+3 Chuột Capybara|Capybara
 1 Chuột Agouti|Agouti
 1 Chuột Paca|Paca
 1 Chuột Viscacha|Viscacha
@@ -236,7 +236,7 @@ export default `
 1 Chuột Nutria|Nutria|Hải ly đuôi chuột # nuocngot
 1 Nhím châu Phi # phi
 1 Nhím Bắc Mỹ|North American porcupine
-1 Nhím kiểng|Nhím kiểng châu Phi|Nhím lùn # nuoi
+3 Nhím kiểng|Nhím kiểng châu Phi|Nhím lùn # nuoi
 1 Thú ăn kiến khổng lồ|Giant anteater
 1 Thú ăn kiến lùn|Silky anteater
 1 Thú ăn kiến Tamandua|Tamandua
@@ -296,7 +296,7 @@ export default `
 1 Cá voi đầu bò|Cá voi đầu bò phương Bắc|Right whale
 1 Cá voi mỏ|Beaked whale
 1 Cá nhà táng lùn|Pygmy sperm whale
-1 Cá heo mũi chai|Bottlenose dolphin
+3 Cá heo mũi chai|Bottlenose dolphin
 1 Cá heo không vây
 1 Cá heo đốm
 1 Cá heo xoay|Spinner dolphin
@@ -335,7 +335,7 @@ export default `
 1 Sáo mỏ ngà
 1 Sáo mỏ vàng
 1 Sáo đầu trắng
-1 Yểng|Nhồng|Chim nhồng
+3 Yểng|Nhồng|Chim nhồng
 1 Cu gáy
 1 Cu ngói
 1 Cu luồng
@@ -373,8 +373,8 @@ export default `
 1 Ngỗng Canada|Canada goose
 1 Ngỗng đầu sọc|Ngỗng đầu vằn|Bar-headed goose
 1 Ngỗng tuyết|Snow goose
-1 Thiên nga đen|Black swan # uc
-1 Thiên nga trắng|Mute swan
+3 Thiên nga đen|Black swan # uc
+3 Thiên nga trắng|Mute swan
 1 Thiên nga kèn|Trumpeter swan
 1 Sếu đầu đỏ|Sếu cổ trụi # vn
 1 Sếu Nhật Bản|Sếu đầu đỏ Nhật Bản|Red-crowned crane
@@ -406,7 +406,7 @@ export default `
 1 Chim Puffin|Puffin|Hải âu rụt cổ
 1 Chim An ca|Auk
 1 Én bụng trắng
-1 Én nhà|Barn swallow
+3 Én nhà|Barn swallow
 1 Yến hông trắng
 1 Yến hàng|Chim yến hàng
 1 Chim yến tổ trắng
@@ -476,7 +476,7 @@ export default `
 1 Giẻ cùi
 1 Giẻ cùi xanh
 1 Giẻ cùi vàng
-1 Quạ đen
+3 Quạ đen
 1 Quạ khoang
 1 Quạ thông
 1 Quạ Raven|Raven
@@ -607,18 +607,18 @@ export default `
 1 Gà Brahma|Brahma # nuoi
 1 Gà Silkie|Gà tre lông xù|Silkie # nuoi
 1 Gà Ai Cập # nuoi
-1 Gà Tam Hoàng # nuoi
-1 Gà Lương Phượng # nuoi
-1 Gà công nghiệp|Gà broiler # nuoi
-1 Vịt Bắc Kinh|Vịt Bắc Kinh trắng # nuoi
+3 Gà Tam Hoàng # nuoi
+3 Gà Lương Phượng # nuoi
+3 Gà công nghiệp|Gà broiler # nuoi
+3 Vịt Bắc Kinh|Vịt Bắc Kinh trắng # nuoi
 1 Vịt Xiêm # nuoi
 1 Vịt Super M # nuoi
 1 Vịt Khaki Campbell # nuoi
 1 Vịt Runner|Vịt chạy Ấn Độ # nuoi
 1 Ngỗng sư tử # nuoi
 1 Ngỗng Toulouse # nuoi
-1 Bồ câu Pháp # nuoi
-1 Bồ câu đưa thư # nuoi
+3 Bồ câu Pháp # nuoi
+3 Bồ câu đưa thư # nuoi
 1 Bồ câu Fantail|Bồ câu xòe đuôi # nuoi
 1 Đà điểu châu Phi|Đà điểu Ostrich # phi nuoi
 @ bosat
@@ -692,7 +692,7 @@ export default `
 1 Cá sấu Mỹ|Alligator|Cá sấu Alligator # nuocngot
 1 Cá sấu Trung Quốc|Chinese alligator # nuocngot
 1 Cá sấu sông Nile|Nile crocodile # phi nuocngot
-1 Cá sấu Caiman|Caiman # nuocngot
+3 Cá sấu Caiman|Caiman # nuocngot
 1 Cá sấu Gharial|Gharial|Cá sấu Ấn Độ mõm dài # nuocngot
 1 Cá sấu lùn|Dwarf crocodile # phi
 1 Kỳ đà hoa
@@ -724,8 +724,8 @@ export default `
 1 Kỳ nhông xanh|Green iguana # nuoi
 1 Kỳ nhông tê giác|Rhinoceros iguana
 1 Khủng long Tam giác|Triceratops # tuyet sung
-1 Khủng long Velociraptor|Velociraptor # tuyet
-1 Khủng long cổ dài|Brachiosaurus # tuyet
+3 Khủng long Velociraptor|Velociraptor # tuyet
+3 Khủng long cổ dài|Brachiosaurus # tuyet
 1 Khủng long Stegosaurus|Khủng long phiến sừng|Stegosaurus # tuyet
 1 Khủng long Spinosaurus|Spinosaurus # tuyet
 1 Khủng long Ankylosaurus|Ankylosaurus|Khủng long bọc giáp # tuyet
@@ -743,7 +743,7 @@ export default `
 1 Pteranodon # tuyet bay
 1 Quetzalcoatlus # tuyet bay
 @ luongcu nuocngot
-1 Ếch Thái Lan # nuoi
+3 Ếch Thái Lan # nuoi
 1 Ếch cây|Ếch cây xanh
 1 Ếch cây mắt đỏ|Red-eyed tree frog
 1 Ếch bay|Ếch cây bay # bay
@@ -811,13 +811,13 @@ export default `
 1 Cá rô mo
 1 Cá sặc rằn|Cá sặc bổi
 1 Cá sặc điệp
-1 Cá lia thia|Cá chọi xiêm|Betta
+3 Cá lia thia|Cá chọi xiêm|Betta
 1 Cá tai tượng da beo
 1 Cá nàng hai
 1 Cá phát tài
-1 Cá la hán
+3 Cá la hán
 1 Cá ông tiên
-1 Cá mún|Cá platy
+3 Cá mún|Cá platy
 1 Cá đuôi kiếm|Swordtail
 1 Cá molly|Cá bình tích
 1 Cá sóc đầu đỏ
@@ -835,7 +835,7 @@ export default `
 1 Cá Flowerhorn|Flowerhorn|Cá La Hán Flowerhorn
 1 Cá Cichlid|Cichlid
 2 Cá điêu hồng|Cá rô phi đỏ
-1 Cá hồi vân|Rainbow trout
+3 Cá hồi vân|Rainbow trout
 1 Cá hồi nâu|Brown trout
 1 Cá hồi suối|Brook trout
 1 Cá hồi Chinook|Chinook
@@ -861,7 +861,7 @@ export default `
 1 Cá Pacu|Pacu
 1 Cá Tambaqui|Tambaqui
 1 Cá trê điện|Electric catfish # phi
-1 Cá chình điện|Electric eel
+3 Cá chình điện|Electric eel
 1 Cá Candiru|Candiru
 1 Cá bốn mắt|Four-eyed fish
 1 Cá thòi lòi nước ngọt
@@ -915,7 +915,7 @@ export default `
 1 Cá đù bạc
 1 Cá đường|Cá sủ vàng
 1 Cá sủ đất
-1 Cá mối
+3 Cá mối
 1 Cá mối hoa
 1 Cá phèn hồng
 1 Cá phèn vàng
@@ -996,12 +996,12 @@ export default `
 1 Cá hề cam|Clownfish|Cá Nemo
 1 Cá hề đen
 1 Cá hề hồng
-1 Cá thia|Damselfish
+3 Cá thia|Damselfish
 1 Cá thia xanh|Blue damsel
 1 Cá bướm vây
 1 Cá bướm chấm
 1 Cá bướm mỏ dài
-1 Cá thiên thần|Angelfish biển|Cá thần tiên biển
+3 Cá thiên thần|Angelfish biển|Cá thần tiên biển
 1 Cá thiên thần hoàng đế|Emperor angelfish
 1 Cá thiên thần xanh|Queen angelfish
 1 Cá đuôi gai xanh|Blue tang|Cá Dory
@@ -1141,7 +1141,7 @@ export default `
 1 Bọ cánh cứng thông|Bark beetle
 1 Bọ cánh cứng rùa|Tortoise beetle
 1 Mọt gạo
-1 Mọt gỗ
+3 Mọt gỗ
 1 Mọt bột
 1 Mọt đậu
 1 Châu chấu sa mạc|Desert locust # phi
@@ -1196,7 +1196,7 @@ export default `
 1 Kiến gai
 1 Kiến cỏ
 1 Kiến thợ mộc|Carpenter ant
-1 Kiến càng
+3 Kiến càng
 1 Sâu róm|Sâu lông # doc
 1 Sâu khoang
 1 Sâu cuốn lá
@@ -1213,8 +1213,8 @@ export default `
 1 Rệp giường|Rệp
 1 Bọ nhảy đuôi bật|Springtail
 1 Nhậy|Con nhậy|Nhậy sách
-1 Giòi
-1 Lăng quăng|Bọ gậy
+4 Giòi
+3 Lăng quăng|Bọ gậy
 1 Nhộng|Nhộng tằm
 1 Đuông chà là
 @ chandot
@@ -1233,7 +1233,7 @@ export default `
 1 Nhện công|Peacock spider # uc
 1 Nhện bạc|Nhện lưng bạc
 1 Nhện đen
-1 Nhện nhà
+3 Nhện nhà
 1 Nhện đỏ|Mạt nhện đỏ
 1 Nhện bò cạp|Whip scorpion|Bò cạp roi
 1 Nhện lạc đà|Camel spider|Solifugae
@@ -1247,7 +1247,7 @@ export default `
 1 Rết nhà|House centipede
 1 Cuốn chiếu khổng lồ|Giant millipede
 1 Cuốn chiếu lưng phẳng
-1 Ve bò|Tick|Bét
+3 Ve bò|Tick|Bét
 1 Ve gà|Mạt gà
 1 Bét bụi|Mạt bụi|Dust mite
 1 Mạt đỏ|Chigger
@@ -1262,8 +1262,8 @@ export default `
 1 Tôm mũ ni trắng
 1 Tôm mũ ni đỏ
 1 Tôm he|Tôm he chân trắng
-1 Tôm rảo
-1 Tôm bạc
+3 Tôm rảo
+3 Tôm bạc
 1 Tôm nương
 1 Tôm sắt
 1 Tôm chì
@@ -1277,14 +1277,14 @@ export default `
 1 Tôm hề|Harlequin shrimp
 1 Tôm Mysis|Mysis
 1 Tôm Artemia|Artemia|Tôm ngâm nước muối
-1 Tép đồng|Tép riu # nuocngot
-1 Tép bạc # nuocngot
-1 Cua Cà Mau
+3 Tép đồng|Tép riu # nuocngot
+3 Tép bạc # nuocngot
+3 Cua Cà Mau
 1 Cua bùn
-1 Cua xanh
+3 Cua xanh
 1 Cua huỳnh đế
 1 Cua King Alaska|Cua hoàng đế Alaska
-1 Cua tuyết|Snow crab
+3 Cua tuyết|Snow crab
 1 Cua Dungeness|Dungeness crab
 1 Cua lông Thượng Hải|Cua lông|Mitten crab # nuocngot
 1 Cua móng đỏ|Cua móng đỏ biển
@@ -1294,7 +1294,7 @@ export default `
 1 Cua yeti|Yeti crab
 1 Cua trang trí|Decorator crab
 1 Cua mặt trăng
-1 Ghẹ xanh
+3 Ghẹ xanh
 1 Ghẹ đỏ
 1 Ghẹ ba chấm
 1 Ghẹ hoa
@@ -1326,7 +1326,7 @@ export default `
 1 Bạch tuộc chăn|Blanket octopus
 1 Ốc móng tay đen
 1 Ốc bươu vàng # nuocngot
-1 Ốc bươu đen # nuocngot
+3 Ốc bươu đen # nuocngot
 1 Ốc nhồi đồng # nuocngot
 1 Ốc dừa
 1 Ốc đỏ
@@ -1357,19 +1357,19 @@ export default `
 1 Vẹm xanh
 1 Vẹm xanh New Zealand|Vẹm xanh NZ
 1 Hàu Thái Bình Dương
-1 Hàu sữa
-1 Hàu đá
+3 Hàu sữa
+3 Hàu đá
 1 Hàu Kumamoto|Kumamoto
-1 Trai sông # nuocngot
+3 Trai sông # nuocngot
 1 Trai ngọc
 1 Trai cánh # nuocngot
-1 Hến sông # nuocngot
-1 Hến biển
+3 Hến sông # nuocngot
+3 Hến biển
 1 Dắt|Con dắt # nuocngot
 1 Don|Con don
 1 Vọp|Con vọp
 1 Phi|Con phi
-1 Chem chép|Chém chép
+3 Chem chép|Chém chép
 1 Bàn mai|Con bàn mai
 1 Bào ngư vành tai|Bào ngư chín lỗ
 1 Song mã|Ốc nhảy
@@ -1435,7 +1435,7 @@ export default `
 1 Giun lươn
 1 Sán lá gan
 1 Sán lá phổi
-1 Sán heo|Sán dây lợn
+3 Sán heo|Sán dây lợn
 1 Sán bò|Sán dây bò
 1 Sán chó
 1 Đỉa trâu # nuocngot
