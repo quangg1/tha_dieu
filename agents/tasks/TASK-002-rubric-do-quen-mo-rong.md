@@ -1,7 +1,7 @@
 # TASK-002: ví dụ neo cho rubric độ quen ở các nhóm khác
 
 - Người nhận: Kiro
-- Trạng thái: chờ duyệt
+- Trạng thái: đã nhận
 - Giao ngày: 2026-10-23
 
 ## Bối cảnh
@@ -35,3 +35,4 @@ Mẫu: nội dung RUBRIC.md ở TASK-001. Kho: `shared/book/lex/*.ts`.
 Chưa commit/push — chờ chủ dự án xem (HITL).
 
 ## Duyệt (Claude điền)
+Chủ dự án duyệt 2026-10-23. Ngoại lệ `diaphuong` mức 1 chỉ có 2 tỉnh (Bắc Kạn, Hậu Giang) được chấp nhận: kho thật chỉ có 2 tỉnh ở mức đó, không bịa thêm từ để đủ 3. Rubric chỉ trích dẫn mức sẵn có trong kho, không sửa kho. Đã commit và push.
