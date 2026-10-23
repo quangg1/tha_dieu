@@ -67,7 +67,7 @@ export const RELEASE3: ReleaseQuestion[] = [
 'Nemo, Dory, Dumbo, Bambi, Tom và Jerry|Mèo Tom|Chuột Jerry, Pikachu, Doraemon',
 'Pumbaa, Timon, Nala, Mufasa, Scar, Thumper, Goofy, Pluto, Daisy, Minnie, Stitch, Baloo, Bagheera, Kaa, Shere Khan, Rafiki, Abu, Flounder, Sebastian',
 'Zazu, Pascal, Maximus, Sven, Rajah, Meeko, Mushu, Pua, Judy Hopps, Nick Wiles|Nick Wilde, Po, Hổ Tigress, Gấu Pooh|Winnie the Pooh, Piglet, Tigger, Eeyore, Bugs Bunny|Thỏ Bugs, Garfield, Scooby-Doo, Snoopy',
-'Abu, Iago, Marie, Figaro, Sergeant Tibbs, Gus, Jaq, Lucifer, Copper, Tod, Duchess, Bernard, Bianca, Roquefort, Rex, Hamm, Bullseye, Remy, Dug, Kevin, Sid, Manny, Diego, Scrat']},
+'Iago, Marie, Figaro, Sergeant Tibbs, Gus, Jaq, Lucifer, Copper, Tod, Duchess, Bernard, Bianca, Roquefort, Rex, Hamm, Bullseye, Remy, Dug, Kevin, Sid, Manny, Diego, Scrat']},
 {id:'r-dv-co-tich',c:'Văn học',q:'Kể tên một con vật trong truyện cổ tích hoặc ngụ ngôn Việt Nam',s:['con'],k:'Chim Phượng Hoàng|Phượng hoàng',t:[
 'Rùa Vàng, Trăn tinh, Chim đại bàng',
 'Cáo, Cóc|Cậu Cóc, Thỏ, Rùa, Quạ, Trâu, Hổ',

@@ -67,11 +67,11 @@ export const RELEASE8: ReleaseQuestion[] = [
 'Ghềnh Ráng Tiên Sa|Ghềnh Ráng, Tháp Đôi, Bảo tàng Quang Trung, Cù Lao Xanh, Hòn Khô',
 'Bãi Xép, Tháp Bánh Ít, Đồi cát Phương Mai, Chùa Thiên Hưng, Mộ Hàn Mặc Tử, Biển Quy Nhơn, Nhơn Lý, Nhơn Hải, Trung Lương',
 'Tháp Dương Long, Thành Hoàng Đế, Tháp Cánh Tiên, Tháp Bình Lâm, Đầm Thị Nại, Cầu Thị Nại, Hồ Núi Một, Chùa Ông Núi, Bãi Kỳ Co, Làng nón Phú Gia, Làng rượu Bàu Đá, Làng võ Tây Sơn',
-'Suối khoáng nóng Hội Vân, Tháp Thủ Thiện, Tháp Phú Lốc, Tháp Bánh Ít, Đồi Ghềnh Ráng, Bãi Bàng, Bãi Rạng, Hòn Sẹo, Mũi Vi Rồng, Gành Yến']},
+'Suối khoáng nóng Hội Vân, Tháp Thủ Thiện, Tháp Phú Lốc, Đồi Ghềnh Ráng, Bãi Bàng, Bãi Rạng, Hòn Sẹo, Mũi Vi Rồng, Gành Yến']},
 {id:'r-dd-vung-tau',c:'Du lịch',q:'Kể tên một điểm du lịch ở Vũng Tàu hoặc Bà Rịa - Vũng Tàu',s:['diadiem'],k:'Đình Thắng Tam',t:[
 'Tượng Chúa Kitô Vua|Tượng Chúa dang tay, Bãi Sau, Bãi Trước',
 'Ngọn hải đăng Vũng Tàu|Hải đăng Vũng Tàu, Hòn Bà, Côn Đảo, Bạch Dinh, Mũi Nghinh Phong, Hồ Tràm',
-'Bãi Dâu, Bãi Dứa, Long Hải, Hồ Cốc, Núi Minh Đạm, Thích Ca Phật Đài, Hồ Mây Park, Suối nước nóng Bình Châu, Dinh Cô, Mũi Nghinh Phong, Đồi Con Heo',
+'Bãi Dâu, Bãi Dứa, Long Hải, Hồ Cốc, Núi Minh Đạm, Thích Ca Phật Đài, Hồ Mây Park, Suối nước nóng Bình Châu, Dinh Cô, Đồi Con Heo',
 'Niết Bàn Tịnh Xá, Pháo đài Phước Thắng, Chùa Phật Quang, Rừng phòng hộ, Bảo tàng Vũ khí cổ, Nhà tù Côn Đảo, Hòn Bảy Cạnh, Bãi Đầm Trầu, Nghĩa trang Hàng Dương, Mũi Kỳ Vân, Khu du lịch Thùy Dương',
 'Hải đăng Cấp, Đền thờ Võ Thị Sáu, Bãi Nhát, Hòn Cau, Bãi Ông Đụng, Khu dự trữ sinh quyển Bình Châu - Phước Bửu, Thắng Tam, Lăng Cá Ông']},
 {id:'r-dd-cao-bang',c:'Du lịch',q:'Kể tên một điểm du lịch ở Cao Bằng hoặc Lạng Sơn',s:['diadiem'],k:'Mắt Thần Núi',t:[
@@ -79,7 +79,7 @@ export const RELEASE8: ReleaseQuestion[] = [
 'Động Ngườm Ngao, Mẫu Sơn, Chợ Kỳ Lừa, Động Tam Thanh',
 'Suối Lê Nin, Hang Cốc Bó, Núi Các Mác, Chùa Phật Tích Trúc Lâm Bản Giốc, Đèo Mã Phục, Thác Thăng Hen|Hồ Thăng Hen, Thành nhà Mạc, Đền Bắc Lệ, Ải Chi Lăng, Cửa khẩu Hữu Nghị, Đồng Đăng',
 'Làng đá Khuổi Ky, Làng hương Phja Thắp, Kim Đồng|Khu di tích Kim Đồng, Đèo Khau Cốc Chà, Đèo Mẻ Pia, Hồ Khuổi Lái, Thung lũng Bắc Sơn, Núi Tô Thị|Nàng Tô Thị, Chùa Thành, Động Nhị Thanh, Đền Kỳ Cùng, Chợ Đông Kinh, Ruộng bậc thang Bắc Sơn',
-'Rừng trúc Phia Oắc, Núi Phia Oắc, Phja Oắc - Phja Đén, Đèo Mã Phục, Làng giấy bản Phja Chang, Thác Ngườm Ngao, Bản Thang, Ba Quẻ, Khuổi Ky, Đền Mẫu Đồng Đăng']},
+'Rừng trúc Phia Oắc, Núi Phia Oắc, Phja Oắc - Phja Đén, Làng giấy bản Phja Chang, Thác Ngườm Ngao, Bản Thang, Ba Quẻ, Khuổi Ky, Đền Mẫu Đồng Đăng']},
 {id:'r-dd-mui-ne',c:'Du lịch',q:'Kể tên một điểm du lịch ở Phan Thiết hoặc Bình Thuận',s:['diadiem'],k:'Mũi Điện|Mũi Điện Kê Gà',t:[
 'Mũi Né, Đồi cát bay|Đồi cát Mũi Né',
 'Bàu Trắng|Đồi cát trắng, Suối Tiên Mũi Né|Suối Tiên, Hải đăng Kê Gà, Làng chài Mũi Né, Tháp Chàm Poshanư, Núi Tà Cú',

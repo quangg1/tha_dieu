@@ -81,8 +81,8 @@ export const RELEASE1: ReleaseQuestion[] = [
 'Sahara, Gobi',
 'Kalahari, Atacama, Ả Rập|Sa mạc Ả Rập',
 'Namib, Mojave, Thar, Sonora, Nam Cực|Sa mạc Nam Cực',
-'Taklamakan, Great Victoria|Victoria lớn, Simpson, Gibson, Syria|Sa mạc Syria, Chihuahua, Patagonia, Karakum, Kyzylkum, Negev, Sinai, Rub al Khali|Rub al-Khali, Death Valley|Thung lũng Chết',
-'Libya|Sa mạc Libya, Nubia|Sa mạc Nubia, Ogaden, Danakil, Great Basin, Colorado Plateau, Badain Jaran, Tengger, Ordos, Thar, Great Sandy, Tanami, Strzelecki, Sechura, Monte']},
+'Taklamakan, Great Victoria|Victoria lớn, Simpson, Gibson, Syria|Sa mạc Syria, Chihuahua, Patagonia, Karakum, Kyzylkum, Negev, Sinai, Rub al Khali, Death Valley|Thung lũng Chết',
+'Libya|Sa mạc Libya, Nubia|Sa mạc Nubia, Ogaden, Danakil, Great Basin, Colorado Plateau, Badain Jaran, Tengger, Ordos, Great Sandy, Tanami, Strzelecki, Sechura, Monte']},
 {id:'r-day-nui',c:'Thế giới',q:'Kể tên một dãy núi trên thế giới',s:['daynui','day','nui'],k:'Drakensberg',t:[
 'Himalaya|Hy Mã Lạp Sơn, Alps|Anpơ',
 'Andes, Rocky|Rockies, Hoàng Liên Sơn, Trường Sơn',
@@ -105,8 +105,8 @@ export const RELEASE1: ReleaseQuestion[] = [
 'Hàng Đào, Hàng Bạc, Hàng Mã',
 'Tạ Hiện, Hàng Buồm, Hàng Ngang, Hàng Gai, Mã Mây, Hàng Bè',
 'Hàng Đường, Hàng Bông, Hàng Bồ, Hàng Thiếc, Hàng Quạt, Hàng Trống, Lương Văn Can, Hàng Giấy, Hàng Chiếu, Hàng Muối, Đinh Liệt, Cầu Gỗ',
-'Hàng Lược, Hàng Cót, Hàng Gà, Hàng Điếu, Hàng Da, Hàng Nón, Hàng Mắm, Hàng Thùng, Hàng Khoai, Hàng Chĩnh, Hàng Hòm, Hàng Phèn, Hàng Rươi, Hàng Than, Lò Rèn, Lò Sũ, Đồng Xuân, Hàng Cân, Hàng Tre, Hàng Dầu, Hàng Mành, Hàng Đồng, Hàng Bút, Hàng Ống, Hàng Hành, Nguyễn Hữu Huân, Hàng Lược',
-'Hàng Gà, Hàng Cá, Hàng Chai, Chả Cá, Gầm Cầu, Ngõ Tạm Thương, Hàng Hương, Mã Mây, Thuốc Bắc, Bát Đàn, Bát Sứ, Ngõ Gạch, Phùng Hưng, Hàng Phèn, Nguyễn Siêu, Hàng Chuối']},
+'Hàng Lược, Hàng Cót, Hàng Gà, Hàng Điếu, Hàng Da, Hàng Nón, Hàng Mắm, Hàng Thùng, Hàng Khoai, Hàng Chĩnh, Hàng Hòm, Hàng Phèn, Hàng Rươi, Hàng Than, Lò Rèn, Lò Sũ, Đồng Xuân, Hàng Cân, Hàng Tre, Hàng Dầu, Hàng Mành, Hàng Đồng, Hàng Bút, Hàng Ống, Hàng Hành, Nguyễn Hữu Huân',
+'Hàng Cá, Hàng Chai, Chả Cá, Gầm Cầu, Ngõ Tạm Thương, Hàng Hương, Thuốc Bắc, Bát Đàn, Bát Sứ, Ngõ Gạch, Phùng Hưng, Nguyễn Siêu, Hàng Chuối']},
 {id:'r-hcm-dd',c:'Du lịch',q:'Kể tên một địa điểm nổi tiếng ở TP. Hồ Chí Minh',s:['diadiem'],k:'Chùa Bà Thiên Hậu',t:[
 'Chợ Bến Thành, Nhà thờ Đức Bà, Phố đi bộ Nguyễn Huệ',
 'Dinh Độc Lập, Bưu điện Thành phố, Bitexco, Landmark 81, Phố Bùi Viện, Địa đạo Củ Chi',
@@ -183,7 +183,7 @@ export const RELEASE1: ReleaseQuestion[] = [
 'Đèo Hải Vân, Mã Pí Lèng',
 'Đèo Ô Quy Hồ, Đèo Khau Phạ, Đèo Pha Đin, Đèo Bảo Lộc, Đèo Prenn, Đèo Cù Mông',
 'Đèo Ngoạn Mục, Đèo Lò Xo, Đèo Ngang, Đèo Cả, Đèo Thung Khe, Đèo Mã Phục, Đèo Hoàng Su Phì, Đèo Mimosa, Đèo Đá Trắng, Đèo Lũng Lô, Đèo Gió',
-'Đèo Hoàng Liên Sơn, Đèo Pắc Ma, Đèo Khánh Lê, Đèo Phượng Hoàng, Đèo Vi Ô Lắc, Đèo Mẹ Bồng Con, Đèo Tam Điệp, Đèo Cả Rá, Đèo An Khê, Đèo Chuối, Đèo Măng Đen, Đèo Le, Đèo Sông Pha, Đèo Bảo Lộc',
+'Đèo Hoàng Liên Sơn, Đèo Pắc Ma, Đèo Khánh Lê, Đèo Phượng Hoàng, Đèo Vi Ô Lắc, Đèo Mẹ Bồng Con, Đèo Tam Điệp, Đèo Cả Rá, Đèo An Khê, Đèo Chuối, Đèo Măng Đen, Đèo Le, Đèo Sông Pha',
 'Đèo Pha Long, Đèo Si Ma Cai, Đèo Chín Khoanh, Đèo Tà Xùa, Đèo Mã Hồng, Đèo Keo Nưa, Đèo Ba Dội, Đèo Rù Rì, Đèo Bình Đê, Đèo Tô Hạp']},
 {id:'r-bao-tang',c:'Du lịch',q:'Kể tên một bảo tàng nổi tiếng ở Việt Nam',s:['baotang'],k:'Bảo tàng Gốm Bát Tràng',t:[
 'Bảo tàng Lịch sử Quốc gia, Bảo tàng Hồ Chí Minh',
@@ -201,13 +201,13 @@ export const RELEASE1: ReleaseQuestion[] = [
 'Tân Sơn Nhất, Nội Bài',
 'Đà Nẵng, Cam Ranh, Phú Quốc, Long Thành, Cát Bi, Liên Khương',
 'Phú Bài, Vinh, Cần Thơ, Thọ Xuân, Vân Đồn, Côn Đảo, Phù Cát, Buôn Ma Thuột, Pleiku',
-'Chu Lai, Đồng Hới, Tuy Hòa, Rạch Giá, Cà Mau, Điện Biên, Liên Khương, Thọ Xuân, Biên Hòa, Gia Lâm, Kép, Phan Rang',
-'Nà Sản, Sa Pa, Lai Châu, Quảng Trị, Phan Thiết, Thành Sơn, Phan Rang, Sóc Trăng, Bạch Mai, Trường Sa']},
+'Chu Lai, Đồng Hới, Tuy Hòa, Rạch Giá, Cà Mau, Điện Biên, Biên Hòa, Gia Lâm, Kép, Phan Rang',
+'Nà Sản, Sa Pa, Lai Châu, Quảng Trị, Phan Thiết, Thành Sơn, Sóc Trăng, Bạch Mai, Trường Sa']},
 {id:'r-khu-vui-choi',c:'Du lịch',q:'Kể tên một công viên giải trí hoặc khu vui chơi nổi tiếng',s:['congvien','khuvuichoi'],k:'Everland',t:[
 'Disneyland, Suối Tiên, Đầm Sen',
 'Universal Studios, VinWonders, Sun World Bà Nà Hills|Bà Nà Hills, Hồ Mây|Hồ Mây Park, Asia Park',
 'Lotte World, Thảo Cầm Viên, Công viên nước Hồ Tây, Sun World Hạ Long, Vinpearl Safari, Grand World, Hồ Tây, KizCiti, Tuần Châu, Fansipan Legend',
-'Ocean Park, Legoland, SeaWorld, Six Flags, Busch Gardens, Disney World, Tokyo DisneySea, Universal Studios Japan, Dream World|Dreamworld, Genting, Sentosa, Gardens by the Bay, Safari World, Công viên Yên Sở, Công viên Thủ Lệ',
+'Ocean Park, Legoland, SeaWorld, Six Flags, Busch Gardens, Disney World, Tokyo DisneySea, Universal Studios Japan, Dream World, Genting, Sentosa, Gardens by the Bay, Safari World, Công viên Yên Sở, Công viên Thủ Lệ',
 'Tivoli, Efteling, Europa-Park, Port Aventura, Cedar Point, Knott\'s Berry Farm, Fuji-Q Highland, Nagashima Spa Land, Chimelong, Happy Valley, Ferrari World, Warner Bros. World, Movie World, Luna Park']},
 {id:'r-tinh-dac-san',c:'Ẩm thực',q:'Kể tên một đặc sản của Đà Lạt',s:[],k:'Trà Cầu Đất',t:[
 'Dâu tây, Bánh tráng nướng, Mứt',

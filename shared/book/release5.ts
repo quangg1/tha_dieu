@@ -18,7 +18,7 @@ export const RELEASE5: ReleaseQuestion[] = [
 'Diễm xưa, Cát bụi, Hạ trắng',
 'Nối vòng tay lớn, Biển nhớ, Ru em từng ngón xuân nồng, Một cõi đi về, Như cánh vạc bay, Để gió cuốn đi, Tình xa',
 'Chiếc lá thu phai, Mưa hồng, Cuối cùng cho một tình yêu, Gọi tên bốn mùa, Ướt mi, Nắng thủy tinh, Một ngày như mọi ngày, Tuổi đá buồn, Ca dao mẹ, Hãy yêu nhau đi, Còn tuổi nào cho em',
-'Tình sầu, Lặng lẽ nơi này, Bốn mùa thay lá, Cỏ xót xa đưa, Phôi pha, Em còn nhớ mùa xuân, Xin cho tôi, Một cõi đi về, Bên đời hiu quạnh, Như một lời chia tay, Đóa hoa vô thường, Em là hoa hồng nhỏ, Huyền thoại mẹ',
+'Tình sầu, Lặng lẽ nơi này, Bốn mùa thay lá, Cỏ xót xa đưa, Phôi pha, Em còn nhớ mùa xuân, Xin cho tôi, Bên đời hiu quạnh, Như một lời chia tay, Đóa hoa vô thường, Em là hoa hồng nhỏ, Huyền thoại mẹ',
 'Vết lăn trầm, Quỳnh hương, Ngẫu nhiên, Xin trả nợ người, Mùa thu không trở lại, Có một dòng sông đã qua đời, Lời buồn thánh, Ngày dài trên quê hương']},
 {id:'r-bh-ha-noi',c:'Âm nhạc',q:'Kể tên một bài hát viết về Hà Nội',s:['bai','baihat'],k:'Chiều phủ Tây Hồ',t:[
 'Nhớ mùa thu Hà Nội, Hà Nội mùa vắng những cơn mưa, Em ơi Hà Nội phố',
@@ -53,7 +53,7 @@ export const RELEASE5: ReleaseQuestion[] = [
 {id:'r-bh-mj',c:'Âm nhạc',q:'Kể tên một bài hát của Michael Jackson',s:['bai','baihat'],k:'Human Nature',t:[
 'Billie Jean, Thriller, Beat It',
 'Heal the World, Smooth Criminal, Black or White, Earth Song, You Are Not Alone, Bad',
-'Dangerous, They Don\'t Care About Us, Man in the Mirror, Remember the Time, Don\'t Stop \'Til You Get Enough, Rock with You, Thriller, We Are the World, Scream, The Way You Make Me Feel',
+'Dangerous, They Don\'t Care About Us, Man in the Mirror, Remember the Time, Don\'t Stop \'Til You Get Enough, Rock with You, We Are the World, Scream, The Way You Make Me Feel',
 'Jam, Leave Me Alone, Dirty Diana, Off the Wall, Wanna Be Startin\' Somethin\', Will You Be There, Stranger in Moscow, History, Blood on the Dance Floor, Liberian Girl, Ben, I Just Can\'t Stop Loving You, Speed Demon, Childhood',
 'Who Is It, In the Closet, Give In to Me, Gone Too Soon, Ghosts, Unbreakable, Butterflies, Cry, Invincible, P.Y.T., Workin\' Day and Night, Another Part of Me']},
 {id:'r-bh-blackpink',c:'Âm nhạc',q:'Kể tên một bài hát của BLACKPINK hoặc một thành viên nhóm',s:['bai','baihat'],k:'Stay',t:[
@@ -97,11 +97,11 @@ export const RELEASE5: ReleaseQuestion[] = [
 'Tôi thấy hoa vàng trên cỏ xanh, Hai Phượng, Lật mặt, Nhà bà Nữ, Mắt biếc, Mai, Đất rừng phương Nam, Cua lại vợ bầu',
 'Gái già lắm chiêu, Tiệc trăng máu, Song lang, Bẫy rồng, Dòng máu anh hùng, Áo lụa Hà Đông, Hương Ga, Siêu sao siêu ngố, Bộ tứ báo thủ, Địa đạo, Thám tử Kiên, Tử chiến trên không, Nhà gia tiên, Lật mặt 7',
 'Mùa len trâu, Mùi đu đủ xanh, Xích lô, Chơi vơi, Đừng đốt, Thương nhớ đồng quê, Bao giờ cho đến tháng Mười, Em bé Hà Nội, Chị Dậu, Cô gái trên sông, Ván bài lật ngửa, Biệt động Sài Gòn, Đất phương Nam, Người Hà Nội',
-'Vợ chồng A Phủ, Chung một dòng sông, Chị Tư Hậu, Mùa gió chướng, Cô Ba Sài Gòn, Ròm, Vợ ba, Cha cõng con, Song Lang, Thiên mệnh anh hùng']},
+'Vợ chồng A Phủ, Chung một dòng sông, Chị Tư Hậu, Mùa gió chướng, Cô Ba Sài Gòn, Ròm, Vợ ba, Cha cõng con, Thiên mệnh anh hùng']},
 {id:'r-gameshow-vn',c:'Giải trí',q:'Kể tên một chương trình truyền hình nổi tiếng của Việt Nam',s:['chuongtrinh'],k:'Điều ước thứ 7',t:[
 'Gặp nhau cuối năm|Táo Quân, Ai là triệu phú, Đường lên đỉnh Olympia',
 'Rap Việt, Anh trai say hi, Giọng hát Việt, Vietnam\'s Got Talent|Việt Nam Got Talent, 2 ngày 1 đêm, Ơn giời cậu đây rồi, Thách thức danh hài, Chiếc nón kỳ diệu',
-'Bữa trưa vui vẻ, Ký ức vui vẻ, Ai là triệu phú, Vua tiếng Việt, Siêu trí tuệ, Người ấy là ai, Running Man Việt Nam, Ca sĩ mặt nạ, Anh trai vượt ngàn chông gai, Em xinh say hi, Gặp nhau cuối tuần, Hãy chọn giá đúng, Vượt lên chính mình',
+'Bữa trưa vui vẻ, Ký ức vui vẻ, Vua tiếng Việt, Siêu trí tuệ, Người ấy là ai, Running Man Việt Nam, Ca sĩ mặt nạ, Anh trai vượt ngàn chông gai, Em xinh say hi, Gặp nhau cuối tuần, Hãy chọn giá đúng, Vượt lên chính mình',
 'Rung chuông vàng, Chúng tôi là chiến sĩ, Sao Mai, Sao Mai điểm hẹn, Vietnam Idol, Bước nhảy hoàn vũ, Cuộc đua kỳ thú, Trò chơi âm nhạc, Nhanh như chớp, Thời sự 19h, Chuyển động 24h, Quà tặng cuộc sống, Vì bạn xứng đáng, Shark Tank Việt Nam',
 'Ở nhà chủ nhật, Siêu bất ngờ, Nhật ký Vàng Anh, Đuổi hình bắt chữ, Ai thông minh hơn học sinh lớp 5, Hát mãi ước mơ, Khi đàn ông mang bầu, Sao nhập ngũ, Nhà là nơi, Ký sự vùng cao']},
 {id:'r-phim-netflix',c:'Giải trí',q:'Kể tên một bộ phim hoặc series nổi tiếng trên Netflix',s:['phim'],k:'Dark',t:[

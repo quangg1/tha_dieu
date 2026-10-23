@@ -24,7 +24,7 @@ export const RELEASE6: ReleaseQuestion[] = [
 'Hà Nội FC|CLB Hà Nội, Hoàng Anh Gia Lai|HAGL, Viettel|Thể Công Viettel',
 'Công an Hà Nội, Sông Lam Nghệ An|SLNA, Becamex Bình Dương|Bình Dương, Nam Định|Thép Xanh Nam Định, Hải Phòng',
 'Thanh Hóa|Đông Á Thanh Hóa, Hà Nội T&T, SHB Đà Nẵng|Đà Nẵng, Khánh Hòa, Quảng Nam, Hồng Lĩnh Hà Tĩnh, TP.HCM|CLB TP.HCM, Bình Định, Than Quảng Ninh',
-'Long An, Đồng Tháp, Cần Thơ, Sài Gòn FC, XSKT Cần Thơ, Hoàng Anh Gia Lai, Ninh Bình, PVF, Phố Hiến, Bà Rịa Vũng Tàu, Đồng Nai, Khatoco Khánh Hòa',
+'Long An, Đồng Tháp, Cần Thơ, Sài Gòn FC, XSKT Cần Thơ, Ninh Bình, PVF, Phố Hiến, Bà Rịa Vũng Tàu, Đồng Nai, Khatoco Khánh Hòa',
 'Thể Công, Cảng Sài Gòn, Hải Quan, Công an TP.HCM, Navibank Sài Gòn, Xuân Thành Sài Gòn, Kienlongbank Kiên Giang, Vissai Ninh Bình, Mitsustar Haier Hải Phòng']},
 {id:'r-dt-wc-vo-dich',c:'Thể thao',q:'Kể tên một đội tuyển từng vô địch World Cup bóng đá nam',s:['doi','doituyen'],k:'Uruguay',t:[
 'Brazil, Argentina, Đức',
@@ -53,7 +53,7 @@ export const RELEASE6: ReleaseQuestion[] = [
 {id:'r-vdv-vn',c:'Thể thao',q:'Kể tên một vận động viên Việt Nam nổi tiếng (không phải cầu thủ bóng đá)',s:['vdv'],k:'Trần Hiếu Ngân',t:[
 'Nguyễn Thị Ánh Viên|Ánh Viên, Hoàng Xuân Vinh',
 'Nguyễn Tiến Minh, Lý Hoàng Nam, Nguyễn Thùy Linh, Hoàng Nguyên Thanh, Vũ Thị Hương',
-'Quách Thị Lan, Nguyễn Thị Oanh, Nguyễn Huy Hoàng, Trần Đức Phấn|Phấn, Thạch Kim Tuấn, Thạch Kim Tuấn, Nguyễn Thị Huyền, Lê Quang Liêm, Nguyễn Ngọc Trường Sơn, Hoàng Thị Loan, Đinh Phương Thành, Phạm Thị Huệ',
+'Quách Thị Lan, Nguyễn Thị Oanh, Nguyễn Huy Hoàng, Trần Đức Phấn|Phấn, Thạch Kim Tuấn, Nguyễn Thị Huyền, Lê Quang Liêm, Nguyễn Ngọc Trường Sơn, Hoàng Thị Loan, Đinh Phương Thành, Phạm Thị Huệ',
 'Nguyễn Văn Hùng, Lê Bích Phương, Trần Văn Vũ, Nguyễn Thị Lụa, Nguyễn Thị Thật, Trần Quyết Chiến, Phạm Như Phương, Nguyễn Thị Hằng, Lê Văn Công, Hoàng Thị Duyên, Đỗ Thị Ngân Thương, Nguyễn Thị Hương, Dương Thúy Vi, Lò Thị Hoàng, Bùi Thị Thu Thảo, Phạm Thị Thu Hiền, Trần Quốc Cường',
 'Nguyễn Hoàng Ngân, Châu Tuyết Vân, Nguyễn Văn Đức, Phạm Văn Mách, Văn Ngọc Tú, Nguyễn Thị Phương Thúy, Ngô Đức Mạnh, Đỗ Thị Thu Hoài, Hoàng Thị Thanh Nhàn, Nguyễn Thị Kim Ngân']},
 {id:'r-cauthu-vn',c:'Thể thao',q:'Kể tên một cầu thủ bóng đá Việt Nam',s:['cauthu'],k:'Nguyễn Hồng Sơn',t:[
@@ -61,7 +61,7 @@ export const RELEASE6: ReleaseQuestion[] = [
 'Lê Công Vinh|Công Vinh, Nguyễn Tiến Linh|Tiến Linh, Đỗ Hùng Dũng|Hùng Dũng, Đoàn Văn Hậu|Văn Hậu, Nguyễn Văn Quyết|Văn Quyết, Lương Xuân Trường|Xuân Trường, Bùi Tiến Dũng, Nguyễn Xuân Son|Xuân Son',
 'Nguyễn Hoàng Đức|Hoàng Đức, Quế Ngọc Hải, Phạm Tuấn Hải, Đỗ Duy Mạnh, Nguyễn Văn Toàn|Văn Toàn, Nguyễn Thành Chung, Bùi Hoàng Việt Anh, Nguyễn Filip, Lê Huỳnh Đức|Huỳnh Đức, Phạm Thành Lương, Nguyễn Trọng Hoàng, Nguyễn Văn Thanh',
 'Lê Văn Xuân, Nguyễn Hồng Duy, Hồ Tấn Tài, Nguyễn Thái Sơn, Khuất Văn Khang, Vũ Văn Thanh, Trần Đình Trọng, Nguyễn Phong Hồng Duy, Phan Văn Đức, Châu Ngọc Quang, Nguyễn Văn Vĩ, Nguyễn Tuấn Anh, Đặng Văn Tới, Nguyễn Minh Phương, Phạm Văn Quyến, Nguyễn Anh Đức',
-'Lê Tấn Tài, Trần Minh Chiến, Nguyễn Văn Sỹ, Huỳnh Kesley Alves, Dương Hồng Sơn, Nguyễn Minh Chuyên, Phan Thanh Bình, Nguyễn Vũ Phong, Lê Công Vinh, Trần Văn Kiên, Đinh Thanh Bình']},
+'Lê Tấn Tài, Trần Minh Chiến, Nguyễn Văn Sỹ, Huỳnh Kesley Alves, Dương Hồng Sơn, Nguyễn Minh Chuyên, Phan Thanh Bình, Nguyễn Vũ Phong, Trần Văn Kiên, Đinh Thanh Bình']},
 {id:'r-cauthu-tg',c:'Thể thao',q:'Kể tên một cầu thủ bóng đá đang thi đấu hoặc vừa giải nghệ',s:['cauthu'],k:'Florian Wirtz',t:[
 'Cristiano Ronaldo|Ronaldo, Lionel Messi|Messi, Neymar',
 'Kylian Mbappé|Mbappé, Erling Haaland|Haaland, Lamine Yamal|Yamal, Mohamed Salah|Salah, Harry Kane, Vinícius Júnior|Vinícius, Kevin De Bruyne, Luka Modrić|Modrić',
@@ -76,7 +76,7 @@ export const RELEASE6: ReleaseQuestion[] = [
 'Le Mans 24 giờ, Indy 500, Stanley Cup, America\'s Cup, Boston Marathon, Uber Cup, Hopman Cup, Commonwealth Games, Gold Cup, Africa Cup of Nations']},
 {id:'r-mon-sea',c:'Thể thao',q:'Kể tên một môn thể thao đối kháng hoặc võ thuật',s:['mon','vo'],k:'Kurash',t:[
 'Boxing|Quyền Anh, Karate, Taekwondo',
-'Vovinam, Judo, Võ cổ truyền, Muay Thái, Vật, Kungfu|Kung fu',
+'Vovinam, Judo, Võ cổ truyền, Muay Thái, Vật, Kungfu',
 'MMA, Kickboxing, Đấu kiếm, Pencak silat, Wushu, Aikido, Sumo, Jujitsu, Thái cực quyền, Vịnh Xuân quyền|Vịnh Xuân',
 'Kendo, Capoeira, Hapkido, Sambo, Krav Maga, Nhu thuật Brazil, Võ Bình Định, Thiếu Lâm, Côn Luân, Savate, Lethwei, Bokator, Kalaripayattu, Kudo',
 'Sanda, Silambam, Shorinji Kempo, Ssireum, Taekkyon, Vật Mông Cổ, Vật dầu, Systema, Arnis, Iaido, Naginata, Bajiquan']},
@@ -85,7 +85,7 @@ export const RELEASE6: ReleaseQuestion[] = [
 'Pháp, Đức, Anh, Bồ Đào Nha, Mỹ, Nhật Bản, Hàn Quốc',
 'Hà Lan, Bỉ, Croatia, Mexico, Canada, Uruguay, Colombia, Maroc, Úc, Ả Rập Xê Út, Iran, Qatar, Senegal',
 'Thụy Sĩ, Na Uy, Thụy Điển, Áo, Scotland, Séc|Cộng hòa Séc, Thổ Nhĩ Kỳ, Bosnia và Herzegovina, Ecuador, Paraguay, Ai Cập, Algeria, Tunisia, Bờ Biển Ngà, Ghana, Nam Phi, Uzbekistan, Jordan, Iraq, New Zealand',
-'Cape Verde|Cabo Verde, Haiti, Panama, CHDC Congo|Congo, Uzbekistan']},
+'Cape Verde|Cabo Verde, Haiti, Panama, CHDC Congo|Congo']},
 {id:'r-tp-wc2026',until:'2027-06-30',c:'Thể thao',q:'Kể tên một thành phố đăng cai trận đấu tại World Cup 2026',s:['thanhpho','tp'],k:'Guadalajara',t:[
 'New York|New Jersey, Los Angeles, Miami',
 'Toronto, Vancouver, Mexico City, Dallas, Boston',

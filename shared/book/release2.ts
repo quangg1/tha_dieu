@@ -109,7 +109,7 @@ export const RELEASE2: ReleaseQuestion[] = [
 'Nhãn lồng Hưng Yên, Bưởi Diễn, Cam Vinh, Sầu riêng Ri6, Thanh long Bình Thuận, Vú sữa Lò Rèn, Bưởi da xanh',
 'Cam Cao Phong, Mận Mộc Châu, Hồng xiêm Xuân Đỉnh, Chuối ngự Đại Hoàng, Bưởi Phúc Trạch, Bưởi Đoan Hùng, Nho Ninh Thuận, Táo Ninh Thuận, Dừa sáp Trà Vinh, Quýt hồng Lai Vung, Măng cụt Lái Thiêu, Vải Lục Ngạn',
 'Cam Xã Đoài, Cam Bố Hạ, Hồng không hạt Bắc Kạn, Na Chi Lăng, Mận Bắc Hà, Lê Tai Nung, Quýt Bắc Kạn, Bơ Đắk Lắk, Chôm chôm Chợ Lách, Sầu riêng Cái Mơn, Xoài Yên Châu, Bòn bon Quảng Nam, Thanh trà Huế, Hồng giòn Đà Lạt, Dâu tây Đà Lạt',
-'Cam canh Hà Nội, Bưởi Tân Triều, Nhãn xuồng cơm vàng, Mít tố nữ Cái Mơn, Sầu riêng Cái Mơn, Cam Hàm Yên, Vải chua Phúc Hòa, Hồng Thạch Hà, Na Bà Đen, Xoài tượng Cam Ranh']},
+'Cam canh Hà Nội, Bưởi Tân Triều, Nhãn xuồng cơm vàng, Mít tố nữ Cái Mơn, Cam Hàm Yên, Vải chua Phúc Hòa, Hồng Thạch Hà, Na Bà Đen, Xoài tượng Cam Ranh']},
 {id:'r-nuoc-cham-vn',c:'Ẩm thực',q:'Kể tên một loại nước mắm nổi tiếng của Việt Nam',s:['nuocmam'],k:'Nước mắm Diêm Điền',t:[
 'Nước mắm Phú Quốc, Nước mắm Nam Ngư, Nước mắm Phan Thiết',
 'Nước mắm Chinsu, Nước mắm Liên Thành, Nước mắm Cát Hải, Nước mắm Hưng Thịnh, Nước mắm Knorr',

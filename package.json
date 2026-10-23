@@ -5,7 +5,8 @@
     "dev": "tsx scripts/dev.ts",
     "build": "tsc -p tsconfig.json --noEmit && vitest run && vite build",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:questions": "tsx scripts/check-questions.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.134.0",

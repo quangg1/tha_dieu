@@ -40,15 +40,15 @@ export const RELEASE7: ReleaseQuestion[] = [
 'Chipset, Khe PCIe, Bus, ROM, VRM, Thanh RAM, Ổ đĩa mềm, Card Wi-Fi, Bộ chuyển đổi, Đế tản nhiệt, Hub USB']},
 {id:'r-he-dieu-hanh',c:'Công nghệ',q:'Kể tên một hệ điều hành',s:['hedieuhanh'],k:'Symbian',t:[
 'Windows, Android, iOS',
-'macOS|Mac OS, Linux, Ubuntu',
-'HarmonyOS, Chrome OS|ChromeOS, iPadOS, watchOS, Windows XP, Windows 7, Windows 10, Windows 11, MS-DOS|DOS',
+'macOS, Linux, Ubuntu',
+'HarmonyOS, Chrome OS, iPadOS, watchOS, Windows XP, Windows 7, Windows 10, Windows 11, MS-DOS|DOS',
 'BlackBerry OS, Windows Phone, Debian, Fedora, Red Hat, CentOS, Linux Mint, Arch Linux, Kali Linux, FreeBSD, Unix, Tizen, visionOS, tvOS, Wear OS, Windows Vista, Windows 8',
 'Solaris, OS/2, Haiku, ReactOS, Plan 9, BeOS, Palm OS, webOS, KaiOS, Fuchsia, Sailfish, MeeGo, Bada, AmigaOS, OpenBSD, NetBSD']},
 {id:'r-benh-virus',c:'Khoa học',q:'Kể tên một bệnh do virus gây ra',s:['benh'],k:'Bệnh Chikungunya',t:[
 'Cúm, COVID-19|Covid, Sốt xuất huyết',
 'Thủy đậu, Sởi, Quai bị, HIV|AIDS, Viêm gan B, Dại|Bệnh dại',
 'Tay chân miệng, Zika, Ebola, Viêm não Nhật Bản, Bại liệt, Viêm gan C, Đậu mùa, Đậu mùa khỉ|Mpox, Cảm lạnh, Rubella|Sởi Đức, Cúm gia cầm, SARS, Herpes, Sùi mào gà|HPV, Viêm gan A',
-'MERS, Sốt vàng da, Sốt Tây sông Nile, Virus Marburg, Virus Nipah, Viêm não ngựa, Rota|Tiêu chảy do Rotavirus, Zona thần kinh|Zona, Viêm kết mạc do adenovirus, Sốt Lassa, Hantavirus, Quai bị, Viêm gan E, Norovirus',
+'MERS, Sốt vàng da, Sốt Tây sông Nile, Virus Marburg, Virus Nipah, Viêm não ngựa, Rota|Tiêu chảy do Rotavirus, Zona thần kinh|Zona, Viêm kết mạc do adenovirus, Sốt Lassa, Hantavirus, Viêm gan E, Norovirus',
 'Sốt Hanta, Sốt Crimean-Congo, Sốt thung lũng Rift, Kuru, Viêm gan D, Virus Hendra, Sốt Dengue']},
 {id:'r-xuong',c:'Khoa học',q:'Kể tên một chiếc xương trong cơ thể người',s:['xuong'],k:'Xương bướm',t:[
 'Xương sườn, Xương sống|Cột sống, Xương sọ',

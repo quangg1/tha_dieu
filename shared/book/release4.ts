@@ -19,7 +19,7 @@ export const RELEASE4: ReleaseQuestion[] = [
 'Quan Vũ|Quan Công|Quan Vân Trường, Trương Phi, Triệu Vân|Triệu Tử Long, Tôn Quyền, Lữ Bố, Điêu Thuyền, Chu Du',
 'Tư Mã Ý, Đổng Trác, Viên Thiệu, Mã Siêu, Hoàng Trung, Tôn Sách, Lưu Thiện|A Đẩu, Khương Duy, Hoa Đà, Lỗ Túc, Điển Vi, Hứa Chử, Tào Phi, Tôn Kiên, Hạ Hầu Đôn, Bàng Thống',
 'Ngụy Diên, Mã Đại, Tào Nhân, Trương Liêu, Từ Hoảng, Lục Tốn, Lã Mông, Cam Ninh, Thái Sử Từ, Hoàng Cái, Viên Thuật, Lưu Biểu, Công Tôn Toản, Trần Cung, Quách Gia, Tuân Úc, Tào Thực, Tiểu Kiều, Đại Kiều, Tôn Thượng Hương, Mạnh Hoạch, Hán Hiến Đế, Hà Tiến',
-'Mã Tắc, Tư Mã Chiêu, Đặng Ngải, Chung Hội, Khương Duy, Văn Xú, Nhan Lương, Hoa Hùng, Trương Giác, Vu Cấm, Bàng Đức, Quan Bình, Quan Hưng, Trương Bào, Châu Thương, Liêu Hóa, Từ Thứ, Tuân Du, Giả Hủ, Trình Phổ']},
+'Mã Tắc, Tư Mã Chiêu, Đặng Ngải, Chung Hội, Văn Xú, Nhan Lương, Hoa Hùng, Trương Giác, Vu Cấm, Bàng Đức, Quan Bình, Quan Hưng, Trương Bào, Châu Thương, Liêu Hóa, Từ Thứ, Tuân Du, Giả Hủ, Trình Phổ']},
 {id:'r-thuy-hu',c:'Văn học',q:'Kể tên một nhân vật trong Thủy Hử',s:[],k:'Đái Tông',t:[
 'Tống Giang, Võ Tòng, Lỗ Trí Thâm',
 'Lâm Xung, Lý Quỳ, Phan Kim Liên, Võ Đại Lang, Tây Môn Khánh',
@@ -84,7 +84,7 @@ export const RELEASE4: ReleaseQuestion[] = [
 'Bánh trôi nước, Qua Đèo Ngang, Bạn đến chơi nhà',
 'Nam quốc sơn hà|Sông núi nước Nam, Tây Tiến, Việt Bắc, Đồng chí, Sóng, Đây thôn Vĩ Dạ, Ánh trăng, Viếng lăng Bác',
 'Bếp lửa, Bài thơ về tiểu đội xe không kính, Đoàn thuyền đánh cá, Nhớ rừng, Quê hương, Ông đồ, Khi con tu hú, Tràng giang, Vội vàng, Mùa xuân nho nhỏ, Sang thu, Nói với con, Lượm, Đêm nay Bác không ngủ',
-'Tức cảnh Pác Bó, Ngắm trăng, Cảnh khuya, Rằm tháng Giêng, Thương vợ, Câu cá mùa thu|Thu điếu, Tự tình, Chạy giặc, Mộ|Chiều tối, Từ ấy, Đất nước, Tiếng hát con tàu, Đò Lèn, Bên kia sông Đuống, Sông Đáy, Ông đồ, Mẹ Tơm, Quê hương Tế Hanh, Mùa xuân chín',
+'Tức cảnh Pác Bó, Ngắm trăng, Cảnh khuya, Rằm tháng Giêng, Thương vợ, Câu cá mùa thu|Thu điếu, Tự tình, Chạy giặc, Mộ|Chiều tối, Từ ấy, Đất nước, Tiếng hát con tàu, Đò Lèn, Bên kia sông Đuống, Sông Đáy, Mẹ Tơm, Quê hương Tế Hanh, Mùa xuân chín',
 'Thăm lúa, Tiếng gà trưa, Cảnh ngày xuân, Chị em Thúy Kiều, Kiều ở lầu Ngưng Bích, Hồi hương ngẫu thư, Tĩnh dạ tứ|Cảm nghĩ trong đêm thanh tĩnh, Bài ca Côn Sơn, Phò giá về kinh, Thiên Trường vãn vọng, Sông Lấp, Bài ca ngất ngưởng']},
 {id:'r-tac-pham-vn',c:'Văn học',q:'Kể tên một truyện hoặc tiểu thuyết Việt Nam nổi tiếng',s:['truyen','tieuthuyet'],k:'Ngọn cỏ gió đùa',t:[
 'Truyện Kiều, Dế Mèn phiêu lưu ký, Chí Phèo',
@@ -123,7 +123,7 @@ export const RELEASE4: ReleaseQuestion[] = [
 'Kir|Mizunashi Rena, Rum, Chianti, Korn, Kaito Kuroba, Jodie, Shiho|Miyano Shiho, Masumi Sera, Kaitou, Hakuba Saguru, Yusaku Kudo, Yukiko Kudo, Eri Kisaki, Chiba, Wataru Takagi, Miwako Sato, Kyogoku Makoto, Akemi Miyano, Mary Sera, Hiromitsu Morofushi',
 'Yumi Miyamoto, Kazunobu Chiba, Yamamura Misao, Juzo Megure, Shiro Suzuki, Jirokichi Suzuki, Nakamori Ginzo, Kobayashi Sumiko, Momoe Kudo, Tomoaki Araide, Tsutomu Akai, Jinpachi Matsuda, Hiroki Sawada']},
 {id:'r-nv-doremon-dragon',c:'Giải trí',q:'Kể tên một nhân vật trong Bảy viên ngọc rồng (Dragon Ball)',s:[],k:'Nappa',t:[
-'Songoku|Son Goku|Goku, Cadic|Vegeta, Gohan',
+'Songoku|Goku, Cadic|Vegeta, Gohan',
 'Quy lão Kame|Muten Roshi, Krillin, Piccolo|Picôlô, Bulma, Frieza|Fide|Freeza, Cell|Xên, Majin Buu|Ma Bư',
 'Trunks, Goten, Yamcha, Chichi, Thiên Tân Phạn|Tenshinhan, Chaozu, Thần Rồng|Shenron, Beerus, Whis, Broly, Android 18|Số 18, Android 17|Số 17, Raditz, Pan',
 'Mr. Satan|Ông Xa-tăng, Videl, Yajirobe, Oolong, Puar, Bunma, Kibito, Kaioshin, Zamasu, Goku Black, Jiren, Hit, Bardock, Ginyu, Dende, Kami, Mr. Popo',

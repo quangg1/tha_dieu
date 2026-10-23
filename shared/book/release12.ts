@@ -2,7 +2,7 @@
 import type { ReleaseQuestion } from './release1.js';
 
 export const RELEASE12: ReleaseQuestion[] = [
-{id:'r-le-hoi-vn',c:'Văn hóa',q:'Kể tên một lễ hội hoặc ngày Tết truyền thống của Việt Nam',s:['lehoi','hoi','tet'],k:'Hội Trò Trám|Trò Trám',t:[
+{id:'r-le-hoi-vn',c:'Văn hóa',q:'Kể tên một lễ hội truyền thống của Việt Nam',n:'Các dịp Tết như Tết Nguyên Đán, Trung Thu, Đoan Ngọ cũng được tính.',s:['lehoi','hoi','tet'],k:'Hội Trò Trám|Trò Trám',t:[
 'Tết Nguyên Đán, Tết Trung Thu, Giỗ Tổ Hùng Vương|Lễ hội Đền Hùng, Lễ hội chùa Hương|Hội chùa Hương',
 'Tết Đoan Ngọ, Lễ Vu Lan|Rằm tháng Bảy, Tết Thanh Minh, Tết Hàn Thực, Hội Lim, Hội Gióng, Festival Huế, Lễ hội pháo hoa Đà Nẵng, Tết Nguyên Tiêu|Rằm tháng Giêng, Tết Ông Công Ông Táo|Ông Táo',
 'Lễ hội Yên Tử, Khai ấn đền Trần|Lễ hội đền Trần, Vía Bà Chúa Xứ|Lễ hội Bà Chúa Xứ, Lễ hội Katê|Katê, Lễ hội đâm trâu, Lễ hội Cồng chiêng, Lễ hội Phủ Dầy, Lễ hội Kiếp Bạc, Ok Om Bok, Lễ hội Nghinh Ông, Chọi trâu Đồ Sơn, Hội Lồng Tồng, Gầu Tào, Đua ghe ngo, Festival hoa Đà Lạt, Chợ tình Khâu Vai, Hội Xoan, Lễ hội Cổ Loa',
