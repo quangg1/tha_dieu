@@ -212,9 +212,9 @@ describe('day band by rank, titles', async () => {
   it('adds daily points up to a title that only moves forward', () => {
     expect(titleAt(0).here.name).toBe(TITLES[0].name);
     const j = titleAt(9_500);
-    expect(j.here.name).toBe('Bậc thầy gió');
+    expect(j.here.name).toBe('Bách Phong Vương');
     expect(j.left).toBe(12_500 - 9_500);
-    expect(titlesBetween(80, 650).map((s) => s.name)).toEqual(['Tập thả', 'Biết đón gió', 'Thả có nghề']);
+    expect(titlesBetween(80, 650).map((s) => s.name)).toEqual(['Tập Nhập Môn', 'Học Bắt Gió', 'Thành Thục Tay Dây']);
     expect(titleAt(1e9).next).toBeNull();
   });
 });
