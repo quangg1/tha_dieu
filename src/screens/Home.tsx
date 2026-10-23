@@ -169,19 +169,25 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
   const gioToday = usesGio('daily', d.toISOString().slice(0, 10));
 
   useEffect(() => {
-    // Phones: the flyer stands just above the card and the kite sits clear of the title.
+    // Any screen: bé Bi stands just above the card (or the dock on a wide screen), so nothing covers him or his string.
     const fit = () => {
       const card = document.querySelector('.home-card');
       const narrow = window.innerWidth < 600;
-      sky.setLayout(narrow && card ? { ...LAYOUTS.home, kiteX: 0.84, kiteY: 0.39, kiteSize: 0.18, flyerX: 0.6, stand: Math.round(card.getBoundingClientRect().top) } : LAYOUTS.home);
+      const base = narrow ? { ...LAYOUTS.home, kiteX: 0.84, kiteY: 0.39, kiteSize: 0.18, flyerX: 0.6 } : LAYOUTS.home;
+      const top = card ? Math.round(card.getBoundingClientRect().top) : 0;
+      // A card that starts in the upper half (a short window) leaves no room to stand above it: keep the plain scene.
+      sky.setLayout(top >= window.innerHeight * 0.45 ? { ...base, stand: top } : base);
     };
     fit();
     window.addEventListener('resize', fit);
+    const card = document.querySelector('.home-card');
+    const watch = card && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(fit) : null;
+    if (card) watch?.observe(card);
     sky.setAltitude(0, false);
     sky.setFlutes(2);
     sky.setNervous(false);
     flute.setLevel(1);
-    return () => window.removeEventListener('resize', fit);
+    return () => { window.removeEventListener('resize', fit); watch?.disconnect(); };
   }, [sky]);
 
   useEffect(() => {

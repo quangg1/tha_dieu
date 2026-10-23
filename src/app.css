@@ -885,7 +885,7 @@ button svg,a svg{flex-shrink:0}
 /* Wide, tall screens: the daily card is a dock on the grass at the foot of the screen, so the middle of the picture,
    bé Bi, his string and the kite, stays clear. The logo and the line under it ride high in the sky instead. */
 .home-main{display:contents}
-@media (min-width:1100px) and (min-height:640px){
+@media (min-width:900px) and (min-height:600px){
   .home-hero{margin-top:calc(2vh + 40px)}
   .home-title{font-size:clamp(88px,11vh,124px)}
   .stage.home{max-width:none}
@@ -899,6 +899,8 @@ button svg,a svg{flex-shrink:0}
   .home-card .journey-card{grid-column:3;grid-row:1 / span 2;margin-top:0;align-self:center}
   .home-links{grid-column:1 / -1;grid-row:3;margin-top:0}
 }
-@media (min-width:1100px) and (min-height:640px) and (max-height:780px){
+@media (min-width:900px) and (min-height:600px) and (max-height:780px){
   .home-card{padding:12px 18px 6px;bottom:10px}
 }
+/* Tablets in between: the title block is centred like on desktop, and the line under it runs on one line. */
+@media (min-width:600px) and (max-width:899px){.home-hero{align-items:center;text-align:center}.home-kicker{align-self:center}.home-tag{max-width:none}}

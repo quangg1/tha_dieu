@@ -698,11 +698,11 @@ export class SkyScene {
     return Math.max(this.H * L.kiteY, (L.top ?? 0) + size * 0.9 + 6);
   }
 
-  /** Where the village sits on the log scale, lifted on phones so the dyke shows above the page's card. */
+  /** Where the village sits on the log scale, lifted on any screen so bé Bi and the dyke stand above the page's card or dock. */
   private get groundL() {
     const L = this.layout;
     const g = L.ground ?? -0.55;
-    if (!L.stand || this.wide || !this.P) return g;
+    if (!L.stand || !this.P) return g;
     const target = L.stand - this.P.fields.dyke - 6;
     return Math.max(g, g + (this.y(g) - target) / (this.H * L.decade));
   }
