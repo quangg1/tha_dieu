@@ -4,6 +4,8 @@ inclusion: always
 
 # Luật soạn câu hỏi
 
+> Đợt gỡ 23/10/2026: xem `docs/cau-da-go.md` (106 câu đã gỡ, bốn phép thử một câu mới phải qua). Đối soát với đó trước khi thêm lô mới.
+
 ## Một câu tốt
 1. **Đáp án phổ biến ai cũng nghĩ ra ngay**, nhưng **đáp án hiếm phải cần kiến thức thật**. Ví dụ tốt: "Kể tên một loài khủng long" (ai cũng nói T-Rex; Nigersaurus thì phải biết).
 2. **Không chọn câu có vô số đáp án dễ** (ví dụ "Kể tên một quốc gia ở châu Á": ai cũng kể được nước hiếm). Không chọn danh sách đóng học thuộc trong sách giáo khoa (môn học, 12 con giáp).

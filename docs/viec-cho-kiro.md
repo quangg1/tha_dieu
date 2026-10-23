@@ -1,3 +1,4 @@
+> Cập nhật 23/10/2026 (chiều): đã gỡ 106 câu không đạt; **đọc `docs/cau-da-go.md` trước khi soạn lô mới** (danh sách câu gỡ, bốn phép thử và kho đang thiếu gì).
 > Cập nhật 23/10/2026: sổ câu hỏi giờ nằm trong database. Câu mới vẫn viết vào file release (tự được thêm khi deploy); sửa câu cũ thì làm ở trang admin. Xem `.kiro/steering/structure.md`.
 
 # Việc giao cho Kiro: kho câu hỏi
