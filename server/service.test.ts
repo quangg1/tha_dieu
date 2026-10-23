@@ -89,7 +89,7 @@ describe('answering', () => {
     expect(good.status).toBe('landed');
     expect(good.judged).toBe(true);
     expect(good.display).toBe('Chim ngũ sắc');
-    expect(good.tier).toBe(4);
+    expect(good.tier).toBe(2);
     const n = calls.length;
     await S.startTurn(db, { playerId: p, day: nd, mode: 'night', questionId: qid });
     const again = await S.answer(db, { playerId: p, day: nd, mode: 'night', questionId: qid, input: 'chim zzqx' }, referee);

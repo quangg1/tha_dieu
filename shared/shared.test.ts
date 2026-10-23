@@ -218,3 +218,12 @@ describe('day band by rank, titles', async () => {
     expect(titleAt(1e9).next).toBeNull();
   });
 });
+
+describe('newAnswerPrior', () => {
+  it('does not start a word everyone knows as Cực hiếm', async () => {
+    const { newAnswerPrior, wordFamiliarity } = await import('./book/familiar.js');
+    expect(wordFamiliarity('Chó')).toBeGreaterThanOrEqual(4);
+    expect(newAnswerPrior('Chó')).toBeLessThanOrEqual(1);
+    expect(newAnswerPrior('Từ chưa ai biết xyz')).toBe(2);
+  });
+});

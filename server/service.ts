@@ -3,6 +3,7 @@ import { BANKS } from '../shared/banks.js';
 import { BOOK_VERSION } from '../shared/book/questions.js';
 import * as bk from './book.js';
 import { struck } from '../shared/book/prune.js';
+import { newAnswerPrior } from '../shared/book/familiar.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
 import { boardName } from '../shared/names.js';
@@ -804,12 +805,14 @@ async function applyVerdict(db: Db, q: LoadedQuestion, input: string, v: Verdict
   const [gone] = await db.query<{ status: string }>(`select status from answers where question_id=$1 and key=$2 and status='rejected'`, [q.id, key]);
   if (gone) return refuse('Ban quản lý đã gỡ đáp án này khỏi sổ.');
   if (!sure) {
+    // Not 'Cực hiếm' by default: a word the book missed is usually a common one. Start by how familiar the word is.
+    const prior = newAnswerPrior(v.canonical);
     await db.query(
-      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,4,'claude','pending') on conflict do nothing`,
-      [q.id, key, v.canonical],
+      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'claude','pending') on conflict do nothing`,
+      [q.id, key, v.canonical, prior],
     );
     // In the book at once; it stays on the village head's review list (source 'claude' is never scored down).
-    q.answers.set(key, { display: v.canonical, prior: 4, status: 'pending', source: 'claude' });
+    q.answers.set(key, { display: v.canonical, prior, status: 'pending', source: 'claude' });
   }
   await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3), ($1,$4,$3) on conflict do nothing`, [q.id, inputKey, key, soft(v.canonical)]);
   q.matcher.addAlias(input, key);
@@ -1980,7 +1983,7 @@ export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
         for (const [k, v] of (vs ?? []).entries()) {
           if (!v) continue;
           report.submissions++;
-          if (v.valid) await learnAnswer(db, q, open[k].display, v.canonical, 'ai', 'approved', 3, v.reason);
+          if (v.valid) await learnAnswer(db, q, open[k].display, v.canonical, 'ai', 'approved', newAnswerPrior(v.canonical), v.reason);
           else await db.query(`insert into verdicts (question_id, input_key, valid, reason) values ($1,$2,false,$3) on conflict do nothing`, [qid, open[k].input_key, v.reason]);
           await db.query(`update submissions set status=$3 where question_id=$1 and input_key=$2`, [qid, open[k].input_key, v.valid ? 'accepted' : 'dismissed']);
         }
@@ -2072,7 +2075,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
     if (!row) continue;
     if (v.valid && v.canonical.trim()) {
       const q = await loadQuestion(db, v.q);
-      await learnAnswer(db, q, row.display, v.canonical.trim().slice(0, 60), 'ai', 'approved', 3, v.reason || 'Làng công nhận');
+      await learnAnswer(db, q, row.display, v.canonical.trim().slice(0, 60), 'ai', 'approved', newAnswerPrior(v.canonical), v.reason || 'Làng công nhận');
       out.learned++;
     } else {
       await db.query(

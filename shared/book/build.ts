@@ -232,7 +232,9 @@ export function buildSpec(spec: Spec, lex: Record<string, Entry[]>): Built | nul
   // The hidden Cung Trăng answer: a little-known but genuine answer, chosen once per question from the first
   // edition, so thickening the book never moves it.
   const first = answers.filter((_, i) => !items[i].late);
-  const rare = first.filter((a) => a.priorTier === 4 && !(spec.noKrill ?? []).some((n) => soft(n) === a.key));
+  // Never a word most people know (familiarity 3+): the hidden answer must be a real find, not a common word the book ranked rare here.
+  const popOf = new Map(items.map((it) => [it.key, it.pop]));
+  const rare = first.filter((a) => a.priorTier === 4 && (popOf.get(a.key) ?? 0) <= 2 && !(spec.noKrill ?? []).some((n) => soft(n) === a.key));
   const pool = rare.length ? rare : first.filter((a) => a.priorTier >= 3);
   const krill = (pool.length ? pool : answers)[hash(spec.id) % (pool.length || answers.length)];
   krill.priorTier = 5;
