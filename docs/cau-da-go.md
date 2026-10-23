@@ -41,6 +41,20 @@ Thêm: một đáp án hiếm phải đến từ hiểu biết hoặc trí nhớ
 
 `r-loai-den`, `r-vat-dung-van-phong`, `r-kieu-toc`, `r-dung-cu-bep`, `r-vat-dung-phong-khach`, `r-do-dung-hoc-sinh`, `r-bo-phan-xe-may`, `r-bien-bao-giao-thong`, `r-dung-cu-the-thao`, `r-vi-tri-bong-da`, `r-hoa-tiet-vai`, `r-thiet-bi-thong-minh`, `r-thuat-ngu-internet`, `r-mon-chay`, `r-mon-cuon`, `r-nhac-cu-bo-go`, `r-loai-vaccine`, `r-bai-bien-vn`, `r-hang-dong-vn`, `r-xuong-mat`, `r-tuyen-co-the`, `r-chat-khi`, `r-loai-te-bao`
 
+
+## Việc riêng cho Kiro: viết lại bản mở rộng của 4 câu thời sự đã gỡ
+
+Bốn câu này còn hạn (`until` 2027) nên **đề tài vẫn đúng thời điểm**; chúng bị gỡ chỉ vì sổ quá nhỏ và tập đáp án đóng. Hãy viết lại thành câu mới (id mới, có `until`, cùng chủ đề) với sổ đủ dày để có đuôi hiếm. Mỗi câu mới cần tối thiểu 80 đáp án trong sổ và qua bốn phép thử ở trên.
+
+| Câu cũ đã gỡ | Vấn đề | Gợi ý bản mở rộng |
+|---|---|---|
+| `r-dt-wc2026` (48 đáp án, `until` 2027-06-30) | 48 đội, tập đóng | "Kể tên một đội tuyển từng dự vòng chung kết World Cup bóng đá nam" (hơn 80 đội kể cả đội đã giải thể: Liên Xô, Tiệp Khắc, Nam Tư, Đông Đức, Zaire, Indonesia thuộc Hà Lan…); giữ độ hiếm theo số lần dự |
+| `r-tp-wc2026` (16 đáp án, `until` 2027-06-30) | 16 thành phố, ai cũng đoán được | "Kể tên một thành phố từng đăng cai trận đấu World Cup nam" (nhiều kỳ giải, gồm cả thành phố cũ như Montevideo, Berne, Cordoba…) |
+| `r-phim-viet-moi` (20 đáp án, `until` 2027-03-31) | 20 phim, năm quá hẹp | "Kể tên một phim điện ảnh Việt Nam chiếu rạp từ năm 2023 đến nay" (kèm tên gọi khác, tên có phụ đề); `until` theo ngày cập nhật cuối của danh sách |
+| `r-thanh-pho-asiad` (16 đáp án, `until` 2027-10-31) | 16 thành phố, tập đóng | "Kể tên một thành phố từng đăng cai Đại hội Thể thao châu Á hoặc SEA Games" (gộp hai giải để đủ dày, đúng cả thành phố lẫn nước) |
+
+Khi viết: đáp án nào cũng cần tên gọi khác (`a|b|c`), đáp án đã tuyệt chủng hoặc đã giải thể vẫn nằm trong sổ nếu đúng đề. Sau khi xong, ghi vào commit tên 4 câu mới và id câu cũ mà chúng thay thế.
+
 ## Sau khi gỡ: kho đang thiếu gì
 
 Còn 297 câu đang hỏi: mức 1 có 94 câu (31 đại chúng), mức 2 có 189 câu (35 đại chúng), **mức 3 chỉ có 14 câu** (bộ chọn câu cần khoảng 84 câu mức 3 để 42 ngày không lặp). Các chủ đề còn 27 nhóm. Lô mới nên ưu tiên:
