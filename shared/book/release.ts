@@ -18,10 +18,11 @@ import { RELEASE14 } from './release14.js';
 import { RELEASE15 } from './release15.js';
 import { RELEASE16 } from './release16.js';
 import { RELEASE17 } from './release17.js';
+import { RELEASE18 } from './release18.js';
 
 export type { ReleaseQuestion };
 export const RELEASE: ReleaseQuestion[] = [
-  ...RELEASE1, ...RELEASE2, ...RELEASE3, ...RELEASE4, ...RELEASE5, ...RELEASE6, ...RELEASE7, ...RELEASE8, ...RELEASE9, ...RELEASE10, ...RELEASE11, ...RELEASE12, ...RELEASE13, ...RELEASE14, ...RELEASE15, ...RELEASE16, ...RELEASE17,
+  ...RELEASE1, ...RELEASE2, ...RELEASE3, ...RELEASE4, ...RELEASE5, ...RELEASE6, ...RELEASE7, ...RELEASE8, ...RELEASE9, ...RELEASE10, ...RELEASE11, ...RELEASE12, ...RELEASE13, ...RELEASE14, ...RELEASE15, ...RELEASE16, ...RELEASE17, ...RELEASE18,
 ];
 
 /** Last day a timely prompt may be asked (YYYY-MM-DD), by question id. */
