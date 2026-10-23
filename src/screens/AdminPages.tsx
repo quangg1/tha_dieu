@@ -52,6 +52,19 @@ export function BankPage({ token }: { token: string }) {
       .sort((x, y) => (sort === 'miss' ? missRate(y) - missRate(x) : sort === 'plays' ? y.plays - x.plays : sort === 'avg' ? y.avg - x.avg : y.krill - x.krill))
       .slice(0, 80);
   }, [b, q, sort, only, cat]);
+  const backup = async () => {
+    try {
+      const data = await api.admin.exportBook(token);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `so-cau-hoi-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Chưa tải được.');
+    }
+  };
   const pause = async (i: Item, paused: boolean) => {
     try {
       await api.admin.pause(token, i.id, paused);
@@ -82,6 +95,9 @@ export function BankPage({ token }: { token: string }) {
             </div>
           ))}
         </div>
+        <p style={{ margin: '10px 0 0' }}>
+          <button className="gd-chip" onClick={() => void backup()}>Tải bản sao lưu sổ (JSON)</button>
+        </p>
         {t.daysLeft < 30 && <p className="gd-msg gd-msg--hint" style={{ margin: '10px 0 0' }}>Kho chỉ còn đủ khoảng {t.daysLeft} ngày chưa lặp: cần giao thêm câu mới cho Kiro.</p>}
         {msg && <p className="gd-msg gd-msg--hint">{msg}</p>}
       </section>
@@ -190,7 +206,7 @@ export function BankPage({ token }: { token: string }) {
                     <td>{i.avg || '—'}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button className="gd-chip" onClick={() => setEditing(editing === i.id ? null : i.id)}>{editing === i.id ? 'Đóng' : 'Sửa'}</button>{' '}
-                      {!i.active && !i.paused ? null : i.paused ? <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button> : <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button>}
+                      {i.active ? <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button> : <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button>}
                     </td>
                   </tr>
                   {editing === i.id && <tr><td colSpan={7}><QuestionEditor token={token} id={i.id} onChanged={() => void load()} /></td></tr>}
@@ -212,6 +228,7 @@ function QuestionEditor({ token, id, onChanged }: { token: string; id: string; o
   const [d, setD] = useState<Awaited<ReturnType<typeof api.admin.question>> | null>(null);
   const [prompt, setPrompt] = useState('');
   const [note, setNote] = useState('');
+  const [until, setUntil] = useState('');
   const [names, setNames] = useState<Record<string, string>>({});
   const [add, setAdd] = useState({ display: '', tier: 4, aliases: '' });
   const [msg, setMsg] = useState('');
@@ -222,6 +239,7 @@ function QuestionEditor({ token, id, onChanged }: { token: string; id: string; o
         setD(r);
         setPrompt(r.prompt);
         setNote(r.note);
+        setUntil(r.until);
         setNames({});
       })
       .catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa mở được.'));
@@ -237,15 +255,17 @@ function QuestionEditor({ token, id, onChanged }: { token: string; id: string; o
     }
   };
   if (!d) return <p className="gd-msg" style={{ margin: 0 }}>{msg || 'Đang mở…'}</p>;
-  const changed = prompt !== d.prompt || note !== d.note;
+  const changed = prompt !== d.prompt || note !== d.note || until !== d.until;
   return (
     <div className="adm-edit">
       <label className="gd-label" htmlFor={`p-${id}`}>Câu hỏi</label>
       <input id={`p-${id}`} className="gd-input" value={prompt} onChange={(e) => setPrompt(e.target.value)} maxLength={200} />
       <label className="gd-label" htmlFor={`n-${id}`}>Ghi chú dưới câu hỏi (có thể để trống)</label>
       <input id={`n-${id}`} className="gd-input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} />
+      <label className="gd-label" htmlFor={`u-${id}`}>Hạn dùng (chỉ cho câu thời sự, dạng 2027-03-31; để trống nếu không hết hạn)</label>
+      <input id={`u-${id}`} className="gd-input" value={until} onChange={(e) => setUntil(e.target.value)} maxLength={10} placeholder="2027-03-31" />
       <div>
-        <button className="gd-chip" disabled={!changed} onClick={() => void run(() => api.admin.editQuestion(token, { questionId: id, prompt, note }), 'Đã lưu câu hỏi.')}>Lưu câu hỏi</button>{' '}
+        <button className="gd-chip" disabled={!changed} onClick={() => void run(() => api.admin.editQuestion(token, { questionId: id, prompt, note, until }), 'Đã lưu câu hỏi.')}>Lưu câu hỏi</button>{' '}
         {(d.prompt !== d.bookPrompt || d.note !== d.bookNote) && (
           <button className="gd-chip" onClick={() => void run(() => api.admin.editQuestion(token, { questionId: id, reset: true }), 'Đã trở về chữ gốc.')}>Về chữ gốc</button>
         )}
@@ -306,8 +326,8 @@ function EditsList({ token }: { token: string }) {
   if (!e || (e.prompts.length === 0 && e.answers.length === 0)) return null;
   return (
     <section className="gd-paper">
-      <div className="gd-label" style={{ marginBottom: 4 }}>Đã sửa ở trang này ({e.prompts.length + e.answers.length})</div>
-      <p className="gd-msg" style={{ margin: '0 0 8px' }}>Các chỉnh sửa này thắng sổ trong mã. Để sổ trong mã khớp, giao danh sách này cho Kiro gộp vào file release.</p>
+      <div className="gd-label" style={{ marginBottom: 4 }}>Khác với file trong mã ({e.prompts.length + e.answers.length})</div>
+      <p className="gd-msg" style={{ margin: '0 0 8px' }}>Database là nguồn chính của sổ câu hỏi; đây là những chỗ khác với file trong mã. File release chỉ dùng để thêm câu mới, nên không cần gộp ngược, trừ khi bạn muốn mã khớp.</p>
       <div className="tbl">
         <table>
           <tbody>

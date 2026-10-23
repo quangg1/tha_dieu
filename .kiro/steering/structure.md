@@ -4,6 +4,12 @@ inclusion: always
 
 # Cấu trúc và lệnh
 
+## Sổ câu hỏi nằm trong database, không nằm trong file
+- **Database là nguồn chính** (bảng `book`). Các file trong `shared/book` chỉ là **cửa nhận câu mới**: mỗi lần deploy, câu có `id` mà database chưa có sẽ được thêm vào; câu đã có thì **bị bỏ qua**.
+- Vì vậy: **thêm câu mới** thì viết vào file release như bên dưới. **Sửa câu đã có** (chữ, đáp án, bậc, hạn dùng, cho nghỉ) thì **không sửa trong file**, vì deploy sẽ không áp dụng; sửa ở trang admin, tab "Kho câu hỏi" (nút Sửa, Tạm dừng, Bật lại).
+- Trang admin có nút tải bản sao lưu toàn bộ sổ (JSON) và mục "Khác với file trong mã".
+- Kiểm tra `npm run check:questions` chỉ kiểm tra các file trong mã, không kiểm tra những gì đã sửa trong database.
+
 ## Nơi để câu hỏi
 - `shared/book/release1.ts` … `releaseN.ts`: bộ câu hỏi chính, mỗi file 10–35 câu theo chủ đề. **Câu mới viết vào đây.**
 - `shared/book/release.ts`: gom các file release. Tạo file mới thì thêm `import { RELEASEn }` và thêm vào mảng `RELEASE`.

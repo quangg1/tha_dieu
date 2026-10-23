@@ -1,3 +1,5 @@
+> Cập nhật 23/10/2026: sổ câu hỏi giờ nằm trong database. Câu mới vẫn viết vào file release (tự được thêm khi deploy); sửa câu cũ thì làm ở trang admin. Xem `.kiro/steering/structure.md`.
+
 # Việc giao cho Kiro: kho câu hỏi
 
 Đọc trước `.kiro/steering/` (đặc biệt `questions.md`). Mỗi việc làm xong thì chạy `npm run check:questions`, `npx tsc --noEmit -p .`, `npm test`, rồi commit và push.

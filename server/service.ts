@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
-import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
-import { UNTIL } from '../shared/book/release.js';
+import { BOOK_VERSION } from '../shared/book/questions.js';
+import * as bk from './book.js';
 import { struck } from '../shared/book/prune.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
@@ -62,38 +62,8 @@ export async function setup(db: Db) {
   // A new deploy wakes several instances at once and each runs setup; the layout changes take table-wide
   // locks, so two of them at the same moment deadlock. One lock for the whole layout makes them take turns.
   await db.execLocked(7151, SCHEMA);
-  const ids = BOOK.map((q) => q.id);
-  await db.query(
-    `insert into questions (id, category, prompt, note, strip, krill_key, active)
-     select id, c, p, nullif(n, ''), string_to_array(st, ' '), k, a = 'y'
-     from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[]) as x(id, c, p, n, st, k, a)
-     on conflict (id) do update set category=excluded.category, prompt=excluded.prompt, note=excluded.note,
-       strip=excluded.strip, krill_key=excluded.krill_key, active=excluded.active`,
-    [
-      ids,
-      BOOK.map((q) => q.category),
-      BOOK.map((q) => q.prompt),
-      BOOK.map((q) => q.note ?? ''),
-      BOOK.map((q) => q.strip.join(' ')),
-      BOOK.map((q) => q.krillKey),
-      // Sent as text: the Postgres driver does not pass a boolean array.
-      BOOK.map((q) => (RETIRED.has(q.id) ? 'n' : 'y')),
-    ],
-  );
-  await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
-  // Prompts the village head paused from the admin page stay paused through a resync.
-  const [pausedRow] = await db.query<{ value: string }>(`select value from meta where key='paused'`);
-  await db.query(
-    `update questions q set prompt=e.prompt, note=nullif(e.note, '') from question_edits e where q.id=e.question_id`,
-  );
-  const paused = (() => {
-    try {
-      return (JSON.parse(pausedRow?.value ?? '[]') as unknown[]).map(String);
-    } catch {
-      return [] as string[];
-    }
-  })();
-  if (paused.length) await db.query(`update questions set active=false where id = any($1::text[])`, [paused]);
+  // The database holds the book: a prompt it has never seen comes in from the files, one it has is left alone.
+  await bk.seedBook(db);
   await db.query(
     `insert into meta (key, value) values ('book_version', $1) on conflict (key) do update set value=excluded.value`,
     [DB_VERSION],
@@ -167,9 +137,9 @@ export const isPop = (q: { id: string; category: string }) => q.id.startsWith('p
  */
 const TIMELY_SLOT = 3;
 const TIMELY_WINDOW = 14;
-export const isTimely = (id: string) => UNTIL.has(id);
-export const expired = (id: string, day: string) => (UNTIL.get(id) ?? '9999-12-31') < day;
-export const expiredIds = (day: string) => [...UNTIL].filter(([, u]) => u < day).map(([id]) => id);
+export const isTimely = (id: string) => !!bk.until(id);
+export const expired = (id: string, day: string) => (bk.until(id) ?? '9999-12-31') < day;
+export const expiredIds = (day: string) => [...bk.untilMap()].filter(([, u]) => u < day).map(([id]) => id);
 
 /**
  * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
@@ -178,10 +148,11 @@ export const expiredIds = (day: string) => [...UNTIL].filter(([, u]) => u < day)
 const setCache = new Map<string, string[]>();
 
 export async function dailySet(db: Db, day: string): Promise<string[]> {
+  await bk.ensureBook(db);
   const cached = setCache.get(day);
   if (cached) return cached;
   const found = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
-  const active = new Set((await db.query<{ id: string }>(`select id from questions where active`)).map((r) => r.id));
+  const active = new Set(bk.all().filter((q) => bk.status(q.id) === 'active').map((q) => q.id));
   if (found.length) {
     // Today's or a future set drawn before some of its questions were retired is redrawn, as long as nobody has played it.
     const stale = day >= vnToday() && found[0].question_ids.some((id) => !active.has(id));
@@ -192,7 +163,7 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
     }
     await db.query(`delete from daily_sets where day=$1::date`, [day]);
   }
-  const pool = BOOK.filter((q) => active.has(q.id) && !expired(q.id, day));
+  const pool = bk.all().filter((q) => active.has(q.id) && !expired(q.id, day));
   const recentRows = await db.query<{ day: string; question_ids: string[] }>(
     `select to_char(day, 'YYYY-MM-DD') as day, question_ids from daily_sets where day < $1::date and day >= $1::date - 42`,
     [day],
@@ -258,7 +229,7 @@ export interface LoadedQuestion {
 
 const unvouched = (e: { status: string; source?: string }) => e.status === 'pending' && e.source === 'crowd';
 
-const cache = new Map<string, { at: number; q: LoadedQuestion }>();
+const cache = new Map<string, { at: number; rev: string | null; q: LoadedQuestion }>();
 const CACHE_MS = 60_000;
 
 export function forgetQuestion(id: string) {
@@ -267,9 +238,10 @@ export function forgetQuestion(id: string) {
 
 /** A question from the book, plus answers and spellings learned from players (review queue, referee). */
 export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> {
+  await bk.ensureBook(db);
   const hit = cache.get(id);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.q;
-  const base = BOOK_BY_ID.get(id);
+  if (hit && Date.now() - hit.at < CACHE_MS && hit.rev === bk.rev()) return hit.q;
+  const base = bk.get(id);
   if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
   const answers = new Map<string, { display: string; prior: number; status: string; source?: string }>(base.answers.map((a) => [a.key, { display: a.display, prior: a.priorTier, status: 'approved', source: 'seed' }]));
   const entries = base.answers.map((a) => ({ key: a.key, aliases: [...a.aliases], priorTier: a.priorTier }));
@@ -278,16 +250,6 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     [id],
   );
   const rekey = new Map<string, string>();
-  // Names and tiers the village head changed from the admin page win over the book's.
-  for (const l of learned) {
-    if (l.source !== 'admin' || l.status !== 'approved') continue;
-    const cur = answers.get(l.key);
-    const entry = entries.find((e) => e.key === l.key);
-    if (!cur || !entry) continue;
-    answers.set(l.key, { ...cur, display: l.display, prior: l.prior_tier, source: 'admin' });
-    entry.priorTier = l.prior_tier;
-    if (!entry.aliases.includes(l.display)) entry.aliases.push(l.display);
-  }
   for (const l of learned) {
     const key = answers.has(l.key) ? l.key : soft(l.display);
     rekey.set(l.key, key);
@@ -308,12 +270,11 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     const e = answers.get(key);
     if (e && !unvouched(e)) matcher.addAlias(a.alias, key, e.prior);
   }
-  const [edit] = await db.query<{ prompt: string; note: string | null }>(`select prompt, note from question_edits where question_id=$1`, [id]);
   const q: LoadedQuestion = {
     id: base.id,
     category: base.category,
-    prompt: edit?.prompt ?? base.prompt,
-    note: edit ? edit.note || null : base.note ?? null,
+    prompt: base.prompt,
+    note: base.note ?? null,
     krillKey: base.krillKey,
     strip: base.strip,
     level: base.level ?? 2,
@@ -322,7 +283,7 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     vague: new Set((base.vague ?? []).flatMap((v) => [soft(v), norm(v)])),
     traps: new Set(base.traps ?? []),
   };
-  cache.set(id, { at: Date.now(), q });
+  cache.set(id, { at: Date.now(), rev: bk.rev(), q });
   return q;
 }
 
@@ -779,6 +740,7 @@ export async function creditLearned(db: Db, questionId: string) {
 }
 
 export async function notices(db: Db, playerId: string) {
+  await bk.ensureBook(db);
   const rows = await db.query<{ question_id: string; input_key: string; display: string; credited: number | null }>(
     `select question_id, input_key, display, credited from asks where player_id=$1 and not told and day >= current_date - 14 order by day desc limit 40`,
     [playerId],
@@ -786,7 +748,7 @@ export async function notices(db: Db, playerId: string) {
   const out: { questionId: string; prompt: string; typed: string; answer: string; points: number }[] = [];
   const told: string[][] = [];
   for (const r of rows) {
-    const base = BOOK_BY_ID.get(r.question_id);
+    const base = bk.get(r.question_id);
     if (!base) continue;
     const q = await loadQuestion(db, r.question_id);
     const m = q.matcher.match(r.display);
@@ -1392,14 +1354,14 @@ const TOO_FAST_MS = 1200;
  *  - several answers sent faster than anyone can type.
  * It runs on whatever the player has answered so far, so skipping the other questions does not hide a few lucky ones.
  */
-export function suspicion(turns: FlightTurn[]): { score: number; reasons: string[] } {
+export function suspicion(turns: FlightTurn[], inBook: (questionId: string, key: string) => boolean = (q, k) => !!bk.get(q)?.answers.some((a) => a.key === k)): { score: number; reasons: string[] } {
   const done = turns.filter((t) => t.tier != null && t.tier >= 0 && t.key);
   const reasons: string[] = [];
   let score = 0;
   const krill = done.filter((t) => t.tier === CUNG_TRANG).length;
   if (krill >= 2) { score += 3; reasons.push(`${krill} đáp án Độc nhất`); }
   else if (krill === 1) { score += 1; reasons.push('1 đáp án Độc nhất'); }
-  const outside = done.filter((t) => !BOOK_BY_ID.get(t.questionId)?.answers.some((a) => a.key === t.key)).length;
+  const outside = done.filter((t) => !inBook(t.questionId, t.key!)).length;
   if (outside >= 4) { score += 3; reasons.push(`${outside} đáp án ngoài sổ`); }
   else if (outside === 3) { score += 1; reasons.push('3 đáp án ngoài sổ'); }
   const fast = done.filter((t) => t.ms != null && t.ms < TOO_FAST_MS).length;
@@ -1411,6 +1373,7 @@ export function suspicion(turns: FlightTurn[]): { score: number; reasons: string
 
 /** Looks at one player's finished daily flight and holds it off the board when it looks wrong. A cleared run is left alone. */
 async function checkFlight(db: Db, day: string, playerId: string, points: number, dev?: string) {
+  await bk.ensureBook(db);
   const rows = await db.query<{ question_id: string; answer_key: string | null; tier: number | null; ms: number | null }>(
     `select question_id, answer_key, tier, (extract(epoch from (answered_at - started_at)) * 1000)::int as ms
      from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null`,
@@ -1451,6 +1414,7 @@ export interface FlightRow {
 
 /** One flight turn by turn, for the village head: what was typed, how hard it landed, how fast, and whether the book knew it. */
 export async function adminFlight(db: Db, playerId: string, day: string): Promise<{ rows: FlightRow[]; score: number; reasons: string[] }> {
+  await bk.ensureBook(db);
   const turns = await db.query<{ question_id: string; answer_key: string | null; tier: number | null; ms: number | null }>(
     `select question_id, answer_key, tier, (extract(epoch from (answered_at - started_at)) * 1000)::int as ms
      from turns where player_id=$1 and day=$2::date and mode='daily' order by started_at`,
@@ -1458,7 +1422,7 @@ export async function adminFlight(db: Db, playerId: string, day: string): Promis
   );
   const rows: FlightRow[] = [];
   for (const t of turns) {
-    const base = BOOK_BY_ID.get(t.question_id);
+    const base = bk.get(t.question_id);
     let answer: string | null = null;
     if (t.answer_key && base) answer = (await loadQuestion(db, t.question_id)).answers.get(t.answer_key)?.display ?? t.answer_key;
     rows.push({
@@ -1476,6 +1440,7 @@ export async function adminFlight(db: Db, playerId: string, day: string): Promis
 
 /** The numbers behind the flight check, for the village head's dashboard: the last two weeks, and today's suspicion spread. */
 export async function adminSafety(db: Db) {
+  await bk.ensureBook(db);
   const today = vnToday();
   const from = vnToday(new Date(Date.now() - 13 * 86_400_000));
   const series = await db.query<{ day: string; players: number; krill: number; fast: number }>(
@@ -1509,7 +1474,7 @@ export async function adminSafety(db: Db) {
     const s = suspicion(ts);
     spread[Math.min(3, s.score)]++;
     if (s.score > 0) scored.push({ player_id: pid, ...s });
-    outside += ts.filter((x) => x.tier != null && x.tier >= 0 && x.key && !BOOK_BY_ID.get(x.questionId)?.answers.some((a) => a.key === x.key)).length;
+    outside += ts.filter((x) => x.tier != null && x.tier >= 0 && x.key && !bk.get(x.questionId)?.answers.some((a) => a.key === x.key)).length;
   }
   const held = new Set((await db.query<{ player_id: string }>(`select player_id from flags where day=$1::date and status='open'`, [today])).map((r) => r.player_id));
   const names = new Map((await db.query<{ player_id: string; name: string | null }>(`select player_id, name from runs where day=$1::date and mode='daily'`, [today])).map((r) => [r.player_id, r.name]));
@@ -1810,6 +1775,7 @@ export async function mutePlayer(db: Db, playerId: string) {
 
 /** A random active question for Thả vô tận, avoiding the ones this run has already seen. */
 export async function nightQuestion(db: Db, seen: string[]) {
+  await bk.ensureBook(db);
   // Never one of today's daily prompts (see ensureInSet).
   const daily = await dailySet(db, vnToday());
   const rows = await db.query<{ id: string }>(
@@ -1951,6 +1917,7 @@ const NIGHT_SUGGEST = 60;
  *     so tomorrow most answers are found in the book at once.
  */
 export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
+  await bk.ensureBook(db);
   const report = { judged: 0, approved: 0, rejected: 0, submissions: 0, added: 0, questions: [] as string[] };
   // B: the waiting new answers.
   const waiting = await db.query<{ question_id: string; key: string; display: string }>(
@@ -1961,7 +1928,7 @@ export async function nightShift(db: Db, ai: Ai, today = vnToday()) {
   for (const w of waiting) byQ.set(w.question_id, [...(byQ.get(w.question_id) ?? []), w]);
   await Promise.all(
     [...byQ].map(async ([qid, list]) => {
-      const base = BOOK_BY_ID.get(qid);
+      const base = bk.get(qid);
       if (!base) return;
       for (let i = 0; i < list.length; i += 25) {
         const chunk = list.slice(i, i + 25);
@@ -2054,11 +2021,12 @@ export async function nightQueue(db: Db, today = vnToday()) {
 /** Applies the night shift's verdicts once per batch (by its day); safe to call again. */
 export async function applyNight(db: Db, batch: { day: string; pending: NightVerdict[]; submissions: NightVerdict[]; learned?: NightReview[] }) {
   if (!batch.day) return { applied: false, reason: 'empty' };
+  await bk.ensureBook(db);
   const [done] = await db.query<{ value: string }>(`select value from meta where key='night_applied'`);
   if (done?.value === batch.day) return { applied: false, reason: 'already', day: batch.day };
   const out = { applied: true, day: batch.day, approved: 0, rejected: 0, learned: 0, refused: 0, credited: 0, kept: 0, removed: 0 };
   for (const r of batch.learned ?? []) {
-    if (!BOOK_BY_ID.has(r.q)) continue;
+    if (!bk.has(r.q)) continue;
     if (r.keep) {
       await db.query(`update answers set reviewed=true, status=case when status='pending' then 'approved' else status end where question_id=$1 and key=$2 and source <> 'seed'`, [r.q, r.key]);
       out.kept++;
@@ -2073,7 +2041,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
     forgetQuestion(r.q);
   }
   for (const v of batch.pending) {
-    if (!BOOK_BY_ID.has(v.q)) continue;
+    if (!bk.has(v.q)) continue;
     const [row] = await db.query<{ display: string }>(`select display from answers where question_id=$1 and key=$2`, [v.q, v.key]);
     if (!row) continue;
     const r = await settle(db, v.q, row.display, v.key, { valid: v.valid, canonical: v.canonical, reason: v.reason });
@@ -2081,7 +2049,7 @@ export async function applyNight(db: Db, batch: { day: string; pending: NightVer
     if (r === 'rejected') out.rejected++;
   }
   for (const v of batch.submissions) {
-    if (!BOOK_BY_ID.has(v.q)) continue;
+    if (!bk.has(v.q)) continue;
     const [row] = await db.query<{ display: string }>(`select display from submissions where question_id=$1 and input_key=$2`, [v.q, v.key]);
     if (!row) continue;
     if (v.valid && v.canonical.trim()) {

@@ -45,12 +45,13 @@ inclusion: always
 4. Commit và push (xem structure.md).
 
 ## Rà lỗi câu hỏi cũ
+**Câu cũ đã nằm trong database**: sửa chúng ở trang admin (tab Kho câu hỏi), không sửa trong file release (deploy sẽ không áp dụng). Nếu không vào được admin, ghi danh sách chỗ cần sửa cho người quản lý.
 Đọc từng câu đang dùng và sửa khi:
 - câu chữ rối, gộp hai ý, hoặc có thể hiểu hai nghĩa;
 - ranh giới không rõ, người chơi dễ bị chấm oan (thêm `n` hoặc viết lại câu);
 - đáp án sai sự thật, đáp án trùng nghĩa ở hai bậc (ví dụ "Falcon" và "Sam Wilson" là một người: gộp bằng `|`);
 - đáp án quen bị xếp quá hiếm, hoặc đáp án lạ bị xếp quá phổ biến;
-- câu quá dễ để có điểm cao (nhiều đáp án hiếm mà ai cũng biết): cho vào `RETIRED` trong `questions.ts` và ghi lý do bên cạnh.
+- câu quá dễ để có điểm cao (nhiều đáp án hiếm mà ai cũng biết): đề nghị cho nghỉ (nút Tạm dừng ở admin) và ghi lý do trong báo cáo. `RETIRED` trong `questions.ts` chỉ có tác dụng với câu mới thêm lần đầu.
 Ghi lại danh sách những gì đã sửa trong message commit.
 
 ## Bộ chọn câu mỗi ngày dùng gì (để soạn đúng chỗ đang thiếu)

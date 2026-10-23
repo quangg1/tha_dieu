@@ -1,37 +1,30 @@
-import { BOOK, BOOK_BY_ID, RETIRED } from '../shared/book/questions.js';
-import { UNTIL } from '../shared/book/release.js';
+import { BOOK_BY_ID as CODE } from '../shared/book/questions.js';
+import * as bk from './book.js';
 import type { Db } from './db.js';
 import { DB_VERSION, GameError, dayQuestion, forgetBoard, forgetQuestion, isPop, loadQuestion, syncedVersion, vnToday } from './service.js';
 import { soft } from '../shared/normalize.js';
+import type { QuestionDef } from '../shared/match.js';
 
 /* The village head's pages beyond the day's numbers: the question bank, players, and the state of the system. */
 
-async function pausedIds(db: Db): Promise<Set<string>> {
-  const [r] = await db.query<{ value: string }>(`select value from meta where key='paused'`);
-  try {
-    return new Set((JSON.parse(r?.value ?? '[]') as unknown[]).map(String));
-  } catch {
-    return new Set();
-  }
-}
-
-/** Takes a prompt out of play (or puts it back) without a deploy. A resync keeps it paused. */
-export async function adminPause(db: Db, id: string, paused: boolean) {
-  if (!BOOK_BY_ID.has(id)) throw new GameError(404, 'Không tìm thấy câu hỏi.');
-  const set = await pausedIds(db);
-  if (paused) set.add(id);
-  else set.delete(id);
-  await db.query(`insert into meta (key, value) values ('paused', $1) on conflict (key) do update set value=excluded.value`, [JSON.stringify([...set])]);
-  await db.query(`update questions set active=$2 where id=$1`, [id, !paused && !RETIRED.has(id)]);
+/** Takes a prompt out of play, brings it back, or retires it, without a deploy. */
+export async function adminSetStatus(db: Db, id: string, status: bk.Status) {
+  await bk.ensureBook(db);
+  const def = bk.get(id);
+  if (!def) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  if (!['active', 'paused', 'retired'].includes(status)) throw new GameError(400, 'Trạng thái không hợp lệ.');
+  await bk.save(db, def, { status });
   forgetQuestion(id);
   return { ok: true };
 }
 
+/** Pause or resume: kept for the dashboard's button. */
+export const adminPause = (db: Db, id: string, paused: boolean) => adminSetStatus(db, id, paused ? 'paused' : 'active');
+
 /** The whole question bank at a glance: what is in it, how long it lasts, what is about to expire, how each prompt plays. */
 export async function adminBank(db: Db) {
+  await bk.ensureBook(db);
   const today = vnToday();
-  const active = new Set((await db.query<{ id: string }>(`select id from questions where active`)).map((r) => r.id));
-  const paused = await pausedIds(db);
   const drawn = await db.query<{ day: string; question_ids: string[] }>(`select day::text as day, question_ids from daily_sets order by day`);
   const seen = new Set(drawn.flatMap((d) => d.question_ids));
   const stat = new Map(
@@ -47,20 +40,21 @@ export async function adminBank(db: Db) {
       )
     ).map((r) => [r.question_id, r]),
   );
-  const edited = new Map((await db.query<{ question_id: string; prompt: string }>(`select question_id, prompt from question_edits`)).map((r) => [r.question_id, r.prompt]));
-  const items = BOOK.map((q) => {
+  const items = bk.all().map((q) => {
     const s = stat.get(q.id);
+    const st = bk.status(q.id)!;
+    const code = CODE.get(q.id);
     return {
       id: q.id,
-      prompt: edited.get(q.id) ?? q.prompt,
-      edited: edited.has(q.id),
+      prompt: q.prompt,
+      edited: !!code && (code.prompt !== q.prompt || (code.note ?? '') !== (q.note ?? '')),
       category: q.category,
       level: q.level ?? 2,
       pop: isPop(q),
-      until: UNTIL.get(q.id) ?? null,
-      active: active.has(q.id),
-      retired: RETIRED.has(q.id),
-      paused: paused.has(q.id),
+      until: bk.until(q.id),
+      active: st === 'active',
+      retired: st === 'retired',
+      paused: st === 'paused',
       seen: seen.has(q.id),
       plays: s?.plays ?? 0,
       misses: s?.misses ?? 0,
@@ -76,7 +70,7 @@ export async function adminBank(db: Db) {
     return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([name, n]) => ({ name, n }));
   };
   const unseen = live.filter((i) => !i.seen).length;
-  const day = (id: string) => ({ id, prompt: BOOK_BY_ID.get(id)?.prompt ?? id });
+  const day = (id: string) => ({ id, prompt: bk.get(id)?.prompt ?? id });
   const sets = drawn
     .filter((d) => d.day >= vnToday(new Date(Date.now() - 6 * 86_400_000)))
     .reverse()
@@ -91,7 +85,7 @@ export async function adminBank(db: Db) {
   );
   return {
     today,
-    totals: { book: items.length, live: live.length, retired: items.filter((i) => i.retired).length, paused: paused.size, unseen, daysLeft: Math.floor(unseen / 7) },
+    totals: { book: items.length, live: live.length, retired: items.filter((i) => i.retired).length, paused: items.filter((i) => i.paused).length, unseen, daysLeft: Math.floor(unseen / 7) },
     byCategory: count((i) => i.category).map((c) => ({ ...c, retired: items.filter((i) => i.category === c.name && !i.active && !i.paused).length })),
     byLevel: count((i) => ['dễ', 'vừa', 'khó'][i.level - 1] ?? String(i.level)),
     pop: live.filter((i) => i.pop).length,
@@ -103,6 +97,12 @@ export async function adminBank(db: Db) {
     sets,
     krillToday,
   };
+}
+
+/** The whole book as the database holds it, for a backup the village head can keep. */
+export async function adminExport(db: Db) {
+  await bk.ensureBook(db);
+  return { at: new Date().toISOString(), version: DB_VERSION, questions: bk.all().map((def) => ({ def, status: bk.status(def.id), until: bk.until(def.id) })) };
 }
 
 /** Finds players by the start of their id or a part of their name; also lists the muted ones. */
@@ -200,64 +200,96 @@ const tierOf = (v: unknown) => {
 
 /** One prompt with every answer the village knows, for the editor. */
 export async function adminQuestion(db: Db, id: string) {
-  const base = BOOK_BY_ID.get(id);
+  await bk.ensureBook(db);
+  const base = bk.get(id);
   if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
   const q = await loadQuestion(db, id);
   const answers = [...q.answers.entries()]
     .filter(([, e]) => !(e.status === 'pending' && e.source === 'crowd'))
     .map(([key, e]) => ({ key, display: e.display, tier: key === q.krillKey ? 5 : e.prior, source: e.source ?? 'seed', status: e.status }))
     .sort((a, b) => b.tier - a.tier || a.display.localeCompare(b.display, 'vi'));
-  return { id, category: q.category, prompt: q.prompt, note: q.note ?? '', bookPrompt: base.prompt, bookNote: base.note ?? '', krillKey: q.krillKey, answers };
+  const code = CODE.get(id);
+  return {
+    id,
+    category: q.category,
+    prompt: q.prompt,
+    note: q.note ?? '',
+    until: bk.until(id) ?? '',
+    status: bk.status(id)!,
+    bookPrompt: code?.prompt ?? base.prompt,
+    bookNote: code?.note ?? '',
+    krillKey: q.krillKey,
+    answers,
+  };
 }
 
-/** Changes the words of a prompt or its note. Scoring and counts are untouched. */
-export async function adminEditQuestion(db: Db, id: string, prompt: unknown, note: unknown) {
-  if (!BOOK_BY_ID.has(id)) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+/** Changes the words of a prompt, its note, or its last day (timely prompts). Scoring and counts are untouched. */
+export async function adminEditQuestion(db: Db, id: string, prompt: unknown, note: unknown, until?: unknown) {
+  await bk.ensureBook(db);
+  const cur = bk.get(id);
+  if (!cur) throw new GameError(404, 'Không tìm thấy câu hỏi.');
   const p = text(prompt, 200);
   if (p.length < 8) throw new GameError(400, 'Câu hỏi quá ngắn.');
   const n = text(note, 300);
-  await db.query(
-    `insert into question_edits (question_id, prompt, note) values ($1,$2,$3)
-     on conflict (question_id) do update set prompt=excluded.prompt, note=excluded.note, updated_at=now()`,
-    [id, p, n],
-  );
-  await db.query(`update questions set prompt=$2, note=nullif($3, '') where id=$1`, [id, p, n]);
+  const def: QuestionDef = { ...cur, prompt: p };
+  if (n) def.note = n;
+  else delete def.note;
+  let un: string | null | undefined;
+  if (until !== undefined) {
+    const u = String(until ?? '').trim();
+    if (u && !/^\d{4}-\d{2}-\d{2}$/.test(u)) throw new GameError(400, 'Ngày hết hạn phải có dạng năm-tháng-ngày.');
+    un = u || null;
+  }
+  await bk.save(db, def, { until: un });
   forgetQuestion(id);
   return { ok: true };
 }
 
-/** Goes back to the book's own words. */
+/** Goes back to the words the files in code have. */
 export async function adminResetQuestion(db: Db, id: string) {
-  const base = BOOK_BY_ID.get(id);
-  if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
-  await db.query(`delete from question_edits where question_id=$1`, [id]);
-  await db.query(`update questions set prompt=$2, note=nullif($3, '') where id=$1`, [id, base.prompt, base.note ?? '']);
+  await bk.ensureBook(db);
+  const cur = bk.get(id);
+  const code = CODE.get(id);
+  if (!cur || !code) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  const def: QuestionDef = { ...cur, prompt: code.prompt };
+  if (code.note) def.note = code.note;
+  else delete def.note;
+  await bk.save(db, def);
   forgetQuestion(id);
   return { ok: true };
 }
 
 /** Renames an answer, moves it to another tier, or takes it out. The key stays, so its counts and history stay with it. */
 export async function adminEditAnswer(db: Db, a: { questionId: string; key: string; display?: unknown; tier?: unknown; remove?: boolean }) {
+  await bk.ensureBook(db);
   const q = await loadQuestion(db, a.questionId);
   const cur = q.answers.get(a.key);
   if (!cur) throw new GameError(404, 'Không tìm thấy đáp án này.');
   const isKrill = a.key === q.krillKey;
-  if (a.remove) {
-    if (isKrill) throw new GameError(400, 'Đây là đáp án làng giấu của câu này: đổi trong mã, không gỡ ở đây.');
-    await db.query(
-      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','rejected')
-       on conflict (question_id, key) do update set status='rejected'`,
-      [a.questionId, a.key, cur.display, cur.prior],
-    );
+  if (a.remove && isKrill) throw new GameError(400, 'Đây là đáp án làng giấu của câu này: đổi tên được, nhưng không gỡ ở đây.');
+  const def = bk.get(a.questionId)!;
+  const entry = def.answers.find((x) => x.key === a.key);
+  const display = a.display === undefined ? cur.display : text(a.display, 60);
+  if (!a.remove && !display) throw new GameError(400, 'Tên đáp án trống.');
+  const tier = a.tier === undefined || isKrill ? cur.prior : tierOf(a.tier);
+  if (entry) {
+    // An answer of the book itself: changed in the book.
+    const next: QuestionDef = { ...def, answers: def.answers.map((x) => ({ ...x, aliases: [...x.aliases] })) };
+    if (a.remove) next.answers = next.answers.filter((x) => x.key !== a.key);
+    else {
+      const e = next.answers.find((x) => x.key === a.key)!;
+      e.display = display;
+      e.priorTier = isKrill ? e.priorTier : tier;
+      if (!e.aliases.includes(display)) e.aliases.push(display);
+    }
+    await bk.save(db, next);
+  } else if (a.remove) {
+    // An answer players or the referee added: out of the book for good.
+    await db.query(`update answers set status='rejected' where question_id=$1 and key=$2`, [a.questionId, a.key]);
   } else {
-    const display = a.display === undefined ? cur.display : text(a.display, 60);
-    if (!display) throw new GameError(400, 'Tên đáp án trống.');
-    const tier = a.tier === undefined || isKrill ? cur.prior : tierOf(a.tier);
-    await db.query(
-      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','approved')
-       on conflict (question_id, key) do update set display=excluded.display, prior_tier=excluded.prior_tier, source='admin', status='approved'`,
-      [a.questionId, a.key, display, tier],
-    );
+    await db.query(`update answers set display=$3, prior_tier=$4, status='approved' where question_id=$1 and key=$2`, [a.questionId, a.key, display, tier]);
+  }
+  if (!a.remove) {
     // Whoever types the new name finds it, and the old one still works.
     await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [a.questionId, soft(display), a.key]);
   }
@@ -267,40 +299,43 @@ export async function adminEditAnswer(db: Db, a: { questionId: string; key: stri
 
 /** Adds an answer the book lacks, with the names people also use for it. */
 export async function adminAddAnswer(db: Db, a: { questionId: string; display: unknown; tier: unknown; aliases?: unknown }) {
+  await bk.ensureBook(db);
   const q = await loadQuestion(db, a.questionId);
+  const def = bk.get(a.questionId)!;
   const display = text(a.display, 60);
   if (!display) throw new GameError(400, 'Tên đáp án trống.');
   const tier = tierOf(a.tier);
   const found = q.matcher.match(display);
   if (found?.exact || q.answers.has(soft(display))) throw new GameError(409, 'Đáp án này đã có trong sổ.');
   const key = soft(display);
-  await db.query(
-    `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','approved')
-     on conflict (question_id, key) do update set display=excluded.display, prior_tier=excluded.prior_tier, source='admin', status='approved'`,
-    [a.questionId, key, display, tier],
-  );
   const names = String(a.aliases ?? '')
     .split(/[,|]/)
     .map((x) => text(x, 60))
     .filter(Boolean)
     .slice(0, 10);
-  for (const n of [display, ...names]) {
-    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [a.questionId, soft(n), key]);
-  }
+  const aliases = [display, ...names.filter((n) => soft(n) !== key)];
+  await bk.save(db, { ...def, answers: [...def.answers, { key, display, priorTier: tier, aliases }] });
   forgetQuestion(a.questionId);
   return { ok: true };
 }
 
-/** Every change made from the admin page, to fold back into the release files so the book in code matches. */
+/** Where the database's book differs from the files in code, so the files can be brought back in line (or left behind on purpose). */
 export async function adminEdits(db: Db) {
-  const prompts = await db.query<{ question_id: string; prompt: string; note: string | null; updated_at: string }>(
-    `select question_id, prompt, note, updated_at::text as updated_at from question_edits order by updated_at desc`,
-  );
-  const answers = await db.query<{ question_id: string; key: string; display: string; prior_tier: number; status: string }>(
-    `select question_id, key, display, prior_tier, status from answers where source='admin' order by question_id, status, display`,
-  );
-  return {
-    prompts: prompts.map((p) => ({ ...p, bookPrompt: BOOK_BY_ID.get(p.question_id)?.prompt ?? '' })),
-    answers: answers.map((x) => ({ ...x, inBook: !!BOOK_BY_ID.get(x.question_id)?.answers.some((b) => b.key === x.key) })),
-  };
+  await bk.ensureBook(db);
+  const prompts: { question_id: string; prompt: string; note: string | null; bookPrompt: string }[] = [];
+  const answers: { question_id: string; display: string; prior_tier: number; status: string; inBook: boolean }[] = [];
+  for (const def of bk.all()) {
+    const code = CODE.get(def.id);
+    if (!code) continue;
+    if (code.prompt !== def.prompt || (code.note ?? '') !== (def.note ?? '')) prompts.push({ question_id: def.id, prompt: def.prompt, note: def.note ?? null, bookPrompt: code.prompt });
+    const codeBy = new Map(code.answers.map((x) => [x.key, x]));
+    const dbBy = new Map(def.answers.map((x) => [x.key, x]));
+    for (const x of def.answers) {
+      const c = codeBy.get(x.key);
+      if (!c) answers.push({ question_id: def.id, display: x.display, prior_tier: x.priorTier, status: 'approved', inBook: false });
+      else if (c.display !== x.display || c.priorTier !== x.priorTier) answers.push({ question_id: def.id, display: x.display, prior_tier: x.priorTier, status: 'approved', inBook: true });
+    }
+    for (const c of code.answers) if (!dbBy.has(c.key)) answers.push({ question_id: def.id, display: c.display, prior_tier: c.priorTier, status: 'rejected', inBook: true });
+  }
+  return { prompts: prompts.map((p) => ({ ...p, updated_at: '' })), answers: answers.map((x) => ({ ...x, key: soft(x.display) })) };
 }

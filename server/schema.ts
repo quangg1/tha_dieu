@@ -29,6 +29,17 @@ create table if not exists aliases (
   primary key (question_id, alias)
 );
 
+-- The question book. The files in shared/book only add prompts the database has never seen; after that the database is
+-- the source: prompts, answers, tiers, last days and status are edited from the admin page.
+create table if not exists book (
+  id text primary key,
+  def jsonb not null,
+  status text not null default 'active',
+  until text,
+  seq bigserial,
+  updated_at timestamptz not null default now()
+);
+
 -- Prompt and note changed from the admin page: they win over the book in code until folded back into it.
 create table if not exists question_edits (
   question_id text primary key,

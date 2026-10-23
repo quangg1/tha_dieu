@@ -6,6 +6,7 @@ import { getDb, type Db } from './db.js';
 import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
 import * as AD from './admin.js';
+import { ensureBook } from './book.js';
 import * as A from './account.js';
 import * as F from './friends.js';
 import { NIGHT_VERDICTS } from '../shared/book/night-verdicts.js';
@@ -369,7 +370,7 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     admin: true,
     async run({ db, body }) {
       const id = String(body.questionId ?? '');
-      return body.reset ? AD.adminResetQuestion(db, id) : AD.adminEditQuestion(db, id, body.prompt, body.note);
+      return body.reset ? AD.adminResetQuestion(db, id) : AD.adminEditQuestion(db, id, body.prompt, body.note, body.until);
     },
   },
   'admin/answer-edit': {
@@ -391,6 +392,20 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     admin: true,
     async run({ db }) {
       return AD.adminEdits(db);
+    },
+  },
+  'admin/book-status': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return AD.adminSetStatus(db, String(body.questionId ?? ''), String(body.status ?? '') as 'active' | 'paused' | 'retired');
+    },
+  },
+  'admin/book-export': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return AD.adminExport(db);
     },
   },
   'admin/pause': {
@@ -546,6 +561,7 @@ export async function route(req: Req, res: ServerResponse, opts: { referee?: Ref
     const body = req.method === 'POST' ? await readBody(req) : {};
     const db = opts.db ?? (await getDb());
     if (!opts.db) await ensureReady(db);
+    await ensureBook(db);
     // A coarse device mark (network address and browser), hashed, so a replay in a private tab stays off the board.
     const ip = clientIp(req.headers, req.socket?.remoteAddress);
     const dev = createHash('sha256').update(`${ip}|${req.headers['user-agent'] ?? ''}`).digest('hex').slice(0, 24);

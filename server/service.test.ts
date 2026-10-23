@@ -919,3 +919,55 @@ describe('the village head other pages', () => {
     expect(JSON.stringify(s)).not.toMatch(/sk-|postgres:/);
   });
 });
+
+describe('the book in the database', () => {
+  it('holds every prompt as the files define it, keeps edits across a resync, takes in new prompts and folds old overrides', async () => {
+    const bk = await import('./book.js');
+    const { BOOK, RETIRED } = await import('../shared/book/questions.js');
+    const { UNTIL } = await import('../shared/book/release.js');
+    await bk.ensureBook(db, true);
+    expect(bk.all().length).toBe(BOOK.length);
+    for (const q of BOOK) {
+      if (q.id === 'trai-cay') continue; // edited by the test above
+      expect(bk.get(q.id), q.id).toEqual(JSON.parse(JSON.stringify(q)));
+      expect(bk.status(q.id), q.id).toBe(RETIRED.has(q.id) ? 'retired' : 'active');
+      expect(bk.until(q.id), q.id).toBe(UNTIL.get(q.id) ?? null);
+    }
+    // A prompt the database has never seen comes in from the files on the next setup; an existing one is left alone.
+    const id = BOOK.find((q) => !RETIRED.has(q.id) && q.id !== 'trai-cay')!.id;
+    await bk.save(db, { ...bk.get(id)!, prompt: 'Kể tên một thứ đã sửa trong database' });
+    await db.query(`delete from book where id = (select id from book where id <> $1 order by seq desc limit 1)`, [id]);
+    const before = (await db.query<{ n: number }>(`select count(*)::int as n from book`))[0].n;
+    expect(before).toBe(BOOK.length - 1);
+    await S.setup(db);
+    await bk.ensureBook(db, true);
+    expect(bk.all().length).toBe(BOOK.length);
+    expect(bk.get(id)!.prompt).toBe('Kể tên một thứ đã sửa trong database');
+    // Overrides from before the book moved here are folded into the prompts and removed.
+    const target = bk.get(id)!.answers[0];
+    await db.query(`insert into question_edits (question_id, prompt, note) values ($1,$2,$3)`, [id, 'Kể tên một thứ từ lớp ghi đè cũ', 'Ghi chú cũ']);
+    await db.query(`insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','approved')`, [id, target.key, 'Tên từ lớp ghi đè cũ', 1]);
+    await db.query(`insert into meta (key, value) values ('paused', $1) on conflict (key) do update set value=excluded.value`, [JSON.stringify([id])]);
+    await S.setup(db);
+    await bk.ensureBook(db, true);
+    expect(bk.get(id)!.prompt).toBe('Kể tên một thứ từ lớp ghi đè cũ');
+    expect(bk.get(id)!.answers.find((a) => a.key === target.key)!.display).toBe('Tên từ lớp ghi đè cũ');
+    expect(bk.status(id)).toBe('paused');
+    expect((await db.query(`select 1 from question_edits`)).length).toBe(0);
+    expect((await db.query(`select 1 from answers where source='admin' and key=$1`, [target.key])).length).toBe(0);
+    expect((await db.query(`select 1 from meta where key='paused'`)).length).toBe(0);
+    // A change made on one instance reaches another through the revision counter.
+    const pausedQ = (await S.loadQuestion(db, id)).prompt;
+    expect(pausedQ).toBe('Kể tên một thứ từ lớp ghi đè cũ');
+    await db.query(`update book set status='active' where id=$1`, [id]);
+    await db.query(`insert into meta (key, value) values ('book_rev', '1') on conflict (key) do update set value=(meta.value::int + 1)::text`);
+    await bk.ensureBook(db, true);
+    expect(bk.status(id)).toBe('active');
+    const AD = await import('./admin.js');
+    await AD.adminSetStatus(db, id, 'retired');
+    expect((await AD.adminBank(db)).items.find((i) => i.id === id)!.retired).toBe(true);
+    await AD.adminSetStatus(db, id, 'active');
+    const ex = await AD.adminExport(db);
+    expect(ex.questions.length).toBe(BOOK.length);
+  });
+});
