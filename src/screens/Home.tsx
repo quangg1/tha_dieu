@@ -367,6 +367,10 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
           <small>{account() ? 'Đã đồng bộ' : 'Chuỗi ngày, bộ sưu tập'}</small>
           <span className="mine-arrow" aria-hidden="true">›</span>
         </button>
+        <div className="home-links">
+          <button onClick={() => setSheet('feedback')} aria-haspopup="dialog">Góp ý</button>
+          {canSupport && <button onClick={() => { setSheet('support'); track('support'); }} aria-haspopup="dialog">Ủng hộ tác giả</button>}
+        </div>
       </section>
 
       {menu && (
