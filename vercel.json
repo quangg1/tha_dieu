@@ -34,5 +34,18 @@
       "path": "/api/nightly",
       "schedule": "20 16 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "tha-dieu-dusky.vercel.app"
+        }
+      ],
+      "destination": "https://bilion-vn.vercel.app/:path*",
+      "permanent": true
+    }
   ]
 }
