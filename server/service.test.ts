@@ -762,3 +762,12 @@ describe('Thả vô tận board', () => {
     expect(all.rows.findIndex((r) => r.name === 'Bình')).toBeLessThan(all.rows.findIndex((r) => r.name === 'An'));
   });
 });
+
+describe('timely prompts', () => {
+  it('stop being asked after their last day', () => {
+    const late = S.expiredIds('2099-01-01');
+    expect(late.length).toBeGreaterThan(0);
+    expect(late.every((id) => S.isTimely(id) && S.expired(id, '2099-01-01'))).toBe(true);
+    expect(S.expiredIds('2026-10-23')).toEqual([]);
+  });
+});

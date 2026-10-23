@@ -52,3 +52,10 @@ inclusion: always
 - đáp án quen bị xếp quá hiếm, hoặc đáp án lạ bị xếp quá phổ biến;
 - câu quá dễ để có điểm cao (nhiều đáp án hiếm mà ai cũng biết): cho vào `RETIRED` trong `questions.ts` và ghi lý do bên cạnh.
 Ghi lại danh sách những gì đã sửa trong message commit.
+
+## Bộ chọn câu mỗi ngày dùng gì (để soạn đúng chỗ đang thiếu)
+- 7 câu mỗi ngày theo mức khó `1, 2, 1, 2, 3, 2, 3`. Mức khó đặt bằng trường `lv` (1 dễ, 2 vừa, 3 khó); bỏ trống thì máy tự đoán (thường ra 1 hoặc 2). **Câu khó (`lv:3`) đang rất thiếu**: chỉ khoảng 17 câu, cần thêm nhiều.
+- Chỗ 2 và 5 dành cho câu **đại chúng**: id bắt đầu `pop-` hoặc chủ đề Giải trí, Âm nhạc, Nhạc Việt, Điện ảnh, Mua sắm, Thời trang, Ăn uống, Công nghệ, Tuổi thơ.
+- Chỗ 4 dành cho **câu thời sự** (có `until`) khi còn câu chưa hết hạn; mỗi câu thời sự quay lại sau ít nhất 14 ngày. Hết hạn thì tự thôi hỏi.
+- Không hai câu cùng chủ đề trong một ngày; một câu không quay lại trong 42 ngày nếu kho còn đủ.
+- Câu hỏi dễ sửa bậc nhất là câu có trường `lv` rõ ràng và chủ đề đúng danh sách ở trên.

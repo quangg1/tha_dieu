@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BANKS } from '../shared/banks.js';
 import { BOOK, BOOK_BY_ID, BOOK_VERSION, RETIRED } from '../shared/book/questions.js';
+import { UNTIL } from '../shared/book/release.js';
 import { struck } from '../shared/book/prune.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
@@ -144,7 +145,18 @@ async function openPrompts(db: Db, pool: readonly { id: string; answers: readonl
 const LEVEL_PLAN = [1, 2, 1, 2, 3, 2, 3];
 /** Slots held for pop-culture questions (films, songs, snacks, apps), which make the rare answers worth showing off. */
 const POP_SLOTS = [1, 4];
-const isPop = (id: string) => id.startsWith('pop-');
+/** Categories that count as pop culture, besides the old pop- prompts. */
+const POP_CATEGORIES = new Set(['Giải trí', 'Âm nhạc', 'Nhạc Việt', 'Điện ảnh', 'Mua sắm', 'Thời trang', 'Ăn uống', 'Công nghệ', 'Tuổi thơ']);
+const isPop = (q: { id: string; category: string }) => q.id.startsWith('pop-') || POP_CATEGORIES.has(q.category);
+/**
+ * Timely prompts (news, new films, this year's songs) carry a last day in UNTIL. They are never asked after it, they
+ * only come in the day's timely slot (one a day while any is fresh), and they may come back after TIMELY_WINDOW days.
+ */
+const TIMELY_SLOT = 3;
+const TIMELY_WINDOW = 14;
+export const isTimely = (id: string) => UNTIL.has(id);
+export const expired = (id: string, day: string) => (UNTIL.get(id) ?? '9999-12-31') < day;
+export const expiredIds = (day: string) => [...UNTIL].filter(([, u]) => u < day).map(([id]) => id);
 
 /**
  * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
@@ -167,7 +179,7 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
     }
     await db.query(`delete from daily_sets where day=$1::date`, [day]);
   }
-  const pool = BOOK.filter((q) => active.has(q.id));
+  const pool = BOOK.filter((q) => active.has(q.id) && !expired(q.id, day));
   const recentRows = await db.query<{ day: string; question_ids: string[] }>(
     `select to_char(day, 'YYYY-MM-DD') as day, question_ids from daily_sets where day < $1::date and day >= $1::date - 42`,
     [day],
@@ -181,16 +193,28 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
   for (const window of [42, 14, 3, 0]) {
     const cutoff = new Date(new Date(day + 'T00:00:00Z').getTime() - window * 86400_000).toISOString().slice(0, 10);
     const recent = new Set(recentRows.filter((r) => r.day >= cutoff).flatMap((r) => r.question_ids));
+    const timelyCutoff = new Date(new Date(day + 'T00:00:00Z').getTime() - Math.min(window, TIMELY_WINDOW) * 86400_000).toISOString().slice(0, 10);
+    const recentTimely = new Set(recentRows.filter((r) => r.day >= timelyCutoff).flatMap((r) => r.question_ids));
     for (const level of LEVEL_PLAN.slice(pick.length)) {
       const slot = pick.length;
-      const ok = (q: (typeof pool)[number], strictLevel: boolean) =>
+      // The timely slot takes a fresh timely prompt when there is one; timely prompts never take other slots.
+      if (slot === TIMELY_SLOT) {
+        const t = order.find((q) => isTimely(q.id) && !recentTimely.has(q.id) && !pick.some((p) => p.category === q.category || p.family === q.family));
+        if (t) {
+          pick.push(t);
+          continue;
+        }
+      }
+      const ok = (q: (typeof pool)[number], strictLevel: boolean, strictPop = true) =>
+        !isTimely(q.id) &&
         !recent.has(q.id) &&
-        isPop(q.id) === POP_SLOTS.includes(slot) &&
+        (!strictPop || isPop(q) === POP_SLOTS.includes(slot)) &&
         !pick.includes(q) &&
         (!open.has(q.id) || pick.filter((p) => open.has(p.id)).length < OPEN_PER_DAY) &&
         (!strictLevel || (q.level ?? 2) === level) &&
         !pick.some((p) => p.category === q.category || p.family === q.family);
-      const next = order.find((q) => ok(q, true)) ?? order.find((q) => ok(q, false));
+      // Loosen the level first, then the pop slot, and only then the six-week window.
+      const next = order.find((q) => ok(q, true)) ?? order.find((q) => ok(q, false)) ?? order.find((q) => ok(q, false, false));
       if (!next) break;
       pick.push(next);
     }
@@ -1574,12 +1598,12 @@ export async function nightQuestion(db: Db, seen: string[]) {
   // Never one of today's daily prompts (see ensureInSet).
   const daily = await dailySet(db, vnToday());
   const rows = await db.query<{ id: string }>(
-    `select id from questions where active and not (id = any($1::text[])) and not (id = any($2::text[])) order by random() limit 1`,
-    [seen.slice(-200), daily],
+    `select id from questions where active and not (id = any($1::text[])) and not (id = any($2::text[])) and not (id = any($3::text[])) order by random() limit 1`,
+    [seen.slice(-200), daily, expiredIds(vnToday())],
   );
   const id =
     rows[0]?.id ??
-    (await db.query<{ id: string }>(`select id from questions where active and not (id = any($1::text[])) order by random() limit 1`, [daily]))[0]?.id;
+    (await db.query<{ id: string }>(`select id from questions where active and not (id = any($1::text[])) and not (id = any($2::text[])) order by random() limit 1`, [daily, expiredIds(vnToday())]))[0]?.id;
   // When every active question is already on today's flight (a small book), there is nothing left to ask.
   if (!id) throw new GameError(404, 'Hết câu để thả rồi. Quay lại sau nhé.');
   return publicQuestion(await loadQuestion(db, id));
