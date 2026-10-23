@@ -18,7 +18,7 @@ function makeArt() {
     bamboo: [Art.sprite(V.bambooSvg(1)), Art.sprite(V.bambooSvg(4))],
     areca: [Art.sprite(V.arecaSvg(0)), Art.sprite(V.arecaSvg(-1))],
     banyan: Art.sprite(V.banyanSvg()),
-    house: [Art.sprite(V.houseSvg(0)), Art.sprite(V.houseSvg(1))],
+    house: [0, 1, 2, 3, 4, 5, 6, 7].map((v) => Art.sprite(V.houseSvg(v as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7))),
     // bé Bi, the mascot: a painted picture; hand = where the kite string leaves his raised fist.
     kids: Art.spriteUrl('/art/be-bi.png', 325, 420),
     hand: { x: 0.928, y: 0.276 },
@@ -1761,11 +1761,42 @@ export class SkyScene {
       [[A.bamboo[0], 0.12, 0.34, 2], [A.house[1], 0.3, 0.12, 1], [A.banyan, 0.56, 0.42, 0], [A.house[0], 0.5, 0.22, 1], [A.areca[0], 0.78, 0.09, 0], [A.bamboo[1], 0.9, 0.36, 2]],
     ];
     const r = mulberry(13);
-    for (let k = 0; k * unit < W + unit; k++) {
-      const plan = W < 700 ? plans[0] : plans[k % plans.length];
-      for (const [sp, fx, fw, z] of plan) {
-        const jitter = W < 700 ? 0 : (r() - 0.5) * 0.06;
-        items.push({ s: sp, x: (k + fx + jitter) * unit - (W < 700 ? 0 : unit * 0.3), w: U * fw * (W < 700 ? 1 : 0.88 + r() * 0.24), z, flip: W >= 700 && r() < 0.4 && sp !== A.house[1] });
+    if (W < 700) {
+      for (let k = 0; k * unit < W + unit; k++) for (const [sp, fx, fw, z] of plans[0]) items.push({ s: sp, x: (k + fx) * unit, w: U * fw, z, flip: false });
+    } else {
+      // Wide screens: a front row of houses that differ in shape, colour and size, trees in the gaps, and a paler,
+      // smaller back row peeking between them, so the whole width of the meadow is filled.
+      const HW = clamp(W * 0.15, 140, 300);
+      // Relative widths of the eight house sprites: cream, townhouse, Thai-roof, thatched, communal house, tall, tin-roof, shop.
+      const rel = [1, 0.62, 1.12, 0.95, 1.5, 0.66, 0.98, 0.9];
+      const order = [2, 0, 5, 6, 3, 7, 1, 4, 0, 2, 6, 5, 7, 3, 1];
+      let x = -HW * 0.25;
+      let n = 0;
+      let last = -1;
+      let dinh = false;
+      while (x < W + HW) {
+        let v = order[(n++ + Math.floor(r() * 3)) % order.length];
+        if (v === last) v = (v + 1) % 8;
+        // The communal house is the village's landmark: one or two in the whole width, never next to each other.
+        if (v === 4 && (dinh || x < W * 0.25)) v = 2;
+        if (v === 4) dinh = true;
+        else if (x > W * 0.6) dinh = false;
+        last = v;
+        const w = HW * rel[v] * (0.92 + r() * 0.16);
+        items.push({ s: A.house[v], x: x + w / 2, w, z: 1, flip: r() < 0.35 && v !== 1 && v !== 5 && v !== 7 });
+        // A paler, smaller house behind, set off to one side.
+        if (r() < 0.6) {
+          const bv = [0, 6, 3, 2, 7][Math.floor(r() * 5)];
+          items.push({ s: A.house[bv], x: x + w * (0.1 + r() * 0.5), w: HW * rel[bv] * 0.62, z: -1, flip: r() < 0.5 });
+        }
+        x += w * 0.94;
+        const gap = r();
+        if (gap < 0.5) {
+          const tree = [A.areca[0], A.areca[1], A.bamboo[0], A.bamboo[1], A.banyan][Math.floor(r() * 5)];
+          const tw = tree === A.banyan ? HW * 1.4 : tree === A.bamboo[0] || tree === A.bamboo[1] ? HW * 1.05 : HW * 0.3;
+          items.push({ s: tree, x: x + tw * 0.2, w: tw, z: tree === A.bamboo[0] || tree === A.bamboo[1] ? 2 : 0, flip: r() < 0.5 });
+          x += tw * (tree === A.banyan ? 0.7 : 0.45);
+        } else x += w * 0.06;
       }
     }
     items.sort((a, b) => a.z - b.z);
@@ -1837,6 +1868,14 @@ export class SkyScene {
     ctx.drawImage(P.hedge, 0, yg - hh + 4, W, hh);
     for (const it of this.villageItems()) {
       if (it.x + it.w < -20 || it.x - it.w > W + 20) continue;
+      if (it.z < 0) {
+        ctx.save();
+        ctx.translate(it.x, 0);
+        if (it.flip) ctx.scale(-1, 1);
+        this.put(it.s, 0, yg - Math.max(8, it.w * 0.14), it.w, 0.5, 1, 0.85);
+        ctx.restore();
+        continue;
+      }
       if (it.flip) {
         ctx.save();
         ctx.translate(it.x, 0);
