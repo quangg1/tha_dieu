@@ -2,6 +2,14 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 23:00
+- **Đã giao TASK-007 cho HY3: chấm lại 7 kho, bảy lượt riêng** — `tungu` 681 → `dovat` 515 → `cotich` 359 → `thethao` 307 → `quanao` 169 → `mausac` 112 → `diaphuong` 63. Kết quả ra file `tu_<kho>_hy3_v2.tsv`, bản cũ để nguyên để còn so hai bản.
+- **Mỗi lượt có cửa tự kiểm bắt buộc, ghi vào báo cáo rồi mới sang lượt sau:** (1) đếm số từ từng mức — mức 1 ra 0 từ thì dừng và đọc lại cả kho, nếu đọc lại vẫn là 0 thì ghi lý do chứ **đừng bịa từ mức 1 cho đủ hình**; (2) đối chiếu từ neo, lệch ≥ 2 mức thì chấm lại kho đó; (3) quét từ trùng chấm khác mức.
+- **Từ neo cho 7 kho:** `dovat` và `diaphuong` lấy từ `rubric-do-quen.md` (chuẩn đã duyệt, viết thẳng vào task thành bảng 5 mức). Năm kho rubric không có neo thì lấy **từ của bộ 160 từ chồng nơi hai model đã khớp** — `tungu` 8 từ, `cotich` 4, `thethao` 4, `quanao` 3, `mausac` 3; chỗ hai bên lệch 1 mức thì ghi thành khoảng (`Xì xụp` 2–3) cho người chấm chọn.
+- Không bắt chấm lại bộ 160 từ chồng: thang của HY3 đã được xác nhận (+0,00 so với DeepSeek), vấn đề của 7 kho không phải lệch thang.
+- Task cũng nhắc lại cái nit bốn đợt liền đều mắc: dòng cuối file phải đủ 4 cột kể cả khi `ghi_chu` rỗng.
+- **Chờ chủ dự án:** chuyển TASK-007 cho HY3; quyết chuyện mức 5 của `thucvat` (2.805 mục đã chấm chưa áp); 58 ca kéo xuống của `monan`; **truy vấn số 2 trên production** — vẫn là việc quan trọng nhất còn treo.
+
 ## 2026-10-23 22:50
 - **Duyệt TASK-005: `đã nhận` cả 11 kho.** 12 file đều 0 lệch thứ tự, `pop` nguyên 1–5, **0 từ trùng chấm khác mức**, mỗi kho dùng đủ 5 mức. Đã áp vào sổ.
 - **Duyệt TASK-006: `cần sửa` 7 trong 11 kho.** Nhận và đã áp `nhanvat` (25/25 từ neo đúng, lệch TB +0,07 — bản chắc tay nhất bốn đợt), `diadanh` (−0,09), `douong` (+0,22), `ngonngu` (−0,08). Trả lại `tungu`, `dovat`, `cotich`, `thethao`, `quanao`, `mausac`, `diaphuong` — 2.206 mục.
