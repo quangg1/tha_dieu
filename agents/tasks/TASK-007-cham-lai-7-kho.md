@@ -1,7 +1,7 @@
 # TASK-007: chấm lại 7 kho, mỗi kho một lượt riêng
 
 - Người nhận: WorkBuddy · model **HY3**
-- Trạng thái: đã giao
+- Trạng thái: đã nhận
 - Giao ngày: 2026-10-23
 
 ## Bối cảnh
@@ -92,5 +92,20 @@ Năm kho còn lại rubric không có neo, nên neo lấy từ **bộ 160 từ c
 ## Báo cáo (người nhận điền)
 Bảy mục, mỗi kho một mục, theo thứ tự đã làm. Rồi đổi trạng thái sang `chờ duyệt`.
 
-## Duyệt (Claude điền)
-Claude kiểm từng file, đối chiếu từ neo, so với bản `tu_<kho>_hy3.tsv` cũ để thấy đã đổi gì, rồi áp vào sổ bằng `scripts/apply-pop.ts` — chỉ các mục lệch ≥ 2 mức so với sổ. Không cần bảng chuyển thang.
+## Duyệt (Kiro thay Claude, 2026-10-23)
+Đã kiểm 7 file `tu_<kho>_hy3_v2.tsv` tại `bilion-rarity-audit` (bản 2026-10-23-16-28-25). Tiêu chí cứng đạt hết: số dòng khớp phiếu, 2 cột đầu nguyên văn & đúng thứ tự, mọi dòng 4 cột, pop nguyên 1–5, không có từ trùng chấm khác mức. Vấn đề cốt lõi của v1 đã khắc phục — cả 7 kho đều có mức 1 > 0 từ.
+
+Phân bố (1→5) và từ neo:
+- tungu 18/65/300/229/69
+- dovat 11/36/365/72/31 — neo: 31 khớp, 1 lệch-1, 0 lệch≥2
+- cotich 5/0/72/47/235
+- thethao 88/0/95/89/35
+- quanao 1/16/39/97/16
+- mausac 12/6/13/67/14
+- diaphuong 2/12/34/10/5 — neo: 20/20 khớp
+
+Đã áp bằng `scripts/apply-pop.ts <file> <kho> --write` (không bảng chuyển thang), chỉ mục lệch ≥ 2 mức so với sổ. Số mục sửa: tungu 72, dovat 126, cotich 277, thethao 177, quanao 79, mausac 75, diaphuong 2. Kho có cả `lex/` và `lex2/` (dovat, quanao, thethao) được sửa ở cả hai nơi cho cùng một mục, giữ nhất quán.
+
+Kiểm sau khi áp: `check:questions` 371 câu, 0 lỗi, 11 chú ý (đúng bằng trước); `tsc --noEmit` sạch; `npm test` 90/90. File chấm cũ `tu_<kho>_hy3.tsv` giữ nguyên, không ghi đè.
+
+Chưa đối chiếu với lượt gõ thật của người chơi — các con số này vẫn là phán đoán của model, cần hiệu chỉnh bằng dữ liệu sau (truy vấn số 2 trên production còn treo).

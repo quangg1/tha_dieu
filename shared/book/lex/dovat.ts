@@ -18,7 +18,7 @@ export default `
 3 Ấm đun nước|Ấm siêu tốc|Ấm điện # dien
 3 Ấm trà|Ấm|Bình trà #
 3 Bếp từ|Bếp điện|Bếp hồng ngoại # dien
-3 Nĩa|Dĩa ăn|Cái nĩa|Fork # nhon
+5 Nĩa|Dĩa ăn|Cái nĩa|Fork # nhon
 3 Muôi|Vá|Cái muôi|Cái vá #
 3 Rổ|Rá|Cái rổ #
 3 Máy xay sinh tố|Máy xay # dien
@@ -37,9 +37,9 @@ export default `
 3 Bình nước|Chai nước|Bình đựng nước #
 3 Phích nước|Phích|Bình thủy|Bình giữ nhiệt #
 2 Chày cối|Cối|Cối giã|Chày #
-2 Vỉ nướng #
+4 Vỉ nướng #
 2 Xửng hấp|Nồi hấp|Chõ #
-2 Rây|Cái rây #
+4 Rây|Cái rây #
 2 Kẹp gắp|Kẹp|Kẹp gắp thức ăn #
 2 Dụng cụ mở hộp|Cái mở hộp #
 2 Đồ khui bia|Cái mở bia|Khui #
@@ -47,41 +47,41 @@ export default `
 2 Cân nhà bếp|Cân #
 2 Máy pha cà phê # dien
 2 Phin cà phê|Phin #
-2 Máy nướng bánh mì # dien
+4 Máy nướng bánh mì # dien
 2 Máy ép trái cây|Máy ép # dien
-2 Máy đánh trứng # dien
+4 Máy đánh trứng # dien
 2 Cây đánh trứng|Phới #
 2 Hũ|Lọ|Hũ gia vị|Lọ gia vị #
-2 Chai nước mắm #
+4 Chai nước mắm #
 2 Giấy bạc|Màng bọc thực phẩm #
 2 Ống hút #
-2 Tủ bếp|Kệ bếp # noithat
-2 Máy hút mùi|Hút mùi # dien
+4 Tủ bếp|Kệ bếp # noithat
+4 Máy hút mùi|Hút mùi # dien
 2 Bình lọc nước|Máy lọc nước # dien
-2 Tô|Bát tô|Cái tô #
+4 Tô|Bát tô|Cái tô #
 2 Gáo|Gáo dừa|Gáo múc nước # xua
-2 Vung|Nắp nồi #
-2 Lò than|Bếp than|Bếp lò # xua
-1 Bếp củi|Kiềng ba chân|Ông đầu rau # xua
-1 Ống thổi lửa # xua
+5 Vung|Nắp nồi #
+4 Lò than|Bếp than|Bếp lò # xua
+3 Bếp củi|Kiềng ba chân|Ông đầu rau # xua
+3 Ống thổi lửa # xua
 1 Chạn|Chạn bát # xua
 1 Ang|Thạp|Vại|Chum # xua
 1 Ấm tích # xua
 1 Nồi đất|Niêu|Nồi niêu # xua
 1 Mẹt|Nia|Cái nia|Cái mẹt # xua
-1 Sàng|Cái sàng # xua
+3 Sàng|Cái sàng # xua
 1 Muỗng canh|Thìa canh #
-1 Dao bào|Dao gọt # nhon
-1 Kéo cắt gà # nhon
-1 Tăm|Que tăm|Tăm tre # nhon
-1 Lót nồi|Miếng lót nồi #
-1 Bao tay nhà bếp|Găng tay nhà bếp #
-1 Máy làm sữa đậu nành # dien
-1 Máy làm bánh mì # dien
-1 Máy xay thịt # dien
-1 Bình sữa #
-1 Ấm sắc thuốc # xua
-1 Cối xay|Cối xay bột|Cối đá # xua
+3 Dao bào|Dao gọt # nhon
+3 Kéo cắt gà # nhon
+3 Tăm|Que tăm|Tăm tre # nhon
+3 Lót nồi|Miếng lót nồi #
+3 Bao tay nhà bếp|Găng tay nhà bếp #
+3 Máy làm sữa đậu nành # dien
+3 Máy làm bánh mì # dien
+3 Máy xay thịt # dien
+3 Bình sữa #
+3 Ấm sắc thuốc # xua
+3 Cối xay|Cối xay bột|Cối đá # xua
 
 @ noithat
 5 Bàn|Cái bàn|Table #
@@ -93,8 +93,8 @@ export default `
 4 Quạt|Quạt điện|Quạt máy # dien
 4 Đèn|Bóng đèn|Đèn điện # dien
 4 Điều hòa|Máy lạnh|Máy điều hòa # dien
-3 Kệ sách|Giá sách|Tủ sách #
-3 Bàn trà|Bàn nước #
+5 Kệ sách|Giá sách|Tủ sách #
+5 Bàn trà|Bàn nước #
 3 Đồng hồ|Đồng hồ treo tường #
 3 Rèm cửa|Rèm|Màn cửa #
 3 Thảm|Tấm thảm|Thảm trải sàn #
@@ -106,23 +106,23 @@ export default `
 3 Công tắc # dien
 3 Quạt trần # dien
 2 Đèn chùm # dien
-2 Đèn ngủ # dien ngu
-2 Đèn bàn # dien
-2 Đèn cây # dien
-2 Ghế đẩu #
-2 Ghế xếp #
+4 Đèn ngủ # dien ngu
+4 Đèn bàn # dien
+4 Đèn cây # dien
+4 Ghế đẩu #
+4 Ghế xếp #
 2 Ghế bập bênh #
 2 Võng|Cái võng #
 2 Phản|Sập|Bộ phản # xua
-1 Tràng kỷ|Trường kỷ # xua
-1 Tủ chè # xua
-1 Án thư # xua
+3 Tràng kỷ|Trường kỷ # xua
+3 Tủ chè # xua
+3 Án thư # xua
 2 Bàn thờ #
 2 Lư hương|Bát hương #
 2 Chiếu|Chiếu cói|Manh chiếu # ngu
 2 Máy lọc không khí # dien
 2 Máy hút bụi|Robot hút bụi # dien
-2 Loa|Loa thùng|Loa bluetooth # dien
+4 Loa|Loa thùng|Loa bluetooth # dien
 2 Đầu đĩa|Đầu DVD|Máy hát # dien
 2 Điều khiển|Remote|Điều khiển ti vi # dien
 2 Máy sưởi # dien
@@ -130,22 +130,22 @@ export default `
 2 Bể cá|Hồ cá #
 2 Chậu cây|Chậu hoa #
 2 Giá treo quần áo|Mắc áo|Móc áo # ngu
-2 Tủ giày|Kệ giày #
+4 Tủ giày|Kệ giày #
 2 Cửa sổ #
 2 Cửa ra vào|Cửa #
-1 Bình phong # xua
-1 Câu đối|Hoành phi # xua
-1 Lịch|Lịch treo tường|Lịch bloc #
-1 Đèn dầu|Đèn hoa kỳ # xua
-1 Đèn lồng #
-1 Chuông cửa # dien
-1 Két sắt #
-1 Camera an ninh # dien
-1 Bộ phát wifi|Wifi|Cục phát wifi|Router # dien
-1 Đèn pin # dien
-1 Quạt nan|Quạt giấy|Quạt mo # xua
-1 Ghế mây #
-1 Đôn|Đôn sứ # xua
+3 Bình phong # xua
+3 Câu đối|Hoành phi # xua
+3 Lịch|Lịch treo tường|Lịch bloc #
+3 Đèn dầu|Đèn hoa kỳ # xua
+3 Đèn lồng #
+3 Chuông cửa # dien
+3 Két sắt #
+3 Camera an ninh # dien
+3 Bộ phát wifi|Wifi|Cục phát wifi|Router # dien
+3 Đèn pin # dien
+3 Quạt nan|Quạt giấy|Quạt mo # xua
+3 Ghế mây #
+4 Đôn|Đôn sứ # xua
 
 @ ngu
 5 Gối|Cái gối|Gối đầu|Pillow #
@@ -159,13 +159,13 @@ export default `
 2 Rèm cửa|Rèm cửa sổ
 2 Gấu bông|Thú nhồi bông #
 2 Nôi|Cũi|Giường cũi #
-1 Chăn bông|Chăn lông #
-1 Chõng tre|Cái chõng # xua
-1 Hòm|Rương|Hòm gỗ # xua
+3 Chăn bông|Chăn lông #
+3 Chõng tre|Cái chõng # xua
+3 Hòm|Rương|Hòm gỗ # xua
 
 @ tam
-5 Bàn chải đánh răng|Bàn chải #
-5 Kem đánh răng #
+3 Bàn chải đánh răng|Bàn chải #
+3 Kem đánh răng #
 4 Xà phòng|Xà bông|Bánh xà phòng #
 4 Khăn tắm|Khăn mặt|Khăn #
 4 Dầu gội|Dầu gội đầu #
@@ -181,10 +181,10 @@ export default `
 3 Chậu|Thau|Cái chậu #
 3 Xô|Thùng nước #
 3 Gáo múc nước #
-2 Dầu xả #
-2 Chỉ nha khoa|Tăm chỉ #
+4 Dầu xả #
+4 Chỉ nha khoa|Tăm chỉ #
 2 Nước súc miệng #
-2 Bông tai|Tăm bông|Bông ngoáy tai #
+4 Bông tai|Tăm bông|Bông ngoáy tai #
 2 Lavabo|Bồn rửa mặt #
 2 Thảm chùi chân #
 2 Cây lau nhà|Chổi lau nhà|Lau nhà #
@@ -195,20 +195,20 @@ export default `
 2 Bột giặt|Nước giặt #
 2 Nước xả vải #
 2 Bàn là|Bàn ủi # dien
-2 Mắc phơi|Sào phơi|Giá phơi đồ #
-2 Kẹp phơi quần áo #
-1 Bấm móng tay|Kềm cắt móng # nhon
-1 Nhíp #
-1 Cân sức khỏe #
-1 Sữa rửa mặt #
-1 Kem chống nắng #
-1 Nước hoa #
-1 Son môi|Son #
-1 Phấn trang điểm|Phấn phủ
-1 Băng vệ sinh #
-1 Tã|Bỉm #
-1 Bồ kết # xua
-1 Chổi lông gà #
+4 Mắc phơi|Sào phơi|Giá phơi đồ #
+4 Kẹp phơi quần áo #
+4 Bấm móng tay|Kềm cắt móng # nhon
+3 Nhíp #
+3 Cân sức khỏe #
+3 Sữa rửa mặt #
+3 Kem chống nắng #
+3 Nước hoa #
+3 Son môi|Son #
+3 Phấn trang điểm|Phấn phủ
+3 Băng vệ sinh #
+3 Tã|Bỉm #
+3 Bồ kết # xua
+3 Chổi lông gà #
 
 @ hoc
 5 Bút|Bút bi|Viết|Cây viết|Pen #
@@ -250,50 +250,50 @@ export default `
 2 Quả địa cầu|Địa cầu #
 2 Bản đồ #
 2 Đèn học # dien
-1 Bảng cửu chương #
-1 Kính lúp #
-1 Ống đựng bút #
-1 Que tính #
-1 Bộ đồ dùng toán|Bộ chữ cái #
-1 Cặp tóc #
-1 Khăn quàng đỏ #
-1 Phiếu bé ngoan #
+3 Bảng cửu chương #
+3 Kính lúp #
+3 Ống đựng bút #
+3 Que tính #
+3 Bộ đồ dùng toán|Bộ chữ cái #
+3 Cặp tóc #
+3 Khăn quàng đỏ #
+3 Phiếu bé ngoan #
 
 @ dien
 4 Điện thoại|Điện thoại di động|Di động|Smartphone|Phone #
 4 Máy tính|Máy vi tính|Computer|PC|Máy tính để bàn #
 4 Laptop|Máy tính xách tay #
 3 Máy tính bảng|Tablet|iPad #
-3 Tai nghe|Headphone|Earphone #
-3 Sạc|Cục sạc|Củ sạc|Sạc điện thoại #
-3 Pin|Cục pin #
-3 Chuột|Chuột máy tính #
-3 Bàn phím #
+5 Tai nghe|Headphone|Earphone #
+5 Sạc|Cục sạc|Củ sạc|Sạc điện thoại #
+5 Pin|Cục pin #
+5 Chuột|Chuột máy tính #
+5 Bàn phím #
 3 Màn hình #
 3 Máy in # vanphong
 3 Máy ảnh|Máy chụp ảnh|Camera #
-2 Sạc dự phòng|Pin dự phòng #
-2 USB|Ổ USB|Thẻ nhớ #
-2 Ổ cứng #
-2 Máy chiếu # vanphong
-2 Máy photocopy|Máy photo # vanphong
-2 Máy quay|Máy quay phim #
-2 Đồng hồ thông minh|Smartwatch #
-2 Micro|Mic|Mi-crô #
+4 Sạc dự phòng|Pin dự phòng #
+4 USB|Ổ USB|Thẻ nhớ #
+4 Ổ cứng #
+4 Máy chiếu # vanphong
+4 Máy photocopy|Máy photo # vanphong
+4 Máy quay|Máy quay phim #
+4 Đồng hồ thông minh|Smartwatch #
+4 Micro|Mic|Mi-crô #
 2 Máy chơi game|Máy chơi điện tử|Máy game #
 2 Đài|Radio|Đài radio #
-1 Máy fax # vanphong
-1 Máy nhắn tin #
+3 Máy fax # vanphong
+3 Máy nhắn tin #
 1 Máy đánh chữ # xua vanphong
-1 Máy khâu|Máy may #
-1 Máy scan|Máy quét # vanphong
-1 Ổ cắm kéo dài|Ổ điện nối dài #
+3 Máy khâu|Máy may #
+3 Máy scan|Máy quét # vanphong
+3 Ổ cắm kéo dài|Ổ điện nối dài #
 1 Dây điện #
-1 Ổn áp #
-1 Máy phát điện #
-1 Cát-xét|Máy cát-xét|Cassette # xua
-1 Đĩa CD|CD|Đĩa nhạc #
-1 Băng video|Băng cát-xét # xua
+3 Ổn áp #
+3 Máy phát điện #
+3 Cát-xét|Máy cát-xét|Cassette # xua
+3 Đĩa CD|CD|Đĩa nhạc #
+3 Băng video|Băng cát-xét # xua
 
 @ dungcu
 4 Búa|Cái búa #
@@ -333,26 +333,26 @@ export default `
 2 Bơm|Cái bơm|Bơm xe #
 2 Ổ khóa|Khóa|Cái khóa #
 2 Chìa khóa|Chìa khoá #
-1 Cày|Cái cày # xua
-1 Bừa|Cái bừa # xua
+3 Cày|Cái cày # xua
+3 Bừa|Cái bừa # xua
 1 Quang gánh|Đòn gánh # xua
 1 Gàu sòng|Gàu dai|Gàu tát nước # xua
 1 Cối xay lúa # xua
-1 Nong|Nong tằm # xua
-1 Cần câu|Cần câu cá #
-1 Lưới|Lưới đánh cá|Chài #
-1 Nơm|Đó|Lờ # xua
-1 Vó|Cái vó # xua
+3 Nong|Nong tằm # xua
+3 Cần câu|Cần câu cá #
+3 Lưới|Lưới đánh cá|Chài #
+3 Nơm|Đó|Lờ # xua
+3 Vó|Cái vó # xua
 1 Thuổng #
-1 Cuốc chim #
-1 Bàn cào #
-1 Dao bầu # nhon
-1 Mỏ hàn #
-1 Kìm điện #
-1 Lục giác #
-1 Máy mài # dien
-1 Thước thủy|Ni vô #
-1 Dây dọi|Quả dọi #
+3 Cuốc chim #
+3 Bàn cào #
+3 Dao bầu # nhon
+3 Mỏ hàn #
+3 Kìm điện #
+3 Lục giác #
+3 Máy mài # dien
+3 Thước thủy|Ni vô #
+3 Dây dọi|Quả dọi #
 
 @ vanphong
 3 Bàn làm việc # noithat
@@ -365,10 +365,10 @@ export default `
 2 Giấy note|Giấy nhớ|Giấy ghi chú|Post-it #
 2 Danh thiếp|Card visit #
 2 Bảng trắng #
-1 Máy hủy tài liệu # dien
-1 Máy chấm công # dien
-1 Lịch để bàn #
-1 Thẻ nhân viên #
-1 Dao rọc giấy # nhon
-1 Bàn dập lỗ|Máy đục lỗ #
+3 Máy hủy tài liệu # dien
+3 Máy chấm công # dien
+3 Lịch để bàn #
+3 Thẻ nhân viên #
+3 Dao rọc giấy # nhon
+3 Bàn dập lỗ|Máy đục lỗ #
 `;

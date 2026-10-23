@@ -54,8 +54,8 @@ export default `
 4 Lâm Đồng|Lam Dong|Đà Lạt # con ^ Lâm Đồng
 @ nam dnb
 5 TP Hồ Chí Minh|Hồ Chí Minh|Thành phố Hồ Chí Minh|TP HCM|TPHCM|HCM|Sài Gòn|Saigon|Ho Chi Minh # bien tp con ^ TP Hồ Chí Minh
-2 Bình Phước|Binh Phuoc # gcpc ^ Đồng Nai
-4 Bình Dương|Binh Duong # ^ TP Hồ Chí Minh
+5 Bình Phước|Binh Phuoc # gcpc ^ Đồng Nai
+2 Bình Dương|Binh Duong # ^ TP Hồ Chí Minh
 4 Đồng Nai|Dong Nai # con ^ Đồng Nai
 3 Tây Ninh|Tay Ninh # gcpc con ^ Tây Ninh
 4 Bà Rịa - Vũng Tàu|Bà Rịa Vũng Tàu|Vũng Tàu|Bà Rịa|BRVT|Ba Ria Vung Tau # bien ^ TP Hồ Chí Minh

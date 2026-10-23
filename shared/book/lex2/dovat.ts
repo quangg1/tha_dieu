@@ -66,7 +66,7 @@ export default `
 @ tam
 4 Khăn mặt|Khăn rửa mặt #
 4 Gương|Gương soi #
-4 Cốc đánh răng #
+2 Cốc đánh răng #
 3 Giá treo khăn #
 3 Hộp đựng xà phòng|Đĩa xà phòng #
 3 Rèm phòng tắm #
@@ -105,7 +105,7 @@ export default `
 4 Quạt|Quạt điện #
 4 Điều hòa|Máy lạnh #
 3 Tranh treo tường #
-3 Kệ sách #
+5 Kệ sách #
 3 Thảm trải sàn #
 3 Gương đứng #
 3 Móc treo quần áo #
@@ -117,12 +117,12 @@ export default `
 3 Gối tựa #
 3 Ruột chăn #
 3 Vỏ gối #
-3 Tủ giày #
+4 Tủ giày #
 3 Ổ cắm #
 3 Rèm cản sáng #
 3 Ghế lười #
 3 Giỏ đựng quần áo #
-2 Két sắt #
+3 Két sắt #
 2 Bàn trang điểm có gương #
 2 Màn chụp #
 2 Bình hoa #

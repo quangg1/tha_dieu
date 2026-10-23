@@ -24,12 +24,12 @@ export default `
 3 Ò ó o
 3 Cục ta cục tác
 3 Ủn ỉn
-3 Meo meo
-3 Gâu gâu
+5 Meo meo
+5 Gâu gâu
 3 Oang oang
 3 Khúc khích
-3 Ha ha
-3 Hi hi
+5 Ha ha
+5 Hi hi
 3 Hu hu
 3 Oe oe
 3 Ọ ọe
@@ -65,10 +65,10 @@ export default `
 3 Đoàng
 2 Xì xụp
 2 Sụt sịt
-2 Thút thít
+4 Thút thít
 2 Nức nở
 2 Rưng rức
-2 Khanh khách
+4 Khanh khách
 2 Sằng sặc
 2 Hô hố
 2 Hềnh hệch
@@ -104,7 +104,7 @@ export default `
 2 Cúc cu
 2 Chiêm chiếp
 2 Chíp chíp
-2 Rinh rích
+4 Rinh rích
 2 Hí hí
 2 Be be
 2 Ò ọ
@@ -126,7 +126,7 @@ export default `
 2 Hổn hển
 2 Khò khè
 2 Khụ khụ
-2 Hắt xì|Hắt xì hơi
+5 Hắt xì|Hắt xì hơi
 2 Ngáy khò khò|Khò khò
 2 Nhóp nhép
 2 Chóp chép
@@ -167,7 +167,7 @@ export default `
 4 Thướt tha
 4 Lững thững
 4 Khấp khểnh
-4 Ngoằn ngoèo
+2 Ngoằn ngoèo
 4 Lung linh
 4 Mũm mĩm
 4 Phúng phính
@@ -270,11 +270,11 @@ export default `
 3 Hớt hải
 3 Hấp tấp
 3 Vội vàng
-3 Thong thả
+5 Thong thả
 3 Khoan thai
 3 Nhẹ nhàng
-3 Rụt rè
-3 E ấp
+5 Rụt rè
+5 E ấp
 3 Ngơ ngác
 3 Ngẩn ngơ
 3 Đờ đẫn
@@ -298,31 +298,31 @@ export default `
 
 @ camxuc
 5 Vui|Vui vẻ
-5 Buồn|Buồn bã
+2 Buồn|Buồn bã
 4 Giận|Tức giận|Giận dữ
 4 Sợ|Sợ hãi
 4 Hạnh phúc
 4 Yêu|Yêu thương
-4 Ghét
-4 Lo lắng|Lo âu|Lo
+2 Ghét
+1 Lo lắng|Lo âu|Lo
 4 Hồi hộp
 4 Ngạc nhiên
-3 Xấu hổ|Ngượng|Ngại
-3 Cô đơn
-3 Nhớ|Nhớ nhung
-3 Tự hào
-3 Thất vọng
-3 Chán|Chán nản
-3 Mệt mỏi
+5 Xấu hổ|Ngượng|Ngại
+5 Cô đơn
+5 Nhớ|Nhớ nhung
+5 Tự hào
+5 Thất vọng
+5 Chán|Chán nản
+5 Mệt mỏi
 3 Hào hứng|Háo hức
-3 Phấn khích
+5 Phấn khích
 3 Thích thú
-3 Hài lòng
-3 Bất ngờ
+5 Hài lòng
+5 Bất ngờ
 3 Ghen|Ghen tị|Đố kỵ
 3 Thương|Thương xót|Thương cảm
-3 Cảm động|Xúc động
-3 Bực bội|Bực mình|Bực
+5 Cảm động|Xúc động
+5 Bực bội|Bực mình|Bực
 3 Khó chịu
 3 Căng thẳng|Stress
 3 Bình yên|Thanh thản
@@ -331,7 +331,7 @@ export default `
 3 Tủi thân
 3 Ấm ức
 3 Day dứt
-3 Bối rối
+5 Bối rối
 3 Hoang mang
 3 Tuyệt vọng
 3 Hy vọng|Hi vọng
@@ -343,11 +343,11 @@ export default `
 3 Uất ức
 3 Kinh hãi|Kinh hoàng
 3 Hoảng sợ|Hoảng hốt
-3 Rụt rè
+5 Rụt rè
 3 Tự ti
 3 Tự tin
 3 Bâng khuâng
-3 Xao xuyến
+5 Xao xuyến
 3 Bồi hồi
 3 Nao nao
 3 Man mác
@@ -361,7 +361,7 @@ export default `
 3 Ân hận
 3 Tiếc nuối|Nuối tiếc
 3 Hụt hẫng
-3 Trống trải
+5 Trống trải
 3 Chán ghét
 3 Oán hận|Căm hận|Căm ghét
 3 Thù hằn
@@ -380,9 +380,9 @@ export default `
 3 Vững tâm|An tâm|Yên tâm
 3 Phấn chấn
 3 Hớn hở
-3 Rạng rỡ
+5 Rạng rỡ
 3 Lâng lâng
-3 Bẽn lẽn
+5 Bẽn lẽn
 3 Thẹn thùng
 3 Tức tối
 3 Cáu|Cáu kỉnh
@@ -392,7 +392,7 @@ export default `
 3 Nhớ nhà
 
 @ tinhcach
-5 Hiền|Hiền lành
+3 Hiền|Hiền lành
 4 Chăm chỉ|Siêng năng
 4 Lười|Lười biếng|Lười nhác
 4 Thông minh
@@ -432,7 +432,7 @@ export default `
 3 Tinh nghịch|Nghịch ngợm
 3 Hiếu động
 3 Trầm tính
-3 Sôi nổi
+5 Sôi nổi
 3 Cởi mở
 3 Kín đáo
 3 Nhạy cảm
@@ -516,7 +516,7 @@ export default `
 3 Đanh đá
 
 @ w-nuoc
-5 Nước mắt
+3 Nước mắt
 5 Nước mắm
 4 Nước ngọt
 4 Nước đá
@@ -535,25 +535,25 @@ export default `
 3 Nước cam
 3 Nước chè
 3 Nước dùng
-3 Nước sốt|Nước xốt
-3 Nước rửa bát
-3 Nước giặt
-3 Nước sơn
+5 Nước sốt|Nước xốt
+5 Nước rửa bát
+5 Nước giặt
+5 Nước sơn
 3 Nước non
-3 Nước nhà
+5 Nước nhà
 3 Nước ngoài
-3 Nước mặn
+5 Nước mặn
 3 Nước lợ
-3 Nước ngầm
-3 Nước lũ
+5 Nước ngầm
+5 Nước lũ
 3 Nước triều|Nước thủy triều
 3 Nước rút
-3 Nước lên
-3 Nước cờ
-3 Nước đi
+5 Nước lên
+5 Nước cờ
+5 Nước đi
 3 Nước da
-3 Nước ấm
-3 Nước lạnh
+5 Nước ấm
+5 Nước lạnh
 3 Nước nóng
 3 Nước đục
 3 Nước trong
@@ -570,20 +570,20 @@ export default `
 3 Nước ối
 3 Nước tiểu
 3 Nước mũi
-3 Nước bóng
+5 Nước bóng
 3 Nước kiệu
 3 Nước đôi
 
 @ w-mat
-5 Mặt trời
+3 Mặt trời
 5 Mặt trăng
 4 Mặt nạ
 4 Mặt đất
 4 Mặt biển
 4 Mặt nước
 3 Mặt bàn
-3 Mặt đồng hồ
-3 Mặt mũi
+5 Mặt đồng hồ
+5 Mặt mũi
 3 Mặt mày
 3 Mặt hàng
 3 Mặt tiền
@@ -603,21 +603,21 @@ export default `
 3 Mặt dây chuyền
 3 Mặt mếu
 3 Mặt dày
-3 Mặt ngoài
-3 Mặt trong
-3 Mặt chữ
+5 Mặt ngoài
+5 Mặt trong
+5 Mặt chữ
 3 Mặt số
 3 Mặt kính
 3 Mặt cười
-3 Mặt lạnh
-3 Mặt ủ mày chau
+5 Mặt lạnh
+5 Mặt ủ mày chau
 3 Mặt hoa da phấn
 
 @ w-troi
 5 Bầu trời
 4 Ông trời
 4 Chân trời
-4 Mặt trời
+3 Mặt trời
 4 Trên trời
 3 Góc trời
 3 Khung trời
@@ -635,16 +635,16 @@ export default `
 3 Mây trời
 3 Gió trời
 3 Thấu trời
-3 Tận trời
+5 Tận trời
 
 @ w-long
 4 Lòng tốt
 4 Lòng tin
 4 Lòng yêu nước
 4 Lòng biết ơn
-3 Lòng tham
-3 Lòng thương
-3 Lòng dũng cảm
+5 Lòng tham
+5 Lòng thương
+5 Lòng dũng cảm
 3 Lòng bàn tay
 3 Lòng bàn chân
 3 Lòng trắng
@@ -656,15 +656,15 @@ export default `
 3 Lòng vòng
 3 Lòng lợn
 3 Lòng kiêu hãnh
-3 Lòng tự trọng
-3 Lòng nhân ái
+5 Lòng tự trọng
+5 Lòng nhân ái
 3 Lòng vị tha
 3 Lòng trung thành
 3 Lòng hiếu thảo
 3 Lòng kiên nhẫn
 3 Lòng hồ
 3 Lòng chảo
-3 Lòng đất
+5 Lòng đất
 3 Lòng thành
 3 Lòng ghen tị
 
@@ -677,7 +677,7 @@ export default `
 3 Đồng hồ đeo tay
 3 Vỗ tay
 3 Bắt tay
-3 Khoanh tay
+5 Khoanh tay
 3 Giơ tay
 3 Rửa tay
 3 Nắm tay
@@ -693,14 +693,14 @@ export default `
 3 Ra tay
 3 Nhúng tay
 3 Bó tay
-3 Trắng tay
-3 Đôi tay
-3 Thuận tay
+5 Trắng tay
+5 Đôi tay
+5 Thuận tay
 3 Tay trái
-3 Tay phải
-3 Tay lái
-3 Vòng tay
+5 Tay phải
+5 Tay lái
+5 Vòng tay
 3 Lỡ tay
-3 Khéo tay
+5 Khéo tay
 3 Vụng tay
 `;

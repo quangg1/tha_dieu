@@ -45,7 +45,7 @@ export default `
 3 Tất cổ cao #
 3 Tất lưới #
 3 Quần tất #
-2 Giày espadrilles #
+4 Giày espadrilles #
 2 Giày mary jane #
 2 Giày brogue #
 2 Giày monk strap #
