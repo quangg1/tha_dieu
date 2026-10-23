@@ -30,7 +30,7 @@ export interface Reveal {
 }
 
 export interface AnswerResult {
-  status: 'landed' | 'retry' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
+  status: 'landed' | 'retry' | 'checking' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;

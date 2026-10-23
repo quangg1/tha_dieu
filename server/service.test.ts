@@ -418,13 +418,15 @@ describe('day by day', () => {
 
 describe('a slow referee', () => {
   const slow = (v: { valid: boolean; canonical: string; reason: string }): Referee => () => new Promise((r) => setTimeout(() => r(v), 500));
-  it('asks for another try at once, and its late verdict teaches the book', async () => {
+  it('keeps the word while it reads, and its late verdict teaches the book', async () => {
     process.env.REFEREE_INLINE_MS = '40';
     try {
       const qid = 'loai-hoa';
       await S.startTurn(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid });
       const r = await S.answer(db, { playerId: 'slow_ok', day, mode: 'night', questionId: qid, input: 'Hoa bướm đêm Sơn La' }, slow({ valid: true, canonical: 'Hoa bướm đêm Sơn La', reason: 'Có thật.' }));
-      expect(r.status).toBe('retry');
+      // Not a no: the answer is still being read, so the app asks again by itself instead of scolding the player.
+      expect(r.status).toBe('checking');
+      expect(r.reason).not.toMatch(/Thả lại|Trọng tài/);
       await S.settleAll();
       expect((await S.notices(db, 'slow_ok')).learned).toMatchObject([{ answer: 'Hoa bướm đêm Sơn La' }]);
       await S.startTurn(db, { playerId: 'slow_ok2', day, mode: 'night', questionId: qid });
@@ -433,7 +435,7 @@ describe('a slow referee', () => {
 
       await S.startTurn(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau' });
       const bad = await S.answer(db, { playerId: 'slow_bad', day, mode: 'night', questionId: 'loai-rau', input: 'Rau bịa đặt' }, slow({ valid: false, canonical: '', reason: 'Không có loại rau này.' }));
-      expect(bad.status).toBe('retry');
+      expect(bad.status).toBe('checking');
       await S.settleAll();
       // The next player who types it is refused at once, with the reason.
       await S.startTurn(db, { playerId: 'slow_bad2', day, mode: 'night', questionId: 'loai-rau' });

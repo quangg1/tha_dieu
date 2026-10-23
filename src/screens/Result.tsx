@@ -117,6 +117,9 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const subtitle = night ? night.subtitle : rest.join('. ');
   const band = night ? night.band : dBand;
   const gio = mode === 'daily' && usesGio('daily', day);
+  // Below RANK_MIN_PLAYERS a share of the village is noise, so the band comes from points and the result stops
+  // claiming a place: "hơn 0%" of three players says nothing about how the kite flew.
+  const ranked = result.players >= RANK_MIN_PLAYERS;
   // Each answer's points as flown, so the result can show base × gió for every row.
   const flown = mode === 'daily' ? flightPoints(rows.map((r) => r.tier), day) : [];
   // Hành trình: today's flight is already added to the total; show it arriving.
@@ -137,7 +140,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const text = useMemo(() => {
     const grid = result.grid.split('').map((c) => (c === 'x' ? '⬛' : TIERS[Number(c)]?.emoji ?? '⬛')).join('');
     const head = mode === 'daily' ? `🪁 Bilion · thả diều mỗi ngày · ${dayLabel}` : '🪁 Bilion · Thả vô tận';
-    const height = `${result.score.toLocaleString('vi-VN')} điểm · diều bay ${formatAlt(result.altitude)}${result.players > 1 ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
+    const height = `${result.score.toLocaleString('vi-VN')} điểm · diều bay ${formatAlt(result.altitude)}${ranked ? ` · cao hơn ${result.beaten}% người chơi` : ''}`;
     return [head, `${title}. ${subtitle}`, `“${brag}”`, height, grid].join('\n');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
@@ -152,7 +155,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         altitude: result.altitude,
         score: result.score,
         milestone: reached.alt ? reached.name : '',
-        beaten: result.players > 1 ? result.beaten : null,
+        beaten: ranked ? result.beaten : null,
         grid: result.grid,
         points: mode === 'daily' ? rows.map((r) => r.points) : undefined,
         rare: moment ? { text: moment.r.display!, tier: moment.r.tier } : undefined,
@@ -259,7 +262,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
       <div className={`result-hero${mode === 'daily' ? ` band-${band}` : ' band-3'}`}>
         <span className="result-kicker">{mode === 'daily' ? `Chuyến bay ${dayLabel}` : 'Thả vô tận'}</span>
         {mode === 'daily' && result.score > 0 && (
-          <span className="band-pill"><i aria-hidden="true">{['🌾', '🎋', '☁️', '🌌', '✨', '🌕'][band]}</i>Bậc {band + 1}/6{gio && result.players >= RANK_MIN_PLAYERS ? ` · ${BAND_RULES[band]}` : ''}</span>
+          <span className="band-pill"><i aria-hidden="true">{['🌾', '🎋', '☁️', '🌌', '✨', '🌕'][band]}</i>Bậc {band + 1}/6{gio ? (ranked ? ` · ${BAND_RULES[band]}` : ' · tạm tính theo điểm') : ''}</span>
         )}
         <span className="result-title">{title}.</span>
         <span className="result-sub">{subtitle}</span>
@@ -271,7 +274,13 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
           </div>
           <div>
             <b>{result.players > 1 ? `#${result.rank}` : '—'}</b>
-            <span>{result.players > 1 ? `trên ${result.players.toLocaleString('vi-VN')} người, hơn ${result.beaten}%` : 'bạn thả đầu tiên'}</span>
+            <span>
+              {result.players < 2
+                ? 'bạn thả đầu tiên'
+                : ranked
+                  ? `trên ${result.players.toLocaleString('vi-VN')} người, hơn ${result.beaten}%`
+                  : `trên ${result.players.toLocaleString('vi-VN')} người hôm nay`}
+            </span>
           </div>
           {mode === 'daily' && (
             <div>
@@ -503,7 +512,8 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
               <DayCurve dist={result.dist} score={result.score} beaten={result.beaten} players={result.players} mode={mode} />
             </div>
           )}
-          {mode === 'daily' && (
+          {/* "Bậc của ngày" is a place in the village: with a handful of players there is no ladder to stand on. */}
+          {mode === 'daily' && (!gio || ranked) && (
             <div className="more-part">
               <div className="card-k">Bậc của ngày</div>
               <DayBands altitude={result.altitude} band={gio ? band : undefined} />

@@ -69,6 +69,8 @@ interface Reveal {
 }
 
 const INTRO_SECONDS = 3;
+/** How long to wait before asking again for a new answer the referee is still reading (its verdict is cached by then). */
+const CHECKING_RETRY_MS = 1200;
 /** Rungs of the rarity ladder from the bottom: Thường, Khá hiếm, Hiếm, Rất hiếm, Cực hiếm, Độc nhất. */
 const LADDER = [0, 1, 2, 3, 4, 5];
 const LEVELS = ['', 'gió nhẹ', 'gió vừa', 'gió mạnh'];
@@ -210,7 +212,11 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [quitArmed, setQuitArmed] = useState(false);
   const [pulling, setPulling] = useState(false);
+  /** A new answer the referee is still reading: bé Bi is turning the pages, not scolding the player. */
+  const [checking, setChecking] = useState(false);
   const [notice, setNotice] = useState('');
+  /** The notice is a note from the village rather than a refusal, so it is not painted in the colour of a mistake. */
+  const [noticeSoft, setNoticeSoft] = useState(false);
   /** The answer the village just turned away, so the player can say the referee got it wrong. */
   const [rejected, setRejected] = useState<{ questionId: string; input: string; sent: boolean } | null>(null);
   const seen = useRef<string[]>([]);
@@ -509,6 +515,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
     const text = input.trim();
     if (!text) return;
     setPhase('judging');
+    setNoticeSoft(false);
     // A wait longer than a blink (a new answer the referee is reading) becomes part of the throw:
     // bé Bi tugs the line and the wind picks up, so the climb that follows feels like one motion.
     const pull = window.setTimeout(() => {
@@ -516,17 +523,27 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       sky.boost(0.35);
     }, 280);
     let r: AnswerResult;
-    try {
-      r = await api.answer({ playerId: pid, day, mode, questionId: q.id, input: text });
-    } catch (err) {
-      clearTimeout(pull);
-      setPulling(false);
-      setNotice(err instanceof ApiError ? err.message : 'Không gửi được đáp án. Thử lại.');
-      setPhase('asking');
-      return;
+    for (let tries = 0; ; tries++) {
+      try {
+        r = await api.answer({ playerId: pid, day, mode, questionId: q.id, input: text });
+      } catch (err) {
+        clearTimeout(pull);
+        setPulling(false);
+        setChecking(false);
+        setNotice(err instanceof ApiError ? err.message : 'Không gửi được đáp án. Thử lại.');
+        setPhase('asking');
+        return;
+      }
+      // The referee is still reading this new answer: the kite keeps tugging and the app asks once more by itself,
+      // because "press Thả again" is the app admitting it did not finish its own job.
+      if (r.status !== 'checking' || tries >= 1) break;
+      setPulling(true);
+      setChecking(true);
+      await new Promise((res) => setTimeout(res, CHECKING_RETRY_MS));
     }
     clearTimeout(pull);
     setPulling(false);
+    setChecking(false);
     if (r.status === 'empty') return setPhase('asking');
     if (r.status === 'vague') {
       setNotice(r.reason ?? 'Chung chung quá. Hãy kể tên một thứ cụ thể hơn.');
@@ -539,6 +556,17 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
       setInput(r.suggestion!);
       setPhase('asking');
       setTimeout(() => inputRef.current?.focus(), 30);
+      return;
+    }
+    if (r.status === 'checking') {
+      // Still being read after the second ask: it waits for the night shift like any new word, and nothing is
+      // thrown back at the player — the answer may well be right, so the report link stays within reach.
+      setNotice(r.reason ?? 'Bé Bi đang lật sổ tra đáp án này. Cứ thả đáp án khác nhé, làng sẽ báo bạn nếu đúng.');
+      setNoticeSoft(true);
+      setRejected({ questionId: q.id, input: text, sent: false });
+      track('checking', { q: q.id, mode });
+      setPhase('asking');
+      setTimeout(() => inputRef.current?.select(), 30);
       return;
     }
     if (r.status === 'retry' || r.status === 'nothing') {
@@ -797,7 +825,8 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           <>
             {phase === 'judging' && pulling && (
               <div className="toast-pill pull" role="status">
-                Bé Bi đang kéo dây<span className="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
+                {checking ? 'Bé Bi đang lật sổ tra' : 'Bé Bi đang kéo dây'}
+                <span className="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
               </div>
             )}
             {suggest && (
@@ -807,7 +836,7 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
               </div>
             )}
             {notice && (
-              <div className="toast-pill bad" role="status">
+              <div className={`toast-pill${noticeSoft ? '' : ' bad'}`} role="status">
                 {notice}
                 {rejected && (
                   <button

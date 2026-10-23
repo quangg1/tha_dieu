@@ -572,9 +572,16 @@ async function noteRefused(db: Db, q: LoadedQuestion, input: string) {
   );
 }
 
-async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string) {
+interface Judgement {
+  key: string | null;
+  reason: string;
+  /** The referee is still reading this new answer: nobody said no, so the app asks again instead of telling the player off. */
+  checking?: boolean;
+}
+
+async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string, day: string, referee: Referee, net?: string): Promise<Judgement> {
   const inputKey = soft(input);
-  if (norm(input).length < 1 || inputKey.length > 50) return { key: null as string | null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
+  if (norm(input).length < 1 || inputKey.length > 50) return { key: null, reason: 'Đáp án quá ngắn hoặc quá dài.' };
   const cached = await db.query<{ valid: boolean; canonical_key: string | null; reason: string | null }>(
     `select valid, canonical_key, reason from verdicts where question_id=$1 and input_key=$2`,
     [q.id, inputKey],
@@ -641,7 +648,8 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
       background(callP.then((v) => (v ? applyVerdict(db, q, input, v).then(() => creditLearned(db, q.id)) : null)));
       // Still noted for this player, so they hear about it on their next visit if they moved on.
       await notInBook(db, q, input, playerId, day);
-      return { key: null, reason: `Trọng tài đang xem “${input.slice(0, 40)}”. Bấm Thả lại sau một giây, hoặc thử đáp án khác.` };
+      // Not a refusal: the app asks again by itself, so the player never sees this as a mistake they made.
+      return { key: null, reason: `Bé Bi đang lật sổ tra “${input.slice(0, 40)}”. Cứ thả đáp án khác nhé, làng sẽ báo bạn nếu đáp án này đúng.`, checking: true };
     }
   }
   return notInBook(db, q, input, playerId, day);
@@ -869,9 +877,10 @@ export async function settle(db: Db, questionId: string, input: string, key: str
 
 export interface AnswerResult {
   /** landed: scored · retry: not an answer the village or the referee accepts, try another while the wind lasts
+   *  checking: a new answer the referee is still reading, so the app asks again by itself and nothing is lost
    *  late: the wind ran out · confirm: a near match to accept · vague: too general ("chim" for a bird) · empty: nothing typed
    *  nothing: kept for older clients, no longer sent */
-  status: 'landed' | 'retry' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
+  status: 'landed' | 'retry' | 'checking' | 'nothing' | 'late' | 'confirm' | 'vague' | 'empty';
   input?: string;
   suggestion?: string;
   reason?: string;
@@ -979,7 +988,8 @@ export async function answer(
   if (!key) {
     const j = await judge(db, q, input, a.playerId, a.day, referee, a.net);
     // Nobody loses a prompt to an answer the village does not know: they try again while the wind lasts.
-    if (!j.key) return { status: 'retry', input, reason: j.reason };
+    // Still being read is not a no: the client asks again, so the word is never thrown back at the player.
+    if (!j.key) return { status: j.checking ? 'checking' : 'retry', input, reason: j.reason };
     key = j.key;
     judged = true;
   }

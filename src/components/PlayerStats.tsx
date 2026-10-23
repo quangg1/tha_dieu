@@ -1,6 +1,6 @@
 // Player statistics, Krillion style: where today's flight sits among everyone's, the rarity of each answer,
 // the day's bands, and the player's own record over time.
-import { BAND_RULES, DAY_BANDS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
+import { BAND_RULES, DAY_BANDS, RANK_MIN_PLAYERS, TIERS, TIERS_BY_RANK, bandFor, formatAlt } from '../../shared/scoring.js';
 import { TIER_COLOR, TierIcon } from '../icons';
 import type { LocalRow, Stats } from '../store';
 
@@ -29,6 +29,8 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
   const me = Math.floor(score / w);
   const myY = y(dens[Math.min(dens.length - 1, me)] ?? 0);
   const step = mode === 'daily' ? 100 : Math.max(100, Math.round(max / 6 / 100) * 100);
+  // A share of a handful of players is noise: the curve still shows, but nobody is told they beat 0% of the village.
+  const ranked = players >= RANK_MIN_PLAYERS;
   const ticks: number[] = [];
   for (let t = 0; t <= max; t += step) ticks.push(t);
   return (
@@ -37,7 +39,7 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
         <b>{score}</b>
         <span>điểm, diều lên {formatAlt(Math.pow(10, score / (mode === 'daily' ? 65 : 30)))}</span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={players > 1 ? `Điểm của bạn cao hơn ${beaten}% người chơi hôm nay` : 'Bạn là người bay đầu tiên hôm nay'}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ranked ? `Điểm của bạn cao hơn ${beaten}% người chơi hôm nay` : players > 1 ? `${players} người chơi hôm nay, chưa đủ để tính phần trăm` : 'Bạn là người bay đầu tiên hôm nay'}>
         <defs>
           <linearGradient id="pst-fill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#3a8fd8" stopOpacity=".35" />
@@ -63,9 +65,13 @@ export function DayCurve({ dist, score, beaten, players, mode }: { dist?: { w: n
         </text>
       </svg>
       <p className="pst-line">
-        {players > 1 ? (
+        {ranked ? (
           <>
             Cao hơn <b>{beaten}%</b> trong {players.toLocaleString('vi-VN')} người chơi {mode === 'daily' ? 'hôm nay' : 'chơi Thả vô tận hôm nay'}
+          </>
+        ) : players > 1 ? (
+          <>
+            {players.toLocaleString('vi-VN')} người chơi {mode === 'daily' ? 'hôm nay' : 'Thả vô tận hôm nay'}. Đông thêm chút nữa là so được phần trăm.
           </>
         ) : (
           'Bạn là người bay đầu tiên. Đường cong sẽ hiện dần khi cả làng cùng chơi.'
