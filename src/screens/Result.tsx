@@ -4,7 +4,7 @@ import { api, type FriendsBoard, type BoardRow, type FinishResult } from '../api
 import { flute } from '../audio/flute';
 import { TIER_COLOR, TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
-import { challengeLink, shareCard } from '../shareCard';
+import { challengeLink, shareCard, canShareImage, canCopyImage, copyImage, downloadImage, openSocialShare } from '../shareCard';
 import { renderKiteCard } from '../kiteCard';
 import { NightBoardList } from '../components/NightBoard';
 import { bragLine, momentLine, nightVerdict, seedOf, tauntLine } from '../quips';
@@ -16,7 +16,7 @@ import { track } from '../track';
 import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/PlayerStats';
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
-import { CheckIcon, FlagIcon } from '../glyphs';
+import { CheckIcon, CloseIcon, FlagIcon } from '../glyphs';
 import { AnswerList } from '../components/AnswerList';
 import { JourneyArrival, JourneyCard, JourneySheet } from '../components/Journey';
 import { journeyAt } from '../../shared/journey.js';
@@ -34,6 +34,8 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const [board, setBoard] = useState<{ players: number; settled?: boolean; rows: BoardRow[] } | null>(null);
   const [toast, setToast] = useState('');
   const [busy, setBusy] = useState(false);
+  // The rendered share image, previewed in a sheet before the player sends it.
+  const [preview, setPreview] = useState<{ url: string; blob: Blob } | null>(null);
   const reached = lastMilestone(result.altitude);
   const upcoming = nextMilestone(result.altitude);
   const day = vnDay();
@@ -159,13 +161,41 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.5, kiteY: 0.22, decade: 0.5, kiteSize: 0.24, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
       });
       if (!blob) throw new Error();
-      const how = await shareCard(blob, text, link);
-      track('share', { how, mode, alt: result.altitude });
-      if (how === 'downloaded') flash('Đã lưu ảnh. Đăng lên Facebook hay gửi Zalo nhé!');
+      setPreview({ url: URL.createObjectURL(blob), blob });
     } catch {
       flash('Chưa tạo được ảnh. Thử “Chép kết quả” bên dưới.');
     }
     setBusy(false);
+  };
+
+  const closePreview = () => {
+    if (preview) URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  };
+
+  // From the preview sheet: the primary action adapts to the device — native share on phones, copy on desktop.
+  const sendImage = async () => {
+    if (!preview) return;
+    const how = await shareCard(preview.blob, text, link);
+    track('share', { how, mode, alt: result.altitude });
+    if (how === 'shared' || how === 'copied' || how === 'downloaded') {
+      flash(how === 'copied' ? 'Đã chép ảnh. Dán thẳng vào Facebook hay Zalo nhé!' : how === 'downloaded' ? 'Đã lưu ảnh. Đăng lên Facebook hay gửi Zalo nhé!' : 'Đã mở cửa sổ chia sẻ');
+      closePreview();
+    }
+  };
+
+  const copyFromPreview = async () => {
+    if (!preview) return;
+    const r = await copyImage(preview.blob);
+    track('share', { how: 'copied', mode, alt: result.altitude });
+    flash(r === 'copied' ? 'Đã chép ảnh. Dán thẳng vào Facebook hay Zalo nhé!' : 'Trình duyệt không chép được ảnh. Hãy lưu ảnh nhé.');
+  };
+
+  const saveFromPreview = () => {
+    if (!preview) return;
+    downloadImage(preview.blob);
+    track('share', { how: 'downloaded', mode, alt: result.altitude });
+    flash('Đã lưu ảnh vào máy.');
   };
 
   const shareLink = async () => {
@@ -270,13 +300,42 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
             ))}
           </div>
           <button className="next-btn" onClick={shareImage} disabled={busy}>
-            {busy ? 'Đang vẽ ảnh…' : 'Chia sẻ ảnh kết quả'}
+            {busy ? 'Đang vẽ ảnh…' : 'Xem & chia sẻ ảnh kết quả'}
           </button>
           <div className="home-row">
             <button className="pill-btn ghost" onClick={shareLink}>Gửi thách đấu</button>
             <button className="pill-btn ghost" onClick={copy}>Chép kết quả</button>
           </div>
         </section>
+
+        {preview && (
+          <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Ảnh kết quả" onClick={closePreview}>
+            <section className="sheet share-preview" onClick={(e) => e.stopPropagation()}>
+              <div className="sheet-head">
+                <h2>Ảnh kết quả</h2>
+                <button className="sheet-x" onClick={closePreview} aria-label="Đóng"><CloseIcon /></button>
+              </div>
+              <img className="share-preview-img" src={preview.url} alt="Ảnh kết quả để chia sẻ" />
+              <button className="next-btn" onClick={sendImage}>
+                {canShareImage(preview.blob) ? 'Chia sẻ ngay' : canCopyImage() ? 'Chép ảnh để dán' : 'Lưu ảnh về máy'}
+              </button>
+              <div className="home-row">
+                {canCopyImage() && <button className="pill-btn ghost" onClick={copyFromPreview}>Chép ảnh</button>}
+                <button className="pill-btn ghost" onClick={saveFromPreview}>Lưu ảnh</button>
+              </div>
+              <div className="share-social" aria-label="Chia sẻ lên mạng xã hội">
+                <button className="pill-btn ghost" onClick={() => openSocialShare('facebook', text, link)}>Facebook</button>
+                <button className="pill-btn ghost" onClick={() => openSocialShare('x', text, link)}>X</button>
+                <button className="pill-btn ghost" onClick={() => openSocialShare('telegram', text, link)}>Telegram</button>
+              </div>
+              <p className="share-preview-hint">
+                {canCopyImage()
+                  ? 'Mẹo: bấm “Chép ảnh” rồi dán (Ctrl+V) thẳng vào ô đăng Facebook, Messenger hay Zalo.'
+                  : 'Lưu ảnh rồi đính kèm khi đăng bài nhé.'}
+              </p>
+            </section>
+          </div>
+        )}
 
         {moment && (
           <section className="card moment-card" style={{ '--c': TIER_COLOR[moment.r.tier] } as CSSProperties}>

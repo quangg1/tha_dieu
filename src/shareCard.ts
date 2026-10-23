@@ -203,18 +203,42 @@ function quoteBubble(ctx: CanvasRenderingContext2D, text: string) {
   ctx.restore();
 }
 
-/** Shares through the phone's share sheet (Zalo, Messenger, Facebook…), or downloads the picture where that is not possible. */
-export async function shareCard(blob: Blob, text: string, url: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
-  const file = new File([blob], 'tha-dieu.png', { type: 'image/png' });
+/** True when the device has a native share sheet that can carry the image file itself (phones, some tablets). */
+export function canShareImage(blob?: Blob): boolean {
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-  if (nav.share && nav.canShare?.({ files: [file] })) {
-    try {
-      await nav.share({ files: [file], text: `${text}\n${url}` });
-      return 'shared';
-    } catch {
-      return 'cancelled';
-    }
+  if (!nav.share || !nav.canShare) return false;
+  const file = new File([blob ?? new Blob()], 'tha-dieu.png', { type: 'image/png' });
+  return nav.canShare({ files: [file] });
+}
+
+/** True when the browser can put an image on the clipboard (Chrome/Edge on Windows, macOS). */
+export function canCopyImage(): boolean {
+  return typeof ClipboardItem !== 'undefined' && !!navigator.clipboard?.write;
+}
+
+/** Opens the native share sheet with the image. Returns 'cancelled' if the user backs out. */
+export async function shareImageFile(blob: Blob, text: string, url: string): Promise<'shared' | 'cancelled'> {
+  const file = new File([blob], 'tha-dieu.png', { type: 'image/png' });
+  try {
+    await navigator.share({ files: [file], text: `${text}\n${url}` });
+    return 'shared';
+  } catch {
+    return 'cancelled';
   }
+}
+
+/** Copies the image to the clipboard so it can be pasted straight into Facebook, Zalo or Messenger. */
+export async function copyImage(blob: Blob): Promise<'copied' | 'failed'> {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    return 'copied';
+  } catch {
+    return 'failed';
+  }
+}
+
+/** Saves the image as a file. The last resort when a device can neither share nor copy it. */
+export function downloadImage(blob: Blob): 'downloaded' {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'tha-dieu.png';
@@ -223,6 +247,27 @@ export async function shareCard(blob: Blob, text: string, url: string): Promise<
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   return 'downloaded';
+}
+
+/** Shares through the phone's share sheet, else copies the image, else downloads it — for one-tap sharing. */
+export async function shareCard(blob: Blob, text: string, url: string): Promise<'shared' | 'copied' | 'downloaded' | 'cancelled'> {
+  if (canShareImage(blob)) return shareImageFile(blob, text, url);
+  if (canCopyImage()) {
+    const r = await copyImage(blob);
+    if (r === 'copied') return 'copied';
+  }
+  return downloadImage(blob);
+}
+
+/** Opens a share intent for a social network in a new tab, carrying the result link (and text where the network allows). */
+export function openSocialShare(network: 'facebook' | 'x' | 'telegram', text: string, url: string): void {
+  const u = encodeURIComponent(url);
+  const t = encodeURIComponent(text);
+  const href =
+    network === 'facebook' ? `https://www.facebook.com/sharer/sharer.php?u=${u}&quote=${t}`
+    : network === 'x' ? `https://twitter.com/intent/tweet?text=${t}&url=${u}`
+    : `https://t.me/share/url?url=${u}&text=${t}`;
+  window.open(href, '_blank', 'noopener,noreferrer,width=640,height=640');
 }
 
 /** A link that opens the game with a friend's result as a challenge. */

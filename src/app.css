@@ -842,3 +842,11 @@ button svg,a svg{flex-shrink:0}
 .adm-link{background:none;border:0;padding:0;font:inherit;font-size:13px;text-align:left;color:var(--bi-ink);cursor:pointer}
 .adm-link:hover{text-decoration:underline}
 .adm-edit{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;background:rgba(15,39,71,.05)}
+
+/* ---------- share preview sheet ---------- */
+.share-preview{display:flex;flex-direction:column;gap:12px}
+.share-preview-img{width:100%;max-width:360px;aspect-ratio:1080/1350;object-fit:contain;margin:0 auto;border-radius:16px;background:#0b1430;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.share-preview .next-btn{width:100%}
+.share-social{display:flex;gap:8px;flex-wrap:wrap}
+.share-social .pill-btn{flex:1;min-width:92px}
+.share-preview-hint{margin:0;font-size:13px;line-height:1.45;color:var(--bi-muted)}
