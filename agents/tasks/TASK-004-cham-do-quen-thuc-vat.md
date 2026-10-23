@@ -1,7 +1,7 @@
 # TASK-004: chấm độ quen kho thực vật (HY3)
 
 - Người nhận: WorkBuddy · model **HY3**
-- Trạng thái: cần sửa (một việc nhỏ)
+- Trạng thái: đã nhận
 - Giao ngày: 2026-10-23
 
 ## Bối cảnh
@@ -49,11 +49,11 @@ Cả hai: 4 cột `lexicon word pop ghi_chu`, tab, có dòng tiêu đề, UTF-8 
 
 | pop | số từ | % |
 |---|---|---|
-| 1 | 1.845 | 40,2% |
+| 1 | 1.843 | 40,2% |
 | 2 | 1.446 | 31,5% |
-| 3 | 801 | 17,5% |
-| 4 | 411 | 9,0% |
-| 5 | 83 | 1,8% |
+| 3 | 800 | 17,4% |
+| 4 | 412 | 9,0% |
+| 5 | 85 | 1,9% |
 
 **Bảng phân bố — `tu_doi_chieu_dongvat_hy3.tsv`** (120 dòng)
 
@@ -70,7 +70,7 @@ Hai phân bố khác nhau rất xa, và tôi cho là đúng như vậy: kho th�
 **Tự soát sau khi ghép (phần cần Claude biết).**
 1. So 37 từ neo trong `rubric-do-quen.md` với kết quả: **37/37 khớp mức neo**.
 2. Viết script quét mọi cặp "từ Việt — từ Anh" nằm cạnh nhau mà bản tiếng Anh **không** bị chấm thấp hơn bản tiếng Việt. Bắt được 2 lỗi thật do biên phiếu cắt đúng vào giữa cặp: `Dưa hấu = 3 / Watermelon = 5` và `Dừa = 3 / Coconut = 5`. Đã sửa thành `Dưa hấu = 4 / Watermelon = 3`, `Dừa = 5 / Coconut = 3`. 381 cặp còn lại là từ đồng nghĩa đặt cạnh nhau nên bằng mức là đúng.
-3. Đối chiếu danh sách neo mức 5 của rubric: ban đầu có 142 từ ở mức 5, rõ ràng là lạm phát so với nghĩa "từ đầu tiên bật ra". Tôi lập danh sách trắng ~90 từ lõi (Chuối, Táo, Cam, Xoài, Lúa, Rau muống, Hoa hồng, Hoa sen, Dừa, Cà phê, Trà, Mía, Cỏ…) và hạ 57 từ ngoài danh sách trắng từ 5 xuống 4. Mức 5 còn 83 dòng, đều là từ lõi. Danh sách trắng nằm trong script, xem lại được.
+3. Đối chiếu danh sách neo mức 5 của rubric: ban đầu có 142 từ ở mức 5, rõ ràng là lạm phát so với nghĩa "từ đầu tiên bật ra". Tôi lập danh sách trắng ~90 từ lõi (Chuối, Táo, Cam, Xoài, Lúa, Rau muống, Hoa hồng, Hoa sen, Dừa, Cà phê, Trà, Mía, Cỏ…) và hạ 57 từ ngoài danh sách trắng từ 5 xuống 4. Mức 5 còn 85 dòng (= 142 − 57, sau khi gộp 11 từ trùng ở dưới thì `Gạo` và `Mắm` về 5). Danh sách trắng nằm trong script, xem lại được.
 4. Sửa `Cúc = 5` xuống 4 cho khớp `Hoa cúc = 4` (cùng một thứ, rubric nói chấm theo tên người ta hay gọi nhất — ở đây hai tên ngang nhau nên lấy cùng mức).
 
 **Từ tự thấy khó chấm.** 10 từ, đều đã để mức 1 và đánh `?`:
@@ -80,10 +80,32 @@ Hai phân bố khác nhau rất xa, và tôi cho là đúng như vậy: kho th�
 Lý do: `Bom`, `Doi`, `Xay`, `De`, `Trường` là âm tiết tiếng Việt trần, không đủ để xác định là tên cây — rất có thể là mảnh của một tên dài bị cắt khi tách kho. `Hạnh` có thể là hạnh nhân (quen) hoặc cây hạnh (lạ), không xác định được ý nào. `Dưa hồng` và `Tre mai` tôi không xác nhận được là tên thật. `Củ cái` thì ngược lại: tôi *nghi* đây là tên gọi khác của củ cải trắng (quen, mức 3–4), nhưng không chắc nên để 1 + `?` thay vì đoán. `Khủng long Tam giác` là tên dịch máy, không phải tên tiếng Việt dùng thật.
 
 **Câu hỏi còn tồn.**
-1. Mức 5 chỉ chiếm 1,8% kho thực vật (83/4.586). Tôi cho là đúng bản chất kho, nhưng nếu chủ dự án cần mức 5 đủ dày để làm "bậc dễ nhất" cho người chơi mới thì phải nới tiêu chí, không phải sửa từng từ. Cần quyết trước khi dùng số.
+1. Mức 5 chỉ chiếm 1,9% kho thực vật (85/4.586). Tôi cho là đúng bản chất kho, nhưng nếu chủ dự án cần mức 5 đủ dày để làm "bậc dễ nhất" cho người chơi mới thì phải nới tiêu chí, không phải sửa từng từ. Cần quyết trước khi dùng số.
 2. Cách hạ 57 từ 5→4 theo danh sách trắng là quyết định của tôi, không có trong rubric. Nếu Claude thấy sai hướng thì nên bỏ hẳn bước này và chấm lại 142 từ đó, đừng chỉnh nửa vời.
 3. `tu_dong_vat_workbuddy.tsv` của TASK-001 đã giao trước đó **không** áp dụng bước hạ mức 5 này. Nếu giữ chính sách danh sách trắng thì bản TASK-001 cũng cần soát lại cho cùng thang, nếu không thì phép so ba nguồn trên 120 từ sẽ lẫn hai thang khác nhau.
 4. 9 từ đánh `?` ở kho thực vật: nếu đúng là mảnh tên bị cắt khi tách kho thì nên sửa ở khâu tách kho rồi chấm lại, chứ không phải để mức 1 trong dữ liệu cuối.
+
+### Sửa theo mục Duyệt: 11 từ trùng chấm hai mức — đã xong
+
+Quét lại toàn file: **149 từ xuất hiện nhiều lần (301 dòng)**, đúng **11 từ** bị chấm hai mức — khớp danh sách trong mục Duyệt, không thêm không bớt. Đã gộp mỗi từ về một mức, sửa đúng **11 ô**, không chấm lại dòng nào khác. `tu_doi_chieu_dongvat_hy3.tsv` không có từ trùng nên không đụng tới.
+
+| từ | trước | chốt | lý do |
+|---|---|---|---|
+| `Gạo` | 4 / 5 | **5** | nghĩa thường ngày là hạt gạo. Dòng 4 là bí danh của `Cây gạo` (cây gạo) — chuỗi khác nên `Cây gạo` vẫn để 4. |
+| `Mắm` | 5 / 3 | **5** | "mắm" là từ chỉ đồ mắm/nước mắm, ai cũng biết. Dòng 3 là bí danh của `Cây Mắm` (cây mắm, rừng ngập mặn); **cả hai dòng đều là bí danh** nên phiếu mới bỏ, không ảnh hưởng bảng bậc. |
+| `Gỗ lim` | 4 / 1 | **4** | lim là loại gỗ ai cũng biết tên, chốt 4 cho khớp `Lim`=4 và `Cây gỗ lim`=4 đã chấm. Dòng 1 là lỗi do nằm giữa một loạt gỗ rừng hiếm. |
+| `Măng tre` | 3 / 4 | **4** | măng là món quen; `Măng`=5 là tên người ta hay gọi, `Măng tre` là dạng viết đủ nên 4. |
+| `Tỏi Lý Sơn` | 3 / 1 | **3** | đặc sản có tên trên báo chí/thị trường, nhiều người nhận ra. |
+| `Nghệ đen` | 2 / 1 | **2** | biết qua tinh bột nghệ đen, không phổ thông. |
+| `Tỏi đen` | 2 / 1 | **2** | sản phẩm sức khỏe phổ biến vài năm nay. |
+| `Hồ đào` | 1 / 2 | **2** | biết qua "hạt hồ đào"; tên thường gọi của quả óc chó vẫn là "óc chó". |
+| `Ngải bún` | 2 / 1 | **1** | cây gia vị chuyên môn, phải tra mới biết. |
+| `Cashew` | 1 / 2 | **1** | từ tiếng Anh. |
+| `Monstera` | 1 / 2 | **1** | tên cây cảnh ngoại lai. |
+
+Kiểm lại sau khi sửa: 4.586 dòng, 0 lệch thứ tự/nguyên văn, `pop` nguyên 1–5, **0 từ còn lệch mức**, 37/37 neo vẫn đúng, 9 dòng `?` giữ nguyên. Phân bố dịch nhẹ: mức 1 −2, mức 2 không đổi, mức 3 −1, mức 4 +1, mức 5 +2 (bảng phân bố ở trên đã cập nhật).
+
+Phần "26 cặp tiếng Anh bị bỏ sót" — nhận là sót thật, và biết vì sao. Phần lớn trong số đó script của tôi **có** bắt (nằm trong 383 cặp) nhưng tôi tự loại vì cho rằng "cả hai đều thấp, không hậu quả" — đánh giá đó quá dễ, vì lệch chiều ngay trong cùng một mục là lỗi thật (`Quýt Mandarin`=1 đứng trước `Mandarin`=2, `Dâu đen gai`=1 trước `Blackberry`=2). Số còn lại thì script bỏ sót vì chỉ so hai dòng **cạnh nhau**: `Nấm Truffle`=1 đứng trước `Nấm cục`=2, nên `Truffle`=2 được so với `Nấm cục` (2/2, không lệch) thay vì so với tên chính của nó. Đúng như mục Duyệt nói, cả 26 cặp đều là dòng bí danh nên phiếu mới bỏ; tôi để nguyên theo yêu cầu chỉ sửa 11 dòng, nhưng nếu cần thì sửa được trong một lượt mà không chạm tên chính.
 
 ## Duyệt (Claude điền)
 Claude kiểm số dòng và thứ tự, rồi so ba nguồn trên 120 từ động vật (TASK-001, TASK-004, và kho trong repo): báo tỉ lệ khớp tuyệt đối, tỉ lệ lệch ≤ 1 mức, và danh sách lệch ≥ 2 mức. Nếu hai model lệch hệ thống (một bên luôn chấm cao hơn) thì ghi vào `decisions.md` trước khi dùng số của bên nào. Không ghi đè số cũ khi chủ dự án chưa đồng ý.
@@ -162,3 +184,57 @@ Phiếu được sinh bằng cách rải **mọi tên** của mỗi mục thành
 Cả hai model đều chấm **đúng** ở đây: `Water spinach` 5→1, `Fish sauce` 5→1, `Cassava` 4→1 — người Việt không nói ra tên tiếng Anh. Tên không dấu/tiếng Anh lệch trung bình **−0,40** (DeepSeek) và **−0,52** (HY3) so với kho, gần hết là ca này. Số đó là nhiễu của phiếu, không phải phát hiện về kho.
 
 Đã sửa `scripts/emit-lex-tsv.ts` chỉ xuất tên chính (`monan` 3.198 → 2.638 dòng, `thucvat` 4.586 → 2.805 dòng). **Không chấm lại:** các dòng tên chính vẫn dùng được nguyên; khi áp số thì bỏ dòng tên khác.
+
+---
+
+## Duyệt lần hai (Claude điền) — `đã nhận`
+
+**Đã nhận.** Sửa đúng việc được yêu cầu, không rộng hơn, không hẹp hơn.
+
+| Kiểm | Kết quả |
+|---|---|
+| 4.586 dòng, thứ tự và hai cột đầu nguyên văn đầu vào | đạt, 0 lệch |
+| `pop` nguyên 1–5, không trống | đạt |
+| 11 từ trùng đã về một mức | đạt — `Gạo` 5 · `Mắm` 5 · `Gỗ lim` 4 · `Măng tre` 4 · `Tỏi Lý Sơn` 3 · `Nghệ đen` 2 · `Tỏi đen` 2 · `Hồ đào` 2 · `Ngải bún` 1 · `Cashew` 1 · `Monstera` 1 |
+| Không còn từ nào chấm hai mức | đạt, 0 |
+| 37 từ neo `thucvat` của rubric | 37/37 vẫn đúng mức |
+| 9 dòng `?` | giữ nguyên |
+| `tu_doi_chieu_dongvat_hy3.tsv` không bị đụng | đạt, md5 không đổi |
+
+### Chứng minh đúng 11 ô bị sửa, không một ô nào khác
+
+Không có bản cũ để diff, nhưng phân bố mới kiểm chéo được. Từ 11 mức chốt, tính ra dòng nào phải nhảy mức, cộng lại theo từng mức:
+
+| Mức | Dự đoán từ 11 chỗ sửa | Phân bố thật (cũ → mới) |
+|---|---|---|
+| 1 | −2 | 1.845 → 1.843 ✓ |
+| 2 | 0 | 1.446 → 1.446 ✓ |
+| 3 | −1 | 801 → 800 ✓ |
+| 4 | +1 | 411 → 412 ✓ |
+| 5 | +2 | 83 → 85 ✓ |
+
+Khớp cả năm mức. Nếu có ô thứ 12 bị sửa thì ít nhất một dòng trong bảng này phải lệch. So với kho cũng chỉ dịch nhẹ đúng cỡ đó: lệch ≥2 mức 415 → 416, lệch TB +0,54 không đổi.
+
+### Một điều cả hai bên đều chưa nói ra
+
+**Cả 11 ca trùng đều là dòng bí danh**, không có ca nào là hai tên chính đụng nhau:
+`Gạo` là bí danh của `Hoa gạo` (pop 4) và của `Lúa` (pop 5) · `Mắm` của `Nước mắm` (5) và `Cây Mắm` (1) · `Gỗ lim` của `Lim` (3) và `Cây gỗ lim` (1) · `Hồ đào` của `Hạt hồ đào` và `Cây hồ đào` · `Cashew` của `Điều` (2) và `Hạt điều` (3) · `Monstera` của `Cây trầu bà lá xẻ` (2) và `Cây Monstera` (1).
+
+Nghĩa là lỗi trùng mức **không phải khuyết điểm của người chấm** mà là hệ quả trực tiếp của phiếu rải mọi tên thành dòng riêng: một chuỗi chữ là bí danh của hai mục khác nghĩa thì không có một mức nào đúng cho nó. Phiếu đã sửa (chỉ xuất tên chính) làm cả lớp lỗi này mất hẳn, không cần quy tắc gộp nào nữa. Quy tắc "lấy nghĩa phổ thông hơn" trong `decisions.md` vẫn đúng, nhưng từ nay sẽ không có chỗ dùng.
+
+Ngoại lệ duy nhất đáng ghi: `Măng tre` **là** tên chính của một mục (kho cho pop 1) **và** đồng thời là bí danh của `Măng` (pop 3). Chốt 4 là một trong các ca "kho chấm lạ quá tay" — `Măng tre` 1→4 đã nằm trong danh sách 380 ca kéo lên.
+
+### Hai chỗ ghi sai tên mục trong báo cáo, không đổi kết luận
+
+- `Gạo` mức 4 là bí danh của **`Hoa gạo`**, không phải `Cây gạo` (kho không có mục nào tên `Cây gạo`).
+- `Lim` trong kho là **pop 3**, không phải 4; `Cây gỗ lim` là pop 1. Con số 4 trong báo cáo là mức do chính người nhận chấm, không phải mức của kho.
+
+Cả hai đều không làm đổi mức chốt nào.
+
+### Nhận lỗi 26 cặp bí danh — chấp nhận lời giải thích
+
+Lý do nêu ra kiểm được và đúng: script chỉ so hai dòng **cạnh nhau**, nên `Truffle`=2 bị so với `Nấm cục`=2 thay vì với tên chính của nó. Để nguyên là đúng theo yêu cầu "chỉ sửa 11 dòng"; sau khi phiếu bỏ dòng bí danh thì các dòng này không còn được dùng.
+
+### Chưa làm, chờ chủ dự án
+
+Không ghi đè `pop` nào trong kho. Hai việc cần chốt trước khi dùng số, đã nêu trong `checkpoints.md`: hiệu chỉnh thang của DeepSeek (~0,4 mức), và có áp hướng "kho chấm lạ quá tay" cho `thucvat` hay không.

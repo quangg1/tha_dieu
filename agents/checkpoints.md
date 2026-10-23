@@ -2,6 +2,23 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 21:30
+- **Duyệt lần hai TASK-004: `đã nhận`.** Sửa đúng 11 ô, không rộng hơn. Kiểm chéo bằng phân bố: từ 11 mức chốt suy ra mức 1 −2, mức 2 0, mức 3 −1, mức 4 +1, mức 5 +2 — khớp **cả năm mức** với phân bố thật (1.845→1.843, 1.446→1.446, 801→800, 411→412, 83→85). Có ô thứ 12 bị sửa thì ít nhất một dòng phải lệch. 0 từ còn chấm hai mức, 37/37 neo đúng, file 120 từ md5 không đổi.
+- **Điều cả hai bên chưa nói ra:** cả 11 ca trùng đều là **dòng bí danh** của hai mục khác nghĩa (`Gạo` = bí danh của `Hoa gạo` pop 4 và `Lúa` pop 5; `Mắm` của `Nước mắm` 5 và `Cây Mắm` 1; `Gỗ lim` của `Lim` 3 và `Cây gỗ lim` 1…). Không phải khuyết điểm của người chấm mà là hệ quả trực tiếp của phiếu rải mọi tên thành dòng riêng. Phiếu đã sửa làm cả lớp lỗi này mất hẳn — quy tắc "lấy nghĩa phổ thông hơn" vẫn đúng nhưng từ nay không có chỗ dùng. Ngoại lệ: `Măng tre` vừa là tên chính (kho pop 1) vừa là bí danh của `Măng` (pop 3); chốt 4 nằm trong danh sách 380 ca "kho chấm lạ quá tay".
+- Hai chỗ báo cáo ghi sai tên mục, không đổi kết luận: `Gạo` mức 4 là bí danh của `Hoa gạo` (kho không có mục `Cây gạo`); `Lim` trong kho là pop 3 chứ không phải 4.
+- **Trạng thái bốn task:** TASK-001 `chờ duyệt` · TASK-002 `đã nhận` · TASK-003 `đã nhận` · TASK-004 `đã nhận`.
+- **Hai việc phải chốt trước khi áp số vào kho:** (1) hiệu chỉnh thang của DeepSeek, nó chấm thấp hơn TASK-001/HY3 ~0,4 mức; (2) có áp hướng "kho chấm lạ quá tay" cho `monan` và `thucvat` hay không, và áp theo từng từ chứ không bằng hệ số chung.
+- **Chờ chủ dự án:** các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); truy vấn số 2 của báo cáo WorkBuddy; xác nhận TASK-001 do model nào chấm.
+
+## 2026-10-23 21:40
+- **Đã sửa xong TASK-004, giao lại.** Đúng 11 từ trùng bị chấm hai mức như mục Duyệt nêu — sửa 11 ô, không chấm lại dòng nào khác. Quét lại toàn file: 149 từ xuất hiện nhiều lần (301 dòng), khớp danh sách Claude, không thêm không bớt. `tu_doi_chieu_dongvat_hy3.tsv` không có từ trùng nên không đụng.
+- Mức chốt: `Gạo` 5 · `Mắm` 5 · `Gỗ lim` 4 · `Măng tre` 4 · `Tỏi Lý Sơn` 3 · `Nghệ đen` 2 · `Tỏi đen` 2 · `Hồ đào` 2 · `Ngải bún` 1 · `Cashew` 1 · `Monstera` 1. Lý do từng từ ở mục Báo cáo TASK-004.
+- Phân bố `thucvat` sau khi sửa: 1 · 1.843 (40,2%) · 2 · 1.446 (31,5%) · 3 · 800 (17,4%) · 4 · 412 (9,0%) · 5 · 85 (1,9%). Mức 5 giờ đúng bằng 142 − 57, khớp phép tính trong báo cáo (trước khi gộp thì lệch 2 vì `Gạo` và `Mắm` còn nằm ở 4 và 3).
+- Kiểm lại: 4.586 dòng, 0 lệch thứ tự/nguyên văn, `pop` nguyên 1–5, **0 từ còn lệch mức**, 37/37 neo đúng, 9 dòng `?` giữ nguyên.
+- **Nhận lỗi 26 cặp tiếng Anh bị bỏ sót:** phần lớn script có bắt nhưng tôi tự loại vì "cả hai đều thấp" — sai, vì lệch chiều trong cùng một mục là lỗi thật (`Quýt Mandarin`=1 đứng trước `Mandarin`=2). Số còn lại script bỏ sót vì chỉ so hai dòng cạnh nhau (`Nấm Truffle`=1, `Nấm cục`=2, `Truffle`=2 → `Truffle` được so với `Nấm cục` nên không lệch). Để nguyên theo yêu cầu; cả 26 đều là bí danh nên phiếu mới bỏ.
+- **Chờ duyệt:** TASK-004 (giao lại, chỉ cần kiểm 11 ô + 0 từ lệch mức). TASK-001 chưa duyệt.
+- **Tiếp theo (Claude):** chốt chuyện DeepSeek chấm thấp hơn thang chung ~0,4 mức trước khi dùng số `monan`; quyết `pop` của `thucvat` có hiệu chỉnh theo hướng "kho chấm lạ quá tay" không.
+
 ## 2026-10-23 21:10
 - **Duyệt TASK-003: `đã nhận`.** DeepSeek · `monan`, 3.198 dòng. Mọi tiêu chí đạt, 25/25 từ neo đúng mức, 56 dòng trùng đã tự gộp về một mức trước khi giao. Đã trả lời 4 câu hỏi còn tồn.
 - **Duyệt TASK-004: `cần sửa` (một việc nhỏ).** HY3 · `thucvat`, 4.586 dòng. Chất lượng chấm cao nhất tới nay, nhưng **11 từ trùng bị chấm hai mức khác nhau** (`Gỗ lim` 4/1, `Mắm` 5/3, `Gạo` 4/5…). Trả lại đúng 11 dòng đó, không chấm lại gì khác.
