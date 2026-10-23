@@ -15,7 +15,6 @@ import {
   crossed,
   formatAlt,
   lastMilestone,
-  formatAltParts,
   lapOf,
   CEILING_L,
   type Milestone,
@@ -642,7 +641,6 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
   /* ------------------------------------------------ view */
   const count = list.length || 7;
   const lastDaily = mode === 'daily' && idx + 1 >= count;
-  const [altNum, altUnit] = formatAltParts(shownAlt);
   const asking = phase === 'intro' || phase === 'asking' || phase === 'judging';
   const sideTier = phase === 'reveal' ? reveal?.tier ?? null : phase === 'result' && outcome?.kind === 'landed' ? outcome.tier! : null;
   const sideStep = phase === 'reveal' ? reveal?.step ?? -1 : phase === 'result' && outcome?.kind === 'landed' ? (outcome.tier === KHON_LOI ? 0 : LADDER.indexOf(outcome.tier!)) : -1;
@@ -682,36 +680,31 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
           </span>
           <span className="v gold">{Math.round(shownScore)}</span>
         </div>
-        <div className="hud-panel mid">
-          {mode === 'daily' ? (
-            <>
-              <div className="pips" aria-label={`Câu ${Math.min(idx + 1, count)} trên ${count}`}>
-                {Array.from({ length: count }, (_, i) => {
-                  const r = rows.find((x) => x.questionId === list[i]?.id);
-                  const tier = r?.tier;
-                  const bg = tier === undefined ? undefined : tier < 0 ? '#6b7280' : TIER_COLOR[tier];
-                  return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
-                })}
-              </div>
-              <span className="k pips-n">
-                {Math.min(idx + 1, count)}/{count}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="v small">{rows.length}</span>
-              <span className="k">Thả vô tận</span>
-            </>
-          )}
-        </div>
-        <div className="hud-panel right" title={`Diều đang ở: ${lap > 1 ? `vòng ${lap}, ` : ''}${lastMilestone(shownAlt).name}`}>
-          {/* Points decide the boards; height is the picture of them, so it sits second. */}
-          <span className="k">{lap > 1 ? `Vòng ${lap} · ` : ''}Độ cao</span>
-          <span className="v dim">
-            {altNum}
-            <small>{altUnit}</small>
-          </span>
-        </div>
+        {mode === 'daily' ? (
+          /* Seven dots on their own thin line, no chip and no "2/7" beside them: the dots already say which
+             question this is and how many are left, and a bare strip costs a tenth of the sky a panel costs. */
+          <div className="pips" aria-label={`Câu ${Math.min(idx + 1, count)} trên ${count}`}>
+            {Array.from({ length: count }, (_, i) => {
+              const r = rows.find((x) => x.questionId === list[i]?.id);
+              const tier = r?.tier;
+              const bg = tier === undefined ? undefined : tier < 0 ? '#6b7280' : TIER_COLOR[tier];
+              return <span key={i} className={`pip${tier === undefined ? ' todo' : ''}${i === idx && !r ? ' now' : ''}`} style={bg ? { background: bg } : undefined} />;
+            })}
+          </div>
+        ) : (
+          <div className="hud-panel mid">
+            <span className="v small">{rows.length}</span>
+            <span className="k">Thả vô tận</span>
+          </div>
+        )}
+        {/* No height panel: the ruler already draws "Bạn <height>" right beside the kite, which is the better
+            picture of it. A second copy in the corner only costs sky. A lap is the one thing the ruler cannot
+            show, so it shows up here alone and only once there is one. */}
+        {lap > 1 && (
+          <div className="hud-panel right" title={`Diều đang ở: vòng ${lap}, ${lastMilestone(shownAlt).name}`}>
+            <span className="v dim">Vòng {lap}</span>
+          </div>
+        )}
         <span className="hud-sound">{soundButton}</span>
         {quitArmed && <span className="quit-tag">Bấm lần nữa để rời</span>}
       </header>

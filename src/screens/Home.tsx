@@ -346,14 +346,6 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             </button>
           </>
         )}
-        <div className="home-row">
-          <button className="pill-btn ghost" onClick={() => go('night')}>
-            Thả vô tận
-          </button>
-          <button className="pill-btn ghost" onClick={() => { setHowto(true); track('howto'); }} aria-haspopup="dialog">
-            Cách chơi
-          </button>
-        </div>
         {done && (
           <button className="invite-btn" onClick={invite}>
             <LetterIcon /> {invited || 'Thách bạn bè bay cao hơn'}
@@ -362,14 +354,14 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
 
         <TitleCard compact total={st.total} onOpen={() => { setJourney(true); track('titles'); }} />
 
-        <button className="mine-btn" onClick={onAccount}>
-          <span>Bilion của tôi</span>
-          <small>{account() ? 'Đã đồng bộ' : 'Chuỗi ngày, bộ sưu tập'}</small>
-          <span className="mine-arrow" aria-hidden="true">›</span>
-        </button>
+        {/* One quiet row instead of four stacked controls: every item here is also in the menu, so it only
+            needs to be reachable, not loud. The card is what covers the sky — the less of it, the better. */}
         <div className="home-links">
+          <button onClick={() => go('night')}>Thả vô tận</button>
+          <button onClick={() => { setHowto(true); track('howto'); }} aria-haspopup="dialog">Cách chơi</button>
+          <button onClick={onAccount}>Bilion của tôi</button>
           <button onClick={() => setSheet('feedback')} aria-haspopup="dialog">Góp ý</button>
-          {canSupport && <button onClick={() => { setSheet('support'); track('support'); }} aria-haspopup="dialog">Ủng hộ tác giả</button>}
+          {canSupport && <button onClick={() => { setSheet('support'); track('support'); }} aria-haspopup="dialog">Ủng hộ</button>}
         </div>
       </section>
 
