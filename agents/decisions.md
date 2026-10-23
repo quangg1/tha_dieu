@@ -3,6 +3,7 @@
 Mỗi dòng: ngày · quyết định · lý do.
 
 - 2026-10-23 · Đáp án do trọng tài AI duyệt không còn mặc định "Cực hiếm". Bậc đầu theo độ quen của từ (mức 5 → Thường, 3–4 → Khá hiếm, còn lại → Hiếm) · từ thiếu trong sổ thường là từ quen; 210 điểm cho "chim cánh cụt" là lệch. Quy tắc này mới là phán đoán, cần hiệu chỉnh bằng dữ liệu người chơi (`shared/book/familiar.ts`).
+- 2026-10-23 · Sửa `Nhật Bản` trong kho `quocgia` từ 4 lên 5 sau khi phát hiện lỗi nhập liệu · là một trong những quốc gia quen nhất với ngườ i Việt, không thể thấp hơn `Lào` hay `Campuchia` (4). Chỉ sửa khi lỗi rõ ràng và có thể chứng minh bằng so sánh nội bộ; không tự hậu xử lý hàng loạt.
 - 2026-10-23 · Đáp án Độc nhất (Krill) của câu sinh từ kho từ vựng không chọn từ có độ quen ≥ 3 · Độc nhất phải là một phát hiện thật.
 - 2026-10-23 · Gỡ bẫy Khôn lỏi "Thú mỏ vịt", "Sóc bay" · là đáp án hiếm thật, không phải đáp án ai cũng nghĩ tới.
 - 2026-10-23 · Độ hiếm tính theo từng câu hỏi, không theo từ toàn cục · cùng một từ có thể thường ở câu này và hiếm ở câu khác.
@@ -52,3 +53,7 @@ Mỗi dòng: ngày · quyết định · lý do.
 - 2026-10-23 · Bộ từ chồng của đợt này lấy **trong chính 22 kho đó** (160 từ, rải đều 22 kho), không dùng lại bộ 120 từ động vật · bảng chuyển thang học trên từ động vật rồi áp cho kho món ăn là chỗ yếu đã biết của đợt trước; đo thang ngay trong miền sẽ dùng thì bảng mới đáng tin.
 - 2026-10-23 · Hai model chấm bộ chồng **trước** rồi mới chấm nửa của mình, và được dặn đừng tự chỉnh cho giống nhau · lệch thang là dữ liệu đo được và hiệu chỉnh được; hai bên bắt chước nhau thì mất luôn phép đo.
 - 2026-10-23 · Bỏ `thudo` khỏi danh sách giao · nó là kho dẫn xuất từ `extra` của `quocgia`, không có `lex/thudo.ts` nên không áp số vào được; `pop` của nó đi theo `quocgia`.
+- 2026-10-23 · Đợt TASK-005/006 **không dùng bảng chuyển thang**, áp mức thô trực tiếp · trên 160 từ chồng hai model khớp 71%, lệch ≤1 98%, lệch TB +0,00. Bộ chồng lấy trong chính 22 kho đó đã trả đúng cái nó hứa: đo thang trong miền sẽ dùng thì không còn khoảng lệch nào phải chữa.
+- 2026-10-23 · Dấu hiệu nhận ra một bản chấm bị gán hàng loạt: **kho không có một từ nào ở mức 1** · bảy kho của TASK-006 đều 0 từ ở mức 1 (`cotich`, `thethao`, `quanao`, `mausac`, `diaphuong` còn 0 cả mức 2), lệch TB +2,0 đến +3,0; bốn kho được nhận có 149–619 từ ở mức 1. Dùng làm phép kiểm đầu tiên cho mọi bản chấm sau.
+- 2026-10-23 · Bộ từ chồng còn dùng được để bắt bản chấm **tự mâu thuẫn**, không chỉ để đo thang · ba từ `diaphuong` trong bộ chồng được chấm 1/2/3 trong khi cả 63 tỉnh ở file đầy đủ đều là 5. Cùng model, cùng kho, cùng đợt — bằng chứng khách quan, không cần tranh luận về cảm nhận.
+- 2026-10-23 · `quocgia` và `hoahoc` chỉ áp chiều kéo lên · bốn ca kéo xuống của `quocgia` sai rõ (`Anh` 5→2, `Ý` 5→3): chuỗi một âm bị đọc như từ thường chứ không như tên nước. 129 ca kéo xuống của các kho khác thì áp hết vì là tên địa lý thật sự xa lạ.

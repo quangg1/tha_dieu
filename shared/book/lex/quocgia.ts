@@ -91,12 +91,12 @@ export default `
 1 Bosnia và Herzegovina|Bosnia|Bô-xni-a ^ Sarajevo|Xa-ra-ê-vô
 1 Montenegro|Môn-tê-nê-grô ^ Podgorica
 2 Luxembourg|Lúc-xăm-bua|Lucxambua # eu27 noi ^ Luxembourg|Thành phố Luxembourg
-2 Monaco|Mô-na-cô ^ Monaco
+4 Monaco|Mô-na-cô ^ Monaco
 1 Liechtenstein # noi ^ Vaduz
 1 Andorra # noi ^ Andorra la Vella
 1 San Marino # noi ^ San Marino
 2 Vatican|Tòa Thánh Vatican|Thành Vatican|Thành quốc Vatican # noi ^ Vatican|Thành Vatican
-1 Malta|Man-ta # eu27 dao ^ Valletta
+4 Malta|Man-ta # eu27 dao ^ Valletta
 
 @ af
 4 Ai Cập|Egypt # trungdong ^ Cairo|Cai-rô|Khai La
@@ -150,9 +150,9 @@ export default `
 1 Malawi|Ma-la-uy # noi ^ Lilongwe
 1 Lesotho # noi ^ Maseru
 1 Eswatini|Swaziland # noi ^ Mbabane|Lobamba
-1 Mauritius|Mô-ri-xơ # dao ^ Port Louis
-1 Seychelles|Xây-sen # dao ^ Victoria
-1 Comoros|Cô-mo # dao ^ Moroni
+5 Mauritius|Mô-ri-xơ # dao ^ Port Louis
+5 Seychelles|Xây-sen # dao ^ Victoria
+5 Comoros|Cô-mo # dao ^ Moroni
 
 @ bm
 5 Mỹ|Hoa Kỳ|Hợp chúng quốc Hoa Kỳ|USA|US|United States|America # g7 ^ Washington|Washington D.C.|Oa-sinh-tơn|Hoa Thịnh Đốn
@@ -164,7 +164,7 @@ export default `
 2 Costa Rica|Cô-xta Ri-ca ^ San José|San Jose
 1 Guatemala|Goa-tê-ma-la ^ Thành phố Guatemala|Guatemala City|Guatemala
 1 Honduras|Ôn-đu-rát ^ Tegucigalpa
-1 El Salvador|En Xan-va-đo ^ San Salvador
+3 El Salvador|En Xan-va-đo ^ San Salvador
 1 Nicaragua|Ni-ca-ra-goa ^ Managua
 1 Belize|Bê-li-xê ^ Belmopan
 2 Haiti|Ha-i-ti # dao ^ Port-au-Prince

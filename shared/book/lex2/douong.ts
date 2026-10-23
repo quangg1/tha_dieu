@@ -1,8 +1,8 @@
 // Đồ uống, phần làm dày sổ. Cùng định dạng và nhãn với lex/douong.ts; tên trùng được gộp vào mục cũ.
 export default `
 @ cafe
-2 Cà phê đen đá|Cà phê đen|Cafe đen|Cà phê đá
-2 Cà phê nóng
+4 Cà phê đen đá|Cà phê đen|Cafe đen|Cà phê đá
+4 Cà phê nóng
 2 Cà phê sữa nóng
 2 Nâu đá|Cà phê nâu
 2 Cà phê phin giấy
@@ -23,7 +23,7 @@ export default `
 2 Cà phê đá xay caramel|Frappuccino
 2 Cà phê sữa đặc|Cà phê sữa
 2 Cà phê pha máy
-2 Cà phê hòa tan|Cà phê gói|Cà phê 3 trong 1
+4 Cà phê hòa tan|Cà phê gói|Cà phê 3 trong 1
 2 Cà phê lon
 2 Cà phê nhỏ giọt|Pour over|Cà phê pour-over
 2 Cà phê Pha Phin Ấm|Cà phê ấm
@@ -147,23 +147,23 @@ export default `
 2 Trà dâu tằm
 2 Trà việt quất
 2 Trà sữa khoai môn
-2 Trà sữa đường đen|Sữa tươi trân châu đường đen
+4 Trà sữa đường đen|Sữa tươi trân châu đường đen
 2 Trà sữa ô long
-2 Trà sữa Thái|Trà Thái đỏ
+4 Trà sữa Thái|Trà Thái đỏ
 2 Trà sữa hokkaido
 2 Trà sữa okinawa
-2 Trà sữa kem cheese|Trà kem cheese
+4 Trà sữa kem cheese|Trà kem cheese
 2 Trà sữa nướng
 2 Trà sữa socola
 2 Trà sữa hạnh nhân
 2 Trà sữa dâu
 2 Trà sữa trà xanh
 2 Trà sữa gạo rang
-2 Trà trái cây|Trà hoa quả
-2 Trà túi lọc|Trà Lipton|Lipton
+4 Trà trái cây|Trà hoa quả
+4 Trà túi lọc|Trà Lipton|Lipton
 2 Trà Dilmah|Dilmah
 2 Trà Cozy|Cozy
-2 Trà Phúc Long|Trà Phúc Long
+4 Trà Phúc Long|Trà Phúc Long
 2 Trà kombucha|Kombucha
 2 Trà nhân trần|Nhân trần
 2 Trà diệp hạ châu
@@ -191,7 +191,7 @@ export default `
 2 Trà cam thảo
 2 Trà quế
 2 Trà hồi
-2 Trà thảo mộc|Trà thảo dược
+4 Trà thảo mộc|Trà thảo dược
 2 Trà ngũ vị
 2 Trà bát bảo
 2 Trà tâm sen|Tâm sen
@@ -203,9 +203,9 @@ export default `
 2 Trà ngô|Trà bắp
 2 Trà sắn dây
 2 Trà cascara
-2 Trà lạnh|Ice tea|Iced tea
-2 Trà chanh giã tay
-2 Trà nóng
+4 Trà lạnh|Ice tea|Iced tea
+4 Trà chanh giã tay
+4 Trà nóng
 2 Trà Matcha Uji|Matcha Uji
 2 Trà Ô Long Đài Loan
 2 Trà Ô Long Lâm Đồng|Ô long Bảo Lộc
@@ -215,9 +215,9 @@ export default `
 @ cocon
 2 Bia Hà Nội
 2 Bia Sài Gòn|Saigon
-2 Bia Sài Gòn Special|Saigon Special
-2 Bia Sài Gòn Xanh|Saigon Lager
-2 Bia Sài Gòn Đỏ|Saigon Export
+4 Bia Sài Gòn Special|Saigon Special
+4 Bia Sài Gòn Xanh|Saigon Lager
+4 Bia Sài Gòn Đỏ|Saigon Export
 2 Bia Trúc Bạch
 2 Bia Halida
 2 Bia Hạ Long
@@ -231,7 +231,7 @@ export default `
 2 Bia Corona|Corona
 2 Bia Hoegaarden|Hoegaarden
 2 Bia Leffe|Leffe
-2 Bia Guinness|Guinness
+4 Bia Guinness|Guinness
 2 Bia Stella Artois|Stella Artois
 2 Bia Becks|Beck\'s
 2 Bia Asahi|Asahi
@@ -262,7 +262,7 @@ export default `
 2 Bia lúa mì|Bia trắng|Wheat beer
 2 Bia chua|Sour beer
 2 Bia không cồn
-2 Bia tươi|Bia tươi Tiệp
+4 Bia tươi|Bia tươi Tiệp
 2 Bia Tiệp
 2 Bia Đức
 2 Bia Bỉ
@@ -330,8 +330,8 @@ export default `
 2 Rượu Cachaça|Cachaca
 2 Rượu Rum Bacardi|Bacardi
 2 Rượu Captain Morgan
-2 Rượu Johnnie Walker|Johnnie Walker
-2 Rượu Chivas Regal|Chivas
+4 Rượu Johnnie Walker|Johnnie Walker
+4 Rượu Chivas Regal|Chivas
 2 Rượu Jack Daniel\'s|Jack Daniels
 2 Rượu Jim Beam
 2 Rượu Ballantine\'s|Ballantines
@@ -340,13 +340,13 @@ export default `
 2 Rượu Bourbon|Bourbon
 2 Rượu Scotch|Scotch
 2 Rượu Whisky Nhật
-2 Rượu Smirnoff|Smirnoff
+4 Rượu Smirnoff|Smirnoff
 2 Rượu Absolut|Absolut
 2 Rượu Grey Goose
 2 Rượu Vodka Hà Nội|Vodka Hà Nội
 2 Rượu Men|Rượu Vodka Men
 2 Rượu Gin Bombay|Bombay Sapphire
-2 Rượu Gin Tonic|Gin tonic
+4 Rượu Gin Tonic|Gin tonic
 2 Rượu Baijiu|Bạch tửu
 2 Rượu Mao Đài|Mao Đài
 2 Rượu Ngũ Lương Dịch
@@ -389,11 +389,11 @@ export default `
 2 Rượu thóc
 2 Rượu mía
 2 Rượu thuốc bắc
-2 Rượu hoa quả
+3 Rượu hoa quả
 2 Rượu trái cây
 2 Rượu sake nóng
 2 Rượu soju trái cây
-2 Cocktail Martini|Martini
+4 Cocktail Martini|Martini
 2 Cocktail Negroni|Negroni
 2 Cocktail Old Fashioned|Old Fashioned
 2 Cocktail Manhattan|Manhattan
@@ -421,7 +421,7 @@ export default `
 2 Shot|Rượu shot
 @ truyenthong
 2 Nước vối|Chè vối
-2 Nước chè tươi|Chè tươi
+4 Nước chè tươi|Chè tươi
 2 Nước chè xanh đun
 2 Nước lá sen
 2 Nước lá tre
@@ -434,7 +434,7 @@ export default `
 2 Nước hạt é|Hạt é
 2 Nước thạch đen|Thạch đen
 2 Nước nha đam đường phèn
-2 Nước dừa tươi|Dừa tươi
+4 Nước dừa tươi|Dừa tươi
 2 Nước mía siêu sạch
 2 Nước mía tắc
 2 Nước rau má|Rau má
@@ -474,8 +474,8 @@ export default `
 2 Nước tamarind|Nước me đá
 2 Chè sương sáo|Sương sáo đường
 2 Đá bào siro|Siro đá bào
-2 Trà đá vỉa hè
-2 Trà chanh vỉa hè
+4 Trà đá vỉa hè
+4 Trà chanh vỉa hè
 2 Nước chè đặc
 @
 2 Nước hạt chia|Hạt chia
@@ -505,14 +505,14 @@ export default `
 2 Cacao nóng|Ca cao
 2 Sô cô la nóng|Chocolate nóng
 2 Ovaltine nóng
-2 Milo dằm|Milo dầm
+4 Milo dằm|Milo dầm
 
 @
 @ sua
 3 Sữa tươi #
 3 Sữa đặc|Sữa ông Thọ #
 3 Sữa bột #
-3 Sữa chua #
+5 Sữa chua #
 3 Sữa chua nếp cẩm #
 3 Sữa chua mít #
 3 Sữa chua trân châu #
@@ -601,7 +601,7 @@ export default `
 3 Sinh tố yến mạch #
 3 Sinh tố chuối yến mạch #
 3 Sinh tố đậu xanh #
-3 Sinh tố cải bó xôi #
+1 Sinh tố cải bó xôi #
 3 Sinh tố cà phê #
 3 Sinh tố socola #
 3 Sinh tố mâm xôi #

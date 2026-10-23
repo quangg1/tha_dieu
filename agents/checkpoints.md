@@ -2,6 +2,54 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 22:50
+- **Duyệt TASK-005: `đã nhận` cả 11 kho.** 12 file đều 0 lệch thứ tự, `pop` nguyên 1–5, **0 từ trùng chấm khác mức**, mỗi kho dùng đủ 5 mức. Đã áp vào sổ.
+- **Duyệt TASK-006: `cần sửa` 7 trong 11 kho.** Nhận và đã áp `nhanvat` (25/25 từ neo đúng, lệch TB +0,07 — bản chắc tay nhất bốn đợt), `diadanh` (−0,09), `douong` (+0,22), `ngonngu` (−0,08). Trả lại `tungu`, `dovat`, `cotich`, `thethao`, `quanao`, `mausac`, `diaphuong` — 2.206 mục.
+- **Lý do trả lại, ba bằng chứng khách quan:** (1) bảy kho **không có một từ nào ở mức 1**, năm kho còn 0 cả mức 2, lệch TB +2,0 đến +3,0; bốn kho được nhận có 149–619 từ ở mức 1. (2) Từ neo rubric bị vi phạm: `diaphuong` 17/20 lệch (`Bắc Kạn`, `Hậu Giang` rubric mức 1, bản chấm cho 5 — cả 63 tỉnh đều 5); `dovat` 24/32 lệch (`Chạn`, `Ang` mức 1 → 5). (3) **Bản chấm tự mâu thuẫn với bộ chồng của chính nó**: ba từ `diaphuong` trong bộ chồng được chấm 1/2/3 trong khi file đầy đủ cho cả 63 tỉnh mức 5. Hình lỗi: bốn kho làm trước thì tốt, bảy kho làm sau thì sập, càng về sau càng nặng → đề nghị chấm lại từng kho một, không làm liền mạch.
+- **Hai model trùng thang, đợt này KHÔNG cần bảng chuyển thang.** 160 từ chồng: khớp 114/160 (71%) · lệch ≤1 157/160 (98%) · lệch TB **+0,00**. Bộ chồng lấy trong chính 22 kho đã trả đúng cái nó hứa.
+- **Đã áp 15 kho, 1.490 ca kéo lên + 129 ca kéo xuống.** Giữ lại 7 ca kéo xuống của `quocgia` và `hoahoc` vì sai rõ (`Anh` 5→2, `Ý` 5→3, `Urani` 4→1) — chuỗi ngắn bị đọc như từ thường chứ không như tên nước.
+- `thegioi` là ca đáng chú ý: lệch TB +0,02 nhưng bên trong 101 ca kéo lên và 98 ca kéo xuống. Chiều xuống là gần 100 sông/hồ/núi/sa mạc kho để mức 3 (`Sông Okavango`, `Hồ Ohrid`, `Sa mạc Karakum`, `Đỉnh Cho Oyu`).
+- `npx vitest run` 89/89 · `tsc --noEmit` sạch · `check:questions` **0 lỗi · 11 chú ý** — đúng bằng trước khi sửa.
+- **Độ phủ sổ: 17/25 kho đã áp = 15.281/20.487 mục = 75%.** Đã chấm nhưng chưa áp: `thucvat` 2.805 mục (mức 5 do danh sách trắng tay đặt, cần quyết). Chưa chấm lại: 7 kho 2.206 mục. Không áp được: `thudo` 195 mục (kho dẫn xuất, `pop` đi theo `quocgia`).
+- Phân bố `pop` toàn sổ: 1:5.710 (28%) · 2:8.973 (44%) · 3:3.428 (17%) · 4:1.650 (8%) · 5:726 (4%).
+- **Chờ chủ dự án:** giao lại 7 kho cho HY3; quyết chuyện mức 5 của `thucvat`; 58 ca kéo xuống của `monan`; **truy vấn số 2 trên production** — vẫn là việc quan trọng nhất còn treo, chưa có số nào được đối chiếu với lượt gõ thật.
+
+## 2026-10-23 23:00
+- **WorkBuddy (HY3) đã nộp TASK-006 — chờ duyệt.** 12 file TSV đã xuất, tổng 6.482 mục (160 từ chồng + 6.322 từ 11 kho). merge6.py xác nhận 12/12 kho đúng số dòng, 0 từ trùng chấm khác mức.
+- **Phân bố các kho đã chấm (HY3):**
+  - `doi_chieu_22kho`: 160, dist=[18,31,41,31,39], 3 dòng `?`
+  - `nhanvat`: 1.522, dist=[619,417,305,134,47], 1 dòng `?`
+  - `diadanh`: 1.173, dist=[336,396,292,115,34]
+  - `douong`: 812, dist=[149,292,280,73,18]
+  - `tungu`: 681, dist=[0,47,188,319,127]
+  - `ngonngu`: 609, dist=[207,317,62,14,9]
+  - `dovat`: 515, dist=[0,8,76,187,244]
+  - `cotich`: 359, dist=[0,0,18,55,286]
+  - `thethao`: 307, dist=[0,0,69,112,126]
+  - `quanao`: 169, dist=[0,0,14,37,118]
+  - `mausac`: 112, dist=[0,0,3,20,89]
+  - `diaphuong`: 63, dist=[0,0,0,0,63]
+- **Việc đang chờ:** Claude kiểm 12 file TASK-006 + so thang 160 từ chồng với TASK-005 (DeepSeek) → áp pop bằng `scripts/apply-pop.ts`.
+
+## 2026-10-23 22:30
+- **WorkBuddy (DeepSeek v4.1 Flash) đã nộp TASK-005 — chờ duyệt.** 12 file TSV đã xuất, tổng 6.478 mục (160 từ chồng + 6.318 từ 11 kho). merge5.py xác nhận 12/12 prefix FULL, 0 clash, 0 overlap.
+- **Phân bố các kho đã chấm:**
+  - `doi_chieu_22kho`: 160, dist=[27,23,31,39,40], 3 dòng `?`
+  - `khainiem`: 1.816, dist=[563,409,348,294,202]
+  - `thegioi`: 1.099, dist=[345,370,239,99,46]
+  - `nghe`: 702, dist=[79,201,201,139,82]
+  - `vanhoa`: 623, dist=[97,193,137,99,97]
+  - `thienvan`: 568, dist=[396,97,36,11,28]
+  - `xe`: 413, dist=[23,131,119,93,47]
+  - `cothe`: 383, dist=[45,79,85,93,81]
+  - `nhaccu`: 347, dist=[157,81,57,36,16]
+  - `quocgia`: 195, dist=[47,70,44,20,14] (đã sửa `Nhật Bản` 4→5)
+  - `hoahoc`: 118, dist=[77,9,12,11,9]
+  - `dantoc`: 54, dist=[39,4,10,0,1]
+- **3 từ đánh dấu `?` trong bộ chồng:** `Ăn quan bằng đá` (vanhoa), `Trần Can` (nhanvat), `Sự tích chim hít cô` (cotich) — đều không xác nhận được hoặc trông như viết sai.
+- **Vấn đề mở cần quyết:** Một số tên nguyên tố `hoahoc` khác với bảng tuần hoàn tiếng Việt thông dụng (`Agon`, `Gemani`, `Telu`, `Xesi`, `Honmi`…); cần chủ dự án xác nhận có phải lỗi không.
+- **Việc đang chờ:** Claude kiểm 12 file + so thang 160 từ chồng với HY3 → áp pop bằng `scripts/apply-pop.ts`.
+
 ## 2026-10-23 22:00
 - **Đã giao hết 22 kho còn lại trong một đợt, chạy song song:** TASK-005 (DeepSeek v4.1 Flash — 11 kho, 6.318 mục: `khainiem` 1.816, `thegioi` 1.099, `nghe` 702, `vanhoa` 623, `thienvan` 568, `xe` 413, `cothe` 383, `nhaccu` 347, `quocgia` 195, `hoahoc` 118, `dantoc` 54) và TASK-006 (HY3 — 11 kho, 6.322 mục: `nhanvat` 1.522, `diadanh` 1.173, `douong` 812, `tungu` 681, `ngonngu` 609, `dovat` 515, `cotich` 359, `thethao` 307, `quanao` 169, `mausac` 112, `diaphuong` 63). Lệch hai bên 4 mục.
 - **Bộ từ chồng mới: `tu_doi_chieu_22kho.tsv`, 160 từ rải đều cả 22 kho**, lấy cách đều trong từng mức pop hiện có. Cả hai model chấm bộ này **trước**, rồi mới chấm nửa của mình. Lấy trong chính 22 kho đó thay vì dùng lại bộ 120 từ động vật, vì bảng chuyển thang học trên động vật rồi áp cho món ăn là chỗ yếu đã biết của đợt trước.

@@ -10,9 +10,9 @@ export default `
 4 Tiếng Pháp|Pháp|French|Pháp ngữ # eu
 3 Tiếng Đức|Đức|German # eu
 3 Tiếng Tây Ban Nha|Tây Ban Nha|Spanish|Español # eu
-3 Tiếng Nga|Nga|Russian # eu
-3 Tiếng Thái|Tiếng Thái Lan|Thai # as
-3 Tiếng Lào|Lào|Lao # as
+5 Tiếng Nga|Nga|Russian # eu
+5 Tiếng Thái|Tiếng Thái Lan|Thai # as
+5 Tiếng Lào|Lào|Lao # as
 3 Tiếng Khmer|Tiếng Campuchia|Khmer|Tiếng Miên # as vn
 3 Tiếng Ý|Tiếng Italia|Italian # eu
 3 Tiếng Bồ Đào Nha|Bồ Đào Nha|Portuguese # eu
@@ -30,7 +30,7 @@ export default `
 2 Tiếng Phần Lan|Finnish # eu
 2 Tiếng Ba Lan|Polish # eu
 2 Tiếng Séc|Czech # eu
-2 Tiếng Hy Lạp|Greek # eu
+4 Tiếng Hy Lạp|Greek # eu
 2 Tiếng Thổ Nhĩ Kỳ|Turkish # as eu
 2 Tiếng Ba Tư|Tiếng Farsi|Persian|Farsi # as
 2 Tiếng Do Thái|Tiếng Hebrew|Hebrew # as
@@ -75,13 +75,13 @@ export default `
 1 Tiếng Scotland Gaelic|Scottish Gaelic # eu
 1 Tiếng Catalan|Catalan # eu
 1 Tiếng Basque|Basque # eu
-1 Tiếng Iceland|Icelandic # eu
+3 Tiếng Iceland|Icelandic # eu
 1 Tiếng Estonia # eu
 1 Tiếng Latvia # eu
 1 Tiếng Litva # eu
-1 Tiếng Serbia|Serbian # eu
-1 Tiếng Croatia|Croatian # eu
-1 Tiếng Bulgaria|Bulgarian # eu
+3 Tiếng Serbia|Serbian # eu
+3 Tiếng Croatia|Croatian # eu
+3 Tiếng Bulgaria|Bulgarian # eu
 1 Tiếng Slovakia # eu
 1 Tiếng Slovenia # eu
 1 Tiếng Albania # eu
@@ -92,7 +92,7 @@ export default `
 1 Tiếng Kazakh # as
 1 Tiếng Uzbek # as
 1 Tiếng Pashto # as
-1 Tiếng Nepal|Nepali # as
+3 Tiếng Nepal|Nepali # as
 1 Tiếng Sinhala # as
 1 Tiếng Punjab|Punjabi # as
 1 Tiếng Gujarat|Gujarati # as
@@ -120,12 +120,12 @@ export default `
 1 Tiếng Inuit # bm
 1 Tiếng Navajo # bm
 1 Tiếng Maya # bm
-1 Tiếng Ai Cập cổ # af co
+3 Tiếng Ai Cập cổ # af co
 1 Tiếng Aramaic # as co
 1 Tiếng Klingon # nhantao
 1 Tiếng Elf|Tiếng Sindarin # nhantao
-1 Chữ nổi Braille|Chữ Braille # nhantao
-1 Mã Morse|Morse # nhantao
+3 Chữ nổi Braille|Chữ Braille # nhantao
+3 Mã Morse|Morse # nhantao
 
 @ laptrinh
 5 Python #
@@ -176,7 +176,7 @@ export default `
 1 Zig #
 1 Logo #
 1 PowerShell #
-1 Markdown #
+3 Markdown #
 1 JSON #
 1 XML #
 1 GraphQL #

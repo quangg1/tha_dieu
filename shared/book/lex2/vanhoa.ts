@@ -3,11 +3,11 @@ export default `
 @ lehoi
 2 Lễ hội Đền Gióng|Hội Gióng Phù Đổng
 2 Hội Gióng Sóc Sơn
-2 Lễ hội chùa Bái Đính
+4 Lễ hội chùa Bái Đính
 2 Lễ hội Tràng An
 2 Lễ hội Hoa Lư
 2 Lễ hội Đền Bà Chúa Kho
-2 Lễ hội đền Trần|Lễ hội Đền Trần Nam Định|Lễ khai ấn Đền Trần
+4 Lễ hội đền Trần|Lễ hội Đền Trần Nam Định|Lễ khai ấn Đền Trần
 2 Lễ hội Phủ Tây Hồ
 2 Lễ hội Đền Sóc
 2 Lễ hội Đền Đô
@@ -36,7 +36,7 @@ export default `
 2 Lễ hội Đình Nam Ô
 2 Lễ hội Bà Thu Bồn
 2 Lễ hội Long Chu
-2 Lễ hội Rằm tháng Giêng
+4 Lễ hội Rằm tháng Giêng
 2 Lễ hội Kate|Lễ hội Ka Tê|Lễ hội Katê Ninh Thuận
 2 Lễ hội Rija Nagar
 2 Lễ hội Chôl Chnăm Thmây|Tết Chôl Chnăm Thmây
@@ -83,7 +83,7 @@ export default `
 2 Lễ hội Đền Kim Liên
 2 Lễ hội Chùa Láng
 2 Lễ hội Đền Ngọc Sơn
-2 Lễ hội Đống Đa|Lễ hội Gò Đống Đa
+4 Lễ hội Đống Đa|Lễ hội Gò Đống Đa
 2 Lễ hội Đình Chèm
 2 Lễ hội Đền Và
 2 Lễ hội Đền Mẫu Đồng Đăng
@@ -106,31 +106,31 @@ export default `
 2 Lễ hội Đền Mẫu Tam Thanh
 @ ngayle
 2 Ngày Quốc khánh|Ngày 2/9
-2 Ngày Thương binh Liệt sĩ|Ngày 27/7
-2 Ngày Quân đội nhân dân Việt Nam|Ngày 22/12
-2 Ngày thành lập Đoàn|Ngày 26/3
-2 Ngày sinh nhật Bác|Ngày 19/5
-2 Ngày thành lập Đảng|Ngày 3/2
+5 Ngày Thương binh Liệt sĩ|Ngày 27/7
+4 Ngày Quân đội nhân dân Việt Nam|Ngày 22/12
+5 Ngày thành lập Đoàn|Ngày 26/3
+5 Ngày sinh nhật Bác|Ngày 19/5
+5 Ngày thành lập Đảng|Ngày 3/2
 2 Giỗ Tổ Hùng Vương|Ngày 10/3 âm lịch
 2 Ngày Phụ nữ Việt Nam|Ngày Phụ nữ 20/10|Ngày 20/10
 2 Ngày Quốc tế Phụ nữ|Ngày 8/3|Ngày Phụ nữ 8/3
 2 Ngày Quốc tế Thiếu nhi|Ngày 1/6|Tết Thiếu nhi
 2 Ngày Giải phóng miền Nam|Ngày 30/4|Ngày Chiến thắng 30/4|Ngày Thống nhất
 2 Ngày Nhà giáo Việt Nam|Ngày Hiến chương Nhà giáo|Ngày 20/11
-2 Ngày Quốc tế Nam giới
-2 Ngày Valentine Trắng|Valentine trắng
+4 Ngày Quốc tế Nam giới
+4 Ngày Valentine Trắng|Valentine trắng
 2 Ngày Valentine Đen|Valentine đen
 2 Ngày Lễ Độc thân|Ngày 11/11
-2 Ngày Black Friday|Black Friday
-2 Ngày Trái Đất|Giờ Trái Đất
+5 Ngày Black Friday|Black Friday
+4 Ngày Trái Đất|Giờ Trái Đất
 2 Ngày Nước thế giới
 2 Ngày Sức khỏe thế giới
 2 Ngày Quốc tế Người cao tuổi
 2 Ngày Quốc tế Người khuyết tật
-2 Ngày Quốc tế Hạnh phúc|Ngày Hạnh phúc Quốc tế
+4 Ngày Quốc tế Hạnh phúc|Ngày Hạnh phúc Quốc tế
 2 Ngày Quốc tế Xóa nghèo
 2 Ngày Lương thực thế giới
-2 Ngày Phòng chống HIV/AIDS|Ngày Thế giới phòng chống AIDS
+4 Ngày Phòng chống HIV/AIDS|Ngày Thế giới phòng chống AIDS
 2 Ngày Không thuốc lá thế giới
 2 Ngày Đại dương thế giới
 2 Ngày Đa dạng sinh học
@@ -147,7 +147,7 @@ export default `
 2 Ngày Kiến trúc sư Việt Nam
 2 Ngày Hội Quốc phòng toàn dân|Ngày Quốc phòng toàn dân
 2 Ngày Biên phòng toàn dân
-2 Ngày Công an nhân dân|Ngày truyền thống Công an nhân dân
+4 Ngày Công an nhân dân|Ngày truyền thống Công an nhân dân
 2 Ngày Hải quân Việt Nam
 2 Ngày Phòng không Không quân
 2 Ngày Biên phòng
@@ -179,11 +179,11 @@ export default `
 2 Tết Trung nguyên|Rằm tháng Bảy|Xá tội vong nhân
 2 Tết Nguyên tiêu|Tết Thượng nguyên|Rằm tháng Giêng
 2 Ngày ông Công ông Táo|Tết Táo quân|23 tháng Chạp
-2 Tất niên|Tiệc tất niên
-2 Giao thừa|Đêm giao thừa
-2 Mùng một Tết|Mùng 1 Tết
-2 Ngày vía Thần Tài|Vía Thần Tài
-2 Ngày Hiến máu nhân đạo
+5 Tất niên|Tiệc tất niên
+5 Giao thừa|Đêm giao thừa
+5 Mùng một Tết|Mùng 1 Tết
+5 Ngày vía Thần Tài|Vía Thần Tài
+4 Ngày Hiến máu nhân đạo
 @ nghethuat
 2 Hát văn|Hát chầu văn|Chầu văn|Hát văn hầu đồng|Hầu đồng
 2 Quan họ|Hát quan họ Bắc Ninh
@@ -204,13 +204,13 @@ export default `
 2 Hát páo dung
 2 Hát soọng cô
 2 Hát giao duyên Nam Bộ
-2 Hò|Hò khoan|Hò mái nhì|Hò mái đẩy|Hò giã gạo|Hò kéo lưới|Hò sông Mã|Hò Huế|Hò Đồng Tháp|Hò khoan Lệ Thủy
+4 Hò|Hò khoan|Hò mái nhì|Hò mái đẩy|Hò giã gạo|Hò kéo lưới|Hò sông Mã|Hò Huế|Hò Đồng Tháp|Hò khoan Lệ Thủy
 2 Hò Bá Trạo|Bả trạo
 2 Lý|Lý con sáo|Lý ngựa ô|Lý cây bông|Lý chiều chiều|Lý qua cầu|Lý kéo chài
-2 Hát ru|Ru con|Hát ru con
-2 Đồng dao
-2 Ca dao
-2 Vè
+5 Hát ru|Ru con|Hát ru con
+4 Đồng dao
+5 Ca dao
+4 Vè
 2 Tuồng|Tuồng cung đình|Hát bội|Hát bộ
 2 Chèo|Chèo sân đình
 2 Cải lương|Cải lương tuồng cổ
@@ -230,7 +230,7 @@ export default `
 2 Múa Rom vong|Lăm vông|Lâm thôn
 2 Múa khèn|Múa khèn H'Mông
 2 Xòe Thái|Múa xòe|Xòe
-2 Múa lân|Múa sư tử|Múa lân sư rồng
+5 Múa lân|Múa sư tử|Múa lân sư rồng
 2 Múa rồng
 2 Múa trống
 2 Múa chuông
@@ -254,9 +254,9 @@ export default `
 2 Tranh Kim Hoàng
 2 Tranh làng Sình
 2 Tranh kính
-2 Tranh sơn mài
-2 Tranh lụa
-2 Tranh thêu
+4 Tranh sơn mài
+4 Tranh lụa
+4 Tranh thêu
 2 Tranh khắc gỗ
 2 Tranh giấy dó
 2 Tranh gốm
@@ -272,47 +272,47 @@ export default `
 2 Nghệ thuật tò he|Tò he
 2 Nghệ thuật múa lửa
 2 Xiếc dân gian
-2 Thơ lục bát
-2 Câu đối
+5 Thơ lục bát
+5 Câu đối
 2 Ca kịch Huế
 2 Ca kịch bài chòi
 @ trochoi
 2 Trò chơi chuyền thẻ|Chuyền thẻ
 2 Đá ống bơ|Đá lon
 2 Chơi nhảy ô|Nhảy ô
-2 Nhảy dây tập thể
+4 Nhảy dây tập thể
 2 Kéo co tre
-2 Chơi bi ve
+4 Chơi bi ve
 2 Chơi khăng đánh
 2 Ô ăn quan|Chơi ô quan
 2 Cờ lúa ngựa|Chơi cờ cá ngựa
 2 Chơi cờ caro giấy
 2 Chơi cờ ô vuông|Cờ chấm|Nối điểm
-2 Chơi tú lơ khơ
+4 Chơi tú lơ khơ
 2 Chơi đá gà lá
 2 Chọi cỏ gà|Chọi gà lá
 2 Chọi dế
 2 Chọi chim|Chọi chim họa mi
 2 Chọi cá chọi|Chọi cá
 2 Chơi thả thuyền giấy
-2 Chơi súng nước
+4 Chơi súng nước
 2 Chơi súng ống tre|Súng phốc|Súng hạt nhót
-2 Chơi súng cao su|Bắn ná|Ná thun
+5 Chơi súng cao su|Bắn ná|Ná thun
 2 Chơi bắn dây thun
 2 Chơi đánh vòng|Lăn vòng
 2 Chơi đẩy vòng|Đẩy vòng sắt
 2 Chơi lò cò cắp nách
 2 Trốn tìm|Chơi ú tim|Ú tim
-2 Chơi đuổi bắt|Đuổi bắt
+4 Chơi đuổi bắt|Đuổi bắt
 2 Chơi rượt bắt
 2 Chơi đi trốn
 2 Chơi thả bè
 2 Chơi nặn đất|Nặn tò he
 2 Chơi làm đèn ông sao
-2 Rước đèn|Chơi rước đèn Trung thu
+5 Rước đèn|Chơi rước đèn Trung thu
 2 Chơi đốt pháo|Đốt pháo
 2 Chơi pháo đất|Pháo đất
-2 Chơi làm diều
+4 Chơi làm diều
 2 Chơi thổi lá|Thổi kèn lá
 2 Chơi chồng nụ chồng hoa|Chồng nụ chồng hoa
 2 Chơi thả đỉa ba ba|Thả đỉa ba ba
@@ -361,7 +361,7 @@ export default `
 2 Chơi quay đĩa
 2 Chơi cù quay
 2 Chơi con quay lá
-2 Chơi chong chóng|Chong chóng giấy
+4 Chơi chong chóng|Chong chóng giấy
 2 Chơi làm ống thụt
 2 Chơi thổi cơm thi
 2 Chơi đá cầu lông gà
@@ -375,5 +375,5 @@ export default `
 2 Trò nói lái
 2 Trò ô chữ
 2 Trò chơi lật hình
-2 Trò chơi ghép hình
+4 Trò chơi ghép hình
 `;

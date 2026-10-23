@@ -117,7 +117,7 @@ export default `
 2 Hồ Sông Hinh
 2 Hồ Sông Ba Hạ
 2 Hồ Ea Kao
-2 Hồ Ea Súp
+1 Hồ Ea Súp
 2 Hồ Yaly|Hồ thủy điện Yaly
 2 Hồ Plei Krông
 2 Hồ Chiến Thắng|Hồ Mê Linh
@@ -197,7 +197,7 @@ export default `
 2 Đảo Hòn Nhạn
 2 Đảo Song Tử Tây
 2 Đảo Trường Sa Lớn
-2 Đảo Sinh Tồn
+3 Đảo Sinh Tồn
 2 Đảo Nam Yết
 2 Đảo Sơn Ca
 2 Đảo Phan Vinh
@@ -230,7 +230,7 @@ export default `
 2 Núi Chiêu Lầu Thi
 2 Núi Phia Oắc
 2 Núi Phja Đén
-2 Núi Tam Đảo
+4 Núi Tam Đảo
 2 Núi Sóc Sơn
 2 Núi Sài Sơn|Chùa Thầy
 2 Núi Trầm
@@ -260,7 +260,7 @@ export default `
 2 Núi Dinh
 2 Núi Thị Vải
 2 Núi Châu Thới
-2 Núi Cấm|Thiên Cấm Sơn
+3 Núi Cấm|Thiên Cấm Sơn
 2 Núi Ba Thê
 2 Núi Sập
 2 Núi Tô
@@ -283,7 +283,7 @@ export default `
 2 Đỉnh Ngũ Chỉ Sơn
 2 Đỉnh Nhìu Cồ San
 2 Đỉnh Bidoup|Bidoup
-2 Cao nguyên Mộc Châu|Mộc Châu
+4 Cao nguyên Mộc Châu|Mộc Châu
 2 Cao nguyên đá Đồng Văn
 2 Cao nguyên Lâm Viên
 2 Cao nguyên Di Linh
@@ -294,8 +294,8 @@ export default `
 2 Cao nguyên Bắc Hà
 2 Cao nguyên Sìn Hồ
 2 Cao nguyên Tà Phình
-2 Dãy Hoàng Liên Sơn|Hoàng Liên Sơn
-2 Dãy Trường Sơn|Trường Sơn
+4 Dãy Hoàng Liên Sơn|Hoàng Liên Sơn
+5 Dãy Trường Sơn|Trường Sơn
 2 Dãy Bạch Mã
 2 Dãy Tam Điệp
 2 Dãy Ngân Sơn
@@ -374,7 +374,7 @@ export default `
 2 Thác Thăm Thiên
 2 Thác Tình Yêu|Thác Tình Yêu Sa Pa
 2 Thác Chiềng Khoa
-2 Thác Ba Tầng
+1 Thác Ba Tầng
 2 Thác Ba Vì
 2 Thác Ao Vua
 2 Thác Đa
@@ -465,11 +465,11 @@ export default `
 2 Vườn quốc gia Bến En
 2 Vườn quốc gia Pù Mát
 2 Vườn quốc gia Vũ Quang
-2 Bạch Mã|Vườn quốc gia Bạch Mã
+4 Bạch Mã|Vườn quốc gia Bạch Mã
 2 Phong Nha - Kẻ Bàng|Vườn quốc gia Phong Nha - Kẻ Bàng
-2 Vườn quốc gia Chư Mom Ray
-2 Vườn quốc gia Kon Ka Kinh
-2 Đỉnh Chư Yang Sin|Vườn quốc gia Chư Yang Sin
+1 Vườn quốc gia Chư Mom Ray
+1 Vườn quốc gia Kon Ka Kinh
+1 Đỉnh Chư Yang Sin|Vườn quốc gia Chư Yang Sin
 2 Vườn quốc gia Bidoup Núi Bà|Bidoup Núi Bà
 2 Vườn quốc gia Núi Chúa
 2 Vườn quốc gia Phước Bình
@@ -508,7 +508,7 @@ export default `
 2 Rừng ngập mặn Rú Chá
 2 Khu bảo tồn sếu Phú Mỹ
 @ tp
-2 Thủ Đức
+4 Thủ Đức
 2 Thuận An
 2 Dĩ An
 2 Tân Uyên
@@ -564,7 +564,7 @@ export default `
 2 Phúc Yên
 2 Vĩnh Yên
 2 Việt Trì
-2 Phú Thọ
+4 Phú Thọ
 2 Tuyên Quang
 2 Yên Bái
 2 Nghĩa Lộ
@@ -578,11 +578,11 @@ export default `
 2 Lai Châu
 2 Mường Lay
 2 Sơn Tây
-2 Hà Đông
+4 Hà Đông
 2 An Khê
 2 Ayun Pa
 2 Buôn Hồ
-2 Thái Bình
+4 Thái Bình
 2 Hải Dương
 
 @
@@ -668,11 +668,11 @@ export default `
 3 Chùa Huệ Nghiêm #
 3 Chùa Ông Bổn #
 3 Chùa Bà Chợ Lớn #
-3 Miếu Ông Bổn #
+1 Miếu Ông Bổn #
 3 Nhà thờ Huyện Sỹ #
 3 Nhà thờ Cha Tam #
-3 Nhà thờ Thủ Thiêm #
-3 Thiền viện Trúc Lâm Chánh Giác #
+1 Nhà thờ Thủ Thiêm #
+1 Thiền viện Trúc Lâm Chánh Giác #
 3 Sala Thủ Thiêm|Khu đô thị Thủ Thiêm #
 3 Cầu Phú Mỹ #
 3 Cầu Mống #
@@ -697,35 +697,35 @@ export default `
 @ tn
 4 Hồ Tuyền Lâm Đà Lạt #
 3 Thác Bảo Đại #
-3 Thác Ba Tầng #
+1 Thác Ba Tầng #
 3 Thác Đắk G'Lun #
 3 Thác Lưu Ly #
-3 Thác Dray K'nao #
+1 Thác Dray K'nao #
 3 Thác Thủy Tiên #
 3 Hồ Yaly #
 3 Hồ Ea Kao #
-3 Hồ Ea Súp #
+1 Hồ Ea Súp #
 3 Núi Chư Đăng Ya #
 3 Núi Ngọc Linh #
 3 Đỉnh Bidoup #
 3 Vườn quốc gia Bidoup - Núi Bà #
-3 Vườn quốc gia Chư Mom Ray #
-3 Vườn quốc gia Kon Ka Kinh #
+1 Vườn quốc gia Chư Mom Ray #
+1 Vườn quốc gia Kon Ka Kinh #
 3 Vườn quốc gia Tà Đùng #
-3 Khu du lịch Ma Thiên Lãnh|Thung lũng Ma Thiên Lãnh #
-3 Làng Kon K'Tu #
-3 Làng Plei Ơp #
-3 Buôn Trí A #
+1 Khu du lịch Ma Thiên Lãnh|Thung lũng Ma Thiên Lãnh #
+1 Làng Kon K'Tu #
+1 Làng Plei Ơp #
+1 Buôn Trí A #
 3 Buôn Akô Dhông #
 3 Bảo tàng Thế giới Cà phê #
 3 Nhà thờ Chính tòa Kon Tum|Nhà thờ gỗ Kon Tum #
-3 Tòa Giám mục Kon Tum #
+1 Tòa Giám mục Kon Tum #
 3 Chùa Minh Thành #
-3 Chùa Sắc tứ Khải Đoan #
+1 Chùa Sắc tứ Khải Đoan #
 3 Ngục Kon Tum #
 3 Quảng trường Đại Đoàn Kết Pleiku #
-3 Đồi chè Biển Hồ #
-3 Hàng thông trăm tuổi Biển Hồ #
+1 Đồi chè Biển Hồ #
+1 Hàng thông trăm tuổi Biển Hồ #
 3 Cánh đồng hoa dã quỳ Chư Đăng Ya #
 3 Vườn hoa Đà Lạt|Vườn hoa Thành phố Đà Lạt #
 3 Quảng trường Lâm Viên #
@@ -737,7 +737,7 @@ export default `
 3 Đồi Robin #
 3 Thung lũng Vàng #
 3 Làng hoa Vạn Thành #
-3 Hồ Đankia - Suối Vàng|Hồ Suối Vàng #
+1 Hồ Đankia - Suối Vàng|Hồ Suối Vàng #
 2 Thác Ba Tầng Bảo Lộc #
 2 Đồi cỏ hồng Đà Lạt #
 2 Rừng thông Bản Đôn #

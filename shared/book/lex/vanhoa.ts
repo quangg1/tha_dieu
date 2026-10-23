@@ -14,45 +14,45 @@ export default `
 4 Giỗ Tổ Hùng Vương|Mùng 10 tháng 3|Ngày Giỗ Tổ # lehoi
 4 Lễ Tình nhân|Valentine|14/2
 4 Giáng sinh|Noel|Lễ Giáng sinh|Christmas
-3 Tết Dương lịch|Năm mới|Tết Tây|1/1
+5 Tết Dương lịch|Năm mới|Tết Tây|1/1
 3 Tết Đoan Ngọ|Tết diệt sâu bọ|Mùng 5 tháng 5
 3 Tết Hàn thực|Tết bánh trôi|Mùng 3 tháng 3
-3 Lễ Vu Lan|Vu Lan|Rằm tháng Bảy
+5 Lễ Vu Lan|Vu Lan|Rằm tháng Bảy
 3 Tết Nguyên tiêu|Rằm tháng Giêng
 3 Ngày ông Công ông Táo|Tết ông Công ông Táo|Ông Táo về trời|23 tháng Chạp # tet
-3 Ngày Thương binh Liệt sĩ|27/7
+5 Ngày Thương binh Liệt sĩ|27/7
 3 Ngày Thầy thuốc Việt Nam|27/2
-2 Ngày Quân đội nhân dân Việt Nam|22/12
+4 Ngày Quân đội nhân dân Việt Nam|22/12
 2 Ngày Báo chí Cách mạng Việt Nam|21/6
-2 Lễ Phật đản|Phật đản
-2 Halloween|Lễ hội hóa trang
-2 Ngày của Mẹ|Mother's Day
-2 Ngày của Cha|Father's Day
-2 Cách mạng Tháng Tám|19/8
-2 Ngày thành lập Đảng|3/2
-2 Ngày sinh nhật Bác|19/5
-2 Ngày Gia đình Việt Nam|28/6
+4 Lễ Phật đản|Phật đản
+5 Halloween|Lễ hội hóa trang
+5 Ngày của Mẹ|Mother's Day
+4 Ngày của Cha|Father's Day
+5 Cách mạng Tháng Tám|19/8
+5 Ngày thành lập Đảng|3/2
+5 Ngày sinh nhật Bác|19/5
+4 Ngày Gia đình Việt Nam|28/6
 2 Ngày Doanh nhân Việt Nam|13/10
-2 Ngày Môi trường thế giới|5/6
-1 Ngày Sách Việt Nam|21/4
+4 Ngày Môi trường thế giới|5/6
+3 Ngày Sách Việt Nam|21/4
 1 Ngày Văn hóa các dân tộc Việt Nam|19/4
-1 Ngày Pháp luật Việt Nam|9/11
+3 Ngày Pháp luật Việt Nam|9/11
 1 Ngày Khoa học và Công nghệ Việt Nam|18/5
-1 Ngày Thể thao Việt Nam|27/3
-1 Ngày thành lập Đoàn|26/3
-1 Ngày Giải phóng Thủ đô|10/10
-1 Ngày Chiến thắng Điện Biên Phủ|7/5
-1 Lễ Tạ ơn|Thanksgiving
-1 Ngày Cá tháng Tư|1/4
-1 Tết Thanh minh|Thanh minh
+3 Ngày Thể thao Việt Nam|27/3
+5 Ngày thành lập Đoàn|26/3
+4 Ngày Giải phóng Thủ đô|10/10
+5 Ngày Chiến thắng Điện Biên Phủ|7/5
+3 Lễ Tạ ơn|Thanksgiving
+4 Ngày Cá tháng Tư|1/4
+3 Tết Thanh minh|Thanh minh
 1 Tết cơm mới|Lễ cơm mới
 1 Tết Trùng cửu|Trùng dương|Mùng 9 tháng 9
-1 Lễ Phục sinh|Phục sinh|Easter
+3 Lễ Phục sinh|Phục sinh|Easter
 
 @ lehoi
 4 Lễ hội chùa Hương|Hội chùa Hương|Chùa Hương
 3 Hội Gióng|Lễ hội Gióng|Hội Gióng Phù Đổng|Hội Gióng Sóc Sơn # unesco
-3 Lễ hội Đền Hùng|Hội Đền Hùng
+5 Lễ hội Đền Hùng|Hội Đền Hùng
 3 Lễ hội Lim|Hội Lim
 3 Lễ hội Yên Tử|Hội Yên Tử
 3 Lễ hội đâm trâu|Đâm trâu
@@ -62,9 +62,9 @@ export default `
 3 Lễ hội Bà Chúa Xứ|Vía Bà Chúa Xứ núi Sam
 2 Lễ hội Kate|Katê|Lễ hội Katê
 2 Lễ hội Ok Om Bok|Ok Om Bok|Cúng trăng
-2 Lễ hội cồng chiêng Tây Nguyên|Lễ hội cồng chiêng
+4 Lễ hội cồng chiêng Tây Nguyên|Lễ hội cồng chiêng
 2 Lễ hội Nghinh Ông|Nghinh Ông|Lễ cầu ngư|Cầu ngư
-2 Lễ hội đền Trần|Khai ấn đền Trần|Lễ khai ấn
+4 Lễ hội đền Trần|Khai ấn đền Trần|Lễ khai ấn
 2 Hội Cổ Loa|Lễ hội Cổ Loa
 2 Lễ hội Côn Sơn - Kiếp Bạc|Côn Sơn Kiếp Bạc
 2 Lễ hội Phủ Dầy|Phủ Dày
@@ -77,24 +77,24 @@ export default `
 2 Lễ hội đua bò Bảy Núi|Đua bò
 2 Lễ hội Tịch điền|Tịch điền
 2 Lễ hội Kéo co|Kéo co ngồi # unesco
-2 Lễ hội Đống Đa|Gò Đống Đa
+4 Lễ hội Đống Đa|Gò Đống Đa
 2 Lễ hội Bạch Đằng
 2 Lễ hội Tháp Bà Ponagar|Tháp Bà
 2 Lễ hội đền Bà Triệu
 2 Lễ hội Lăng Ông Bà Chiểu|Lăng Ông
-2 Lễ hội hoa Đà Lạt|Festival hoa Đà Lạt
+4 Lễ hội hoa Đà Lạt|Festival hoa Đà Lạt
 2 Lễ hội Nghinh Cô
 2 Lễ hội Sóc Bom Bo|Sóc Bom Bo
-1 Lễ hội Ném còn
+3 Lễ hội Ném còn
 1 Lễ hội Cầu mùa
-1 Lễ hội Chùa Keo
+3 Lễ hội Chùa Keo
 1 Lễ hội Phết Hiền Quan|Cướp phết
 1 Lễ hội Rước pháo Đồng Kỵ|Rước pháo
 1 Lễ hội Trò Trám
 1 Lễ hội Làng Sình|Vật làng Sình
 1 Lễ hội Cầu Ngư Khánh Hòa
 1 Lễ hội Kỳ Yên
-1 Lễ hội Lồng đèn Hội An|Đêm phố cổ Hội An
+3 Lễ hội Lồng đèn Hội An|Đêm phố cổ Hội An
 
 @ trochoi
 5 Ô ăn quan|Ô quan
@@ -107,12 +107,12 @@ export default `
 4 Rồng rắn lên mây
 4 Thả diều
 4 Chơi chuyền|Chuyền
-3 Bắn bi|Đánh bi|Chơi bi
+5 Bắn bi|Đánh bi|Chơi bi
 3 Đánh đáo|Đáo
 3 Nu na nu nống|Nu na
 3 Kéo cưa lừa xẻ
-3 Oẳn tù tì|Oẳn tù xì|Búa kéo bao
-3 Nhảy lò cò|Lò cò|Ô lò cò
+5 Oẳn tù tì|Oẳn tù xì|Búa kéo bao
+5 Nhảy lò cò|Lò cò|Ô lò cò
 3 Đánh khăng|Khăng
 3 Cướp cờ
 3 Đánh quay|Con quay|Chơi quay|Đánh cù
@@ -130,10 +130,10 @@ export default `
 2 Đánh đu
 2 Ném còn
 2 Đẩy gậy
-2 Chọi gà|Đá gà
-2 Chọi trâu
-2 Đua thuyền
-2 Mèo bắt chuột
+5 Chọi gà|Đá gà
+4 Chọi trâu
+5 Đua thuyền
+4 Mèo bắt chuột
 2 Tranh bóng
 2 Bỏ khăn|Rồng rắn bỏ khăn
 2 Đánh trống cơm
@@ -148,32 +148,32 @@ export default `
 2 Gắp sỏi|Ném sỏi
 2 Rải ống
 2 Đánh tu lu
-2 Thổi bong bóng xà phòng|Thổi bong bóng
-2 Chơi đồ hàng|Bán đồ hàng
-2 Chơi búp bê
+4 Thổi bong bóng xà phòng|Thổi bong bóng
+4 Chơi đồ hàng|Bán đồ hàng
+5 Chơi búp bê
 2 Chơi tàu lá chuối
-2 Xếp máy bay giấy|Máy bay giấy
-2 Gấp thuyền giấy|Thuyền giấy
+4 Xếp máy bay giấy|Máy bay giấy
+4 Gấp thuyền giấy|Thuyền giấy
 2 Chơi ô tô lá bàng
 2 Trâu lá đa|Làm trâu lá đa
 2 Chơi u
 2 Thả đèn trời
-2 Rước đèn|Rước đèn Trung thu # trungthu
-2 Múa lân|Múa sư tử # trungthu tet
+5 Rước đèn|Rước đèn Trung thu # trungthu
+5 Múa lân|Múa sư tử # trungthu tet
 2 Đố chữ|Câu đố
 2 Hát đối đáp
 1 Chơi khăng thẻ
 1 Mài đáo
 1 Đá dế|Chọi dế
 1 Chọi cá|Đá cá
-1 Hát ru
+5 Hát ru
 1 Cắp cua
 1 Bắn nỏ
 1 Đua cà kheo
-1 Đập bóng
+3 Đập bóng
 1 Bịt mắt bắt vịt
 1 Ăn quan bằng đá
-1 Ném vòng cổ chai
+3 Ném vòng cổ chai
 
 @ nghethuat
 4 Quan họ|Dân ca quan họ|Quan họ Bắc Ninh # unesco
@@ -191,25 +191,25 @@ export default `
 3 Hát then|Then # unesco
 3 Hát văn|Chầu văn|Hầu đồng # unesco
 3 Xòe Thái|Múa xòe # unesco
-2 Ca Huế|Hò Huế
+4 Ca Huế|Hò Huế
 2 Hát xẩm|Xẩm
-2 Hò|Hò khoan|Hò mái nhì|Hò sông Mã
+4 Hò|Hò khoan|Hò mái nhì|Hò sông Mã
 2 Lý|Hát lý|Điệu lý
-2 Vọng cổ
+5 Vọng cổ
 2 Múa rối cạn|Rối que|Rối dây
-2 Hát ru|Ru con
-2 Múa lân|Múa sư tử|Múa rồng
+5 Hát ru|Ru con
+5 Múa lân|Múa sư tử|Múa rồng
 2 Hát trống quân
 2 Hát ghẹo
 2 Hát sình ca
 2 Hát lượn|Lượn
 2 Hát giao duyên
-2 Múa sạp
+4 Múa sạp
 2 Múa trống cơm
 2 Hát bả trạo|Bả trạo
-2 Kịch nói|Kịch
-2 Xiếc
-2 Thư pháp|Viết thư pháp|Chữ Nho
+5 Kịch nói|Kịch
+5 Xiếc
+4 Thư pháp|Viết thư pháp|Chữ Nho
 1 Hát dô
 1 Hát ống
 1 Hát dặm
@@ -220,7 +220,7 @@ export default `
 @ langnghe
 4 Bát Tràng|Gốm Bát Tràng|Làng gốm Bát Tràng
 3 Vạn Phúc|Lụa Vạn Phúc|Làng lụa Vạn Phúc
-3 Đông Hồ|Tranh Đông Hồ|Làng tranh Đông Hồ
+5 Đông Hồ|Tranh Đông Hồ|Làng tranh Đông Hồ
 3 Làng Chuông|Nón làng Chuông
 3 Phù Lãng|Gốm Phù Lãng
 3 Hàng Trống|Tranh Hàng Trống
@@ -241,8 +241,8 @@ export default `
 2 Làng Vòng|Cốm Vòng|Cốm làng Vòng
 2 Bánh tráng Trảng Bàng|Trảng Bàng
 2 Làng hương Quảng Phú Cầu|Quảng Phú Cầu
-2 Làng hoa Sa Đéc|Sa Đéc
-2 Làng đào Nhật Tân|Nhật Tân
+4 Làng hoa Sa Đéc|Sa Đéc
+4 Làng đào Nhật Tân|Nhật Tân
 2 Làng hoa Tây Tựu|Tây Tựu
 2 Làng giấy dó Yên Thái|Yên Thái|Giấy dó
 2 Làng gốm Chu Đậu|Chu Đậu
@@ -251,24 +251,24 @@ export default `
 2 Làng nghề Phước Kiều|Phước Kiều|Đúc đồng Phước Kiều
 2 Làng mộc Chàng Sơn|Chàng Sơn
 2 Làng bún Phú Đô|Phú Đô
-2 Làng nước mắm Phan Thiết|Nước mắm Phú Quốc
+4 Làng nước mắm Phan Thiết|Nước mắm Phú Quốc
 2 Làng lụa Mã Châu|Mã Châu
 2 Làng tơ lụa Nha Xá|Nha Xá
 2 Làng cói Nga Sơn|Chiếu Nga Sơn
 2 Làng tranh Kim Hoàng|Kim Hoàng
 2 Làng tranh làng Sình|Tranh làng Sình
-2 Làng kẹo dừa Bến Tre|Kẹo dừa Bến Tre
+4 Làng kẹo dừa Bến Tre|Kẹo dừa Bến Tre
 1 Làng quạt Chàng Sơn
 1 Làng diều Bá Dương|Bá Dương
-1 Làng trống Đọi Tam|Đọi Tam
+3 Làng trống Đọi Tam|Đọi Tam
 1 Làng gốm Thổ Hà|Thổ Hà
 1 Làng mây tre Ninh Sở
 1 Làng thêu Văn Lâm|Văn Lâm
 1 Làng rèn Phúc Sen|Phúc Sen
 1 Làng dệt thổ cẩm Mỹ Nghiệp|Mỹ Nghiệp
-1 Làng gốm Biên Hòa
-1 Làng nghề Hội An|Phố cổ Hội An
-1 Làng gốm Lái Thiêu|Lái Thiêu
+3 Làng gốm Biên Hòa
+4 Làng nghề Hội An|Phố cổ Hội An
+3 Làng gốm Lái Thiêu|Lái Thiêu
 
 @ tet
 5 Bánh chưng
@@ -278,68 +278,68 @@ export default `
 4 Lì xì|Tiền mừng tuổi|Phong bao lì xì|Bao lì xì|Mừng tuổi
 4 Pháo hoa|Bắn pháo hoa
 4 Mâm ngũ quả|Ngũ quả
-3 Câu đối|Câu đối đỏ
+5 Câu đối|Câu đối đỏ
 3 Cây nêu|Dựng cây nêu
-3 Giao thừa|Đêm giao thừa
-3 Hái lộc|Lộc|Hái lộc đầu năm
-3 Xông đất|Xông nhà|Đạp đất
-3 Chúc Tết|Đi chúc Tết
-3 Mứt|Mứt Tết|Hộp mứt
-3 Dưa hành|Củ kiệu|Dưa món
-3 Thịt kho tàu|Thịt kho hột vịt
-3 Giò lụa|Giò|Chả lụa
+5 Giao thừa|Đêm giao thừa
+5 Hái lộc|Lộc|Hái lộc đầu năm
+5 Xông đất|Xông nhà|Đạp đất
+5 Chúc Tết|Đi chúc Tết
+5 Mứt|Mứt Tết|Hộp mứt
+5 Dưa hành|Củ kiệu|Dưa món
+5 Thịt kho tàu|Thịt kho hột vịt
+5 Giò lụa|Giò|Chả lụa
 3 Thịt đông
-3 Cây quất|Quất|Cây tắc
+5 Cây quất|Quất|Cây tắc
 3 Tranh Đông Hồ|Tranh Tết
-3 Đi lễ chùa|Lễ chùa đầu năm|Đi chùa
-3 Múa lân
-3 Pháo|Pháo nổ|Pháo đỏ
-3 Xin chữ|Ông đồ|Cho chữ
-3 Áo mới|Quần áo mới
-3 Hạt dưa
-3 Bánh kẹo|Kẹo
+5 Đi lễ chùa|Lễ chùa đầu năm|Đi chùa
+5 Múa lân
+5 Pháo|Pháo nổ|Pháo đỏ
+5 Xin chữ|Ông đồ|Cho chữ
+5 Áo mới|Quần áo mới
+5 Hạt dưa
+5 Bánh kẹo|Kẹo
 3 Cúng ông Công ông Táo|Cá chép|Thả cá chép
-2 Hoa cúc|Chậu cúc
-2 Hoa thủy tiên|Thủy tiên
-2 Hoa lay ơn|Lay ơn
-2 Hoa vạn thọ|Cúc vạn thọ
-2 Bánh giầy|Bánh dày
-2 Canh măng|Măng khô
-2 Gà luộc|Gà cúng
-2 Xôi gấc
-2 Nem rán|Chả giò
-2 Câu chúc|Chúc mừng năm mới|An khang thịnh vượng|Vạn sự như ý
-2 Tảo mộ|Tảo mộ cuối năm
-2 Dọn nhà|Sơn sửa nhà cửa|Tất niên dọn nhà
-2 Tất niên|Bữa cơm tất niên
-2 Cúng giao thừa
-2 Đèn lồng|Đèn lồng đỏ
+5 Hoa cúc|Chậu cúc
+4 Hoa thủy tiên|Thủy tiên
+4 Hoa lay ơn|Lay ơn
+4 Hoa vạn thọ|Cúc vạn thọ
+4 Bánh giầy|Bánh dày
+4 Canh măng|Măng khô
+5 Gà luộc|Gà cúng
+4 Xôi gấc
+5 Nem rán|Chả giò
+4 Câu chúc|Chúc mừng năm mới|An khang thịnh vượng|Vạn sự như ý
+5 Tảo mộ|Tảo mộ cuối năm
+5 Dọn nhà|Sơn sửa nhà cửa|Tất niên dọn nhà
+5 Tất niên|Bữa cơm tất niên
+5 Cúng giao thừa
+5 Đèn lồng|Đèn lồng đỏ
 2 Bao lì xì
-2 Chợ Tết|Chợ hoa Tết|Phiên chợ Tết
-2 Đường hoa Nguyễn Huệ|Đường hoa
-2 Bầu cua|Bầu cua cá cọp|Lắc bầu cua
-2 Chơi lô tô|Lô tô
-2 Hội xuân
+5 Chợ Tết|Chợ hoa Tết|Phiên chợ Tết
+5 Đường hoa Nguyễn Huệ|Đường hoa
+5 Bầu cua|Bầu cua cá cọp|Lắc bầu cua
+4 Chơi lô tô|Lô tô
+4 Hội xuân
 2 Tết Táo quân|Táo quân
-2 Nồi bánh chưng|Luộc bánh chưng|Gói bánh chưng
-2 Lá dong
+4 Nồi bánh chưng|Luộc bánh chưng|Gói bánh chưng
+5 Lá dong
 2 Củ hành muối
-2 Hoa đào Nhật Tân
-2 Hoa mai vàng
-2 Rượu Tết|Rượu
-2 Trà|Ấm trà Tết
-1 Bánh in
-1 Bánh phu thê
-1 Mắm tôm chua
-1 Thịt mỡ dưa hành
-1 Cây đào thế
-1 Bàn thờ gia tiên|Bàn thờ
-1 Hương|Nhang|Thắp hương
-1 Vàng mã
-1 Phong bao đỏ
-1 Năm con giáp|Con giáp
-1 Ông Địa|Thần Tài
-1 Mùng 1 Tết|Mồng một Tết
-1 Chúc thọ|Mừng thọ
-1 Cây mía|Cành mía
+4 Hoa đào Nhật Tân
+5 Hoa mai vàng
+4 Rượu Tết|Rượu
+5 Trà|Ấm trà Tết
+3 Bánh in
+4 Bánh phu thê
+3 Mắm tôm chua
+3 Thịt mỡ dưa hành
+4 Cây đào thế
+5 Bàn thờ gia tiên|Bàn thờ
+5 Hương|Nhang|Thắp hương
+5 Vàng mã
+4 Phong bao đỏ
+4 Năm con giáp|Con giáp
+4 Ông Địa|Thần Tài
+5 Mùng 1 Tết|Mồng một Tết
+4 Chúc thọ|Mừng thọ
+4 Cây mía|Cành mía
 `;

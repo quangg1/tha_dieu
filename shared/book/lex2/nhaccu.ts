@@ -17,7 +17,7 @@ export default `
 2 Đàn harp dây|Đàn hạc lớn
 2 Đàn zither|Zither
 2 Đàn dulcimer|Dulcimer
-2 Đàn tam thập lục|Dương cầm Việt|Tam thập lục # dt
+4 Đàn tam thập lục|Dương cầm Việt|Tam thập lục # dt
 2 Đàn tỳ bà Trung Quốc|Pipa
 2 Đàn nhị hồ|Erhu
 2 Đàn cổ cầm|Guqin|Thất huyền cầm
@@ -107,7 +107,7 @@ export default `
 2 Kèn khèn bè|Khèn bè # dt
 2 Khèn Mông|Khèn H\'Mông # dt
 2 Sáo ngang|Sáo trúc # dt
-2 Sáo diều # dt
+4 Sáo diều # dt
 2 Sáo ôi
 2 Sáo Shakuhachi|Shakuhachi
 2 Sáo Bansuri|Bansuri
@@ -138,34 +138,34 @@ export default `
 2 Kèn kazoo|Kazoo
 2 Kèn ống tre # dt
 @ go
-2 Trống cái # dt
-2 Trống con # dt
+4 Trống cái # dt
+4 Trống con # dt
 2 Trống đế # dt
 2 Trống bộc # dt
 2 Trống khẩu # dt
 2 Trống bản # dt
 2 Trống chiến # dt
-2 Trống hội # dt
-2 Trống lân|Trống múa lân # dt
+4 Trống hội # dt
+4 Trống lân|Trống múa lân # dt
 2 Trống da voi # dt
 2 Trống ghinăng|Ghi năng|Trống Ghi-năng # dt
 2 Trống Baranưng|Baranưng # dt
 2 Trống sấm # dt
 2 Trống bông # dt
 2 Trống tang|Trống bộ # dt
-2 Trống đồng Đông Sơn # dt
-2 Trống trường|Trống đánh trường # dt
+5 Trống đồng Đông Sơn # dt
+4 Trống trường|Trống đánh trường # dt
 2 Mõ cá|Mõ chùa|Mõ gỗ # dt
 2 Mõ tre # dt
 2 Mõ trâu # dt
 2 Phách tre|Song lang # dt
 2 Song loan # dt
 2 Sênh sứa|Sênh # dt
-2 Chuông chùa|Chuông đồng # dt
+5 Chuông chùa|Chuông đồng # dt
 2 Khánh|Khánh đá # dt
 2 Đàn đá Khánh Sơn # dt
 2 Chiêng|Cồng|Chiêng ba # dt
-2 Bộ gõ|Percussion
+4 Bộ gõ|Percussion
 2 Trống jazz|Bộ trống|Drum kit|Trống điện
 2 Trống snare|Trống lẫy
 2 Trống bass|Trống kick
@@ -199,7 +199,7 @@ export default `
 2 Đàn mộc cầm|Xylophone gỗ
 2 Đàn gỗ|Đàn tre|Klong put
 2 Đàn T\'rưng|Đàn trưng # dt
-2 Chuông tay|Handbell
+4 Chuông tay|Handbell
 2 Chuông ống|Tubular bells
 2 Chuông gió|Wind chime
 2 Chuông bò|Cowbell
@@ -229,10 +229,10 @@ export default `
 2 Đàn organ nhà thờ|Organ ống|Pipe organ
 2 Đàn organ điện|Organ điện tử|Keyboard điện tử
 2 Đàn organ Hammond|Hammond organ
-2 Đàn piano điện tử|Piano điện|Digital piano
-2 Đàn piano cơ
+4 Đàn piano điện tử|Piano điện|Digital piano
+4 Đàn piano cơ
 2 Đàn piano tủ|Upright piano
-2 Đàn piano cánh|Grand piano
+4 Đàn piano cánh|Grand piano
 2 Đàn piano đồ chơi|Toy piano
 2 Đàn clavichord|Clavichord
 2 Đàn virginal|Virginal
@@ -256,10 +256,10 @@ export default `
 2 Đàn organ điện Yamaha|Electone
 2 Đàn sampler
 @ dien
-2 Đàn guitar điện|Ghi ta điện # day
+4 Đàn guitar điện|Ghi ta điện # day
 2 Đàn bass điện tử # day
 2 Đàn violin điện tử # day
-2 Trống điện tử|Electronic drum # go
+4 Trống điện tử|Electronic drum # go
 2 Máy tạo nhịp|Drum machine|Trống máy
 2 Đàn theremin|Theremin
 2 Đàn synthesizer modular|Modular synth

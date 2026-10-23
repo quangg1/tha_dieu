@@ -1,23 +1,23 @@
 // Nghề nghiệp, phần làm dày sổ. Cùng định dạng và nhãn với lex/nghe.ts; tên trùng được gộp vào mục cũ.
 export default `
 @ yte
-2 Bác sĩ đa khoa
+4 Bác sĩ đa khoa
 2 Bác sĩ nội khoa|Bác sĩ nội
 2 Bác sĩ ngoại khoa|Bác sĩ ngoại
 2 Bác sĩ nhi khoa|Bác sĩ nhi
 2 Bác sĩ sản khoa|Bác sĩ sản phụ khoa
-2 Bác sĩ tim mạch
-2 Bác sĩ da liễu
-2 Bác sĩ mắt|Bác sĩ nhãn khoa
-2 Bác sĩ tai mũi họng
+4 Bác sĩ tim mạch
+4 Bác sĩ da liễu
+4 Bác sĩ mắt|Bác sĩ nhãn khoa
+4 Bác sĩ tai mũi họng
 2 Bác sĩ răng hàm mặt
 2 Bác sĩ chỉnh nha
 2 Bác sĩ thần kinh
-2 Bác sĩ tâm thần
+4 Bác sĩ tâm thần
 2 Bác sĩ ung bướu
 2 Bác sĩ chấn thương chỉnh hình
-2 Bác sĩ thẩm mỹ|Bác sĩ phẫu thuật thẩm mỹ
-2 Bác sĩ cấp cứu
+4 Bác sĩ thẩm mỹ|Bác sĩ phẫu thuật thẩm mỹ
+4 Bác sĩ cấp cứu
 2 Bác sĩ hồi sức
 2 Bác sĩ gia đình
 2 Bác sĩ y học cổ truyền|Thầy thuốc đông y
@@ -109,9 +109,9 @@ export default `
 1 Chuyên viên cai nghiện
 1 Bác sĩ y học hạt nhân
 1 Bác sĩ dị ứng miễn dịch
-1 Bác sĩ cơ xương khớp
-1 Bác sĩ nam khoa
-1 Bác sĩ hiếm muộn|Bác sĩ hỗ trợ sinh sản
+3 Bác sĩ cơ xương khớp
+3 Bác sĩ nam khoa
+3 Bác sĩ hiếm muộn|Bác sĩ hỗ trợ sinh sản
 1 Chuyên viên phôi học
 1 Bác sĩ sơ sinh
 1 Bác sĩ chăm sóc giảm nhẹ
@@ -119,7 +119,7 @@ export default `
 1 Bác sĩ y học biển
 1 Bác sĩ bệnh nghề nghiệp
 1 Nhân viên nhà xác
-1 Người khâm liệm
+3 Người khâm liệm
 1 Điều dưỡng gây mê
 1 Điều dưỡng hồi sức
 1 Điều dưỡng nhi
@@ -150,7 +150,7 @@ export default `
 2 Thợ thêu tranh|Nghệ nhân thêu
 2 Thợ ren|Thợ móc ren
 2 Thợ làm tranh thêu
-2 Thợ sơn mài|Nghệ nhân sơn mài
+3 Thợ sơn mài|Nghệ nhân sơn mài
 2 Thợ khảm trai|Thợ khảm xà cừ
 2 Thợ chạm khắc gỗ|Thợ chạm gỗ|Nghệ nhân chạm khắc
 2 Thợ điêu khắc đá|Thợ đẽo đá|Thợ chạm đá
@@ -189,7 +189,7 @@ export default `
 2 Thợ thuộc da
 2 Thợ làm đồ da
 2 Thợ làm yên ngựa
-2 Thợ làm hương|Người làm nhang|Thợ se hương
+3 Thợ làm hương|Người làm nhang|Thợ se hương
 2 Thợ làm nến
 2 Thợ làm xà phòng
 2 Thợ làm bánh đa
@@ -202,7 +202,7 @@ export default `
 2 Thợ làm tương
 2 Thợ làm nước mắm|Người làm nước mắm
 2 Thợ làm muối|Diêm dân
-2 Thợ nấu rượu|Người nấu rượu
+3 Thợ nấu rượu|Người nấu rượu
 2 Thợ làm chè|Nghệ nhân sao chè|Người sao chè
 2 Thợ làm thuốc nam
 2 Thợ rèn dao|Thợ rèn
@@ -223,7 +223,7 @@ export default `
 2 Thợ làm gạch|Thợ đóng gạch
 2 Thợ làm ngói
 2 Thợ nung vôi
-2 Thợ làm tranh Đông Hồ|Nghệ nhân tranh Đông Hồ
+3 Thợ làm tranh Đông Hồ|Nghệ nhân tranh Đông Hồ
 2 Thợ thổi thủy tinh|Người thổi thủy tinh
 2 Thợ làm tranh cát
 2 Thợ làm tranh gạo
@@ -274,21 +274,21 @@ export default `
 1 Thợ làm đầu lân|Người làm đầu lân
 1 Thợ làm trống cơm
 @
-2 Thợ sửa máy tính
-2 Thợ sửa laptop
-2 Thợ sửa tivi
-2 Thợ sửa tủ lạnh
+4 Thợ sửa máy tính
+4 Thợ sửa laptop
+4 Thợ sửa tivi
+4 Thợ sửa tủ lạnh
 2 Thợ sửa máy giặt
 2 Thợ sửa điều hòa|Thợ điều hòa
 2 Thợ sửa xe máy
-2 Thợ sửa ô tô
+4 Thợ sửa ô tô
 2 Thợ sửa xe đạp
-2 Thợ vá xe|Thợ vá lốp
-2 Thợ rửa xe
+4 Thợ vá xe|Thợ vá lốp
+5 Thợ rửa xe
 2 Thợ sơn xe
 2 Thợ gò hàn ô tô|Thợ đồng sơn
 2 Thợ sửa đồ điện|Thợ điện dân dụng
-2 Thợ sửa điện nước|Thợ điện nước
+4 Thợ sửa điện nước|Thợ điện nước
 2 Thợ chống thấm
 2 Thợ lát gạch
 2 Thợ ốp đá
@@ -302,15 +302,15 @@ export default `
 2 Thợ bọc ghế|Thợ bọc nệm
 2 Thợ làm rèm|Thợ may rèm
 2 Thợ dán giấy tường|Thợ dán tường
-2 Thợ sơn tường|Thợ sơn nhà
+4 Thợ sơn tường|Thợ sơn nhà
 2 Thợ sơn tĩnh điện
 2 Thợ phun sơn
 2 Thợ khoan giếng
 2 Thợ khoan cắt bê tông
 2 Thợ đào móng
-2 Thợ phụ hồ|Phụ hồ
+4 Thợ phụ hồ|Phụ hồ
 2 Thợ hồ
-2 Thợ cả
+4 Thợ cả
 2 Thợ đụng|Thợ cái
 2 Thợ hàn điện
 2 Thợ hàn xì|Thợ hàn hơi
@@ -332,7 +332,7 @@ export default `
 2 Thợ là quần áo|Thợ ủi đồ
 2 Thợ nhuộm tóc
 2 Thợ uốn tóc
-2 Thợ gội đầu
+4 Thợ gội đầu
 2 Thợ nối mi
 2 Thợ phun xăm|Thợ phun mày
 2 Thợ trang điểm cô dâu
@@ -361,7 +361,7 @@ export default `
 2 Thợ sửa túi xách
 2 Thợ sửa khóa|Thợ khóa
 2 Thợ làm chìa khóa
-2 Thợ sửa đồng hồ|Thợ đồng hồ
+3 Thợ sửa đồng hồ|Thợ đồng hồ
 2 Thợ sửa máy ảnh
 2 Thợ sửa máy may
 2 Thợ sửa máy bơm
@@ -411,24 +411,24 @@ export default `
 
 @
 @ dongphuc
-3 Học sinh #
+5 Học sinh #
 3 Sinh viên trường quân đội #
 3 Công nhân may|Công nhân nhà máy #
-3 Nhân viên siêu thị #
-3 Nhân viên cửa hàng tiện lợi #
+5 Nhân viên siêu thị #
+5 Nhân viên cửa hàng tiện lợi #
 3 Nhân viên thức ăn nhanh #
-3 Nhân viên giao hàng #
-3 Tài xế công nghệ #
-3 Tài xế taxi #
-3 Tài xế xe buýt #
+5 Nhân viên giao hàng #
+5 Tài xế công nghệ #
+5 Tài xế taxi #
+4 Tài xế xe buýt #
 3 Phụ xe buýt #
 3 Nhân viên soát vé #
 3 Nhân viên đường sắt #
 3 Nhân viên hàng không #
 3 Nhân viên an ninh sân bay #
-3 Hải quan #
+5 Hải quan #
 3 Kiểm sát viên #
-3 Thẩm phán #
+5 Thẩm phán #
 3 Luật sư #
 3 Quản lý thị trường #
 3 Thanh tra giao thông #
@@ -436,24 +436,24 @@ export default `
 3 Công an phường #
 3 Cảnh sát cơ động #
 3 Dân quân tự vệ #
-3 Linh mục #
-3 Nhà sư #
-3 Phi hành gia #
+4 Linh mục #
+5 Nhà sư #
+5 Phi hành gia #
 3 Thủy thủ đoàn tàu biển #
-3 Thợ lặn #
+4 Thợ lặn #
 3 Đầu bếp khách sạn #
-3 Nhân viên spa #
+4 Nhân viên spa #
 3 Kỹ thuật viên phòng thí nghiệm #
 3 Nhân viên điện lực|Thợ điện lực #
 3 Công nhân vệ sinh môi trường #
-3 Nhân viên y tế #
-3 Hướng dẫn viên du lịch #
+5 Nhân viên y tế #
+4 Hướng dẫn viên du lịch #
 3 Trọng tài bóng đá #
-3 Cầu thủ #
-3 Vận động viên #
-2 Cấp dưỡng #
+5 Cầu thủ #
+5 Vận động viên #
+4 Cấp dưỡng #
 2 Người hầu bàn khách sạn|Nhân viên buồng phòng #
-2 Nhân viên cây xăng #
+4 Nhân viên cây xăng #
 2 Nhân viên rạp chiếu phim #
 @ ngoaitroi
 3 Thợ cắt tỉa cây|Công nhân cây xanh #
@@ -463,12 +463,12 @@ export default `
 3 Thợ lắp kính nhà cao tầng #
 3 Công nhân điện lực|Thợ đường dây #
 3 Lính gác|Bộ đội canh gác #
-3 Shipper|Người giao hàng #
+5 Shipper|Người giao hàng #
 3 Tài xế xe ôm #
 3 Người bán hàng rong #
-3 Người bán vé số #
+5 Người bán vé số #
 3 Thợ đánh giày #
-3 Người thu mua phế liệu|Đồng nát #
+4 Người thu mua phế liệu|Đồng nát #
 3 Thợ sửa xe đạp vỉa hè #
 3 Ngư dân đánh bắt xa bờ #
 3 Người chèo đò|Lái đò #

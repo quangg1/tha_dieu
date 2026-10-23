@@ -2,33 +2,33 @@
 export default `
 @ bo
 2 Xe hơi|Xe con|Xe ô tô con
-2 Xe bán tải|Bán tải|Pickup
-2 Xe SUV|SUV
+5 Xe bán tải|Bán tải|Pickup
+4 Xe SUV|SUV
 2 Xe crossover|Crossover
-2 Xe sedan|Sedan
+4 Xe sedan|Sedan
 2 Xe hatchback|Hatchback
 2 Xe mui trần|Xe cabriolet|Mui trần
-2 Xe thể thao|Siêu xe
-2 Xe van|Xe Van|Xe gia đình 7 chỗ
-2 Xe 16 chỗ|Xe khách 16 chỗ
-2 Xe 29 chỗ|Xe khách 29 chỗ
-2 Xe 45 chỗ
+4 Xe thể thao|Siêu xe
+4 Xe van|Xe Van|Xe gia đình 7 chỗ
+4 Xe 16 chỗ|Xe khách 16 chỗ
+4 Xe 29 chỗ|Xe khách 29 chỗ
+4 Xe 45 chỗ
 2 Xe minibus|Xe buýt nhỏ
 2 Xe buýt nhanh|BRT
 2 Xe buýt điện
 2 Xe buýt trường học|Xe đưa đón học sinh
 2 Xe buýt mui trần|Xe buýt du lịch
-2 Xe khách giường nằm|Xe giường nằm cabin|Xe limousine giường nằm
-2 Xe công nghệ|Xe Grab|Xe ôm công nghệ
+4 Xe khách giường nằm|Xe giường nằm cabin|Xe limousine giường nằm
+5 Xe công nghệ|Xe Grab|Xe ôm công nghệ
 2 Xe taxi điện
 2 Xe đầu kéo|Đầu kéo
-2 Xe tải nhẹ|Xe tải nhỏ
-2 Xe tải ben|Xe ben
-2 Xe tải thùng
-2 Xe tải đông lạnh|Xe đông lạnh
-2 Xe ba gác máy
+4 Xe tải nhẹ|Xe tải nhỏ
+4 Xe tải ben|Xe ben
+4 Xe tải thùng
+4 Xe tải đông lạnh|Xe đông lạnh
+4 Xe ba gác máy
 2 Xe lam
-2 Xe tuk-tuk|Tuk tuk
+4 Xe tuk-tuk|Tuk tuk
 2 Xe kéo tay|Xe kéo|Xe cu li
 2 Xe đạp thồ
 2 Xe trâu
@@ -40,7 +40,7 @@ export default `
 2 Xe nôi|Xe đẩy em bé|Xe đẩy trẻ em
 2 Xe đẩy hàng
 2 Xe đẩy siêu thị
-2 Xe golf|Xe điện sân golf
+4 Xe golf|Xe điện sân golf
 2 Xe ATV|Xe địa hình bốn bánh|Xe mô tô bốn bánh
 2 Xe jeep|Jeep
 2 Xe U-oát|U oát|UAZ
@@ -59,10 +59,10 @@ export default `
 2 Xe chở nước
 2 Xe chở xăng|Xe bồn xăng
 2 Xe hút bùn|Xe hút hầm cầu
-2 Xe tưới cây
+4 Xe tưới cây
 2 Xe phun nước
 2 Xe thang|Xe nâng người
-2 Xe cứu hộ|Xe kéo xe hỏng
+4 Xe cứu hộ|Xe kéo xe hỏng
 2 Xe sửa chữa lưu động
 2 Xe truyền hình lưu động|Xe màu
 2 Xe phát thanh lưu động
@@ -72,14 +72,14 @@ export default `
 2 Xe tra nạp nhiên liệu|Xe tra nạp
 2 Xe thang lên máy bay
 2 Xe chở hàng nhẹ|Xe tải van
-2 Xe giao hàng
+4 Xe giao hàng
 2 Xe tự hành|Xe không người lái
-2 Xe đạp công cộng
+4 Xe đạp công cộng
 2 Xe điện công cộng
 2 Xe bus hai khớp|Xe buýt nối toa
 @ chuyendung
 2 Xe chữa cháy|Xe cứu hỏa
-2 Xe thang cứu hỏa|Xe thang chữa cháy
+4 Xe thang cứu hỏa|Xe thang chữa cháy
 2 Xe chở quân|Xe quân sự
 2 Xe thiết giáp|Xe bọc thép chở quân
 2 Xe chống bạo động
@@ -111,20 +111,20 @@ export default `
 2 Xe xét nghiệm lưu động
 2 Xe chụp X-quang lưu động
 2 Xe bán hàng lưu động|Food truck|Xe bán đồ ăn
-2 Xe kem|Xe bán kem
+4 Xe kem|Xe bán kem
 2 Xe thư viện lưu động
 2 Xe phun thuốc|Xe phun khử khuẩn
-2 Xe gặt đập liên hợp|Máy gặt đập liên hợp
-2 Xe cày|Máy cày
+4 Xe gặt đập liên hợp|Máy gặt đập liên hợp
+4 Xe cày|Máy cày
 2 Xe kéo nông nghiệp|Máy kéo
-2 Máy cấy|Xe cấy
+4 Máy cấy|Xe cấy
 2 Máy san ủi|Máy ủi
 2 Xe nâng hàng|Xe nâng điện
 2 Xe nâng tay
 2 Xe ủi tuyết|Xe dọn tuyết
-2 Xe tuần tra
-2 Xe cảnh sát cơ động
-2 Xe dẫn đoàn
+4 Xe tuần tra
+4 Xe cảnh sát cơ động
+4 Xe dẫn đoàn
 2 Xe chỉ huy
 2 Xe phóng tên lửa
 2 Xe pháo tự hành
@@ -139,25 +139,25 @@ export default `
 2 Xe goòng|Goòng
 2 Xe đạp chở hàng
 2 Xe máy cày tay
-2 Xe công nông
+4 Xe công nông
 2 Xe đẩy rác|Xe rác đẩy tay
 @ thuy
-2 Tàu chở khách|Tàu khách
-2 Tàu du lịch|Tàu du lịch biển|Du thuyền lớn
-2 Tàu hàng|Tàu chở hàng
-2 Tàu container
-2 Tàu chở dầu|Tàu dầu
+4 Tàu chở khách|Tàu khách
+4 Tàu du lịch|Tàu du lịch biển|Du thuyền lớn
+4 Tàu hàng|Tàu chở hàng
+4 Tàu container
+4 Tàu chở dầu|Tàu dầu
 2 Tàu chở hàng rời
 2 Tàu chở khí hóa lỏng|Tàu LNG
 2 Tàu chở ô tô|Tàu ro-ro
-2 Tàu đánh cá|Tàu câu
+4 Tàu đánh cá|Tàu câu
 2 Tàu lưới kéo
 2 Tàu câu mực
 2 Tàu vỏ thép
 2 Tàu vỏ gỗ
 2 Tàu kiểm ngư
-2 Tàu hải quân
-2 Tàu tuần tra
+4 Tàu hải quân
+4 Tàu tuần tra
 2 Tàu khu trục
 2 Tàu hộ vệ
 2 Tàu tuần dương
@@ -172,13 +172,13 @@ export default `
 2 Tàu hai thân|Catamaran
 2 Tàu ba thân|Trimaran
 2 Tàu buồm|Thuyền buồm lớn
-2 Thuyền chèo
+4 Thuyền chèo
 2 Thuyền đánh cá
-2 Thuyền gỗ
+4 Thuyền gỗ
 2 Thuyền thoi
 2 Thuyền mủng
 2 Thuyền chài
-2 Thuyền đua|Thuyền đua rowing
+3 Thuyền đua|Thuyền đua rowing
 2 Thuyền rồng đua
 2 Thuyền hoa
 2 Thuyền rồng Huế
@@ -188,15 +188,15 @@ export default `
 2 Thuyền Dhow
 2 Thuyền Viking
 2 Thuyền chiến
-2 Thuyền độc mộc
-2 Thuyền bè
+3 Thuyền độc mộc
+4 Thuyền bè
 2 Thuyền kayak|Kayak
 2 Thuyền canoe|Canoe
 2 Thuyền SUP|Ván chèo đứng
 2 Thuyền phao|Xuồng phao|Phao cứu sinh
 2 Thuyền cao su|Xuồng cao su|Xuồng hơi
-2 Xuồng máy
-2 Xuồng ba lá
+4 Xuồng máy
+4 Xuồng ba lá
 2 Xuồng cứu sinh
 2 Xuồng cứu hộ
 2 Xuồng CQ|Xuồng tác chiến
@@ -206,7 +206,7 @@ export default `
 2 Ghe lườn
 2 Ghe hàng
 2 Ghe cào
-2 Đò ngang|Đò
+4 Đò ngang|Đò
 2 Đò dọc
 2 Đò máy
 2 Phà sông
@@ -228,13 +228,13 @@ export default `
 2 Thuyền thúng chai|Thúng chai
 2 Bè tre|Bè nứa|Mảng
 2 Bè gỗ
-2 Mô tô nước|Jet ski|Ca nô cá nhân
-2 Vịt đạp nước|Thuyền đạp vịt|Thuyền đạp
+4 Mô tô nước|Jet ski|Ca nô cá nhân
+4 Vịt đạp nước|Thuyền đạp vịt|Thuyền đạp
 2 Sà lan chở cát|Sà lan
 2 Tàu sông
 2 Tàu biển
 2 Tàu viễn dương
-2 Thủy phi cơ
+3 Thủy phi cơ
 2 Tàu thủy lôi
 2 Tàu chở quân
 2 Tàu buôn
@@ -242,11 +242,11 @@ export default `
 2 Tàu lặn biển sâu
 @ tho
 2 Xe đạp gấp
-2 Xe đạp đôi|Xe đạp tandem
+4 Xe đạp đôi|Xe đạp tandem
 2 Xe đạp ba bánh|Xe đạp chở hàng ba bánh
 2 Xe đạp bốn bánh
 2 Xe đạp nước
-2 Xe đạp trẻ em
+5 Xe đạp trẻ em
 2 Xe đạp nằm|Recumbent
 2 Xe thăng bằng|Xe chòi chân
 2 Xe trượt scooter|Xe scooter đẩy chân
@@ -254,50 +254,50 @@ export default `
 2 Xe trượt băng
 2 Xe trượt kéo bằng tuần lộc|Xe tuần lộc
 2 Xe chó kéo
-2 Xe ngựa
+5 Xe ngựa
 2 Xe bò kéo|Xe bò
-2 Xe trâu kéo|Xe trâu
+4 Xe trâu kéo|Xe trâu
 2 Xe lừa kéo
 2 Xe dê kéo
 2 Xe voi|Cưỡi voi
-2 Lạc đà|Cưỡi lạc đà
-2 Ngựa|Cưỡi ngựa
-2 Kiệu|Cáng|Võng cáng
+5 Lạc đà|Cưỡi lạc đà
+5 Ngựa|Cưỡi ngựa
+4 Kiệu|Cáng|Võng cáng
 2 Xe kéo người|Xe kéo tay
-2 Xích lô đạp|Xích lô
+4 Xích lô đạp|Xích lô
 2 Xe lôi đạp
-2 Xe cút kít
+3 Xe cút kít
 2 Xe đẩy tay
 2 Xe đẩy em bé
 2 Xe lăn tay
 2 Thuyền chèo tay
 2 Thuyền buồm nhỏ
-2 Thuyền thúng
+4 Thuyền thúng
 2 Thuyền nan
-2 Thuyền độc mộc
+3 Thuyền độc mộc
 2 Bè nứa
 2 Mảng tre
 2 Thuyền kayak
 2 Thuyền canoe
 2 Ván chèo đứng
-2 Khinh khí cầu|Khí cầu
+5 Khinh khí cầu|Khí cầu
 2 Tàu lượn|Tàu lượn không động cơ
-2 Dù lượn
+4 Dù lượn
 2 Diều lượn|Tàu lượn treo
 2 Xe đạp lốp béo|Fatbike
 2 Xe đạp leo núi
 @ sat
-2 Tàu Thống Nhất|Tàu Bắc Nam
+4 Tàu Thống Nhất|Tàu Bắc Nam
 2 Tàu chở hàng đường sắt|Tàu hàng
 2 Tàu khách
-2 Tàu điện Cát Linh|Metro Cát Linh - Hà Đông
-2 Metro Bến Thành - Suối Tiên|Metro số 1
+4 Tàu điện Cát Linh|Metro Cát Linh - Hà Đông
+4 Metro Bến Thành - Suối Tiên|Metro số 1
 2 Tàu Shinkansen|Shinkansen|Tàu viên đạn
 2 Tàu đệm từ|Maglev
 2 Tàu TGV|TGV
 2 Tàu điện một ray|Monorail
 2 Tàu leo núi|Tàu răng cưa
-2 Tàu hỏa leo núi Fansipan|Tàu leo núi Mường Hoa
+4 Tàu hỏa leo núi Fansipan|Tàu leo núi Mường Hoa
 2 Tàu cáp kéo|Funicular
 2 Tàu điện leng keng|Tàu điện cổ
 2 Tàu tốc hành|Tàu Express
@@ -306,7 +306,7 @@ export default `
 2 Tàu hơi nước cổ|Đầu máy hơi nước
 2 Đầu máy diesel
 2 Đầu máy điện
-2 Toa xe lửa|Toa tàu
+4 Toa xe lửa|Toa tàu
 2 Xe goòng mỏ
 2 Tàu ngầm metro|Metro|Tàu điện ngầm
 2 Tàu điện trên cao Nhổn|Metro Nhổn - Ga Hà Nội
@@ -321,16 +321,16 @@ export default `
 2 Máy bay trực thăng
 2 Máy bay tiêm kích
 2 Máy bay ném bom
-2 Máy bay tàng hình
+4 Máy bay tàng hình
 2 Máy bay huấn luyện
 2 Máy bay nông nghiệp
 2 Máy bay cứu hỏa
 2 Máy bay cứu thương
 2 Máy bay tư nhân|Phản lực tư nhân|Private jet
-2 Chuyên cơ|Chuyên cơ chở nguyên thủ
+4 Chuyên cơ|Chuyên cơ chở nguyên thủ
 2 Máy bay lưỡng cư
 2 Máy bay siêu nhẹ
-2 Máy bay giấy
+5 Máy bay giấy
 2 Máy bay điều khiển từ xa
 2 Flycam|Drone quay phim
 2 Drone giao hàng
@@ -358,8 +358,8 @@ export default `
 2 Tên lửa Trường Chinh
 2 Xe tự hành trên Sao Hỏa|Xe tự hành Mars|Curiosity|Perseverance
 2 Xe tự hành Mặt Trăng|Xe Lunokhod|Lunar Rover
-2 Trạm vũ trụ|Trạm không gian
-2 Trạm vũ trụ quốc tế|ISS
+4 Trạm vũ trụ|Trạm không gian
+4 Trạm vũ trụ quốc tế|ISS
 2 Tàu thăm dò|Tàu thăm dò vũ trụ
 2 Tàu đổ bộ
 2 Tàu chở hàng vũ trụ|Tàu Progress

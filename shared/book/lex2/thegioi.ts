@@ -7,30 +7,30 @@ export default `
 2 Hồ Malawi
 2 Hồ Superior|Hồ Thượng
 2 Ngũ Đại Hồ|Hồ Lớn Bắc Mỹ
-2 Hồ Tahoe
-2 Hồ Crater
+1 Hồ Tahoe
+1 Hồ Crater
 2 Hồ Bled
 2 Hồ Como
 2 Hồ Garda
 2 Hồ Geneva|Hồ Léman
 2 Hồ Hallstatt|Hallstatt
 2 Hồ Moraine
-2 Hồ Peyto
+1 Hồ Peyto
 2 Hồ Toba
 2 Hồ Inle
 2 Tây Hồ Hàng Châu
 2 Hồ Thanh Hải
 2 Hồ Namtso
 2 Hồ Pangong
-2 Hồ Retba|Hồ Hồng
-2 Hồ Hillier
-2 Hồ Spotted
+1 Hồ Retba|Hồ Hồng
+1 Hồ Hillier
+1 Hồ Spotted
 2 Hồ Kawaguchi
 2 Hồ Biwa
-2 Hồ Issyk-Kul
+1 Hồ Issyk-Kul
 2 Hồ Aral|Biển Aral
 2 Hồ Chad
-2 Biển Hồ Tonle Sap|Tonle Sap
+4 Biển Hồ Tonle Sap|Tonle Sap
 2 Thác Yosemite
 2 Thác Kaieteur
 2 Thác Detian|Thác Đức Thiên
@@ -68,7 +68,7 @@ export default `
 2 Đại lộ Baobab
 2 Núi Uluru|Ayers Rock|Uluru
 2 Hòn đá Sugarloaf|Núi Sugarloaf|Pão de Açúcar
-2 Núi Roraima
+1 Núi Roraima
 2 Núi Tai Sơn|Thái Sơn
 2 Núi Hoàng Sơn
 2 Núi Nga Mi
@@ -97,7 +97,7 @@ export default `
 2 Núi lửa Tambora
 2 Núi lửa Yellowstone
 2 Núi lửa Erta Ale
-2 Núi Rainier
+1 Núi Rainier
 2 Núi Whitney
 2 Núi Logan
 2 Núi Ruwenzori
@@ -111,10 +111,10 @@ export default `
 2 Núi Manaslu
 2 Núi Dhaulagiri
 2 Núi Eiger
-2 Núi Jungfrau
-2 Núi Zugspitze
-2 Núi Ben Nevis
-2 Núi Snowdon
+1 Núi Jungfrau
+1 Núi Zugspitze
+1 Núi Ben Nevis
+1 Núi Snowdon
 2 Núi Teide
 2 Núi Halla
 2 Núi Seorak
@@ -128,23 +128,23 @@ export default `
 2 Dãy Carpathian
 2 Dãy Appalachian
 2 Dãy Sierra Nevada
-2 Dãy Drakensberg
+1 Dãy Drakensberg
 2 Dãy Great Dividing
-2 Cao nguyên Tây Tạng
+4 Cao nguyên Tây Tạng
 2 Cao nguyên Deccan
 2 Cao nguyên Iran
-2 Sa mạc Gobi|Gobi
-2 Sa mạc Kalahari
+4 Sa mạc Gobi|Gobi
+3 Sa mạc Kalahari
 2 Sa mạc Namib
-2 Sa mạc Atacama
-2 Sa mạc Ả Rập
+3 Sa mạc Atacama
+3 Sa mạc Ả Rập
 2 Sa mạc Thar
 2 Sa mạc Taklamakan
 2 Sa mạc Mojave
 2 Sa mạc Sonora
 2 Sa mạc Great Victoria
-2 Sa mạc Simpson
-2 Sa mạc Rub' al Khali|Khu Trống
+1 Sa mạc Simpson
+1 Sa mạc Rub' al Khali|Khu Trống
 2 Thung lũng Wadi Rum|Wadi Rum
 2 Thung lũng Napa
 2 Thung lũng Rift Lớn|Thung lũng Tách giãn Lớn
@@ -180,9 +180,9 @@ export default `
 2 Đảo Phuket|Phuket
 2 Đảo Koh Phi Phi|Phi Phi
 2 Đảo Palawan|Palawan
-2 Đảo Maldives|Maldives
+5 Đảo Maldives|Maldives
 2 Đảo Madagascar|Madagascar
-2 Đảo Hawaii|Hawaii
+5 Đảo Hawaii|Hawaii
 2 Đảo Tasmania
 2 Đảo Socotra
 2 Đảo Jeju|Jeju
@@ -190,11 +190,11 @@ export default `
 2 Đảo Lofoten
 2 Đảo Svalbard
 2 Đảo Greenland
-2 Đảo Iceland
+5 Đảo Iceland
 2 Đảo Seychelles|Seychelles
 2 Đảo Mauritius
 2 Đảo Fiji
-2 Đảo Tahiti
+3 Đảo Tahiti
 2 Đảo Phục Sinh|Easter Island
 2 Đảo Zanzibar
 2 Đảo Capri
@@ -230,7 +230,7 @@ export default `
 2 Đá Trollstunga|Trollstunga
 2 Hố Darvaza|Cổng Địa Ngục
 2 Hố sụt Xiaozhai Tiankeng
-2 Rãnh Mariana|Vực Mariana
+4 Rãnh Mariana|Vực Mariana
 2 Rạn san hô Belize
 2 Rạn san hô Tubbataha
 2 Đảo Raja Ampat|Raja Ampat
@@ -289,14 +289,14 @@ export default `
 2 Vịnh Maine
 2 Vịnh Naples
 2 Vịnh Gibraltar
-2 Vịnh Hạ Long
-2 Vịnh Nha Trang
-2 Vịnh Cam Ranh
+5 Vịnh Hạ Long
+5 Vịnh Nha Trang
+4 Vịnh Cam Ranh
 2 Vịnh Xuân Đài
 2 Vịnh Vân Phong
 2 Vịnh Bái Tử Long
 2 Vịnh Phan Thiết
-2 Vịnh Đà Nẵng
+4 Vịnh Đà Nẵng
 2 Vịnh Lăng Cô
 2 Vịnh Dung Quất
 2 Vịnh Quy Nhơn|Vịnh Thị Nại
@@ -319,8 +319,8 @@ export default `
 2 Eo biển Messina
 2 Eo biển Palk
 2 Eo biển Mozambique
-2 Kênh đào Suez
-2 Kênh đào Panama
+4 Kênh đào Suez
+4 Kênh đào Panama
 2 Biển Galilee|Hồ Tiberias
 2 Biển Salton
 @ kientruc
@@ -372,18 +372,18 @@ export default `
 2 Cung điện Mùa Đông|Bảo tàng Hermitage
 2 Cung điện Peterhof
 2 Nhà hát Bolshoi
-2 Lăng Lenin
+3 Lăng Lenin
 2 Cầu Tháp London|Tower Bridge
 2 Tháp Space Needle
 2 Tháp CN Tower|Tháp CN
 2 Cầu Brooklyn
 2 Tòa nhà Chrysler
-2 Trung tâm Thương mại Thế giới|One World Trade Center
+4 Trung tâm Thương mại Thế giới|One World Trade Center
 2 Đập Hoover
 2 Cổng vòm Gateway|Gateway Arch
 2 Tượng đài Washington
 2 Điện Capitol|Tòa Capitol
-2 Lầu Năm Góc
+5 Lầu Năm Góc
 2 Nhà hát Opera Paris|Nhà hát Garnier
 2 Trung tâm Pompidou
 2 Tháp Montparnasse
@@ -391,7 +391,7 @@ export default `
 2 Tượng Manneken Pis|Chú bé đứng tè
 2 Tượng Nàng tiên cá Copenhagen
 2 Nhà thờ Hallgrímskirkja
-2 Kênh đào Venice
+4 Kênh đào Venice
 2 Tháp Galata
 2 Tháp Seoul|Tháp N Seoul
 2 Cung điện Gyeongbokgung|Gyeongbokgung
@@ -402,12 +402,12 @@ export default `
 2 Bến Thượng Hải|The Bund
 2 Đền Thiên Đàn|Thiên Đàn
 2 Di Hòa Viên|Cung điện Mùa hè Bắc Kinh
-2 Quảng trường Thiên An Môn
+4 Quảng trường Thiên An Môn
 2 Đội quân đất nung|Binh mã dũng|Tượng binh mã Tần Thủy Hoàng
-2 Lăng Tần Thủy Hoàng
+4 Lăng Tần Thủy Hoàng
 2 Hang Mạc Cao
 2 Hang đá Long Môn|Long Môn thạch quật
-2 Chùa Thiếu Lâm
+3 Chùa Thiếu Lâm
 2 Cung điện Potala|Potala
 2 Đại Nhạn Tháp
 2 Hoàng Hạc Lâu
@@ -415,13 +415,13 @@ export default `
 2 Đằng Vương Các
 2 Lệ Giang cổ trấn
 2 Phượng Hoàng cổ trấn
-2 Vịnh Victoria Hồng Kông
+4 Vịnh Victoria Hồng Kông
 2 Đền Todai-ji|Tōdai-ji
 2 Đền Kiyomizu-dera|Kiyomizu
 2 Đền Itsukushima|Cổng Torii nổi
 2 Lâu đài Osaka
 2 Đền Meiji
-2 Ngã tư Shibuya|Shibuya
+4 Ngã tư Shibuya|Shibuya
 2 Tượng Đại Phật Kamakura
 2 Đền Senso-ji|Asakusa
 2 Ga Tokyo
@@ -438,7 +438,7 @@ export default `
 2 Đền Banteay Srei
 2 Bagan|Đền Bagan
 2 Chùa Thạt Luổng|That Luang
-2 Luang Prabang
+3 Luang Prabang
 2 Merdeka 118
 2 Gardens by the Bay
 2 Đền Vàng Amritsar|Golden Temple
@@ -469,7 +469,7 @@ export default `
 2 Nhà thờ đá Lalibela|Lalibela
 2 Great Zimbabwe
 2 Đảo Robben
-2 Cầu Sydney Harbour|Cầu cảng Sydney
+4 Cầu Sydney Harbour|Cầu cảng Sydney
 2 Tháp Sky Tower
 2 Teotihuacan|Kim tự tháp Mặt Trời
 2 Tikal
@@ -487,11 +487,11 @@ export default `
 2 Lâu đài Kronborg
 2 Nhà thờ Thánh Vitus
 2 Bảo tàng Guggenheim Bilbao|Guggenheim Bilbao
-2 Bảo tàng Anh|British Museum
+4 Bảo tàng Anh|British Museum
 2 Bảo tàng Metropolitan|The Met
 2 Bảo tàng Prado
 2 Bảo tàng Uffizi
-2 Bảo tàng Vatican
+4 Bảo tàng Vatican
 2 Nhà hát La Scala
 2 Nhà hát Vienna State Opera
 2 Tòa nhà Flatiron
@@ -506,7 +506,7 @@ export default `
 4 Núi Olympus #
 4 Núi Sinai #
 4 Núi Rushmore #
-3 Núi Fansipan #
+5 Núi Fansipan #
 3 Núi Kailash #
 3 Núi Ararat #
 3 Núi Hoàng Sơn #
@@ -523,29 +523,29 @@ export default `
 3 Núi Pinatubo #
 3 Núi Mayon #
 3 Núi St. Helens #
-3 Núi Rainier #
+1 Núi Rainier #
 3 Núi Phú Sĩ|Núi Fuji|Fujiyama #
 3 Núi Eiger #
-3 Núi Jungfrau #
-3 Núi Zugspitze #
-3 Núi Ben Nevis #
-3 Núi Snowdon #
-3 Núi Olympus Mons #
+1 Núi Jungfrau #
+1 Núi Zugspitze #
+1 Núi Ben Nevis #
+1 Núi Snowdon #
+1 Núi Olympus Mons #
 3 Núi Uluru|Ayers Rock #
-3 Núi Roraima #
-3 Núi Fitz Roy #
-3 Núi Cotopaxi #
-3 Núi Chimborazo #
+1 Núi Roraima #
+1 Núi Fitz Roy #
+1 Núi Cotopaxi #
+1 Núi Chimborazo #
 3 Núi Mauna Kea #
 3 Núi Kenya #
-3 Núi Rwenzori #
+1 Núi Rwenzori #
 3 Đỉnh Lhotse #
-3 Đỉnh Makalu #
-3 Đỉnh Cho Oyu #
+1 Đỉnh Makalu #
+1 Đỉnh Cho Oyu #
 3 Đỉnh Annapurna #
-3 Đỉnh Nanga Parbat #
-3 Đỉnh Manaslu #
-3 Đỉnh Puncak Jaya #
+1 Đỉnh Nanga Parbat #
+1 Đỉnh Manaslu #
+1 Đỉnh Puncak Jaya #
 3 Dãy Karakoram #
 3 Dãy Hindu Kush #
 3 Dãy Thiên Sơn #
@@ -555,7 +555,7 @@ export default `
 3 Dãy Carpathian #
 3 Dãy Appalachian #
 3 Dãy Sierra Nevada #
-3 Dãy Drakensberg #
+1 Dãy Drakensberg #
 3 Dãy Hoàng Liên Sơn #
 3 Dãy Scandinavia #
 2 Dãy Zagros #
@@ -564,25 +564,25 @@ export default `
 2 Dãy Brooks #
 @ samac
 3 Sa mạc Victoria lớn|Sa mạc Great Victoria #
-3 Sa mạc Great Sandy #
-3 Sa mạc Simpson #
+1 Sa mạc Great Sandy #
+1 Sa mạc Simpson #
 3 Sa mạc Patagonia #
-3 Sa mạc Chihuahua #
-3 Sa mạc Rub' al Khali|Rub al Khali #
+1 Sa mạc Chihuahua #
+1 Sa mạc Rub' al Khali|Rub al Khali #
 3 Sa mạc Negev #
 3 Sa mạc Sinai #
-3 Sa mạc Karakum #
-3 Sa mạc Kyzylkum #
-3 Sa mạc Dasht-e Kavir #
+1 Sa mạc Karakum #
+1 Sa mạc Kyzylkum #
+1 Sa mạc Dasht-e Kavir #
 3 Sa mạc Syria #
-3 Sa mạc Nubia #
-3 Sa mạc Danakil #
+1 Sa mạc Nubia #
+1 Sa mạc Danakil #
 3 Sa mạc Thung lũng Chết|Death Valley #
 3 Sa mạc Nam Cực #
 3 Sa mạc Bắc Cực #
-3 Sa mạc Lut #
-3 Sa mạc Tengger #
-3 Sa mạc Ordos #
+1 Sa mạc Lut #
+1 Sa mạc Tengger #
+1 Sa mạc Ordos #
 2 Sa mạc Badain Jaran #
 2 Sa mạc Kumtag #
 2 Sa mạc Great Basin #
@@ -593,7 +593,7 @@ export default `
 4 Đảo Jeju #
 3 Đảo Madagascar #
 3 Đảo New Guinea #
-3 Đảo Iceland #
+5 Đảo Iceland #
 3 Đảo Ireland #
 3 Đảo Anh|Đảo Great Britain #
 3 Đảo Honshu #
@@ -602,17 +602,17 @@ export default `
 3 Đảo Okinawa #
 3 Đảo Đài Loan #
 3 Đảo Sri Lanka #
-3 Đảo Cuba #
+5 Đảo Cuba #
 3 Đảo Jamaica #
 3 Đảo Puerto Rico #
-3 Đảo Hispaniola #
+1 Đảo Hispaniola #
 3 Đảo Sulawesi #
 3 Đảo Lombok #
 3 Đảo Penang #
 3 Đảo Sentosa #
 3 Đảo Koh Samui #
 3 Đảo Koh Phi Phi|Phi Phi #
-3 Đảo Maldives #
+5 Đảo Maldives #
 3 Đảo Seychelles #
 3 Đảo Mauritius #
 3 Đảo Fiji #
@@ -626,7 +626,7 @@ export default `
 3 Đảo Tenerife #
 3 Đảo Madeira #
 3 Đảo Svalbard #
-3 Đảo Baffin #
+1 Đảo Baffin #
 3 Đảo Vancouver #
 3 Đảo Manhattan #
 3 Đảo Maui #
@@ -646,9 +646,9 @@ export default `
 3 Hồ Erie #
 3 Hồ Ontario #
 3 Hồ Aral|Biển Aral #
-3 Hồ Ladoga #
-3 Hồ Onega #
-3 Hồ Issyk-Kul #
+1 Hồ Ladoga #
+1 Hồ Onega #
+1 Hồ Issyk-Kul #
 3 Hồ Balkhash #
 3 Hồ Thanh Hải #
 3 Hồ Động Đình #
@@ -657,30 +657,30 @@ export default `
 3 Hồ Nhật Nguyệt #
 3 Hồ Biwa #
 3 Hồ Kawaguchi #
-3 Hồ Tahoe #
-3 Hồ Crater #
+1 Hồ Tahoe #
+1 Hồ Crater #
 3 Hồ Muối Lớn|Great Salt Lake #
 3 Hồ Moraine #
 3 Hồ Lucerne #
 3 Hồ Constance|Hồ Bodensee #
 3 Hồ Garda #
-3 Hồ Maggiore #
+1 Hồ Maggiore #
 3 Hồ Bled #
 3 Hồ Hallstatt #
-3 Hồ Annecy #
-3 Hồ Ohrid #
-3 Hồ Van #
+1 Hồ Annecy #
+1 Hồ Ohrid #
+1 Hồ Van #
 3 Hồ Chad #
-3 Hồ Turkana #
-3 Hồ Nakuru #
-3 Hồ Retba|Hồ Hồng Senegal #
-3 Hồ Hillier #
-3 Hồ Peyto #
+1 Hồ Turkana #
+1 Hồ Nakuru #
+1 Hồ Retba|Hồ Hồng Senegal #
+1 Hồ Hillier #
+1 Hồ Peyto #
 3 Hồ Pangong #
-3 Hồ Dal #
-3 Hồ Nam Co #
-3 Hồ Kaindy #
-3 Hồ Spotted|Hồ Đốm #
+1 Hồ Dal #
+1 Hồ Nam Co #
+1 Hồ Kaindy #
+1 Hồ Spotted|Hồ Đốm #
 3 Hồ Salar de Uyuni|Salar de Uyuni #
 2 Hồ Vostok #
 2 Hồ Taupo #
@@ -691,64 +691,64 @@ export default `
 3 Sông Indus #
 3 Sông Tây Giang #
 3 Sông Hoàng Phố #
-3 Sông Tần Hoài #
-3 Sông Ly Giang #
+1 Sông Tần Hoài #
+1 Sông Ly Giang #
 3 Sông Áp Lục #
 3 Sông Đồ Môn #
-3 Sông Tumen #
-3 Sông Sumida #
-3 Sông Kamo #
-3 Sông Pasig #
-3 Sông Kapuas #
-3 Sông Mahakam #
-3 Sông Sepik #
-3 Sông Fly #
-3 Sông Darling #
-3 Sông Waikato #
+1 Sông Tumen #
+1 Sông Sumida #
+1 Sông Kamo #
+1 Sông Pasig #
+1 Sông Kapuas #
+1 Sông Mahakam #
+1 Sông Sepik #
+1 Sông Fly #
+1 Sông Darling #
+1 Sông Waikato #
 3 Sông Ohio #
-3 Sông Tennessee #
-3 Sông Arkansas #
-3 Sông Snake #
+1 Sông Tennessee #
+1 Sông Arkansas #
+1 Sông Snake #
 3 Sông Potomac #
-3 Sông Fraser #
-3 Sông Nelson #
-3 Sông Madeira #
-3 Sông São Francisco #
+1 Sông Fraser #
+1 Sông Nelson #
+1 Sông Madeira #
+1 Sông São Francisco #
 3 Sông Uruguay #
 3 Sông Paraguay #
-3 Sông Magdalena #
-3 Sông Douro #
-3 Sông Guadalquivir #
-3 Sông Garonne #
-3 Sông Dordogne #
-3 Sông Main #
-3 Sông Weser #
+1 Sông Magdalena #
+1 Sông Douro #
+1 Sông Guadalquivir #
+1 Sông Garonne #
+1 Sông Dordogne #
+1 Sông Main #
+1 Sông Weser #
 3 Sông Arno #
-3 Sông Shannon #
-3 Sông Severn #
-3 Sông Avon #
-3 Sông Dniester #
+1 Sông Shannon #
+1 Sông Severn #
+1 Sông Avon #
+1 Sông Dniester #
 3 Sông Ural #
-3 Sông Kama #
-3 Sông Irtysh #
-3 Sông Kolyma #
-3 Sông Syr Darya #
-3 Sông Amu Darya #
-3 Sông Helmand #
-3 Sông Karun #
-3 Sông Kabul #
-3 Sông Sutlej #
-3 Sông Narmada #
-3 Sông Godavari #
-3 Sông Kaveri #
-3 Sông Meghna #
+1 Sông Kama #
+1 Sông Irtysh #
+1 Sông Kolyma #
+1 Sông Syr Darya #
+1 Sông Amu Darya #
+1 Sông Helmand #
+1 Sông Karun #
+1 Sông Kabul #
+1 Sông Sutlej #
+1 Sông Narmada #
+1 Sông Godavari #
+1 Sông Kaveri #
+1 Sông Meghna #
 3 Sông Nile Xanh #
 3 Sông Nile Trắng #
-3 Sông Ubangi #
-3 Sông Kasai #
-3 Sông Okavango #
-3 Sông Senegal #
-3 Sông Volta #
+1 Sông Ubangi #
+1 Sông Kasai #
+1 Sông Okavango #
+1 Sông Senegal #
+1 Sông Volta #
 2 Sông Spree #
 2 Sông Vltava #
 2 Sông Neckar #

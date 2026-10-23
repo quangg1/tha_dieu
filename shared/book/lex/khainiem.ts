@@ -12,27 +12,27 @@ export default `
 4 Lịch sử|Sử
 4 Địa lý|Địa|Địa lí
 4 Thể dục|Giáo dục thể chất
-3 Tin học|Tin
-3 Giáo dục công dân|GDCD|Đạo đức
-3 Âm nhạc|Nhạc|Hát nhạc
+5 Tin học|Tin
+5 Giáo dục công dân|GDCD|Đạo đức
+5 Âm nhạc|Nhạc|Hát nhạc
 3 Mỹ thuật|Vẽ|Mĩ thuật
-3 Công nghệ|Kỹ thuật
+5 Công nghệ|Kỹ thuật
 3 Khoa học tự nhiên|KHTN
-2 Giáo dục quốc phòng|Quốc phòng|GDQP
-2 Hoạt động trải nghiệm|Trải nghiệm hướng nghiệp
-2 Khoa học|Tự nhiên và xã hội
-2 Lịch sử và Địa lý
+4 Giáo dục quốc phòng|Quốc phòng|GDQP
+4 Hoạt động trải nghiệm|Trải nghiệm hướng nghiệp
+5 Khoa học|Tự nhiên và xã hội
+4 Lịch sử và Địa lý
 2 Kinh tế và pháp luật|Giáo dục kinh tế và pháp luật
-2 Tiếng Pháp
-2 Tiếng Nhật
-2 Tiếng Trung
-1 Thủ công|Kỹ thuật thủ công
-1 Tập viết
-1 Tập đọc
-1 Chính tả
-1 Luyện từ và câu
-1 Kể chuyện
-1 Giáo dục địa phương
+4 Tiếng Pháp
+4 Tiếng Nhật
+5 Tiếng Trung
+4 Thủ công|Kỹ thuật thủ công
+4 Tập viết
+4 Tập đọc
+4 Chính tả
+4 Luyện từ và câu
+4 Kể chuyện
+3 Giáo dục địa phương
 
 @ nganh
 4 Y khoa|Y|Bác sĩ đa khoa|Y đa khoa
@@ -40,21 +40,21 @@ export default `
 4 Kinh tế
 4 Luật|Luật học
 3 Quản trị kinh doanh|QTKD
-3 Kế toán
+5 Kế toán
 3 Tài chính ngân hàng|Tài chính|Ngân hàng
-3 Marketing
+5 Marketing
 3 Sư phạm
 3 Dược|Dược học
-3 Kiến trúc
-3 Xây dựng|Kỹ thuật xây dựng
+5 Kiến trúc
+5 Xây dựng|Kỹ thuật xây dựng
 3 Ngôn ngữ Anh
 3 Báo chí
-3 Du lịch|Quản trị du lịch
-3 Khách sạn|Quản trị khách sạn
+5 Du lịch|Quản trị du lịch
+5 Khách sạn|Quản trị khách sạn
 3 Điện - điện tử|Điện tử|Kỹ thuật điện
 3 Cơ khí|Kỹ thuật cơ khí
-3 Ô tô|Công nghệ ô tô
-3 Trí tuệ nhân tạo|AI
+5 Ô tô|Công nghệ ô tô
+5 Trí tuệ nhân tạo|AI
 3 Khoa học máy tính
 3 Khoa học dữ liệu
 3 Logistics|Quản lý chuỗi cung ứng
@@ -64,17 +64,17 @@ export default `
 3 Tâm lý học
 3 Quan hệ quốc tế
 3 Kinh doanh quốc tế
-2 Thương mại điện tử
-2 An ninh mạng|An toàn thông tin
-2 Kỹ thuật phần mềm
+4 Thương mại điện tử
+4 An ninh mạng|An toàn thông tin
+4 Kỹ thuật phần mềm
 2 Hệ thống thông tin
 2 Ngôn ngữ Nhật
 2 Ngôn ngữ Hàn Quốc
-2 Ngôn ngữ Trung Quốc
+4 Ngôn ngữ Trung Quốc
 2 Đông phương học
 2 Việt Nam học
-2 Văn học
-2 Triết học
+4 Văn học
+4 Triết học
 2 Xã hội học
 2 Nhân học
 2 Sử học
@@ -83,77 +83,77 @@ export default `
 2 Vật lý học
 2 Hóa học
 2 Sinh học
-2 Công nghệ sinh học
-2 Công nghệ thực phẩm
-2 Môi trường|Khoa học môi trường
-2 Nông nghiệp|Nông học
+4 Công nghệ sinh học
+4 Công nghệ thực phẩm
+5 Môi trường|Khoa học môi trường
+5 Nông nghiệp|Nông học
 2 Lâm nghiệp
-2 Thú y
+4 Thú y
 2 Thủy sản|Nuôi trồng thủy sản
 2 Hàng hải|Điều khiển tàu biển
-2 Hàng không|Kỹ thuật hàng không
-2 Dầu khí|Kỹ thuật dầu khí
+4 Hàng không|Kỹ thuật hàng không
+4 Dầu khí|Kỹ thuật dầu khí
 2 Mỏ|Kỹ thuật mỏ
 2 Địa chất
-2 Kiểm toán
-2 Bảo hiểm
-2 Bất động sản
-2 Quản trị nhân lực|Nhân sự
+4 Kiểm toán
+4 Bảo hiểm
+5 Bất động sản
+4 Quản trị nhân lực|Nhân sự
 2 Quan hệ công chúng|PR
 2 Truyền thông đa phương tiện
-2 Điện ảnh
-2 Diễn viên|Diễn xuất
+4 Điện ảnh
+5 Diễn viên|Diễn xuất
 2 Thanh nhạc
-2 Piano
-2 Thời trang|Thiết kế thời trang
-2 Nội thất|Thiết kế nội thất
-2 Hội họa
-2 Điêu khắc
-2 Giáo dục mầm non
-2 Giáo dục tiểu học
+5 Piano
+5 Thời trang|Thiết kế thời trang
+4 Nội thất|Thiết kế nội thất
+4 Hội họa
+4 Điêu khắc
+4 Giáo dục mầm non
+4 Giáo dục tiểu học
 2 Giáo dục thể chất
 2 Công tác xã hội
 2 Quản lý giáo dục
-2 Y học cổ truyền|Đông y
+4 Y học cổ truyền|Đông y
 2 Y tế công cộng
 2 Kỹ thuật y sinh
-2 Xét nghiệm|Kỹ thuật xét nghiệm y học
+4 Xét nghiệm|Kỹ thuật xét nghiệm y học
 2 Vật lý trị liệu
-2 Dinh dưỡng
-2 Robot|Kỹ thuật robot|Cơ điện tử
-2 Tự động hóa
-2 Viễn thông|Điện tử viễn thông
+4 Dinh dưỡng
+5 Robot|Kỹ thuật robot|Cơ điện tử
+4 Tự động hóa
+4 Viễn thông|Điện tử viễn thông
 2 Vi mạch|Bán dẫn|Thiết kế vi mạch
-1 Khảo cổ học
-1 Ngôn ngữ học
+4 Khảo cổ học
+3 Ngôn ngữ học
 1 Lưu trữ học
-1 Thư viện|Thông tin thư viện
+5 Thư viện|Thông tin thư viện
 1 Tôn giáo học
-1 Hải dương học
-1 Khí tượng|Khí tượng thủy văn
-1 Thiên văn học
+3 Hải dương học
+3 Khí tượng|Khí tượng thủy văn
+4 Thiên văn học
 1 Trắc địa|Bản đồ
-1 Quy hoạch đô thị
+3 Quy hoạch đô thị
 1 Kỹ thuật hạt nhân
-1 Vật liệu|Khoa học vật liệu
-1 Dệt may|Công nghệ dệt may
+3 Vật liệu|Khoa học vật liệu
+3 Dệt may|Công nghệ dệt may
 1 Kỹ thuật in
-1 Phát thanh truyền hình
-1 Biên phiên dịch|Phiên dịch
+4 Phát thanh truyền hình
+3 Biên phiên dịch|Phiên dịch
 
 @ hinh
 5 Hình tròn|Tròn
 5 Hình vuông|Vuông
 5 Hình tam giác|Tam giác
 4 Hình chữ nhật|Chữ nhật
-3 Hình thoi|Thoi
+5 Hình thoi|Thoi
 3 Hình thang|Thang
 3 Hình bình hành|Bình hành
 3 Hình ngũ giác|Ngũ giác
 3 Hình lục giác|Lục giác
 3 Hình bầu dục|Hình elip|Elip|Bầu dục
-3 Hình trái tim|Trái tim
-3 Hình ngôi sao|Ngôi sao|Hình sao
+5 Hình trái tim|Trái tim
+5 Hình ngôi sao|Ngôi sao|Hình sao
 3 Hình cầu|Khối cầu
 3 Hình lập phương|Khối lập phương|Lập phương
 3 Hình hộp chữ nhật|Hộp chữ nhật
@@ -182,14 +182,14 @@ export default `
 2 Hình chữ thập|Chữ thập
 2 Hình mũi tên|Mũi tên
 2 Hình lưỡi liềm|Trăng khuyết
-2 Đường thẳng
-2 Đoạn thẳng
-2 Tia
-2 Góc
-2 Điểm
-2 Đường tròn
+5 Đường thẳng
+5 Đoạn thẳng
+4 Tia
+5 Góc
+5 Điểm
+5 Đường tròn
 2 Hình xoắn ốc|Xoắn ốc
-1 Hình parabol|Parabol
+3 Hình parabol|Parabol
 1 Hình hypebol|Hypebol
 1 Dải Möbius|Mobius
 1 Hình fractal|Fractal
@@ -206,23 +206,23 @@ export default `
 4 Gam|Gram|g
 3 Mi-li-mét|Milimét|Milimet|mm|Li
 3 Mi-li-lít|Mililít|ml
-3 Tấn
+5 Tấn
 3 Tạ
 3 Yến
-3 Độ C|Độ xê|Celsius
-3 Ngày
-3 Tuần
-3 Tháng
-3 Năm
-3 Thế kỷ
+5 Độ C|Độ xê|Celsius
+5 Ngày
+5 Tuần
+5 Tháng
+5 Năm
+5 Thế kỷ
 3 Héc-ta|Hecta|ha|Mẫu tây
-3 Mét vuông|m2|M²
+5 Mét vuông|m2|M²
 3 Mét khối|m3|Khối
 3 Vôn|Volt|V
 3 Oát|Watt|W
 3 Am-pe|Ampe|Ampere|A
 3 Ôm|Ohm
-3 Calo|Calorie|Kcal
+5 Calo|Calorie|Kcal
 3 Byte|B
 3 Gigabyte|GB|Giga
 3 Megabyte|MB
@@ -235,34 +235,34 @@ export default `
 3 Pound|Pao|Lb
 3 Ounce|Oz
 3 Hải lý|Dặm biển
-2 Năm ánh sáng
+4 Năm ánh sáng
 2 Đơn vị thiên văn|AU
 2 Héc|Hertz|Hz
-2 Niu-tơn|Newton|N
+4 Niu-tơn|Newton|N
 2 Jun|Joule|J
 2 Pascal|Pa
 2 Kelvin|K
-2 Độ F|Fahrenheit
+4 Độ F|Fahrenheit
 2 Mol
 2 Candela|Cd
 2 Át-mốt-phe|Atmosphere|Atm
 2 Bar
-2 Mã lực|Sức ngựa
+4 Mã lực|Sức ngựa
 2 Ki-lô-oát giờ|kWh|Số điện
 2 Decibel|dB|Đề-xi-ben
 2 Carat|Cara
-2 Lượng|Lạng|Cây vàng
-2 Chỉ|Chỉ vàng
-2 Sào
-2 Mẫu
-2 Thước|Thước ta
-2 Tấc
+4 Lượng|Lạng|Cây vàng
+4 Chỉ|Chỉ vàng
+4 Sào
+4 Mẫu
+4 Thước|Thước ta
+4 Tấc
 2 Gang tay
 2 Sải tay|Sải
-2 Bước chân
-2 Thiên niên kỷ
-2 Thập kỷ
-2 Quý
+4 Bước chân
+4 Thiên niên kỷ
+4 Thập kỷ
+4 Quý
 2 Mili giây|ms
 2 Nano mét|nm
 2 Micromet|µm|Micron
@@ -272,12 +272,12 @@ export default `
 2 Héc-tô-mét|hm
 2 Đề-ca-mét|dam
 2 Vòng/phút|rpm
-2 Km/h|Ki-lô-mét trên giờ
+5 Km/h|Ki-lô-mét trên giờ
 2 Knot|Hải lý trên giờ
-1 Pixel|Px
+4 Pixel|Px
 1 Radian|Rad
-1 Độ|Độ góc
-1 Lux
+5 Độ|Độ góc
+3 Lux
 1 Đơn vị tesla
 1 Weber
 1 Coulomb|Culông
@@ -296,7 +296,7 @@ export default `
 3 Rúp|Rúp Nga|Ruble|Rouble|RUB
 3 Baht|Bạt|Baht Thái
 3 Kíp|Kip|Kíp Lào
-3 Riel|Riên|Riel Campuchia
+1 Riel|Riên|Riel Campuchia
 3 Rupee|Rupi|Rupee Ấn Độ|INR
 3 Đô la Singapore|SGD
 3 Đô la Úc|AUD
@@ -328,17 +328,17 @@ export default `
 2 Taka|Taka Bangladesh
 2 Rupee Pakistan
 2 Đô la New Zealand|NZD
-2 Bitcoin|BTC #
-1 Ethereum|ETH
+5 Bitcoin|BTC #
+3 Ethereum|ETH
 1 Đồng Mác|Mark|Mác Đức
 1 Franc Pháp
 1 Lia Ý
 1 Peseta
 1 Drachma
-1 Quan|Quan tiền
-1 Đồng xu|Xu
-1 Hào
-1 Cắc
+3 Quan|Quan tiền
+5 Đồng xu|Xu
+3 Hào
+3 Cắc
 
 @ daquy
 4 Kim cương|Diamond
@@ -346,7 +346,7 @@ export default `
 3 Hồng ngọc|Ruby
 3 Lam ngọc|Sapphire|Saphia
 3 Ngọc lục bảo|Emerald|Lục bảo
-3 Thạch anh|Quartz
+5 Thạch anh|Quartz
 3 Ngọc bích|Jade|Cẩm thạch
 3 Mã não|Agate
 3 Thạch anh tím|Amethyst
@@ -384,21 +384,21 @@ export default `
 4 Sắt
 4 Kính|Thủy tinh
 4 Giấy
-3 Bông|Cotton|Vải cotton
-3 Lụa|Silk
-3 Len|Wool
-3 Da|Da thuộc
-3 Inox|Thép không gỉ
-3 Thép|Sắt thép
+5 Bông|Cotton|Vải cotton
+5 Lụa|Silk
+5 Len|Wool
+5 Da|Da thuộc
+5 Inox|Thép không gỉ
+5 Thép|Sắt thép
 3 Kim loại nhôm|Nhôm
 3 Kim loại đồng|Đồng
-3 Gạch
-3 Xi măng
-3 Bê tông
-3 Đá
+5 Gạch
+5 Xi măng
+5 Bê tông
+5 Đá
 3 Gốm|Gốm sứ|Sứ
-3 Cao su
-3 Tre|Nứa
+5 Cao su
+5 Tre|Nứa
 3 Mây|Song mây
 3 Kaki|Vải kaki
 3 Jean|Vải jean|Denim
@@ -407,40 +407,40 @@ export default `
 2 Gấm
 2 Đũi
 2 Lanh|Vải lanh|Linen
-2 Thổ cẩm
-2 Nhung
+4 Thổ cẩm
+4 Nhung
 2 Voan
 2 Ren
 2 Kate|Vải kate
 2 Polyester|Vải polyester
-2 Nilon|Ni lông|Nylon
-2 Xốp|Mút
+4 Nilon|Ni lông|Nylon
+4 Xốp|Mút
 2 Thạch cao
 2 Đá hoa cương|Granite
 2 Đá cẩm thạch|Marble
 2 Composite
 2 Sợi carbon|Carbon
-2 Bìa|Các tông|Carton
+4 Bìa|Các tông|Carton
 2 Gỗ ép|Ván ép
 2 Mica
 2 Nhựa PVC|PVC
-2 Silicon
-2 Sơn mài
+4 Silicon
+4 Sơn mài
 2 Giấy dó
 2 Cói|Lác
 2 Lá cọ|Lá buông
-2 Rơm|Rạ
+4 Rơm|Rạ
 2 Sừng
 2 Ngà|Ngà voi
-2 Xương
-2 Vỏ sò|Xà cừ|Khảm trai
-1 Đồng thau
-1 Hợp kim
-1 Gang
-1 Titan
-1 Bạch kim
-1 Sáp
-1 Keo
+5 Xương
+4 Vỏ sò|Xà cừ|Khảm trai
+3 Đồng thau
+4 Hợp kim
+4 Gang
+4 Titan
+4 Bạch kim
+4 Sáp
+5 Keo
 
 @ thoitiet
 5 Mưa|Cơn mưa
@@ -454,7 +454,7 @@ export default `
 4 Sương mù|Sương
 4 Cầu vồng
 3 Mưa phùn
-3 Mưa đá
+5 Mưa đá
 3 Mưa rào
 3 Mưa ngâu
 3 Gió mùa|Gió mùa đông bắc
@@ -462,17 +462,17 @@ export default `
 3 Nồm|Nồm ẩm
 3 Sương muối
 3 Băng giá|Băng
-3 Rét|Rét đậm|Rét hại
-3 Nóng|Nắng nóng
-3 Hạn hán|Hạn
-3 Lũ lụt|Lũ|Lụt
+5 Rét|Rét đậm|Rét hại
+5 Nóng|Nắng nóng
+5 Hạn hán|Hạn
+5 Lũ lụt|Lũ|Lụt
 3 Lũ quét
 3 Sạt lở|Lở đất
 3 Lốc xoáy|Vòi rồng|Lốc|Tornado
 3 Áp thấp nhiệt đới|Áp thấp
-3 Động đất
-3 Sóng thần|Tsunami
-3 Núi lửa|Núi lửa phun trào
+5 Động đất
+5 Sóng thần|Tsunami
+5 Núi lửa|Núi lửa phun trào
 3 Triều cường
 3 Xâm nhập mặn|Hạn mặn
 3 Nhật thực
@@ -485,41 +485,41 @@ export default `
 3 Gió nồm
 3 Gió chướng
 3 Ráng chiều|Ráng
-3 Mây đen
+5 Mây đen
 3 Mây ti|Mây vũ tích|Mây tích
-2 Bão tuyết
+4 Bão tuyết
 2 Bão cát
-2 Siêu bão
-2 Mưa axit
+4 Siêu bão
+4 Mưa axit
 2 Khói mù|Bụi mịn|Ô nhiễm không khí
 2 Sóng nhiệt|Nắng nóng gay gắt
-2 Băng tan
+4 Băng tan
 2 Tuyết lở
-2 Thủy triều
-2 Sóng biển|Sóng
-2 Gió xoáy
+4 Thủy triều
+5 Sóng biển|Sóng
+4 Gió xoáy
 2 Mưa bóng mây
 2 Nắng quái
-2 Hiệu ứng nhà kính
-2 El Nino|En Nino
-2 La Nina
-2 Biến đổi khí hậu
+5 Hiệu ứng nhà kính
+4 El Nino|En Nino
+4 La Nina
+5 Biến đổi khí hậu
 2 Mưa dầm
-2 Mưa giông|Dông|Giông
-2 Hạt mưa
-2 Bông tuyết
+4 Mưa giông|Dông|Giông
+4 Hạt mưa
+4 Bông tuyết
 2 Mưa xuân
-2 Trời âm u|Âm u
+4 Trời âm u|Âm u
 2 Trời quang|Quang mây
-2 Ẩm ướt|Độ ẩm
+4 Ẩm ướt|Độ ẩm
 2 Hanh khô|Hanh
-1 Sương giá
-1 Mưa tuyết
+3 Sương giá
+3 Mưa tuyết
 1 Bão từ
-1 Hoàng hôn
-1 Bình minh
+5 Hoàng hôn
+5 Bình minh
 1 Mây ngũ sắc
-1 Halo|Quầng mặt trời|Quầng trăng
+3 Halo|Quầng mặt trời|Quầng trăng
 
 @ hangxe
 5 Toyota
@@ -532,16 +532,16 @@ export default `
 4 Ford
 4 Mazda
 4 Yamaha
-3 Suzuki
-3 Mitsubishi
+5 Suzuki
+5 Mitsubishi
 3 Nissan
-3 Tesla
-3 Audi
+5 Tesla
+5 Audi
 3 Volkswagen|VW
 3 Lexus
 3 Porsche
-3 Ferrari
-3 Lamborghini
+5 Ferrari
+5 Lamborghini
 3 Chevrolet
 3 Peugeot
 3 Volvo
@@ -567,8 +567,8 @@ export default `
 2 Isuzu
 2 Daihatsu
 2 Hino
-2 Thaco
-2 Kawasaki
+4 Thaco
+4 Kawasaki
 2 KTM
 2 Triumph
 2 Jeep
@@ -614,15 +614,15 @@ export default `
 3 Vivo
 3 Realme
 3 Google
-3 Microsoft
+5 Microsoft
 3 Dell
-3 HP
+5 HP
 3 Asus
 3 Lenovo
 3 Acer
 3 Panasonic
 3 Toshiba
-3 Canon
+5 Canon
 3 Nikon
 3 Intel
 3 AMD
@@ -633,21 +633,21 @@ export default `
 3 OnePlus
 3 Vsmart
 2 Sharp
-2 Philips
+4 Philips
 2 Fujifilm
-2 Casio
+4 Casio
 2 Hitachi
-2 Daikin
+4 Daikin
 2 Electrolux
 2 Sunhouse
 2 Asanzo
-2 Viettel
-2 FPT
-2 VNPT
-2 Logitech
+5 Viettel
+5 FPT
+4 VNPT
+4 Logitech
 2 Razer
 2 MSI
-2 Nintendo
+4 Nintendo
 2 Honor
 2 Tecno
 2 Infinix
@@ -662,25 +662,25 @@ export default `
 2 Marshall
 2 Sennheiser
 2 Qualcomm
-2 TSMC
-2 IBM
-2 Meta|Facebook Inc
-2 Amazon
+4 TSMC
+4 IBM
+5 Meta|Facebook Inc
+4 Amazon
 2 Alibaba
 2 Tencent
-2 Foxconn
-1 Siemens
-1 Bosch
-1 Midea
-1 Haier
+4 Foxconn
+4 Siemens
+3 Bosch
+3 Midea
+3 Haier
 1 TCL
-1 Hisense
-1 Kodak
+3 Hisense
+3 Kodak
 1 Olympus
-1 Polaroid
-1 Xerox
-1 Epson
-1 Brother
+3 Polaroid
+3 Xerox
+3 Epson
+3 Brother
 
 @ app
 5 Facebook|FB|Phây
@@ -693,19 +693,19 @@ export default `
 4 Shopee
 4 Gmail
 3 Twitter|X
-3 Grab
-3 Lazada
+5 Grab
+5 Lazada
 3 Tiki
-3 Netflix
+5 Netflix
 3 Spotify
-3 Wikipedia
+5 Wikipedia
 3 Telegram
 3 WhatsApp
 3 Viber
 3 Skype
 3 Zoom
-3 Google Maps|Bản đồ Google
-3 ChatGPT
+5 Google Maps|Bản đồ Google
+5 ChatGPT
 3 Claude
 3 Gemini
 3 Discord
@@ -714,42 +714,42 @@ export default `
 3 Snapchat
 3 Threads
 3 Be|Ứng dụng Be
-3 Momo|Ví Momo
+5 Momo|Ví Momo
 3 ZaloPay
 3 VNeID
 3 Canva
 3 CapCut
-3 Google Translate|Google Dịch
+5 Google Translate|Google Dịch
 3 Microsoft Teams|Teams
 2 Reddit
 2 Twitch
-2 WeChat
+4 WeChat
 2 Line
 2 KakaoTalk
 2 Weibo
 2 Douyin
 2 Xiaohongshu|Tiểu Hồng Thư
 2 Bilibili
-2 Amazon
+4 Amazon
 2 eBay
 2 Alibaba
-2 AliExpress
+4 AliExpress
 2 Temu
-2 Taobao
-2 Airbnb
-2 Booking|Booking.com
-2 Agoda
+4 Taobao
+4 Airbnb
+4 Booking|Booking.com
+4 Agoda
 2 Traveloka
-2 Uber
+4 Uber
 2 Gojek
-2 Xanh SM
+4 Xanh SM
 2 Baemin
-2 ShopeeFood
-2 GrabFood
+4 ShopeeFood
+4 GrabFood
 2 Duolingo
 2 Quizlet
-2 Google Meet|Meet
-2 Google Drive|Drive
+4 Google Meet|Meet
+5 Google Drive|Drive
 2 Dropbox
 2 Notion
 2 Slack
@@ -760,39 +760,39 @@ export default `
 2 Tinder
 2 Shazam
 2 SoundCloud
-2 Apple Music
-2 Zing MP3
-2 NhacCuaTui
-2 FPT Play
+4 Apple Music
+4 Zing MP3
+4 NhacCuaTui
+4 FPT Play
 2 VieON
-2 Coc Coc|Cốc Cốc
-2 Chrome|Google Chrome
-2 Safari
-2 Firefox
-2 Microsoft Edge|Edge
-2 Outlook
+4 Coc Coc|Cốc Cốc
+5 Chrome|Google Chrome
+4 Safari
+4 Firefox
+4 Microsoft Edge|Edge
+4 Outlook
 2 Yahoo
 2 Bing
 2 Báo Mới
-2 VnExpress
-2 Dân trí
-2 Tuổi Trẻ
-2 Thanh Niên
-2 Kênh 14
+5 VnExpress
+4 Dân trí
+5 Tuổi Trẻ
+5 Thanh Niên
+4 Kênh 14
 2 Voz
 2 Tinhte|Tinh tế
-2 Garena
-2 Steam
+4 Garena
+4 Steam
 2 Roblox
-2 Minecraft
-2 Liên Quân|Liên Quân Mobile
-2 PUBG
-2 Free Fire
+4 Minecraft
+4 Liên Quân|Liên Quân Mobile
+4 PUBG
+4 Free Fire
 2 Genshin Impact
 2 Candy Crush
-2 Flappy Bird
+4 Flappy Bird
 2 Pokémon Go|Pokemon Go
 2 Among Us
 2 Fortnite
-2 Liên Minh Huyền Thoại|LMHT|League of Legends
+4 Liên Minh Huyền Thoại|LMHT|League of Legends
 `;

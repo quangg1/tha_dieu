@@ -1,7 +1,7 @@
 # TASK-006: chấm độ quen 11 kho còn lại (HY3)
 
 - Người nhận: WorkBuddy · model **HY3**
-- Trạng thái: đã giao
+- Trạng thái: cần sửa (7 trong 11 kho)
 - Giao ngày: 2026-10-23
 
 ## Bối cảnh
@@ -61,3 +61,51 @@ Ghi: đường dẫn 12 file; bảng phân bố từng kho; những kho rubric k
 
 ## Duyệt (Claude điền)
 Claude kiểm từng file theo tiêu chí trên (có script sẵn: `scripts/compare-pop.ts`), rồi so hai model trên 160 từ chồng để học bảng chuyển thang, rồi mới áp số vào sổ bằng `scripts/apply-pop.ts` — chỉ các mục lệch ≥ 2 mức, cổng tính trên mức thô. Không ghi đè `pop` nào khi chưa chạy xong phép so thang.
+
+**Nhận 4 kho, trả lại 7 kho.** Bốn kho đầu chấm rất tốt; bảy kho sau không dùng được.
+
+### Nhận: `nhanvat` · `diadanh` · `douong` · `ngonngu` — đã áp vào sổ
+
+| Kho | Dòng | Lệch TB vs kho | Từ neo rubric | Kết luận |
+|---|---|---|---|---|
+| `nhanvat` | 1.522 | +0,07 | **25/25 đúng mức** | nhận, áp 151 mục |
+| `diadanh` | 1.173 | −0,09 | (rubric không có neo) | nhận, áp 54 mục |
+| `douong` | 812 | +0,22 | 20/23 đúng, 3 lệch 1 mức | nhận, áp 50 mục |
+| `ngonngu` | 609 | −0,08 | (rubric không có neo) | nhận, áp 14 mục |
+
+`nhanvat` khớp đủ 25 từ neo là bản chấm chắc tay nhất của cả bốn đợt. Chiều kéo xuống của nó cũng đúng: `Trần Thánh Tông` 4→1, `Trần Anh Tông` 3→1, `Lê Văn Hưu` 3→1 — người Việt biết Trần Nhân Tông và Trần Hưng Đạo, không biết các vua Trần còn lại. `diadanh` kéo xuống 20 ca đều là chùa, thác, làng ở Tây Nguyên mà kho để mức 3.
+
+### Trả lại: 7 kho, 2.206 mục
+
+| Kho | Dòng | Mức 1 | Mức 2 | Lệch TB vs kho |
+|---|---|---|---|---|
+| `tungu` | 681 | **0** | 47 | +0,79 |
+| `dovat` | 515 | **0** | 8 | +1,91 |
+| `cotich` | 359 | **0** | **0** | +2,53 |
+| `thethao` | 307 | **0** | **0** | +2,59 |
+| `quanao` | 169 | **0** | **0** | +2,44 |
+| `mausac` | 112 | **0** | **0** | +2,96 |
+| `diaphuong` | 63 | **0** | **0** | +2,03 |
+
+Bảy kho này **không có một từ nào ở mức 1**. Bốn kho được nhận thì có 619, 336, 149, 207 từ ở mức 1. Một thang 1–5 mà cả 359 truyện cổ tích không có truyện nào "rất ít người biết" thì không phải chấm.
+
+**Ba bằng chứng khách quan, không phải nhận xét của tôi:**
+
+1. **Từ neo của rubric bị vi phạm.** `diaphuong`: 17/20 từ neo lệch — `Bắc Kạn` và `Hậu Giang` rubric ghi mức **1**, bản chấm cho **5**. Cả 63 tỉnh đều mức 5. `dovat`: 24/32 từ neo lệch — `Chạn` và `Ang` rubric ghi mức 1, bản chấm cho 5; `Gàu sòng` 1→3; `Máy đánh chữ` 1→4.
+
+2. **Bản chấm tự mâu thuẫn với bộ chồng của chính nó.** Trong `tu_doi_chieu_22kho_hy3.tsv`, ba từ `diaphuong` được chấm **1, 2, 3**. Trong `tu_diaphuong_hy3.tsv`, cả 63 từ là **5**. Cùng một model, cùng một kho, cùng một đợt. `mausac`, `quanao`, `cotich` cũng vậy: bộ chồng có từ ở mức 1–3, file đầy đủ thì không.
+
+3. **Những từ cụ thể không đứng được.** `Giày espadrilles` = 5 · `Dép Zori` = 3 · `Giày tabi` = 3 · `Poseidon` = 5 · `Ulysses` = 5 · `Màu cẩm thạch` = 5 · `Xanh hòa bình` = 5.
+
+Hình dạng lỗi gợi ý nguyên nhân: bốn kho làm trước (lớn nhất) thì tốt, bảy kho làm sau (nhỏ hơn) thì sập, và càng về sau càng nặng (`mausac` +2,96). Đề nghị chấm lại 7 kho này **từng kho một**, mỗi kho một lượt riêng, không làm liền mạch; và trước khi giao thì tự kiểm hai điều: mỗi kho phải có từ ở mức 1, và từ neo của rubric phải khớp.
+
+### Hai chỗ khác, không chặn
+
+- **Mục Báo cáo để trống.** Tiêu chí nghiệm thu yêu cầu bảng phân bố từng kho; file vẫn là bản mẫu. Tôi tự đo được nên không chặn, nhưng lần giao lại cần điền.
+- Nit ở cả 12 file: dòng cuối thiếu ô `ghi_chu` rỗng nên chỉ có 3 cột.
+
+### Hai model trùng thang, đợt này **không cần bảng chuyển thang**
+
+Trên 160 từ chồng: khớp **114/160 (71%)** · lệch ≤ 1 mức **157/160 (98%)** · 3 ca lệch ≥ 2 · lệch trung bình **+0,00**.
+
+Đây là kết quả tốt nhất trong bốn đợt. Đợt trước phải học bảng `1→1 2→3 3→4 4→4 5→5` cho `monan`; đợt này áp mức thô trực tiếp. Lý do đổi bộ chồng sang lấy trong chính 22 kho (thay vì dùng lại bộ 120 từ động vật) đã trả đúng cái nó hứa: đo thang ngay trong miền sẽ dùng.

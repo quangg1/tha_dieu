@@ -115,7 +115,7 @@ export default `
 2 Hồ Quý Ly # vua
 2 Chu Văn An|Thầy Chu Văn An # khoa
 2 Tuệ Tĩnh|Thiền sư Tuệ Tĩnh # khoa
-2 Lê Văn Hưu # khoa
+1 Lê Văn Hưu # khoa
 2 Trần Quốc Toản|Hoài Văn Hầu
 2 Trần Hưng Đạo|Hưng Đạo Đại Vương|Trần Quốc Tuấn # tuong
 2 Trần Quang Khải|Chiêu Minh Đại Vương # tuong
@@ -192,7 +192,7 @@ export default `
 2 Mạc Mậu Hợp # vua
 2 Mạc Toàn # vua
 2 Mạc Kính Điển # tuong
-2 Nguyễn Bỉnh Khiêm|Trạng Trình # khoa van
+4 Nguyễn Bỉnh Khiêm|Trạng Trình # khoa van
 2 Giáp Hải
 2 Nguyễn Thiến
 2 Phùng Khắc Khoan|Trạng Bùng # khoa
@@ -346,7 +346,7 @@ export default `
 2 Ngô Đức Kế
 2 Thái Phiên # cm
 2 Trần Cao Vân # cm
-2 Nguyễn Khuyến|Tam nguyên Yên Đổ # van
+4 Nguyễn Khuyến|Tam nguyên Yên Đổ # van
 2 Tú Xương|Trần Tế Xương # van
 2 Nguyễn Văn Vĩnh # van
 2 Phạm Quỳnh # van
@@ -382,7 +382,7 @@ export default `
 2 Tôn Đức Thắng # cm
 2 Phạm Văn Đồng # cm
 2 Trường Chinh # cm
-2 Lê Duẩn # cm
+4 Lê Duẩn # cm
 2 Lê Đức Thọ # cm
 2 Hoàng Quốc Việt # cm
 2 Nguyễn Lương Bằng # cm
@@ -396,7 +396,7 @@ export default `
 2 La Văn Cầu # cm
 2 Nguyễn Viết Xuân # cm
 2 Vừ A Dính # cm
-2 Lê Văn Tám # cm
+4 Lê Văn Tám # cm
 2 Mạc Thị Bưởi # cm nu
 2 Nguyễn Thị Chiên # cm nu
 2 Võ Thị Thắng # cm nu
@@ -732,9 +732,9 @@ export default `
 2 Antonio Gramsci
 2 Vladimir Lenin|Lenin
 2 Mahatma Gandhi|Gandhi
-2 Martin Luther King|Martin Luther King Jr.
+4 Martin Luther King|Martin Luther King Jr.
 2 Martin Luther
-2 John Calvin
+5 John Calvin
 2 Thích Ca Mâu Ni|Đức Phật|Phật Thích Ca
 2 Long Thọ|Nagarjuna
 2 Huệ Năng|Lục tổ Huệ Năng
@@ -746,7 +746,7 @@ export default `
 2 Liệt Tử
 2 Quản Trọng
 2 Thương Ưởng
-2 Thích Nhất Hạnh
+4 Thích Nhất Hạnh
 2 Trần Đức Thảo
 2 Ibn Sina|Avicenna
 2 Ibn Rushd|Averroes
@@ -829,7 +829,7 @@ export default `
 2 Lưu Huy
 2 Thẩm Quát
 2 Lý Thời Trân
-2 Hoa Đà
+4 Hoa Đà
 2 Biển Thước
 2 Trương Trọng Cảnh
 2 Galen
@@ -838,7 +838,7 @@ export default `
 2 Hipparchus
 2 Aristarchus
 2 Heron
-2 Benjamin Franklin
+4 Benjamin Franklin
 2 Joseph Priestley
 2 Henry Cavendish
 2 Humphry Davy
@@ -932,7 +932,7 @@ export default `
 2 Nguyễn Cảnh Toàn
 2 Nguyễn Đình Tứ
 2 Vũ Đình Cự
-2 Võ Tòng Xuân
+4 Võ Tòng Xuân
 2 Đàm Thanh Sơn
 2 Vũ Hà Văn
 2 Nguyễn Thanh Liêm

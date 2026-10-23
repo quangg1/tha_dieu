@@ -11,7 +11,7 @@ export default `
 4 Sao Thủy|Sao Thuỷ|Thủy Tinh|Mercury # hanhtinh hemt
 3 Sao Thiên Vương|Thiên Vương Tinh|Uranus # hanhtinh hemt
 3 Sao Hải Vương|Hải Vương Tinh|Neptune # hanhtinh hemt
-3 Sao Diêm Vương|Diêm Vương Tinh|Pluto # hanhtinh hemt
+5 Sao Diêm Vương|Diêm Vương Tinh|Pluto # hanhtinh hemt
 1 Ceres|Sao Ceres # hanhtinh hemt
 1 Eris # hanhtinh hemt
 1 Haumea # hanhtinh hemt
@@ -28,10 +28,10 @@ export default `
 1 Enceladus # vetinh hemt
 1 Mimas # vetinh hemt
 1 Miranda # vetinh hemt
-3 Sao Bắc Cực|Polaris|Bắc Thần # sao
+5 Sao Bắc Cực|Polaris|Bắc Thần # sao
 2 Sao Thiên Lang|Sirius # sao
 2 Sao Chức Nữ|Vega # sao
-2 Sao Ngưu Lang|Altair # sao
+4 Sao Ngưu Lang|Altair # sao
 2 Betelgeuse|Sao Betelgeuse # sao
 2 Alpha Centauri|Cận Tinh|Proxima Centauri|Sao Cận Tinh # sao
 1 Rigel # sao
@@ -49,27 +49,27 @@ export default `
 2 Chòm sao Lạp Hộ|Lạp Hộ|Orion|Thợ Săn # chomsao
 2 Chòm sao Thiên Hậu|Cassiopeia # chomsao
 1 Chòm sao Thiên Cầm|Lyra # chomsao
-1 Chòm sao Thiên Nga|Cygnus # chomsao
+3 Chòm sao Thiên Nga|Cygnus # chomsao
 1 Chòm sao Thiên Ưng|Aquila # chomsao
-1 Chòm sao Nam Thập Tự|Thập Tự Phương Nam|Crux # chomsao
+3 Chòm sao Nam Thập Tự|Thập Tự Phương Nam|Crux # chomsao
 1 Chòm sao Đại Khuyển|Canis Major # chomsao
 1 Chòm sao Tiên Nữ|Andromeda # chomsao
 1 Chòm sao Anh Tiên|Perseus # chomsao
 1 Chòm sao Pegasus|Phi Mã # chomsao
 1 Chòm sao Hercules|Vũ Tiên # chomsao
 1 Chòm sao Rua|Tua Rua|Pleiades|Thất Nữ # chomsao
-3 Bạch Dương|Aries|Chòm sao Bạch Dương # chomsao hoangdao
-3 Kim Ngưu|Taurus|Chòm sao Kim Ngưu # chomsao hoangdao
-3 Song Tử|Gemini|Chòm sao Song Tử # chomsao hoangdao
-3 Cự Giải|Cancer|Chòm sao Cự Giải # chomsao hoangdao
-3 Sư Tử|Leo|Chòm sao Sư Tử # chomsao hoangdao
-3 Xử Nữ|Virgo|Chòm sao Xử Nữ # chomsao hoangdao
-3 Thiên Bình|Libra|Chòm sao Thiên Bình # chomsao hoangdao
-3 Thiên Yết|Bọ Cạp|Hổ Cáp|Scorpio|Scorpius|Chòm sao Thiên Yết # chomsao hoangdao
-3 Nhân Mã|Sagittarius|Chòm sao Nhân Mã # chomsao hoangdao
-3 Ma Kết|Capricorn|Chòm sao Ma Kết # chomsao hoangdao
-3 Bảo Bình|Aquarius|Chòm sao Bảo Bình # chomsao hoangdao
-3 Song Ngư|Pisces|Chòm sao Song Ngư # chomsao hoangdao
+5 Bạch Dương|Aries|Chòm sao Bạch Dương # chomsao hoangdao
+5 Kim Ngưu|Taurus|Chòm sao Kim Ngưu # chomsao hoangdao
+5 Song Tử|Gemini|Chòm sao Song Tử # chomsao hoangdao
+5 Cự Giải|Cancer|Chòm sao Cự Giải # chomsao hoangdao
+5 Sư Tử|Leo|Chòm sao Sư Tử # chomsao hoangdao
+5 Xử Nữ|Virgo|Chòm sao Xử Nữ # chomsao hoangdao
+5 Thiên Bình|Libra|Chòm sao Thiên Bình # chomsao hoangdao
+5 Thiên Yết|Bọ Cạp|Hổ Cáp|Scorpio|Scorpius|Chòm sao Thiên Yết # chomsao hoangdao
+5 Nhân Mã|Sagittarius|Chòm sao Nhân Mã # chomsao hoangdao
+5 Ma Kết|Capricorn|Chòm sao Ma Kết # chomsao hoangdao
+5 Bảo Bình|Aquarius|Chòm sao Bảo Bình # chomsao hoangdao
+5 Song Ngư|Pisces|Chòm sao Song Ngư # chomsao hoangdao
 4 Dải Ngân Hà|Ngân Hà|Milky Way|Sông Ngân # thienha
 2 Thiên hà Andromeda|Thiên hà Tiên Nữ|Andromeda # thienha
 1 Đám mây Magellan|Đám mây Magellan Lớn # thienha
@@ -83,34 +83,34 @@ export default `
 2 Vành đai tiểu hành tinh # hemt
 2 Vành đai Kuiper # hemt
 2 Đám mây Oort # hemt
-3 Lỗ đen|Hố đen|Black hole # thienha
-2 Sao băng|Mưa sao băng #
-2 Thiên thạch #
-2 Tiểu hành tinh # hemt
+5 Lỗ đen|Hố đen|Black hole # thienha
+5 Sao băng|Mưa sao băng #
+5 Thiên thạch #
+4 Tiểu hành tinh # hemt
 2 Sao lùn trắng # sao
 2 Sao neutron|Sao nơ-tron # sao
-1 Siêu tân tinh|Supernova # sao
+3 Siêu tân tinh|Supernova # sao
 1 Quasar|Chuẩn tinh # thienha
 1 Sao xung|Pulsar # sao
-2 Trạm vũ trụ Quốc tế|ISS|Trạm ISS # tau
+4 Trạm vũ trụ Quốc tế|ISS|Trạm ISS # tau
 2 Kính viễn vọng Hubble|Kính thiên văn Hubble|Hubble # tau
 2 Kính viễn vọng James Webb|James Webb # tau
-2 Tàu Apollo 11|Apollo 11|Apollo # tau
+4 Tàu Apollo 11|Apollo 11|Apollo # tau
 2 Tàu Vostok 1|Vostok # tau
 2 Vệ tinh Sputnik|Sputnik # tau
-1 Tàu Voyager 1|Voyager # tau
-1 Tàu Curiosity|Curiosity # tau
+3 Tàu Voyager 1|Voyager # tau
+3 Tàu Curiosity|Curiosity # tau
 1 Tàu Perseverance|Perseverance # tau
 1 Tàu Thường Nga|Hằng Nga|Chang'e # tau
-1 Vinasat-1|Vinasat # tau
+3 Vinasat-1|Vinasat # tau
 1 Tàu Thần Châu|Thần Châu # tau
 1 Trạm Thiên Cung|Thiên Cung # tau
 1 Tàu Soyuz 37|Soyuz # tau
-1 Tàu con thoi Columbia|Columbia # tau
-1 Tàu con thoi Challenger|Challenger # tau
-1 Tên lửa Falcon 9|Falcon 9 # tau
-1 Tàu Starship|Starship # tau
+3 Tàu con thoi Columbia|Columbia # tau
+3 Tàu con thoi Challenger|Challenger # tau
+3 Tên lửa Falcon 9|Falcon 9 # tau
+3 Tàu Starship|Starship # tau
 1 Tàu New Horizons|New Horizons # tau
 1 Tàu Cassini|Cassini # tau
-1 Trạm Mir|Mir # tau
+3 Trạm Mir|Mir # tau
 `;

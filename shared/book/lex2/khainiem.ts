@@ -26,7 +26,7 @@ export default `
 2 Kinh tế đầu tư
 2 Kinh tế vận tải
 2 Kinh tế xây dựng
-2 Thống kê
+4 Thống kê
 2 Toán ứng dụng|Toán tin
 2 Tài chính
 2 Ngân hàng
@@ -55,7 +55,7 @@ export default `
 2 Ngôn ngữ Bồ Đào Nha
 2 Ngôn ngữ Thái
 2 Ngôn ngữ Ả Rập
-2 Ngôn ngữ học
+3 Ngôn ngữ học
 2 Hán Nôm
 2 Lưu trữ học
 2 Thông tin thư viện|Thư viện
@@ -65,7 +65,7 @@ export default `
 2 Châu Á học
 2 Quốc tế học
 2 Tôn giáo học
-2 Khảo cổ học
+4 Khảo cổ học
 2 Văn hóa học
 2 Quản lý văn hóa
 2 Bảo tàng học
@@ -93,7 +93,7 @@ export default `
 2 Giáo dục quốc phòng an ninh
 2 Huấn luyện thể thao
 2 Quản lý thể dục thể thao
-2 Dinh dưỡng
+4 Dinh dưỡng
 2 Y học dự phòng
 2 Y tế công cộng
 2 Kỹ thuật xét nghiệm y học|Xét nghiệm
@@ -105,11 +105,11 @@ export default `
 2 Hóa dược
 2 Sinh học ứng dụng
 2 Vi sinh vật học
-2 Hải dương học
+3 Hải dương học
 2 Khí tượng thủy văn|Khí tượng học
 2 Thủy văn học
 2 Khoa học trái đất
-2 Thiên văn học
+4 Thiên văn học
 2 Vật lý kỹ thuật
 2 Vật lý hạt nhân
 2 Hóa phân tích
@@ -126,7 +126,7 @@ export default `
 2 Kỹ thuật robot|Robot
 2 Internet vạn vật|IoT
 2 Khoa học máy tính ứng dụng
-2 Chăn nuôi
+4 Chăn nuôi
 2 Khoa học cây trồng|Trồng trọt
 2 Bảo vệ thực vật
 2 Nuôi trồng thủy sản
@@ -138,7 +138,7 @@ export default `
 2 Điều khiển tàu biển
 2 Khai thác máy tàu biển
 2 Quản lý hoạt động bay
-2 Phi công|Lái máy bay
+5 Phi công|Lái máy bay
 2 Kinh doanh thương mại
 2 Kinh doanh thời trang
 2 Bảo hiểm tài chính
@@ -146,12 +146,12 @@ export default `
 2 Quản trị văn phòng
 2 Thư ký văn phòng
 2 Văn thư lưu trữ
-2 Biên phiên dịch|Biên dịch|Phiên dịch
+3 Biên phiên dịch|Biên dịch|Phiên dịch
 2 Sáng tác văn học
 2 Biên kịch điện ảnh
 2 Đạo diễn điện ảnh|Đạo diễn
-2 Quay phim
-2 Nhiếp ảnh
+4 Quay phim
+4 Nhiếp ảnh
 2 Diễn viên kịch
 2 Biên đạo múa|Múa
 2 Âm nhạc học
@@ -160,7 +160,7 @@ export default `
 2 Nhạc cụ truyền thống
 2 Kịch hát dân tộc
 2 Gốm|Gốm sứ
-2 Đồ họa
+4 Đồ họa
 2 Lý luận phê bình mỹ thuật
 1 Kỹ thuật địa chất
 1 Kỹ thuật mỏ
@@ -176,44 +176,44 @@ export default `
 1 Kỹ thuật vi điện tử|Vi mạch bán dẫn|Thiết kế vi mạch
 1 Kỹ thuật quân sự
 1 Chỉ huy tham mưu
-1 Biên phòng
-1 Trinh sát
+4 Biên phòng
+4 Trinh sát
 1 Điều tra hình sự
-1 Phòng cháy chữa cháy
-1 Cảnh sát
-1 An ninh
+5 Phòng cháy chữa cháy
+5 Cảnh sát
+5 An ninh
 1 Hậu cần quân sự
-1 Ngoại giao
-1 Xuất bản
-1 Quảng cáo
+4 Ngoại giao
+3 Xuất bản
+5 Quảng cáo
 1 Kinh tế chính trị
 1 Kinh tế học
 1 Kinh tế lượng
 1 Toán kinh tế
 1 Khoa học tính toán
 1 Khoa học quản lý
-1 Quản trị chất lượng
-1 Quản trị chuỗi cung ứng|Chuỗi cung ứng
+3 Quản trị chất lượng
+3 Quản trị chuỗi cung ứng|Chuỗi cung ứng
 1 Thương mại quốc tế
 1 Bảo tồn di sản
 1 Gia đình học
 1 Phụ nữ học
 1 Nghiên cứu phát triển
-1 Ngôn ngữ ký hiệu
+3 Ngôn ngữ ký hiệu
 1 Ngôn ngữ Khmer
 1 Ngôn ngữ Jrai
 1 Văn hóa các dân tộc thiểu số
 1 Y học thể thao
 1 Gây mê hồi sức
 1 Kỹ thuật phục hình răng
-1 Hóa sinh
+3 Hóa sinh
 1 Sinh học biển
-1 Di truyền học
-1 Thần kinh học
+3 Di truyền học
+3 Thần kinh học
 1 Khoa học nhận thức
 1 Khoa học thần kinh
 1 Kỹ thuật dữ liệu
-1 Học máy
+3 Học máy
 1 Khoa học an toàn thông tin
 1 Kỹ thuật thực phẩm
 1 Công nghệ rượu bia
@@ -221,7 +221,7 @@ export default `
 1 Thú y học
 1 Lâm sinh
 1 Quản lý thủy sản
-1 Sinh thái học
+3 Sinh thái học
 1 Khoa học môi trường
 1 Công nghệ kỹ thuật môi trường
 1 Khí tượng hàng không
@@ -234,7 +234,7 @@ export default `
 2 Hình elip|Elip|Ellipse
 2 Hình cung|Cung tròn
 2 Hình viên phân
-2 Hình tứ giác|Tứ giác
+4 Hình tứ giác|Tứ giác
 2 Hình đa giác|Đa giác
 2 Hình đa giác đều
 2 Hình thập nhị giác|Hình mười hai cạnh
@@ -257,24 +257,24 @@ export default `
 2 Hình elipxoit|Ellipsoid
 2 Hình ngũ giác sao|Ngôi sao năm cánh|Pentagram
 2 Hình ngôi sao sáu cánh|Ngôi sao David|Hexagram
-2 Đường chéo
-2 Đường cao
-2 Đường trung tuyến
-2 Đường phân giác
-2 Đường trung trực
-2 Đường trung bình
-2 Đường cong
+5 Đường chéo
+5 Đường cao
+4 Đường trung tuyến
+4 Đường phân giác
+4 Đường trung trực
+4 Đường trung bình
+4 Đường cong
 2 Đường gấp khúc
-2 Tiếp tuyến
-2 Bán kính
-2 Đường kính
+4 Tiếp tuyến
+5 Bán kính
+5 Đường kính
 2 Dây cung
-2 Mặt phẳng
-2 Mặt cầu
-2 Góc vuông
-2 Góc nhọn
-2 Góc tù
-2 Góc bẹt
+5 Mặt phẳng
+4 Mặt cầu
+5 Góc vuông
+5 Góc nhọn
+5 Góc tù
+4 Góc bẹt
 2 Góc nội tiếp
 1 Hình Reuleaux|Tam giác Reuleaux
 1 Hình cardioid|Đường hình tim
@@ -307,7 +307,7 @@ export default `
 1 Hình thập giác|Thập giác đều|Thập giác
 1 Hình bát giác sao
 1 Hình chữ nhật vàng|Hình chữ nhật hoàng kim
-1 Hình thoi|Hình quả trám
+5 Hình thoi|Hình quả trám
 1 Hình sóng|Đường hình sin|Hình sin
 
 @ donvi
@@ -319,17 +319,17 @@ export default `
 2 Đề-xi-lít|Decilit
 2 Héc-tô-lít
 2 Ki-lô-lít
-2 Ki-lô-mét vuông|Km vuông
-2 Xăng-ti-mét vuông
-2 Xăng-ti-mét khối|Phân khối|cc
+5 Ki-lô-mét vuông|Km vuông
+4 Xăng-ti-mét vuông
+4 Xăng-ti-mét khối|Phân khối|cc
 2 Đề-xi-mét khối
-2 Mét trên giây|m/s
-2 Km/h|Ki-lô-mét trên giờ|km/giờ
-2 Dặm trên giờ|mph
+4 Mét trên giây|m/s
+5 Km/h|Ki-lô-mét trên giờ|km/giờ
+4 Dặm trên giờ|mph
 2 Mach|Số Mach
 2 Ki-lô-vôn|kV
 2 Mi-li-vôn
-2 Ki-lô-oát|kW
+4 Ki-lô-oát|kW
 2 Mê-ga-oát|MW
 2 Gi-ga-oát|GW
 2 Mi-li-am-pe|mA
@@ -349,37 +349,37 @@ export default `
 2 Ki-lô-bit|Kilobit
 2 Mê-ga-bit|Megabit|Mbps
 2 Gigabit
-2 Thìa|Muỗng
-2 Thìa canh|Muỗng canh
-2 Thìa cà phê|Muỗng cà phê
-2 Chén
-2 Bát
-2 Cốc|Ly
+5 Thìa|Muỗng
+4 Thìa canh|Muỗng canh
+4 Thìa cà phê|Muỗng cà phê
+5 Chén
+5 Bát
+5 Cốc|Ly
 2 Cup|Cốc đong
-2 Lon
-2 Chai
-2 Thùng
-2 Bao
-2 Bó
-2 Chục
-2 Tá
-2 Cặp
-2 Đôi
+5 Lon
+5 Chai
+5 Thùng
+5 Bao
+5 Bó
+5 Chục
+4 Tá
+5 Cặp
+5 Đôi
 2 Ram giấy|Ram
 2 Phân|Phân ta
 2 Gang tay|Gang
 2 Sải tay|Sải
 2 Dặm|Dặm Anh
 2 Knot|Hải lý trên giờ|Nút
-2 Tấc|Tấc ta
-2 Thước|Thước ta
+4 Tấc|Tấc ta
+4 Thước|Thước ta
 2 Trượng
 2 Dặm Trung Quốc|Lý
 2 Cân Tàu|Cân Trung Quốc
-2 Lượng|Lượng vàng|Cây vàng
-2 Chỉ|Chỉ vàng
+4 Lượng|Lượng vàng|Cây vàng
+4 Chỉ|Chỉ vàng
 2 Phân vàng
-2 Kara|Karat|K vàng
+4 Kara|Karat|K vàng
 2 Tuổi vàng
 2 Pint
 2 Quart
@@ -392,13 +392,13 @@ export default `
 2 BTU
 2 Độ Rankine
 2 Độ Réaumur
-2 Độ rượu
+4 Độ rượu
 2 Độ Brix
-2 Độ pH|pH
-2 Độ Richter|Richter
+5 Độ pH|pH
+4 Độ Richter|Richter
 2 Ppm
-2 Phần trăm
-2 Phần nghìn
+5 Phần trăm
+4 Phần nghìn
 1 Ångström|Angstrom
 1 Fecmi|Femtomet
 1 Picomet
@@ -407,10 +407,10 @@ export default `
 1 Nano giây
 1 Pico giây
 1 Năm thiên hà
-1 Canh|Canh giờ
-1 Khắc|Khắc giờ
+4 Canh|Canh giờ
+4 Khắc|Khắc giờ
 1 Giờ âm lịch|Giờ Tý
-1 Tuần trăng
+3 Tuần trăng
 1 Furlong
 1 Chain
 1 Rod
@@ -431,8 +431,8 @@ export default `
 1 Maxwell
 1 Henry
 1 Farad
-1 Siemens
-1 Tesla
+4 Siemens
+5 Tesla
 1 Lumen
 1 Steradian
 1 Katal
@@ -444,24 +444,24 @@ export default `
 1 Electron-volt|eV
 1 Đơn vị khối lượng nguyên tử|Dalton
 1 Mét khối|Khối
-1 Ki-lô-mét khối
+3 Ki-lô-mét khối
 1 Héc-tô-gam
 1 Đề-ca-gam
 1 Tạ Anh|Hundredweight
 1 Mili-mét khối
 1 Đơn vị Planck|Độ dài Planck
-1 Thùng phi
+3 Thùng phi
 1 Giạ|Giạ lúa
-1 Thúng
-1 Đấu
+3 Thúng
+3 Đấu
 1 Thưng
 1 Bơ gạo|Lon gạo
 1 Công đất|Công
 1 Dặm La Mã
 1 Đơn vị IU|IU
-1 Nhịp|Nhịp mỗi phút|BPM
-1 FPS|Khung hình trên giây
-1 DPI
+4 Nhịp|Nhịp mỗi phút|BPM
+4 FPS|Khung hình trên giây
+3 DPI
 1 PPI
 1 Ki-lô-mét trên lít
 
@@ -580,7 +580,7 @@ export default `
 1 Nguyên bảo
 1 Lạng bạc
 1 Bạc nén
-1 Vàng thỏi|Thỏi vàng
+3 Vàng thỏi|Thỏi vàng
 1 Quan tiền
 1 Tiền giấy Hồ Thăng
 1 Tiền đồng Thái Bình Hưng Bảo|Thái Bình Hưng Bảo
@@ -588,8 +588,8 @@ export default `
 1 Florin
 1 Guinea
 1 Shilling Anh
-1 Penny|Pence
-1 Cent|Xu
+3 Penny|Pence
+4 Cent|Xu
 1 Dime
 1 Nickel
 1 Quarter
@@ -615,15 +615,15 @@ export default `
 1 Mark Đông Đức
 1 Reichsmark
 1 Rúp Liên Xô
-1 Dogecoin
-1 Litecoin
-1 Tether|USDT
-1 Ripple|XRP
-1 Solana
+3 Dogecoin
+3 Litecoin
+3 Tether|USDT
+3 Ripple|XRP
+3 Solana
 1 Cardano
-1 Binance Coin|BNB
+3 Binance Coin|BNB
 1 Stablecoin
-1 Tiền điện tử
+5 Tiền điện tử
 1 SDR|Quyền rút vốn đặc biệt
 1 Ecu
 
@@ -631,7 +631,7 @@ export default `
 2 Hồng ngọc|Ruby|Ruby sao|Hồng ngọc sao|Ruby Lục Yên
 2 Lam ngọc|Sapphire|Saphia|Sapphire sao|Lam ngọc sao
 2 Ngọc lục bảo|Emerald
-2 Ngọc phỉ thúy|Phỉ thúy|Jadeite
+4 Ngọc phỉ thúy|Phỉ thúy|Jadeite
 2 Ngọc bích Nephrite|Nephrite
 2 Ngọc Hòa Điền
 2 Ngọc trai|Ngọc trai Akoya|Ngọc trai Tahiti|Ngọc trai biển Nam|Ngọc trai nước ngọt
@@ -708,14 +708,14 @@ export default `
 2 Jasper|Ngọc Jasper đỏ
 
 @ thoitiet
-2 Mưa bụi
+4 Mưa bụi
 2 Mưa rả rích
 2 Mưa|Mưa to|Mưa lớn|Mưa nhỏ|Trời mưa|Mưa đêm
-2 Mưa lũ
+4 Mưa lũ
 2 Nắng|Nắng nóng|Nắng gắt|Nắng chói chang|Nắng vàng|Trời nắng|Ngày nắng đẹp|Hửng nắng
 2 Gió|Gió mạnh|Gió nhẹ|Gió giật|Gió Bắc|Gió Nam|Gió Đông|Gió Tây
 2 Gió bấc|Gió mùa đông bắc|Gió đông bắc
-2 Gió tây nam
+4 Gió tây nam
 2 Gió mùa đông bắc
 2 Gió mùa tây nam
 2 Gió Lào|Gió Lào khô nóng|Gió Tây khô nóng
@@ -727,9 +727,9 @@ export default `
 2 Gió mậu dịch|Tín phong
 2 Gió tây ôn đới
 2 Bão|Bão nhiệt đới|Bão mạnh|Bão cấp 12|Cuồng phong|Hurricane|Typhoon|Cyclone|Xoáy thuận
-2 Siêu bão|Siêu bão nhiệt đới
+4 Siêu bão|Siêu bão nhiệt đới
 2 Xoáy nghịch
-2 Mắt bão
+4 Mắt bão
 2 Dông|Giông|Giông bão|Giông sét
 2 Sét hòn|Sét cầu
 2 Sét nhiệt
@@ -746,8 +746,8 @@ export default `
 2 Mây vú|Mây mammatus
 2 Mây hình phễu
 2 Mây trời|Mây trắng|Mây xám|Mây hồng|Trời nhiều mây
-2 Trời âm u|Trời âm
-2 Rét|Trời lạnh|Rét đậm|Trời rét đậm
+4 Trời âm u|Trời âm
+5 Rét|Trời lạnh|Rét đậm|Trời rét đậm
 2 Rét hại
 2 Rét nàng Bân
 2 Rét lộc
@@ -760,49 +760,49 @@ export default `
 2 Bụi mịn|Ô nhiễm không khí
 2 Mưa băng
 2 Tuyết|Tuyết rơi
-2 Bão tuyết|Bão tuyết lớn|Blizzard
-2 Băng hà
+4 Bão tuyết|Bão tuyết lớn|Blizzard
+4 Băng hà
 2 Băng trôi
-2 Sông băng
+4 Sông băng
 2 Lốc xoáy|Lốc|Lốc nước|Lốc bụi|Tornado|Lốc xoáy tornado|Vòi rồng
 2 Sóng lừng
 2 Sóng dữ
-2 Sóng thần|Sóng thần tsunami|Tsunami
+5 Sóng thần|Sóng thần tsunami|Tsunami
 2 Thủy triều đỏ
 2 Triều cường|Triều cường dâng cao
 2 Nước dâng do bão
 2 Lũ ống
-2 Lũ lụt|Lũ sông|Ngập lụt
+5 Lũ lụt|Lũ sông|Ngập lụt
 2 Ngập úng
 2 Sạt lở|Lở đất
 2 Sụt lún
 2 Hố tử thần|Hố sụt
-2 Cháy rừng
-2 Sa mạc hóa
+4 Cháy rừng
+4 Sa mạc hóa
 2 Khô hạn
 2 Phun trào núi lửa
 2 Dư chấn
 2 Tro bụi núi lửa
 2 Mạch nước phun|Geyser
-2 Hiện tượng ảo ảnh|Ảo ảnh sa mạc|Ảo ảnh
+4 Hiện tượng ảo ảnh|Ảo ảnh sa mạc|Ảo ảnh
 2 Cầu vồng|Cầu vồng đôi|Cầu vồng trắng
-2 Halo|Quầng mặt trời|Quầng trăng|Trăng quầng|Trăng tán
+3 Halo|Quầng mặt trời|Quầng trăng|Trăng quầng|Trăng tán
 2 Mặt trời giả|Sundog
 2 Tia sáng xanh|Tia chớp xanh
 2 Đêm trắng
 2 Ngày địa cực|Đêm địa cực
-2 Hạ chí
-2 Đông chí
+4 Hạ chí
+4 Đông chí
 2 Xuân phân
 2 Thu phân
-2 Trăng tròn
+5 Trăng tròn
 2 Trăng khuyết
 2 Trăng máu
 2 Siêu trăng
 2 Trăng xanh
 2 Mưa sao băng|Mưa sao băng Perseid
-2 Sao băng
-2 Sao chổi
+5 Sao băng
+5 Sao chổi
 2 Bão Mặt Trời|Gió Mặt Trời
 2 Cực quang|Cực quang phương Bắc|Bắc cực quang|Cực quang phương Nam|Nam cực quang
 2 Phát quang sinh học|Biển phát sáng
@@ -819,11 +819,11 @@ export default `
 2 Gió Chinook|Chinook
 2 Gió Santa Ana
 2 Gió mùa châu Á
-2 Mùa mưa
-2 Mùa khô
+5 Mùa mưa
+5 Mùa khô
 2 Trời quang|Trời trong xanh
 2 Mưa ngâu|Mưa ngâu tháng bảy
-2 Mưa giông|Mưa dông chiều
+4 Mưa giông|Mưa dông chiều
 2 Mưa phùn|Mưa phùn gió bấc
 2 Gió nồm|Gió nồm nam
 2 Gió heo may|Gió may|Heo may
@@ -832,7 +832,7 @@ export default `
 2 Mercedes|Mercedes-Benz|Mercedes Benz|Mẹc
 2 Rolls Royce
 2 Hyundai|Hyundai Thành Công
-2 Thaco|Trường Hải
+4 Thaco|Trường Hải
 2 Kia|Kia Motors
 2 Samco
 2 Fuso|Mitsubishi Fuso
@@ -1029,7 +1029,7 @@ export default `
 2 Ugreen
 2 Belkin
 2 Xiaomi Mi|Mi
-2 Redmi
+4 Redmi
 2 Poco
 2 OnePlus Nord
 2 Nothing Phone
@@ -1081,7 +1081,7 @@ export default `
 2 Withings
 2 Oura
 2 Valve
-2 Sega
+4 Sega
 2 Atari
 2 Bandai Namco
 2 Konami
@@ -1090,12 +1090,12 @@ export default `
 2 Ubisoft
 2 Electronic Arts|EA
 2 Activision Blizzard|Activision|Blizzard
-2 Riot Games
+4 Riot Games
 2 Epic Games
-2 Garena
-2 VNG
+4 Garena
+4 VNG
 2 VTC
-2 MISA
+4 MISA
 2 CMC
 2 BKAV
 2 Vsmart|VinSmart
@@ -1103,9 +1103,9 @@ export default `
 2 Zalo
 2 Tiki
 2 MoMo
-2 VNPay
+5 VNPay
 2 ZaloPay
-2 OpenAI
+5 OpenAI
 2 Anthropic
 2 Google DeepMind|DeepMind
 2 xAI
@@ -1116,11 +1116,11 @@ export default `
 2 JD|JD.com
 2 Pinduoduo|Temu
 2 Shopee|Sea Group
-2 Grab
-2 Netflix
+5 Grab
+5 Netflix
 2 Spotify
-2 Uber
-2 Airbnb
+4 Uber
+4 Airbnb
 2 Twitter|X
 2 Snap|Snapchat
 2 Pinterest
@@ -1129,7 +1129,7 @@ export default `
 2 Oracle
 2 SAP
 2 Salesforce
-2 Adobe
+4 Adobe
 2 Autodesk
 2 Cisco
 2 Broadcom
@@ -1145,7 +1145,7 @@ export default `
 2 Slack
 2 Atlassian
 2 Shopify
-2 PayPal
+4 PayPal
 2 Stripe
 2 Square|Block
 2 Cloudflare
@@ -1206,16 +1206,16 @@ export default `
 2 Walton
 2 Kangaroo
 2 Karofi
-2 Điện Quang
-2 Rạng Đông
+4 Điện Quang
+4 Rạng Đông
 2 Hanel
 2 Vietronics
 2 Sanaky
 2 Comet
 2 Kalite
 2 Bluestone
-2 Lock&Lock
-2 Tefal
+4 Lock&Lock
+4 Tefal
 2 Dyson
 2 iRobot
 2 Ecovacs
@@ -1230,7 +1230,7 @@ export default `
 2 Trane
 2 Funiki
 2 Nagakawa
-2 Casper
+4 Casper
 2 Aqua
 2 Beko
 2 Whirlpool
@@ -1241,18 +1241,18 @@ export default `
 2 Breville
 2 De'Longhi|Delonghi
 2 Nespresso
-2 Philips|Philips Hue
+4 Philips|Philips Hue
 2 Xiaomi Yeelight|Yeelight
 @ hangxe
 2 VinFast|VF
-2 Lamborghini|Lambo
-2 Mitsubishi|Mitsu
+5 Lamborghini|Lambo
+5 Mitsubishi|Mitsu
 2 Hyundai|Hyundai Thành Công
 @ hangcn
 2 Samsung|SS
-2 HP|Hewlett-Packard
+5 HP|Hewlett-Packard
 2 Xiaomi|Mi
-2 Microsoft|MS
+5 Microsoft|MS
 2 Apple|Táo khuyết
 @
 `;

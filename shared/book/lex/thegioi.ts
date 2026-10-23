@@ -3,8 +3,8 @@
 export default `
 @ tp as
 4 Thượng Hải|Shanghai
-3 Hồng Kông|Hong Kong|Hương Cảng
-3 Ma Cao|Macau|Macao
+5 Hồng Kông|Hong Kong|Hương Cảng
+5 Ma Cao|Macau|Macao
 3 Quảng Châu|Guangzhou
 3 Thâm Quyến|Shenzhen
 2 Thành Đô|Chengdu
@@ -17,12 +17,12 @@ export default `
 2 Côn Minh|Kunming
 2 Nam Ninh|Nanning
 2 Thiên Tân|Tianjin
-2 Đài Bắc|Taipei
+4 Đài Bắc|Taipei
 1 Cáp Nhĩ Tân|Harbin
 1 Hạ Môn|Xiamen
 1 Quế Lâm|Guilin
 1 Lệ Giang|Lijiang
-1 Thanh Đảo|Qingdao
+3 Thanh Đảo|Qingdao
 1 Đại Liên|Dalian
 1 Lhasa|Lạp Tát
 4 Osaka|Ô-xa-ca
@@ -35,17 +35,17 @@ export default `
 2 Kobe
 1 Nara
 1 Fukuoka
-1 Okinawa|Naha
+3 Okinawa|Naha
 3 Busan|Pusan
 2 Incheon
 1 Daegu
-1 Jeju|Đảo Jeju
+3 Jeju|Đảo Jeju
 4 Dubai
-2 Mecca|Thánh địa Mecca|La Mecque
-1 Medina
-2 Istanbul|Constantinople|Byzantium|Constantinopolis
+4 Mecca|Thánh địa Mecca|La Mecque
+3 Medina
+4 Istanbul|Constantinople|Byzantium|Constantinopolis
 1 Antalya
-2 Mumbai|Bombay
+4 Mumbai|Bombay
 2 Kolkata|Calcutta
 1 Bangalore|Bengaluru
 1 Chennai|Madras
@@ -53,20 +53,20 @@ export default `
 1 Varanasi
 1 Jaipur
 1 Hyderabad
-1 Karachi
+3 Karachi
 1 Lahore
-2 Bali|Đảo Bali
+5 Bali|Đảo Bali
 1 Surabaya
 1 Bandung
 1 Yogyakarta
-2 Chiang Mai|Chiềng Mai
-2 Pattaya
-2 Phuket
-1 Siem Reap|Xiêm Riệp
-1 Luang Prabang|Luông Pha Băng
+4 Chiang Mai|Chiềng Mai
+4 Pattaya
+4 Phuket
+3 Siem Reap|Xiêm Riệp
+3 Luang Prabang|Luông Pha Băng
 1 Pakse|Pắc Xế
 1 Savannakhet|Xavan
-1 Yangon|Rangoon|Ngưỡng Quang
+3 Yangon|Rangoon|Ngưỡng Quang
 1 Mandalay
 1 Bagan|Pagan
 2 Penang|Pi-nang
@@ -77,7 +77,7 @@ export default `
 1 Almaty
 1 Samarkand
 1 Jeddah
-1 Tel Aviv
+3 Tel Aviv
 1 Isfahan
 
 @ tp eu
@@ -117,8 +117,8 @@ export default `
 1 Bordeaux
 1 Toulouse
 1 Strasbourg
-1 Cannes
-1 Monte Carlo
+3 Cannes
+3 Monte Carlo
 2 Seville|Sevilla
 2 Valencia
 1 Málaga|Malaga
@@ -127,8 +127,8 @@ export default `
 2 Porto
 1 Rotterdam
 1 Antwerp|Antwerpen
-1 Geneva|Genève|Giơ-ne-vơ
-1 Zürich|Zurich
+3 Geneva|Genève|Giơ-ne-vơ
+3 Zürich|Zurich
 1 Salzburg
 1 Kraków|Krakow
 1 Gdańsk|Gdansk
@@ -140,18 +140,18 @@ export default `
 1 Odessa|Odesa
 1 Kharkiv|Kharkov
 1 Thessaloniki
-1 Santorini
+3 Santorini
 1 Dubrovnik
 1 Split
 1 Gothenburg|Göteborg
 1 Bergen
 
 @ tp af
-2 Cape Town|Kếp-tao
+4 Cape Town|Kếp-tao
 2 Johannesburg|Giô-han-nét-xbơ
 2 Casablanca|Ca-xa-blan-ca
 2 Marrakech|Marrakesh
-1 Alexandria|A-lếch-xan-đri-a
+3 Alexandria|A-lếch-xan-đri-a
 1 Luxor
 1 Lagos
 1 Durban
@@ -165,26 +165,26 @@ export default `
 4 Los Angeles|LA
 3 Chicago|Chi-ca-gô
 3 San Francisco|Cựu Kim Sơn
-3 Las Vegas
+5 Las Vegas
 3 Miami
 2 Boston
 2 Seattle
 2 Houston
-1 Dallas
+3 Dallas
 1 Philadelphia
 1 Atlanta
-1 Detroit
+3 Detroit
 1 New Orleans
-1 Orlando
+3 Orlando
 1 San Diego
-1 Honolulu
-1 Hollywood
-2 Toronto
-2 Vancouver
+3 Honolulu
+5 Hollywood
+4 Toronto
+4 Vancouver
 2 Montreal|Montréal
-1 Quebec|Québec
+3 Quebec|Québec
 1 Calgary
-1 Cancún|Cancun
+3 Cancún|Cancun
 1 Guadalajara
 1 Acapulco
 
@@ -205,7 +205,7 @@ export default `
 2 Perth
 1 Adelaide
 1 Gold Coast
-1 Auckland
+3 Auckland
 1 Queenstown
 
 @ kientruc
@@ -236,7 +236,7 @@ export default `
 3 Nhà thờ Sagrada Família|Sagrada Familia # eu unesco
 3 Đền Parthenon|Parthenon|Acropolis|Vệ thành Athens # eu unesco
 3 Khải Hoàn Môn|Arc de Triomphe # eu
-3 Bảo tàng Louvre|Louvre # eu
+5 Bảo tàng Louvre|Louvre # eu
 3 Nhà thờ Đức Bà Paris|Notre-Dame|Notre Dame # eu unesco
 3 Cung điện Versailles|Versailles # eu unesco
 3 Cung điện Buckingham|Buckingham # eu
@@ -258,18 +258,18 @@ export default `
 3 Đền Kinkaku-ji|Chùa Vàng Kyoto|Kim Các Tự # as unesco
 3 Đền Fushimi Inari|Fushimi Inari # as
 3 Lâu đài Himeji|Himeji # as unesco
-3 Nhà Trắng|White House # bm
+5 Nhà Trắng|White House # bm
 3 Tượng đài Lincoln # bm
 3 Núi Rushmore|Đài tưởng niệm Rushmore # bm
 3 Tòa nhà Empire State|Empire State # bm
 3 Thành phố cổ Pompeii|Pompeii # eu unesco
 3 Tượng Moai|Đảo Phục Sinh # nm unesco
-3 Tượng Nhân sư|Sphinx|Nhân sư # af unesco
+5 Tượng Nhân sư|Sphinx|Nhân sư # af unesco
 3 Thung lũng các vị vua # af unesco
 3 Đền Abu Simbel|Abu Simbel # af unesco
-2 Tháp CN|CN Tower # bm
-2 Kênh đào Panama # bm
-2 Kênh đào Suez # af
+4 Tháp CN|CN Tower # bm
+4 Kênh đào Panama # bm
+4 Kênh đào Suez # af
 2 Đập Tam Hiệp # as
 2 Nhà thờ Hồi giáo Sheikh Zayed # as
 2 Thánh đường Hagia Sophia|Hagia Sophia|Ayasofya # as unesco
@@ -287,7 +287,7 @@ export default `
 2 Atomium # eu
 2 Tượng cậu bé đứng tè|Manneken Pis # eu
 2 Nàng tiên cá Copenhagen|Tượng Nàng tiên cá # eu
-2 Cối xay gió Hà Lan|Kinderdijk # eu unesco
+4 Cối xay gió Hà Lan|Kinderdijk # eu unesco
 2 Tháp Galata # as
 2 Thành cổ Jerusalem|Bức tường Than khóc # as unesco
 2 Đền Prambanan # as unesco
@@ -307,9 +307,9 @@ export default `
 2 Golden Gate
 2 Teotihuacan|Kim tự tháp Mặt Trời # bm unesco
 2 Cầu cảng Sydney|Sydney Harbour Bridge # dd
-2 Hollywood Sign|Biển hiệu Hollywood # bm
-2 Đại lộ Danh vọng # bm
-2 Disneyland # bm
+4 Hollywood Sign|Biển hiệu Hollywood # bm
+5 Đại lộ Danh vọng # bm
+4 Disneyland # bm
 2 Vườn treo Babylon # as
 2 Ngọn hải đăng Alexandria # af
 2 Tượng thần Zeus ở Olympia # eu
@@ -320,12 +320,12 @@ export default `
 1 Mont Saint-Michel # eu unesco
 1 Lâu đài Windsor # eu
 1 Nhà hát Bolshoi # eu
-1 Lăng Lenin # eu
+3 Lăng Lenin # eu
 1 Cầu Galata # as
 1 Đền Meiji # as
 1 Đại Phật Kamakura # as
 1 Đền Hoàng Hạc Lâu|Hoàng Hạc Lâu # as
-1 Chùa Thiếu Lâm|Thiếu Lâm Tự # as
+3 Chùa Thiếu Lâm|Thiếu Lâm Tự # as
 1 Nhạc Dương Lâu # as
 1 Đại Nhạn Tháp # as
 
@@ -340,7 +340,7 @@ export default `
 3 Thác Iguazu # nm unesco
 3 Thác Angel|Thác Thiên Thần # nm
 3 Núi Kilimanjaro|Kilimanjaro # af nui unesco
-3 Hoàng Thạch|Đá Uluru|Uluru|Ayers Rock # dd unesco
+1 Hoàng Thạch|Đá Uluru|Uluru|Ayers Rock # dd unesco
 3 Cực quang|Bắc cực quang|Aurora #
 3 Vườn quốc gia Yellowstone|Yellowstone # bm unesco
 3 Trương Gia Giới|Zhangjiajie # as unesco
@@ -351,9 +351,9 @@ export default `
 3 Hồ Baikal|Bai-can # as ho unesco
 3 Núi Alps|Dãy Alps|An-pơ # eu nui
 3 Dãy Himalaya|Himalaya|Hi-ma-lay-a|Hy Mã Lạp Sơn # as nui
-3 Sa mạc Sahara|Sahara|Xa-ha-ra # af samac
-3 Bắc Cực #
-3 Nam Cực|Châu Nam Cực|Antarctica #
+5 Sa mạc Sahara|Sahara|Xa-ha-ra # af samac
+5 Bắc Cực #
+5 Nam Cực|Châu Nam Cực|Antarctica #
 2 Hồ Titicaca # nm ho
 2 Vịnh Phang Nga|Phang Nga # as
 2 Núi lửa Vesuvius|Vesuvius # eu nui
@@ -387,24 +387,24 @@ export default `
 1 Hồ Natron # af ho
 1 Đồng bằng Okavango # af unesco
 1 Núi Elbrus|Elbrus # eu nui
-1 Đỉnh K2|K2 # as nui
+3 Đỉnh K2|K2 # as nui
 1 Đỉnh Aconcagua|Aconcagua # nm nui
 1 Đỉnh Denali|Denali|McKinley # bm nui
 1 Núi Vinson # nui
 1 Đỉnh Kangchenjunga|Kangchenjunga # as nui
-1 Dãy Andes|Andes # nm nui
-1 Dãy Rocky|Rocky Mountains|Dãy núi Rocky # bm nui
-1 Dãy Ural|Ural # eu nui
-1 Dãy Trường Sơn|Trường Sơn|Annamite # as nui
+3 Dãy Andes|Andes # nm nui
+3 Dãy Rocky|Rocky Mountains|Dãy núi Rocky # bm nui
+3 Dãy Ural|Ural # eu nui
+5 Dãy Trường Sơn|Trường Sơn|Annamite # as nui
 1 Dãy Atlas # af nui
 1 Dãy Pyrenees|Pyrénées # eu nui
 1 Dãy Apennine # eu nui
-1 Cao nguyên Tây Tạng # as
-1 Sa mạc Gobi|Gobi # as samac
-1 Sa mạc Atacama|Atacama # nm samac
-1 Sa mạc Kalahari|Kalahari # af samac
+4 Cao nguyên Tây Tạng # as
+4 Sa mạc Gobi|Gobi # as samac
+3 Sa mạc Atacama|Atacama # nm samac
+3 Sa mạc Kalahari|Kalahari # af samac
 1 Sa mạc Namib|Namib # af samac
-1 Sa mạc Ả Rập # as samac
+3 Sa mạc Ả Rập # as samac
 1 Sa mạc Thar # as samac
 1 Sa mạc Mojave # bm samac
 1 Sa mạc Taklamakan # as samac
@@ -470,23 +470,23 @@ export default `
 5 Thái Bình Dương|Pacific #
 4 Đại Tây Dương|Atlantic #
 4 Ấn Độ Dương #
-3 Bắc Băng Dương #
-2 Nam Đại Dương #
+5 Bắc Băng Dương #
+4 Nam Đại Dương #
 4 Biển Đông # as
-3 Địa Trung Hải # eu af
-3 Biển Đỏ # as af
-3 Biển Đen # eu as
-2 Biển Caribe|Caribbean # bm
+5 Địa Trung Hải # eu af
+5 Biển Đỏ # as af
+5 Biển Đen # eu as
+4 Biển Caribe|Caribbean # bm
 2 Biển Baltic # eu
 2 Biển Bắc # eu
 2 Biển Caspi|Caspian # as eu ho
 2 Biển Hoa Đông # as
-2 Biển Nhật Bản # as
-2 Vịnh Thái Lan # as
-2 Vịnh Bắc Bộ # as
+4 Biển Nhật Bản # as
+4 Vịnh Thái Lan # as
+4 Vịnh Bắc Bộ # as
 2 Vịnh Bengal # as
-2 Vịnh Ba Tư # as
-2 Vịnh Mexico # bm
+4 Vịnh Ba Tư # as
+4 Vịnh Mexico # bm
 1 Biển Arabia|Biển Ả Rập # as
 1 Biển Adriatic # eu
 1 Biển Aegean # eu
@@ -497,7 +497,7 @@ export default `
 1 Biển Bering # as bm
 1 Biển Okhotsk # as
 1 Biển Tasman # dd
-1 Biển San hô # dd
+3 Biển San hô # dd
 
 @ ho
 3 Ngũ Đại Hồ|Hồ Superior # bm
@@ -508,16 +508,16 @@ export default `
 2 Tây Hồ Hàng Châu # as
 1 Hồ Geneva|Hồ Léman # eu
 1 Hồ Como # eu
-1 Hồ Loch Ness|Loch Ness # eu
-1 Hồ Tonle Sap|Biển Hồ Campuchia # as
+3 Hồ Loch Ness|Loch Ness # eu
+4 Hồ Tonle Sap|Biển Hồ Campuchia # as
 1 Hồ Inle # as
 1 Hồ Toba # as
 1 Hồ Balaton # eu
 
 @ dao
 3 Đảo Greenland|Greenland # bm
-2 Đảo Hawaii|Hawaii # dd
-2 Đảo Borneo|Kalimantan # as
+5 Đảo Hawaii|Hawaii # dd
+4 Đảo Borneo|Kalimantan # as
 2 Đảo Sicily|Sicilia # eu
 2 Đảo Tasmania|Tasmania # dd
 2 Đảo Java # as
@@ -526,10 +526,10 @@ export default `
 2 Đảo Hokkaido # as
 2 Đảo Corsica # eu
 2 Đảo Crete # eu
-1 Đảo Sardinia # eu
+3 Đảo Sardinia # eu
 1 Đảo Mallorca # eu
-1 Đảo Tahiti # dd
+3 Đảo Tahiti # dd
 1 Đảo Langkawi # as
-1 Đảo Boracay # as
+3 Đảo Boracay # as
 1 Đảo Palawan # as
 `;

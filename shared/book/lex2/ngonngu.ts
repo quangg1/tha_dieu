@@ -102,7 +102,7 @@ export default `
 2 Tiếng Hiligaynon
 2 Tiếng Tetum
 2 Tiếng Brunei Malay
-2 Tiếng Nepal
+3 Tiếng Nepal
 2 Tiếng Sinhala
 2 Tiếng Dzongkha
 2 Tiếng Dhivehi
@@ -219,7 +219,7 @@ export default `
 @ tn dd
 2 Tiếng Samoa
 2 Tiếng Tonga
-2 Tiếng Fiji
+4 Tiếng Fiji
 2 Tiếng Tahiti
 2 Tiếng Tok Pisin
 2 Tiếng Bislama

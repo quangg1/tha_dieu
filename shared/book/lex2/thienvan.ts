@@ -2,9 +2,9 @@
 export default `
 @ sao
 2 Sao Thiên Lang|Sirius
-2 Sao Bắc Cực|Polaris
+5 Sao Bắc Cực|Polaris
 2 Sao Chức Nữ|Vega
-2 Sao Ngưu Lang|Altair
+4 Sao Ngưu Lang|Altair
 2 Sao Hôm
 2 Sao Mai
 2 Proxima Centauri|Cận Tinh
@@ -76,9 +76,9 @@ export default `
 2 Arcturus|Sao Đại Giác
 2 Antares|Sao Tâm
 2 Spica|Sao Giác
-2 Sao Bắc Thần
-2 Sao Thất Tinh|Tua Rua|Pleiades|M45|Đám sao Tua Rua|Sao Rua
-2 Thất tinh Bắc Đẩu|Chòm Bắc Đẩu
+4 Sao Bắc Thần
+4 Sao Thất Tinh|Tua Rua|Pleiades|M45|Đám sao Tua Rua|Sao Rua
+4 Thất tinh Bắc Đẩu|Chòm Bắc Đẩu
 2 Sao Khuê
 2 Sao Cày|Ba sao Thần Nông|Đai Orion
 2 Sao lùn đỏ
@@ -142,7 +142,7 @@ export default `
 2 Đám sao Tổ Ong|M44
 2 Đám sao cầu Omega Centauri|Omega Centauri
 2 Đám sao cầu M13
-2 Lỗ đen|Lỗ đen siêu khối lượng
+5 Lỗ đen|Lỗ đen siêu khối lượng
 2 Nhân Mã A*|Sagittarius A*
 2 Lỗ đen M87*
 2 Sao xung|Pulsar|Sao xung Con Cua
@@ -352,7 +352,7 @@ export default `
 @ hemt
 2 Mây Oort|Đám mây Oort
 2 Đĩa phân tán
-2 Thiên thạch
+5 Thiên thạch
 @ tau
 2 Tàu Apollo 13
 2 Tàu Apollo 8
@@ -455,8 +455,8 @@ export default `
 2 Vệ tinh Explorer 1|Explorer 1
 2 Vệ tinh Sputnik 2
 2 Vệ tinh Telstar
-2 Vệ tinh GPS|GPS
-2 Vệ tinh Starlink|Starlink
+5 Vệ tinh GPS|GPS
+5 Vệ tinh Starlink|Starlink
 2 Vệ tinh Landsat
 2 Vệ tinh Himawari
 2 Vệ tinh Đông Phương Hồng 1

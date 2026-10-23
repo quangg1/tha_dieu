@@ -16,7 +16,7 @@ export default `
 4 Cần Thơ # nam
 3 Quy Nhơn # trung bien
 3 Phan Thiết # trung bien
-3 Sa Pa|Sapa # bac
+5 Sa Pa|Sapa # bac
 3 Vinh # trung
 3 Buôn Ma Thuột|Ban Mê Thuột # tn
 3 Pleiku # tn
@@ -50,8 +50,8 @@ export default `
 2 Kon Tum # tn
 2 Bảo Lộc # tn
 2 Gia Nghĩa # tn
-2 Tây Ninh # nam
-2 Bến Tre # nam
+4 Tây Ninh # nam
+4 Bến Tre # nam
 2 Trà Vinh # nam
 2 Sóc Trăng # nam
 2 Vĩnh Long # nam
@@ -65,7 +65,7 @@ export default `
 2 Dĩ An # nam
 2 Hưng Yên # bac
 2 Hải Dương # bac
-2 Thái Bình # bac
+4 Thái Bình # bac
 2 Phủ Lý # bac
 2 Việt Trì # bac
 2 Vĩnh Yên # bac
@@ -133,7 +133,7 @@ export default `
 3 Yên Tử|Núi Yên Tử # nui chua
 3 Đảo Cát Bà|Cát Bà # dao vqg
 3 Vịnh Lan Hạ|Lan Hạ # bien dao
-3 Sa Pa|Sapa # nui
+5 Sa Pa|Sapa # nui
 3 Đèo Mã Pí Lèng|Mã Pí Lèng # deo
 3 Cột cờ Lũng Cú|Lũng Cú # ditich
 3 Hồ Ba Bể # ho vqg
@@ -141,7 +141,7 @@ export default `
 3 Động Ngườm Ngao # hang
 3 Chùa Bái Đính|Bái Đính # chua
 3 Cố đô Hoa Lư|Hoa Lư # ditich
-3 Đền Hùng|Khu di tích Đền Hùng # chua ditich
+5 Đền Hùng|Khu di tích Đền Hùng # chua ditich
 3 Đồi chè Mộc Châu|Mộc Châu # nui
 3 Đèo Ô Quy Hồ|Ô Quy Hồ # deo
 3 Ruộng bậc thang Mù Cang Chải|Mù Cang Chải # nui
@@ -171,14 +171,14 @@ export default `
 2 Đền Quán Thánh # chua hn
 2 Phố Hàng Ngang # hn
 2 Ô Quan Chưởng # ditich hn
-2 Nhà tù Hỏa Lò|Hỏa Lò # ditich hn
+4 Nhà tù Hỏa Lò|Hỏa Lò # ditich hn
 2 Cầu Nhật Tân # cau hn
 2 Cầu Thăng Long # cau hn
 2 Cầu Chương Dương # cau hn
-2 Tháp Rùa # ditich hn
+5 Tháp Rùa # ditich hn
 2 Keangnam|Landmark 72 # hn
 2 Lotte Center Hà Nội # hn
-2 Vườn quốc gia Cúc Phương|Cúc Phương # vqg
+4 Vườn quốc gia Cúc Phương|Cúc Phương # vqg
 2 Vườn quốc gia Tam Đảo|Tam Đảo # vqg nui
 2 Vườn quốc gia Hoàng Liên|Hoàng Liên Sơn # vqg nui
 2 Đảo Quan Lạn|Quan Lạn # dao bien
@@ -215,7 +215,7 @@ export default `
 2 Hồ Đại Lải # ho
 2 Hồ Thang Hen # ho
 2 Đồng Đăng|Ải Chi Lăng|Chi Lăng # ditich
-2 Bạch Đằng|Sông Bạch Đằng|Bãi cọc Bạch Đằng # song ditich
+4 Bạch Đằng|Sông Bạch Đằng|Bãi cọc Bạch Đằng # song ditich
 2 Đồi Thông Hai Mộ # ditich
 2 Bản Cát Cát|Cát Cát # nui
 2 Thung lũng Mường Hoa # nui
@@ -223,11 +223,11 @@ export default `
 2 Sông Nho Quế|Nho Quế # song
 2 Hẻm Tu Sản # nui
 2 Dinh thự họ Vương|Nhà Vương # ditich
-2 Bảo tàng Hồ Chí Minh # ditich hn
+4 Bảo tàng Hồ Chí Minh # ditich hn
 2 Thủy cung Times City # hn
 2 Hồ Linh Đàm # ho hn
 2 Đầm Vạc # ho
-1 Bảo tàng Phụ nữ # hn
+3 Bảo tàng Phụ nữ # hn
 1 Hồ Thiền Quang # ho hn
 1 Hồ Hoàng Cầu # ho hn
 1 Hồ Ba Mẫu # ho hn
@@ -236,8 +236,8 @@ export default `
 1 Đền Cửa Ông # chua
 1 Chùa Lôi Âm # chua
 1 Hồ Pá Khoang # ho
-1 Đèo Pha Đin|Pha Đin # deo
-1 Đèo Khau Phạ|Khau Phạ # deo
+3 Đèo Pha Đin|Pha Đin # deo
+3 Đèo Khau Phạ|Khau Phạ # deo
 1 Đèo Thung Khe # deo
 1 Đèo Mẹ Bồng Con # deo
 1 Đèo Tam Đảo # deo
@@ -302,8 +302,8 @@ export default `
 3 Ngã ba Đồng Lộc # ditich
 3 Đền Bà Chúa Kho # chua
 3 Núi Hồng Lĩnh # nui
-3 Rạn Nam Ô|Nam Ô # bien
-2 Bạch Mã|Vườn quốc gia Bạch Mã # vqg nui
+1 Rạn Nam Ô|Nam Ô # bien
+4 Bạch Mã|Vườn quốc gia Bạch Mã # vqg nui
 2 Đồi Vọng Cảnh # nui
 2 Hồ Truồi # ho
 2 Đầm Lập An # ho
@@ -322,7 +322,7 @@ export default `
 2 Bảo tàng Quang Trung # ditich
 2 Đầm Thị Nại # ho
 2 Đầm Ô Loan # ho
-2 Mũi Né|Bãi biển Mũi Né # bien
+5 Mũi Né|Bãi biển Mũi Né # bien
 2 Hải đăng Kê Gà|Mũi Kê Gà # bien
 2 Tà Cú|Núi Tà Cú # nui chua
 2 Hòn Mun # dao
@@ -331,7 +331,7 @@ export default `
 2 Hòn Chồng # bien
 2 Tháp Trầm Hương # ditich
 2 Bãi Dài Cam Ranh|Bãi Dài # bien
-2 Vịnh Nha Trang # bien
+4 Vịnh Nha Trang # bien
 2 Đầm Nha Phu # ho
 2 Đầm Thủy Triều # ho
 2 Vịnh Xuân Đài # bien
@@ -351,7 +351,7 @@ export default `
 2 Chùa Thiền Lâm # chua
 2 Điện Hòn Chén # chua
 2 Cửa Ngọ Môn|Ngọ Môn # ditich
-2 Hoàng thành Huế # ditich
+4 Hoàng thành Huế # ditich
 2 Đồi Thiên An # nui
 2 Hồ Tịnh Tâm # ho
 2 Hồ Kẻ Gỗ # ho
@@ -359,9 +359,9 @@ export default `
 2 Hang Tú Làn|Tú Làn # hang
 2 Suối Moọc #
 2 Thác Gành Bang # thac
-1 Đèo Prenn # deo tn
-1 Nhà thờ Con Gà # chua tn
-1 Thánh địa La Vang|La Vang # chua
+3 Đèo Prenn # deo tn
+3 Nhà thờ Con Gà # chua tn
+3 Thánh địa La Vang|La Vang # chua
 1 Nhà thờ Chánh tòa Đà Nẵng|Nhà thờ Con Gà Đà Nẵng # chua
 1 Đỉnh Bàn Cờ # nui
 1 Hồ Đá Bàn # ho
@@ -379,8 +379,8 @@ export default `
 3 Buôn Đôn # vqg
 3 Biển Hồ Pleiku|Biển Hồ|Hồ T'Nưng # ho
 3 Núi Lang Biang|Langbiang|Lang Biang # nui
-3 Đỉnh Chư Yang Sin|Chư Yang Sin # nui vqg
-3 Nhà rông Kon Klor|Kon Klor # ditich
+1 Đỉnh Chư Yang Sin|Chư Yang Sin # nui vqg
+1 Nhà rông Kon Klor|Kon Klor # ditich
 3 Ga Đà Lạt # ditich
 3 Dinh Bảo Đại # ditich
 3 Chùa Linh Phước|Chùa Ve Chai # chua
@@ -398,7 +398,7 @@ export default `
 2 Hồ Đắk Mil # ho
 2 Núi Hàm Rồng Pleiku # nui
 2 Măng Đen # nui
-2 Rừng thông Đà Lạt #
+4 Rừng thông Đà Lạt #
 2 Nhà thờ Đức Bà Đà Lạt|Nhà thờ Con Gà Đà Lạt # chua
 2 Biệt thự Hằng Nga|Crazy House|Ngôi nhà điên #
 2 Làng Cù Lần #
@@ -501,9 +501,9 @@ export default `
 2 Grand World Phú Quốc #
 2 Vinwonders Phú Quốc|Safari Phú Quốc #
 2 Nhà cổ Bình Thủy # ditich
-2 Bến Ninh Kiều|Ninh Kiều #
-2 Cầu Cần Thơ # cau
-2 Cầu Mỹ Thuận # cau
+4 Bến Ninh Kiều|Ninh Kiều #
+4 Cầu Cần Thơ # cau
+4 Cầu Mỹ Thuận # cau
 2 Cầu Rạch Miễu # cau
 2 Làng hoa Sa Đéc
 2 Chùa Vĩnh Tràng # chua
@@ -512,7 +512,7 @@ export default `
 2 Đồng Sen Tháp Mười|Tháp Mười #
 2 Hòn Khoai # dao
 2 Lăng Thoại Ngọc Hầu # ditich
-1 Núi Cấm|Thiên Cấm Sơn # nui
+3 Núi Cấm|Thiên Cấm Sơn # nui
 1 Núi Chứa Chan # nui
 1 Núi Dinh # nui
 1 Núi Minh Đạm # nui
@@ -525,7 +525,7 @@ export default `
 2 Đảo Trường Sa Lớn|Trường Sa Lớn #
 2 Đảo Phú Lâm #
 2 Đảo Hoàng Sa #
-1 Đảo Sinh Tồn #
+3 Đảo Sinh Tồn #
 1 Đảo Nam Yết #
 1 Đảo Sơn Ca #
 1 Đảo Thổ Chu|Thổ Chu #
@@ -582,7 +582,7 @@ export default `
 2 Sông Ông Đốc # nam
 2 Sông Gành Hào # nam
 2 Sông Vàm Nao # nam
-1 Sông Mạ # bac
+3 Sông Mạ # bac
 1 Sông Nậm Mu # bac
 1 Sông Nậm Rốm # bac
 1 Sông Pô Kô # tn

@@ -36,7 +36,7 @@ export default `
 3 Rượu ngô # cocon
 3 Nước lá dứa # truyenthong
 3 Sữa bắp|Sữa ngô # sua
-3 Trà xanh|Chè xanh # tra truyenthong
+5 Trà xanh|Chè xanh # tra truyenthong
 3 Trà sen|Chè sen # tra truyenthong
 3 Trà nhài|Chè nhài # tra
 3 Trà gừng # tra nong
@@ -75,9 +75,9 @@ export default `
 3 Rượu đế # cocon
 3 Rượu Bàu Đá # cocon
 3 Rượu Gò Đen # cocon
-3 Nước ngọt|Soda # nuocngot
-3 Sprite|7Up|Seven Up # nuocngot
-3 Fanta # nuocngot
+5 Nước ngọt|Soda # nuocngot
+5 Sprite|7Up|Seven Up # nuocngot
+5 Fanta # nuocngot
 3 Nước tăng lực|Red Bull|Bò húc|Sting # nuocngot
 3 Trà xanh không độ|Trà xanh đóng chai # tra nuocngot
 3 Nước ép táo # nuocep
@@ -105,7 +105,7 @@ export default `
 3 Sữa chua đánh đá # sua
 3 Sữa chua dẻo # sua
 3 Yến|Nước yến # truyenthong
-3 Trà sữa trân châu # tra sua
+5 Trà sữa trân châu # tra sua
 3 Hồng trà sữa # tra sua
 3 Trà sữa matcha # tra sua
 3 Sữa tươi # sua
@@ -141,14 +141,14 @@ export default `
 2 Chai tea|Trà masala # tra
 2 Trà Long Tỉnh # tra
 2 Trà Thiết Quan Âm # tra
-2 Trà chanh giã tay # tra
+4 Trà chanh giã tay # tra
 2 Trà ướp sen Tây Hồ # tra
 2 Chè búp # tra
 2 Chè khô # tra
 2 Cà phê Robusta|Robusta # cafe
 2 Cà phê Arabica|Arabica # cafe
 2 Cà phê Culi # cafe
-2 Cà phê sữa tươi # cafe sua
+4 Cà phê sữa tươi # cafe sua
 2 Cà phê bọt biển|Dalgona # cafe
 2 Cà phê đá xay|Frappuccino # cafe
 2 Cà phê sữa chua # cafe
@@ -163,8 +163,8 @@ export default `
 2 Bia Huda # cocon
 2 Bia Larue # cocon
 2 Bia 333 # cocon
-2 Bia Tiger # cocon
-2 Heineken # cocon
+4 Bia Tiger # cocon
+4 Heineken # cocon
 2 Rượu sim|Rượu sim Phú Quốc # cocon
 2 Rượu mơ # cocon
 2 Rượu táo mèo # cocon
@@ -175,7 +175,7 @@ export default `
 2 Rượu Mẫu Sơn # cocon
 2 Rượu Phú Lễ # cocon
 2 Rượu ba kích # cocon
-2 Rượu ngâm # cocon
+4 Rượu ngâm # cocon
 2 Rượu mai quế lộ # cocon
 2 Rượu vang Đà Lạt # cocon
 2 Rượu vang trắng|Vang trắng # cocon
@@ -215,8 +215,8 @@ export default `
 2 Sinh tố chanh tuyết # sinhto
 2 Sinh tố rau má # sinhto
 2 Sữa lắc|Milkshake # sua
-2 Sữa trân châu # sua
-2 Sữa đậu xanh # sua
+4 Sữa trân châu # sua
+4 Sữa đậu xanh # sua
 2 Sữa đậu đỏ # sua
 2 Sữa mè đen # sua
 2 Sữa gạo # sua
@@ -231,14 +231,14 @@ export default `
 2 Nước hạt é # truyenthong
 2 Nước sắn dây|Bột sắn dây # truyenthong
 2 Nước chanh muối # truyenthong
-2 Nước cam thảo # truyenthong
+4 Nước cam thảo # truyenthong
 2 Nước nụ vối # truyenthong
 2 Nước gừng|Nước gừng nóng # nong
 2 Nước đường # truyenthong
 2 Nước chè hạt|Chè hạt # tra
 2 Nước bí đỏ # truyenthong
 2 Nước mát # truyenthong
-2 Xí muội|Nước xí muội # truyenthong
+4 Xí muội|Nước xí muội # truyenthong
 2 Đá chanh # truyenthong
 2 Nước dừa xiêm # truyenthong
 2 Nước tắc|Tắc xí muội # truyenthong
@@ -246,14 +246,14 @@ export default `
 2 Nước hoa đậu biếc # truyenthong
 2 Bột ngũ cốc|Ngũ cốc # sua
 2 Trà sữa Hong Kong # tra sua
-2 Trà sữa Thái # tra sua
+4 Trà sữa Thái # tra sua
 2 Trà sữa khoai môn # tra sua
-2 Trà sữa kem cheese|Kem cheese # tra sua
+4 Trà sữa kem cheese|Kem cheese # tra sua
 2 Trà sữa nướng # tra sua
 2 Trà dứa nhiệt đới # tra
 2 Nước tăng lực Number One # nuocngot
 2 Nước bù khoáng|Revive|Pocari # nuocngot
-2 Nước ngọt có ga # nuocngot
+4 Nước ngọt có ga # nuocngot
 2 Nước cam có ga # nuocngot
 2 Nước sá xị|Sá xị|Xá xị|Root beer # nuocngot
 2 Bia không cồn # nuocngot
@@ -265,19 +265,19 @@ export default `
 1 Rượu ngô men lá # cocon
 1 Rượu cần Mường # cocon
 1 Rượu ong # cocon
-1 Rượu dừa # cocon
-1 Rượu nếp than # cocon
+3 Rượu dừa # cocon
+3 Rượu nếp than # cocon
 1 Rượu nếp cái hoa vàng # cocon
 1 Rượu đinh lăng # cocon
-1 Rượu sâm # cocon
-1 Rượu hoa quả # cocon
+3 Rượu sâm # cocon
+3 Rượu hoa quả # cocon
 1 Rượu thóc # cocon
 1 Rượu Bàu Đá Bình Định # cocon
 1 Rượu Xuân Thạnh # cocon
 1 Rượu Đao # cocon
 1 Rượu mắc mật # cocon
 1 Rượu hoẵng # cocon
-1 Trà cung đình Huế # tra
+3 Trà cung đình Huế # tra
 1 Trà mạn hảo # tra
 1 Trà lá ổi # tra
 1 Trà xạ đen # tra

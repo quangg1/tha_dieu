@@ -10,8 +10,8 @@ export default `
 4 Âu Cơ|Mẹ Âu Cơ # nu
 3 An Dương Vương|Thục Phán # vua
 4 Thánh Gióng|Phù Đổng Thiên Vương|Gióng # tuong
-2 Mỵ Châu|Mị Châu # nu
-2 Trọng Thủy
+4 Mỵ Châu|Mị Châu # nu
+4 Trọng Thủy
 2 Cao Lỗ # tuong
 
 @ vn bac
@@ -65,10 +65,10 @@ export default `
 1 Lý Kế Nguyên # tuong
 
 @ vn tran
-4 Trần Thái Tông|Trần Cảnh # vua
-4 Trần Thánh Tông|Trần Hoảng # vua
-5 Trần Nhân Tông|Trần Khâm|Phật hoàng Trần Nhân Tông|Điều Ngự Giác Hoàng # vua
-3 Trần Anh Tông # vua
+2 Trần Thái Tông|Trần Cảnh # vua
+1 Trần Thánh Tông|Trần Hoảng # vua
+3 Trần Nhân Tông|Trần Khâm|Phật hoàng Trần Nhân Tông|Điều Ngự Giác Hoàng # vua
+1 Trần Anh Tông # vua
 2 Trần Minh Tông # vua
 2 Trần Hiến Tông # vua
 2 Trần Dụ Tông # vua
@@ -88,7 +88,7 @@ export default `
 3 Trần Bình Trọng # tuong
 2 Trần Nhật Duật # tuong
 2 Trần Quốc Khang
-3 Lê Văn Hưu # van
+1 Lê Văn Hưu # van
 3 Chu Văn An # van
 3 Mạc Đĩnh Chi|Lưỡng quốc Trạng nguyên # van
 2 Nguyễn Hiền|Trạng nguyên Nguyễn Hiền # van
@@ -141,7 +141,7 @@ export default `
 
 @ vn
 3 Mạc Đăng Dung # vua mac
-2 Nguyễn Bỉnh Khiêm|Trạng Trình|Bạch Vân cư sĩ # van mac
+4 Nguyễn Bỉnh Khiêm|Trạng Trình|Bạch Vân cư sĩ # van mac
 1 Giáp Hải # van mac
 1 Mạc Mậu Hợp # vua mac
 2 Nguyễn Kim # lt
@@ -220,7 +220,7 @@ export default `
 1 Đinh Công Tráng
 1 Nguyễn Thiện Thuật
 1 Tống Duy Tân
-2 Nguyễn Khuyến|Tam nguyên Yên Đổ # van
+4 Nguyễn Khuyến|Tam nguyên Yên Đổ # van
 3 Tú Xương|Trần Tế Xương # van
 4 Phan Bội Châu|Sào Nam # cm
 3 Phan Châu Trinh|Phan Chu Trinh # cm
@@ -246,7 +246,7 @@ export default `
 4 Kim Đồng|Nông Văn Dền
 3 Phạm Văn Đồng # lanhdao
 2 Trường Chinh # lanhdao
-2 Lê Duẩn # lanhdao
+4 Lê Duẩn # lanhdao
 2 Tôn Đức Thắng # lanhdao
 2 Nguyễn Thị Định # nu tuong
 3 Nguyễn Văn Trỗi
@@ -254,7 +254,7 @@ export default `
 3 Phan Đình Giót
 2 Tô Vĩnh Diện
 2 Cù Chính Lan
-2 Lê Văn Tám
+4 Lê Văn Tám
 2 Nguyễn Văn Linh # lanhdao
 2 Võ Văn Kiệt # lanhdao
 1 Hoàng Văn Thụ
@@ -323,7 +323,7 @@ export default `
 2 Võ Quảng
 3 Trần Đăng Khoa
 2 Bằng Việt
-1 Hữu Thỉnh
+3 Hữu Thỉnh
 2 Thanh Hải
 2 Viễn Phương
 1 Anh Thơ # nu
@@ -333,16 +333,16 @@ export default `
 2 Tế Hanh
 2 Chính Hữu
 2 Huy Cận
-1 Nguyễn Đình Thi
+3 Nguyễn Đình Thi
 1 Nguyễn Trung Thành|Nguyên Ngọc
 1 Hồ Anh Thái
 2 Nguyễn Ngọc Tư # nu
-1 Dương Thu Hương # nu
+3 Dương Thu Hương # nu
 1 Nguyễn Khải
 1 Đoàn Văn Cừ
 2 Hoàng Cầm
 1 Lâm Thị Mỹ Dạ # nu
-1 Nguyễn Duy
+3 Nguyễn Duy
 1 Thanh Thảo
 1 Y Phương
 
@@ -363,9 +363,9 @@ export default `
 1 Đặng Thế Phong
 2 Ngô Thụy Miên
 2 Từ Công Phụng
-2 Trần Tiến
+4 Trần Tiến
 2 Thuận Yến
-1 Nguyễn Cường
+3 Nguyễn Cường
 2 Văn Phụng
 1 Lam Phương
 1 Hoàng Thi Thơ
@@ -393,32 +393,32 @@ export default `
 2 Nguyễn Thị Ánh Viên|Ánh Viên # nu
 1 Trần Hiếu Ngân # nu
 2 Lê Quang Liêm
-1 Nguyễn Tiến Minh
-1 Nguyễn Thùy Linh # nu
+3 Nguyễn Tiến Minh
+3 Nguyễn Thùy Linh # nu
 1 Lý Hoàng Nam
 1 Quách Thị Lan # nu
-1 Nguyễn Thị Oanh # nu
+3 Nguyễn Thị Oanh # nu
 
 @ vn bongda
 3 Nguyễn Quang Hải|Quang Hải
 3 Nguyễn Công Phượng|Công Phượng
-2 Lê Công Vinh|Công Vinh
+4 Lê Công Vinh|Công Vinh
 2 Nguyễn Văn Toàn|Văn Toàn
 2 Nguyễn Tiến Linh|Tiến Linh
-2 Đoàn Văn Hậu|Văn Hậu
+4 Đoàn Văn Hậu|Văn Hậu
 2 Đặng Văn Lâm|Văn Lâm
 2 Lê Huỳnh Đức|Huỳnh Đức
-1 Nguyễn Hồng Sơn|Hồng Sơn
-1 Phạm Văn Quyến|Văn Quyến
-1 Phạm Thành Lương|Thành Lương
+3 Nguyễn Hồng Sơn|Hồng Sơn
+3 Phạm Văn Quyến|Văn Quyến
+3 Phạm Thành Lương|Thành Lương
 2 Nguyễn Hoàng Đức|Hoàng Đức
 2 Nguyễn Văn Quyết|Văn Quyết
 2 Huỳnh Như # nu
-1 Đỗ Hùng Dũng|Hùng Dũng
+3 Đỗ Hùng Dũng|Hùng Dũng
 2 Nguyễn Xuân Son|Xuân Son|Rafaelson
-1 Bùi Tiến Dũng|Tiến Dũng
-1 Lương Xuân Trường|Xuân Trường
-1 Quế Ngọc Hải|Ngọc Hải
+3 Bùi Tiến Dũng|Tiến Dũng
+3 Lương Xuân Trường|Xuân Trường
+3 Quế Ngọc Hải|Ngọc Hải
 1 Nguyễn Filip|Filip Nguyễn
 
 @ tg bongda
@@ -441,7 +441,7 @@ export default `
 1 Ferenc Puskás|Puskas
 1 Eusébio|Eusebio
 1 Alfredo Di Stéfano|Di Stefano
-1 Michel Platini|Platini
+3 Michel Platini|Platini
 2 Paolo Maldini|Maldini
 2 Roberto Baggio|Baggio
 2 Gianluigi Buffon|Buffon
@@ -465,46 +465,46 @@ export default `
 1 Luís Figo|Figo
 1 Marco van Basten|Van Basten
 1 Ruud Gullit|Gullit
-1 Thomas Müller|Muller
+3 Thomas Müller|Muller
 1 Manuel Neuer|Neuer
-1 Toni Kroos|Kroos
+3 Toni Kroos|Kroos
 2 Luis Suárez|Suarez
 2 Kevin De Bruyne|De Bruyne
 2 Vinícius Júnior|Vinicius
 2 Jude Bellingham|Bellingham
 2 Lamine Yamal|Yamal
 1 Raúl González|Raul
-1 Gareth Bale|Bale
-1 Paul Pogba|Pogba
-1 Antoine Griezmann|Griezmann
+3 Gareth Bale|Bale
+3 Paul Pogba|Pogba
+3 Antoine Griezmann|Griezmann
 1 Lothar Matthäus|Matthaus
 1 Gerd Müller
 1 Oliver Kahn|Kahn
-1 Fernando Torres|Torres
-1 Eden Hazard|Hazard
+3 Fernando Torres|Torres
+3 Eden Hazard|Hazard
 1 Lev Yashin|Yashin
 
 @ tg vdv
-2 Michael Jordan
-2 Usain Bolt
-2 Muhammad Ali
-2 Roger Federer|Federer
-2 Rafael Nadal|Nadal
-2 Novak Djokovic|Djokovic
-2 Serena Williams # nu
-2 Michael Phelps|Phelps
-1 Tiger Woods
-1 Mike Tyson
-1 Kobe Bryant
-1 LeBron James
-1 Lý Tiểu Long|Bruce Lee
-1 Ayrton Senna|Senna
-1 Michael Schumacher|Schumacher
-1 Lewis Hamilton|Hamilton
-1 Magnus Carlsen|Carlsen
-1 Garry Kasparov|Kasparov
+4 Michael Jordan
+4 Usain Bolt
+4 Muhammad Ali
+4 Roger Federer|Federer
+4 Rafael Nadal|Nadal
+4 Novak Djokovic|Djokovic
+4 Serena Williams # nu
+4 Michael Phelps|Phelps
+3 Tiger Woods
+4 Mike Tyson
+4 Kobe Bryant
+4 LeBron James
+5 Lý Tiểu Long|Bruce Lee
+3 Ayrton Senna|Senna
+4 Michael Schumacher|Schumacher
+3 Lewis Hamilton|Hamilton
+3 Magnus Carlsen|Carlsen
+3 Garry Kasparov|Kasparov
 1 Simone Biles # nu
-1 Lin Dan|Lâm Đan
+3 Lin Dan|Lâm Đan
 
 @ tg khoa
 5 Albert Einstein|Einstein|Anh-xtanh
@@ -529,7 +529,7 @@ export default `
 2 Max Planck|Planck
 2 Werner Heisenberg|Heisenberg
 2 Erwin Schrödinger|Schrodinger
-1 Richard Feynman|Feynman
+3 Richard Feynman|Feynman
 1 Enrico Fermi|Fermi
 2 Robert Oppenheimer|Oppenheimer
 2 Ernest Rutherford|Rutherford
@@ -548,24 +548,24 @@ export default `
 2 Leonhard Euler|Euler
 2 Gottfried Leibniz|Leibniz
 2 René Descartes|Descartes|Đề-các # triet
-1 Fibonacci
-1 Edwin Hubble|Hubble
-1 Carl Sagan
+4 Fibonacci
+3 Edwin Hubble|Hubble
+3 Carl Sagan
 3 Alexander Fleming|Fleming
 2 Edward Jenner|Jenner
-2 Sigmund Freud|Freud
+4 Sigmund Freud|Freud
 2 Ivan Pavlov|Pavlov
 2 Alessandro Volta|Volta|Vôn-ta
 2 André-Marie Ampère|Ampère|Ampe
 2 Georg Ohm|Ohm|Ôm
 1 James Joule|Joule|Jun
 1 Lord Kelvin|Kelvin
-1 Anders Celsius|Celsius
-1 Daniel Fahrenheit|Fahrenheit
+4 Anders Celsius|Celsius
+3 Daniel Fahrenheit|Fahrenheit
 1 Robert Hooke|Hooke
-1 Robert Boyle|Boyle
+3 Robert Boyle|Boyle
 1 John Dalton|Dalton
-1 Amedeo Avogadro|Avogadro
+3 Amedeo Avogadro|Avogadro
 2 Tim Berners-Lee
 1 Hypatia # nu
 1 Al-Khwarizmi
@@ -576,24 +576,24 @@ export default `
 1 Francis Crick
 1 Linus Pauling
 1 Jean-Baptiste Lamarck|Lamarck
-1 Carl Linnaeus|Linnaeus|Linnê
+3 Carl Linnaeus|Linnaeus|Linnê
 1 Alexander von Humboldt|Humboldt
-1 Alfred Wegener|Wegener
-1 Heinrich Hertz|Hertz
-1 Christian Doppler|Doppler
+3 Alfred Wegener|Wegener
+3 Heinrich Hertz|Hertz
+3 Christian Doppler|Doppler
 3 Blaise Pascal|Pascal|Pa-xcan
 1 Daniel Bernoulli|Bernoulli
 1 Bernhard Riemann|Riemann
 1 Emmy Noether|Noether # nu
 1 Srinivasa Ramanujan|Ramanujan
-1 John von Neumann|Von Neumann
+3 John von Neumann|Von Neumann
 1 Claude Shannon|Shannon
 2 Guglielmo Marconi|Marconi
-1 Karl Benz|Benz
+3 Karl Benz|Benz
 1 Rudolf Diesel|Diesel
 2 Johannes Gutenberg|Gutenberg
 2 Samuel Morse|Morse|Moóc-xơ
-1 Anh em Lumière|Lumière
+4 Anh em Lumière|Lumière
 1 Trương Hành
 2 Alexandre Yersin|Yersin|A-lếch-xăng Y-éc-xanh
 1 Tổ Xung Chi
@@ -605,7 +605,7 @@ export default `
 3 Michelangelo|Mi-ken-lăng-giơ
 2 Raphael|Raffaello|Ra-pha-en
 3 Claude Monet|Monet|Mô-nê
-2 Rembrandt|Rem-bran
+4 Rembrandt|Rem-bran
 2 Johannes Vermeer|Vermeer
 2 Salvador Dalí|Dali|Đa-li
 2 Henri Matisse|Matisse
@@ -620,8 +620,8 @@ export default `
 2 Andy Warhol|Warhol
 2 Sandro Botticelli|Botticelli
 1 Caravaggio
-1 Francisco Goya|Goya
-1 Diego Velázquez|Velazquez
+3 Francisco Goya|Goya
+3 Diego Velázquez|Velazquez
 1 El Greco
 1 Peter Paul Rubens|Rubens
 1 Albrecht Dürer|Durer
@@ -651,20 +651,20 @@ export default `
 2 Johannes Brahms|Brahms
 2 Franz Liszt|Liszt|Lít
 2 Claude Debussy|Debussy
-2 Giuseppe Verdi|Verdi
+4 Giuseppe Verdi|Verdi
 2 Giacomo Puccini|Puccini
 2 Richard Wagner|Wagner
 3 Johann Strauss|Strauss
 2 Sergei Rachmaninoff|Rachmaninoff|Rachmaninov
 1 Igor Stravinsky|Stravinsky
-1 Antonín Dvořák|Dvorak
+3 Antonín Dvořák|Dvorak
 1 Edvard Grieg|Grieg
 1 Felix Mendelssohn|Mendelssohn
 1 Robert Schumann|Schumann
-1 Gioachino Rossini|Rossini
-1 Georges Bizet|Bizet
+3 Gioachino Rossini|Rossini
+3 Georges Bizet|Bizet
 1 Maurice Ravel|Ravel
-1 Niccolò Paganini|Paganini
+3 Niccolò Paganini|Paganini
 1 Gustav Mahler|Mahler
 1 Jean Sibelius|Sibelius
 1 Erik Satie|Satie
@@ -673,8 +673,8 @@ export default `
 1 Nikolai Rimsky-Korsakov|Rimsky-Korsakov
 1 Modest Mussorgsky|Mussorgsky
 1 Camille Saint-Saëns|Saint-Saens
-1 George Gershwin|Gershwin
-1 Johann Pachelbel|Pachelbel
+3 George Gershwin|Gershwin
+3 Johann Pachelbel|Pachelbel
 1 Hector Berlioz|Berlioz
 
 @ tg van
@@ -682,7 +682,7 @@ export default `
 4 Victor Hugo|Vích-to Huy-gô|Huygo
 4 Lev Tolstoy|Tolstoy|Lép Tôn-xtôi|Tônxtôi
 3 Fyodor Dostoevsky|Dostoevsky|Đốt-xtôi-ép-xki
-2 Anton Chekhov|Chekhov|Sê-khốp
+4 Anton Chekhov|Chekhov|Sê-khốp
 3 Alexander Pushkin|Pushkin|Puskin|Pu-skin
 3 Maxim Gorky|Gorky|Mắc-xim Gor-ki
 3 Mark Twain|Mác Tuên
@@ -692,19 +692,19 @@ export default `
 3 Agatha Christie # nu
 3 Arthur Conan Doyle|Conan Doyle
 4 J.K. Rowling|JK Rowling|Rowling # nu
-2 J.R.R. Tolkien|Tolkien
-1 C.S. Lewis
+4 J.R.R. Tolkien|Tolkien
+3 C.S. Lewis
 4 Hans Christian Andersen|Andersen|An-đéc-xen
 3 Anh em Grimm|Grimm
 3 Jules Verne|Giuyn Vécnơ|Jules Vec-nơ
 3 Alexandre Dumas|Dumas|A-lếch-xăng Đuy-ma
 2 Honoré de Balzac|Balzac|Ban-dắc
 1 Stendhal
-1 Gustave Flaubert|Flaubert
-2 Guy de Maupassant|Maupassant|Mô-pa-xăng
-1 Émile Zola|Zola
+3 Gustave Flaubert|Flaubert
+4 Guy de Maupassant|Maupassant|Mô-pa-xăng
+3 Émile Zola|Zola
 2 Albert Camus|Camus
-1 Jean-Paul Sartre|Sartre # triet
+3 Jean-Paul Sartre|Sartre # triet
 3 Antoine de Saint-Exupéry|Saint-Exupery
 2 Franz Kafka|Kafka
 2 Johann Wolfgang von Goethe|Goethe|Gơ-tê
@@ -714,23 +714,23 @@ export default `
 2 Dante Alighieri|Dante|Đan-tê
 2 Miguel de Cervantes|Cervantes|Xéc-van-tét
 2 Gabriel García Márquez|Garcia Marquez|Marquez
-2 Paulo Coelho|Coelho
-2 Haruki Murakami|Murakami
+4 Paulo Coelho|Coelho
+4 Haruki Murakami|Murakami
 1 Kawabata Yasunari|Kawabata
 3 Lỗ Tấn
-3 Kim Dung
+5 Kim Dung
 2 Quỳnh Dao # nu
 2 Cổ Long
-2 La Quán Trung
+4 La Quán Trung
 2 Tào Tuyết Cần
 2 Thi Nại Am
 2 Ngô Thừa Ân
 3 Lý Bạch
-2 Đỗ Phủ
+4 Đỗ Phủ
 2 Bạch Cư Dị
 2 Rabindranath Tagore|Tagore|Ta-go
 2 Homer|Hô-me
-1 Edgar Allan Poe|Poe
+3 Edgar Allan Poe|Poe
 2 George Orwell|Orwell
 2 Oscar Wilde|Wilde
 2 Jack London
@@ -740,7 +740,7 @@ export default `
 1 Harper Lee # nu
 2 Margaret Mitchell # nu
 2 Charlotte Brontë|Charlotte Bronte # nu
-1 Emily Brontë|Emily Bronte # nu
+3 Emily Brontë|Emily Bronte # nu
 1 Mary Shelley # nu
 1 Bram Stoker
 2 Lewis Carroll
@@ -752,16 +752,16 @@ export default `
 1 Henrik Ibsen|Ibsen
 2 Molière|Moliere|Mô-li-e
 2 Voltaire|Vôn-te # triet
-1 Jean-Jacques Rousseau|Rousseau|Rút-xô # triet
-1 Mạc Ngôn
+3 Jean-Jacques Rousseau|Rousseau|Rút-xô # triet
+3 Mạc Ngôn
 1 Kenzaburo Oe
 
 @ tg triet
 4 Khổng Tử|Confucius
 3 Lão Tử|Laozi
-2 Mạnh Tử|Mencius
-2 Trang Tử
-1 Hàn Phi Tử|Hàn Phi
+4 Mạnh Tử|Mencius
+4 Trang Tử
+3 Hàn Phi Tử|Hàn Phi
 1 Mặc Tử
 3 Socrates|Xô-crát|Xocrat
 3 Plato|Platon|Pla-tông
@@ -769,16 +769,16 @@ export default `
 2 Immanuel Kant|Kant|Can-tơ
 2 Georg Wilhelm Friedrich Hegel|Hegel|Hê-ghen
 2 Friedrich Nietzsche|Nietzsche|Ních-sơ
-3 Karl Marx|Marx|Các Mác
-2 Friedrich Engels|Engels|Ăng-ghen
+5 Karl Marx|Marx|Các Mác
+4 Friedrich Engels|Engels|Ăng-ghen
 1 John Locke|Locke
 1 David Hume|Hume
 1 Baruch Spinoza|Spinoza
 1 Søren Kierkegaard|Kierkegaard
 1 Arthur Schopenhauer|Schopenhauer
-2 Tôn Tử|Tôn Vũ
+5 Tôn Tử|Tôn Vũ
 1 Seneca
-1 Marcus Aurelius
+3 Marcus Aurelius
 1 Thomas Aquinas
 
 @ tg thamhiem
@@ -789,7 +789,7 @@ export default `
 2 James Cook|Thuyền trưởng Cook
 2 Roald Amundsen|Amundsen
 4 Neil Armstrong|Armstrong
-3 Yuri Gagarin|Gagarin|I-u-ri Ga-ga-rin
+5 Yuri Gagarin|Gagarin|I-u-ri Ga-ga-rin
 2 Edmund Hillary|Hillary
 1 Tenzing Norgay|Tenzing
 2 Trịnh Hòa
@@ -800,55 +800,55 @@ export default `
 1 Ernest Shackleton|Shackleton
 1 David Livingstone|Livingstone
 2 Valentina Tereshkova|Tereshkova # nu
-1 Buzz Aldrin|Aldrin
-1 Dương Lợi Vĩ
+3 Buzz Aldrin|Aldrin
+3 Dương Lợi Vĩ
 
 @ tg lanhdao
 4 Napoleon Bonaparte|Napoleon|Na-pô-lê-ông|Nã Phá Luân
 4 Abraham Lincoln|Lincoln|Lin-côn
-3 George Washington|Oa-sinh-tơn
+5 George Washington|Oa-sinh-tơn
 3 Vladimir Lenin|Lenin|Lê-nin
 4 Mahatma Gandhi|Gandhi|Găng-đi
-3 Nelson Mandela|Mandela
+5 Nelson Mandela|Mandela
 4 Tần Thủy Hoàng|Tần Thuỷ Hoàng|Doanh Chính
 4 Thành Cát Tư Hãn|Genghis Khan|Thiết Mộc Chân
-2 Hốt Tất Liệt|Kublai Khan
+4 Hốt Tất Liệt|Kublai Khan
 3 Alexander Đại đế|Alexandros|A-lếch-xan-đơ Đại đế
-3 Julius Caesar|Caesar|Xê-da
-3 Cleopatra # nu
-2 Nữ hoàng Victoria|Victoria # nu
-2 Nữ hoàng Elizabeth II|Elizabeth II # nu
-1 Nữ hoàng Elizabeth I|Elizabeth I # nu
-2 Martin Luther King|Martin Luther King Jr
-2 Winston Churchill|Churchill
-1 Franklin D. Roosevelt|Roosevelt
-2 John F. Kennedy|Kennedy|JFK
-2 Fidel Castro|Phi-đen Ca-xtơ-rô|Fidel
-2 Che Guevara|Chê Ghê-va-ra
-2 Mao Trạch Đông
-2 Tôn Trung Sơn|Tôn Dật Tiên
-2 Võ Tắc Thiên # nu
+5 Julius Caesar|Caesar|Xê-da
+5 Cleopatra # nu
+4 Nữ hoàng Victoria|Victoria # nu
+5 Nữ hoàng Elizabeth II|Elizabeth II # nu
+3 Nữ hoàng Elizabeth I|Elizabeth I # nu
+4 Martin Luther King|Martin Luther King Jr
+5 Winston Churchill|Churchill
+4 Franklin D. Roosevelt|Roosevelt
+4 John F. Kennedy|Kennedy|JFK
+4 Fidel Castro|Phi-đen Ca-xtơ-rô|Fidel
+4 Che Guevara|Chê Ghê-va-ra
+5 Mao Trạch Đông
+4 Tôn Trung Sơn|Tôn Dật Tiên
+4 Võ Tắc Thiên # nu
 2 Lưu Bang|Hán Cao Tổ
-2 Hạng Vũ|Tây Sở Bá Vương
-3 Tào Tháo
-3 Gia Cát Lượng|Khổng Minh
-2 Lưu Bị
-2 Quan Vũ|Quan Công|Quan Vân Trường
-1 Pyotr Đại đế|Peter Đại đế
-1 Ekaterina Đại đế|Catherine Đại đế # nu
-1 Charlemagne|Sác-lơ-ma-nhơ
+4 Hạng Vũ|Tây Sở Bá Vương
+5 Tào Tháo
+5 Gia Cát Lượng|Khổng Minh
+4 Lưu Bị
+5 Quan Vũ|Quan Công|Quan Vân Trường
+3 Pyotr Đại đế|Peter Đại đế
+3 Ekaterina Đại đế|Catherine Đại đế # nu
+3 Charlemagne|Sác-lơ-ma-nhơ
 3 Jeanne d'Arc|Joan of Arc|Gian-đa # nu
-1 Thomas Jefferson|Jefferson
-1 Otto von Bismarck|Bismarck
-1 Mustafa Kemal Atatürk|Ataturk
-1 Hammurabi
-1 Ramses II|Ramses
-1 Tutankhamun|Tutankhamen
-1 Đường Thái Tông|Lý Thế Dân
-1 Khang Hy
-1 Càn Long
-1 Từ Hy Thái hậu|Từ Hy # nu
-1 Thiên hoàng Minh Trị|Minh Trị
-1 Hannibal
-1 Spartacus
+4 Thomas Jefferson|Jefferson
+3 Otto von Bismarck|Bismarck
+3 Mustafa Kemal Atatürk|Ataturk
+3 Hammurabi
+3 Ramses II|Ramses
+4 Tutankhamun|Tutankhamen
+3 Đường Thái Tông|Lý Thế Dân
+3 Khang Hy
+3 Càn Long
+4 Từ Hy Thái hậu|Từ Hy # nu
+3 Thiên hoàng Minh Trị|Minh Trị
+3 Hannibal
+3 Spartacus
 `;
