@@ -304,7 +304,12 @@ export function checkPlayer(playerId: unknown): string {
 }
 
 async function ensureInSet(db: Db, mode: Mode, day: string, questionId: string) {
-  const set = await dailySet(db, day);
+  let set = await dailySet(db, day);
+  // Another server instance may have redrawn the day (or this one holds an older copy): look once more in the database before refusing.
+  if (!set.includes(questionId)) {
+    setCache.delete(day);
+    set = await dailySet(db, day);
+  }
   // Thả vô tận lets a prompt be tried again and again: on today's prompts that would find the hidden answer for the daily flight.
   if (mode !== 'daily') {
     if (set.includes(questionId)) throw new GameError(400, 'Câu này thuộc chuyến bay hôm nay, Thả vô tận không hỏi câu này.');
