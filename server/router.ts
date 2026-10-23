@@ -5,6 +5,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getDb, type Db } from './db.js';
 import { pickAi, pickReferee, type Referee } from './referee.js';
 import * as S from './service.js';
+import * as AD from './admin.js';
 import * as A from './account.js';
 import * as F from './friends.js';
 import { NIGHT_VERDICTS } from '../shared/book/night-verdicts.js';
@@ -347,6 +348,48 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       const day = query.get('day') ?? '';
       if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new S.GameError(400, 'Ngày không hợp lệ.');
       return S.adminFlight(db, S.checkPlayer(query.get('playerId')), day);
+    },
+  },
+  'admin/bank': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return AD.adminBank(db);
+    },
+  },
+  'admin/pause': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return AD.adminPause(db, String(body.questionId ?? ''), body.paused !== false);
+    },
+  },
+  'admin/players': {
+    method: 'GET',
+    admin: true,
+    async run({ db, query }) {
+      return AD.adminFindPlayers(db, query.get('q') ?? '');
+    },
+  },
+  'admin/player': {
+    method: 'GET',
+    admin: true,
+    async run({ db, query }) {
+      return AD.adminPlayer(db, S.checkPlayer(query.get('playerId')));
+    },
+  },
+  'admin/unmute': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return AD.adminUnmute(db, S.checkPlayer(body.playerId));
+    },
+  },
+  'admin/system': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return AD.adminSystem(db);
     },
   },
   'admin/flag-set': {

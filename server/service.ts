@@ -81,6 +81,16 @@ export async function setup(db: Db) {
     ],
   );
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
+  // Prompts the village head paused from the admin page stay paused through a resync.
+  const [pausedRow] = await db.query<{ value: string }>(`select value from meta where key='paused'`);
+  const paused = (() => {
+    try {
+      return (JSON.parse(pausedRow?.value ?? '[]') as unknown[]).map(String);
+    } catch {
+      return [] as string[];
+    }
+  })();
+  if (paused.length) await db.query(`update questions set active=false where id = any($1::text[])`, [paused]);
   await db.query(
     `insert into meta (key, value) values ('book_version', $1) on conflict (key) do update set value=excluded.value`,
     [DB_VERSION],
@@ -147,7 +157,7 @@ const LEVEL_PLAN = [1, 2, 1, 2, 3, 2, 3];
 const POP_SLOTS = [1, 4];
 /** Categories that count as pop culture, besides the old pop- prompts. */
 const POP_CATEGORIES = new Set(['Giải trí', 'Âm nhạc', 'Nhạc Việt', 'Điện ảnh', 'Mua sắm', 'Thời trang', 'Ăn uống', 'Công nghệ', 'Tuổi thơ']);
-const isPop = (q: { id: string; category: string }) => q.id.startsWith('pop-') || POP_CATEGORIES.has(q.category);
+export const isPop = (q: { id: string; category: string }) => q.id.startsWith('pop-') || POP_CATEGORIES.has(q.category);
 /**
  * Timely prompts (news, new films, this year's songs) carry a last day in UNTIL. They are never asked after it, they
  * only come in the day's timely slot (one a day while any is fresh), and they may come back after TIMELY_WINDOW days.

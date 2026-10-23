@@ -837,3 +837,6 @@ button svg,a svg{flex-shrink:0}
 
 .adm-spread{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;gap:10px;margin:6px 0;font-size:13px}
 .adm-spread b{text-align:right}
+.adm-badge{display:inline-block;margin-left:6px;min-width:18px;padding:0 5px;border-radius:9px;background:#c0392b;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.adm-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.adm-filters select{min-height:36px;font:inherit;font-size:14px}

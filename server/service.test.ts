@@ -862,3 +862,31 @@ describe('flights that look wrong', () => {
     expect((await S.adminFlags(db)).some((f) => f.player_id === 'flag_part_0002' && f.day === d2)).toBe(true);
   });
 });
+
+describe('the village head other pages', () => {
+  it('counts the bank, pauses and resumes a prompt, finds players and reports the system without secrets', async () => {
+    const AD = await import('./admin.js');
+    const b = await AD.adminBank(db);
+    expect(b.totals.live).toBeGreaterThan(30);
+    expect(b.items.length).toBe(b.totals.book);
+    const id = b.items.find((i) => i.active && !i.until)!.id;
+    await AD.adminPause(db, id, true);
+    expect((await AD.adminBank(db)).items.find((i) => i.id === id)!.active).toBe(false);
+    await S.setup(db); // a resync keeps it paused
+    expect((await AD.adminBank(db)).items.find((i) => i.id === id)!.paused).toBe(true);
+    expect((await AD.adminBank(db)).items.find((i) => i.id === id)!.active).toBe(false);
+    await AD.adminPause(db, id, false);
+    expect((await AD.adminBank(db)).items.find((i) => i.id === id)!.active).toBe(true);
+    await expect(AD.adminPause(db, 'khong-co-cau-nay', true)).rejects.toThrow();
+    const f = await AD.adminFindPlayers(db, 'flag_bot');
+    expect(f.found.length).toBeGreaterThan(0);
+    const p = await AD.adminPlayer(db, f.found[0].player_id);
+    expect(p.runs.length).toBeGreaterThan(0);
+    await S.mutePlayer(db, f.found[0].player_id);
+    expect((await AD.adminFindPlayers(db, '')).muted.some((m) => m.player_id === f.found[0].player_id)).toBe(true);
+    await AD.adminUnmute(db, f.found[0].player_id);
+    const s = await AD.adminSystem(db);
+    expect(s.config.length).toBeGreaterThan(3);
+    expect(JSON.stringify(s)).not.toMatch(/sk-|postgres:/);
+  });
+});

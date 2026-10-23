@@ -3,6 +3,7 @@ import { TIERS } from '../../shared/scoring.js';
 import { TIER_COLOR } from '../icons';
 import { api, type Support } from '../api';
 import { BANKS, vietQr } from '../../shared/banks.js';
+import { BankPage, PlayersPage, SystemPage } from './AdminPages';
 
 type Pending = { question_id: string; prompt: string; key: string; display: string; plays: number };
 type Queued = { question_id: string; prompt: string; input_key: string; display: string; n: number };
@@ -17,6 +18,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   const [names, setNames] = useState<Record<string, string>>({});
   const [ins, setIns] = useState<Awaited<ReturnType<typeof api.admin.insights>> | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
+  const [inbox, setInbox] = useState<Record<string, number>>({});
 
   const load = async () => {
     setMsg('');
@@ -25,6 +27,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
       setData(await api.admin.pending(token));
       setQueue((await api.admin.queue(token)).queue);
       setIns(await api.admin.insights(token));
+      api.admin.system(token).then((s) => setInbox(s.inbox)).catch(() => {});
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Lỗi');
     }
@@ -59,6 +62,9 @@ export default function Admin({ onExit }: { onExit: () => void }) {
     }
   };
 
+  // Work waiting for the village head, on the tab where it is handled.
+  const badge = (k: Tab) => (k === 'feedback' ? inbox.feedback : k === 'reports' ? inbox.reports : k === 'book' ? (inbox.queued ?? 0) + (inbox.pending ?? 0) : k === 'safety' ? inbox.flags : 0) || 0;
+
   return (
     <main className="admin" style={{ position: 'relative', zIndex: 1 }}>
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
@@ -83,6 +89,7 @@ export default function Admin({ onExit }: { onExit: () => void }) {
               {TABS.map(([k, l]) => (
                 <button key={k} className={`gd-chip${tab === k ? ' on' : ''}`} aria-pressed={tab === k} onClick={() => setTab(k)}>
                   {l}
+                  {badge(k) > 0 && <span className="adm-badge">{badge(k)}</span>}
                 </button>
               ))}
               <button className="gd-chip" onClick={load}>Tải lại</button>
@@ -180,15 +187,18 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   );
 }
 
-type Tab = 'overview' | 'questions' | 'reports' | 'feedback' | 'names' | 'safety' | 'book';
+type Tab = 'overview' | 'questions' | 'bank' | 'reports' | 'feedback' | 'names' | 'players' | 'safety' | 'book' | 'system';
 const TABS: [Tab, string][] = [
   ['overview', 'Tổng quan'],
   ['questions', 'Câu hỏi hôm nay'],
+  ['bank', 'Kho câu hỏi'],
   ['reports', 'Báo cáo & lỗi'],
   ['feedback', 'Góp ý & ủng hộ'],
   ['names', 'Tên trên bảng'],
+  ['players', 'Người chơi'],
   ['safety', 'Gian lận'],
   ['book', 'Sổ làng'],
+  ['system', 'Hệ thống'],
 ];
 
 type Ins = Awaited<ReturnType<typeof api.admin.insights>>;
@@ -201,6 +211,9 @@ function Insights({ tab, ins, token, onClosed }: { tab: Tab; ins: Ins; token: st
   if (tab === 'feedback') return <Feedback token={token} />;
   if (tab === 'names') return <Names token={token} />;
   if (tab === 'safety') return <Safety token={token} />;
+  if (tab === 'bank') return <BankPage token={token} />;
+  if (tab === 'players') return <PlayersPage token={token} />;
+  if (tab === 'system') return <SystemPage token={token} />;
   return <Reports ins={ins} token={token} onClosed={onClosed} />;
 }
 
