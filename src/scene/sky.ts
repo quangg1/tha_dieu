@@ -730,6 +730,7 @@ export class SkyScene {
     this.drawAir();
     this.drawFarUniverse();
     this.drawGround();
+    this.drawButterflies();
     this.drawLapExtras();
     this.drawStreaks();
     if (this.layout.ruler) this.drawRuler();
@@ -1445,7 +1446,7 @@ export class SkyScene {
     const lite = LITE || this.slow;
     // Petals and seeds drifting up from the fields.
     {
-      const n = lite ? 7 : 12;
+      const n = lite ? 5 : 8;
       for (let i = 0; i < n; i++) {
         const L = 0.35 + ((i * 0.37) % 1) * 1.9;
         const a = this.near(L, 0.9, 1.2) * 0.8;
@@ -1514,7 +1515,7 @@ export class SkyScene {
       const L = 1.58;
       const a = this.near(L, 0.9, 1.2);
       if (a > 0.02) {
-        const n = lite ? 3 : 5;
+        const n = lite ? 3 : 4;
         for (let i = 0; i < n; i++) {
           const x = ((this.t * (26 + (i % 3) * 4) + i * 83) % (W + 120)) - 60;
           const y = this.y(L + (i % 2) * 0.05) + Math.sin(i * 2.4) * 22 + Math.sin(this.t * 1.1 + i * 1.3) * 5;
@@ -1524,20 +1525,12 @@ export class SkyScene {
     }
     // Butterflies and dragonflies over the meadow.
     {
-      const nb = lite ? 2 : 3;
-      for (let i = 0; i < nb; i++) {
-        const L = 0.7 + i * 0.22;
-        const a = this.near(L, 0.9, 1.2);
-        if (a <= 0.02) continue;
-        const ph = this.t * (0.5 + i * 0.1) + i * 2.3;
-        const x = W * (0.2 + ((i * 0.31 + Math.sin(ph * 0.7) * 0.18 + 1) % 1) * 0.6) + Math.sin(ph * 3) * 14;
-        this.butterfly(x, this.y(L) + Math.sin(ph * 2.1) * 18 + Math.sin(ph * 7) * 4, Math.min(U * 0.04, 20), a, i);
-      }
-      const nd = lite ? 3 : 5;
+      // Dragonflies hover mid-way up, between the grass and the storks, never up among the birds.
+      const nd = lite ? 2 : 3;
       for (let i = 0; i < nd; i++) {
-        const L = 0.8 + (i % 3) * 0.3;
-        const a = this.near(L, 0.8, 1.1);
-        if (a <= 0.02) continue;
+        const L = 0.95 + (i % 3) * 0.16;
+        const a = this.near(L, 0.7, 0.55) * clamp((1.7 - this.camL) / 0.3);
+        if (a <= 0.15) continue;
         // Darts, then hovers: the position eases between spots, so each pause reads as hovering.
         const seg = this.t * (0.22 + i * 0.05) + i * 1.9;
         const k0 = Math.floor(seg);
@@ -1552,6 +1545,20 @@ export class SkyScene {
         const dir = px(k0 + 1) >= px(k0) ? 1 : -1;
         this.dragonfly(x, y, Math.min(U * 0.075, 36), dir, i, a, sm > 0.01 && sm < 0.99 ? (dir > 0 ? 0.12 : -0.12) : 0);
       }
+    }
+  }
+
+  /** Butterflies over the meadow around bé Bi, a metre or two up. Drawn after the ground, so the village does not hide them. */
+  private drawButterflies() {
+    const { W, U } = this;
+    const nb = LITE || this.slow ? 2 : 3;
+    const a0 = clamp((1.2 - this.camL) / 0.5);
+    if (a0 <= 0.02) return;
+    for (let i = 0; i < nb; i++) {
+      const L = -1.05 + i * 0.2;
+      const ph = this.t * (0.5 + i * 0.1) + i * 2.3;
+      const x = W * (0.3 + ((i * 0.27 + Math.sin(ph * 0.6) * 0.16 + 1) % 1) * 0.55) + Math.sin(ph * 3) * 12;
+      this.butterfly(x, this.y(L) + Math.sin(ph * 2.1) * 14 + Math.sin(ph * 7) * 4, Math.min(U * 0.04, 20), a0, i);
     }
   }
 
