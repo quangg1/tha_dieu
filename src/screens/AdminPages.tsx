@@ -34,7 +34,7 @@ export function BankPage({ token }: { token: string }) {
   const [msg, setMsg] = useState('');
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<'miss' | 'plays' | 'avg' | 'krill'>('miss');
-  const [only, setOnly] = useState<'all' | 'played' | 'paused' | 'unseen'>('played');
+  const [only, setOnly] = useState<'all' | 'played' | 'paused' | 'unseen' | 'retired'>('played');
   const [cat, setCat] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const load = () => api.admin.bank(token).then(setB).catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tải được.'));
@@ -44,9 +44,10 @@ export function BankPage({ token }: { token: string }) {
     const needle = q.trim().toLowerCase();
     const missRate = (i: Item) => (i.plays + i.misses >= 10 ? i.misses / (i.plays + i.misses) : -1);
     return b.items
-      .filter((i) => i.active || i.paused)
+      // Looking for a prompt by words searches the whole book, retired and unplayed ones included.
+      .filter((i) => needle || only === 'retired' || only === 'all' || i.active || i.paused)
       .filter((i) => !cat || i.category === cat)
-      .filter((i) => (only === 'played' ? i.plays + i.misses > 0 : only === 'paused' ? i.paused : only === 'unseen' ? !i.seen && i.active : true))
+      .filter((i) => needle || (only === 'played' ? i.plays + i.misses > 0 : only === 'paused' ? i.paused : only === 'unseen' ? !i.seen && i.active : only === 'retired' ? !i.active && !i.paused : true))
       .filter((i) => !needle || i.prompt.toLowerCase().includes(needle) || i.category.toLowerCase().includes(needle) || i.id.includes(needle))
       .sort((x, y) => (sort === 'miss' ? missRate(y) - missRate(x) : sort === 'plays' ? y.plays - x.plays : sort === 'avg' ? y.avg - x.avg : y.krill - x.krill))
       .slice(0, 80);
@@ -86,8 +87,10 @@ export function BankPage({ token }: { token: string }) {
       </section>
       <section className="gd-paper">
         <div className="gd-label" style={{ marginBottom: 8 }}>Theo chủ đề</div>
-        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Bấm một chủ đề để xem và sửa các câu của chủ đề đó ở bảng bên dưới.</p>
-        <Bars rows={b.byCategory} onPick={(n) => { setCat(cat === n ? null : n); setOnly('all'); setSort('plays'); document.getElementById('adm-bank-list')?.scrollIntoView({ behavior: 'smooth' }); }} picked={cat} />
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>
+          Bấm một chủ đề để xem và sửa các câu của chủ đề đó ở bảng bên dưới. Số trong biểu đồ chỉ đếm câu đang được hỏi; câu đã nghỉ xem ở ô lọc “Đã nghỉ”. Chủ đề là nhóm rộng: ví dụ mỹ phẩm nằm trong Mua sắm hoặc Thời trang.
+        </p>
+        <Bars rows={b.byCategory.map((c) => ({ name: c.name, n: c.n }))} onPick={(n) => { setCat(cat === n ? null : n); setOnly('all'); setSort('plays'); document.getElementById('adm-bank-list')?.scrollIntoView({ behavior: 'smooth' }); }} picked={cat} />
         <div className="gd-label" style={{ margin: '14px 0 8px' }}>Theo mức khó</div>
         <Bars rows={b.byLevel} color="#8a5cd6" />
         <p className="gd-msg" style={{ margin: '8px 0 0' }}>Câu khó là câu hiếm nhất kho; thiếu câu khó thì chỗ 5 và 7 của ngày phải dùng câu vừa.</p>
@@ -152,13 +155,14 @@ export function BankPage({ token }: { token: string }) {
         <div className="adm-filters">
           <select value={cat ?? ''} onChange={(e) => { setCat(e.target.value || null); if (e.target.value) setOnly('all'); }} aria-label="Chủ đề">
             <option value="">Mọi chủ đề</option>
-            {b.byCategory.map((c) => <option key={c.name} value={c.name}>{c.name} ({c.n})</option>)}
+            {b.byCategory.map((c) => <option key={c.name} value={c.name}>{c.name} ({c.n}{c.retired ? ` · ${c.retired} nghỉ` : ''})</option>)}
           </select>
           <input className="gd-input" style={{ fontSize: 15, minHeight: 36, flex: 1, minWidth: 160 }} placeholder="Tìm câu hỏi, chủ đề…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Tìm câu hỏi" />
           <select value={only} onChange={(e) => setOnly(e.target.value as typeof only)} aria-label="Lọc">
             <option value="played">Đã có người chơi</option>
             <option value="unseen">Chưa lên chuyến nào</option>
             <option value="paused">Đang tạm dừng</option>
+            <option value="retired">Đã nghỉ (không còn được hỏi)</option>
             <option value="all">Tất cả</option>
           </select>
           <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} aria-label="Sắp xếp">
@@ -177,8 +181,8 @@ export function BankPage({ token }: { token: string }) {
                 const bad = all >= 10 && i.misses / all > 0.4;
                 return (
                   <Fragment key={i.id}>
-                  <tr style={i.paused ? { opacity: 0.55 } : undefined}>
-                    <td>{i.prompt}{i.edited ? ' ✎' : ''}<br /><small style={{ opacity: 0.6 }}>{i.category} · {['dễ', 'vừa', 'khó'][i.level - 1] ?? i.level}{i.pop ? ' · đại chúng' : ''}{i.until ? ` · hạn ${dm(i.until)}` : ''}</small></td>
+                  <tr style={i.paused || !i.active ? { opacity: 0.55 } : undefined}>
+                    <td>{i.prompt}{i.edited ? ' ✎' : ''}<br /><small style={{ opacity: 0.6 }}>{!i.active && !i.paused ? 'ĐÃ NGHỈ · ' : ''}{i.category} · {['dễ', 'vừa', 'khó'][i.level - 1] ?? i.level}{i.pop ? ' · đại chúng' : ''}{i.until ? ` · hạn ${dm(i.until)}` : ''}</small></td>
                     <td>{i.plays}</td>
                     <td style={bad ? { color: '#c0392b', fontWeight: 700 } : undefined}>{all >= 10 ? `${Math.round((i.misses / all) * 100)}%` : '—'}</td>
                     <td>{i.krill}</td>
@@ -186,7 +190,7 @@ export function BankPage({ token }: { token: string }) {
                     <td>{i.avg || '—'}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button className="gd-chip" onClick={() => setEditing(editing === i.id ? null : i.id)}>{editing === i.id ? 'Đóng' : 'Sửa'}</button>{' '}
-                      {i.paused ? <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button> : <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button>}
+                      {!i.active && !i.paused ? null : i.paused ? <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button> : <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button>}
                     </td>
                   </tr>
                   {editing === i.id && <tr><td colSpan={7}><QuestionEditor token={token} id={i.id} onChanged={() => void load()} /></td></tr>}

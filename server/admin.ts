@@ -92,7 +92,7 @@ export async function adminBank(db: Db) {
   return {
     today,
     totals: { book: items.length, live: live.length, retired: items.filter((i) => i.retired).length, paused: paused.size, unseen, daysLeft: Math.floor(unseen / 7) },
-    byCategory: count((i) => i.category),
+    byCategory: count((i) => i.category).map((c) => ({ ...c, retired: items.filter((i) => i.category === c.name && !i.active && !i.paused).length })),
     byLevel: count((i) => ['dễ', 'vừa', 'khó'][i.level - 1] ?? String(i.level)),
     pop: live.filter((i) => i.pop).length,
     timely: live

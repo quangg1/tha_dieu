@@ -244,7 +244,7 @@ export const api = {
       call<{
         today: string;
         totals: { book: number; live: number; retired: number; paused: number; unseen: number; daysLeft: number };
-        byCategory: { name: string; n: number }[];
+        byCategory: { name: string; n: number; retired: number }[];
         byLevel: { name: string; n: number }[];
         pop: number;
         timely: { id: string; prompt: string; until: string; daysLeft: number }[];
