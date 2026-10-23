@@ -145,12 +145,15 @@ export const expiredIds = (day: string) => [...bk.untilMap()].filter(([, u]) => 
  * The day's question ids, created on first request: easy to hard, no two from the same category or lexicon,
  * and nothing asked in the last six weeks while there is enough left to choose from.
  */
-const setCache = new Map<string, string[]>();
+const setCache = new Map<string, { at: number; ids: string[] }>();
+const SET_CACHE_MS = 60_000;
+/** Changing this redraws every set not yet drawn (and, with the day's row deleted, today's): the shuffle of the first day was re-rolled on 2026-10-23. */
+const SET_SALT = 'v2';
 
 export async function dailySet(db: Db, day: string): Promise<string[]> {
   await bk.ensureBook(db);
   const cached = setCache.get(day);
-  if (cached) return cached;
+  if (cached && Date.now() - cached.at < SET_CACHE_MS) return cached.ids;
   const found = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
   const active = new Set(bk.all().filter((q) => bk.status(q.id) === 'active').map((q) => q.id));
   if (found.length) {
@@ -158,7 +161,7 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
     const stale = day >= vnToday() && found[0].question_ids.some((id) => !active.has(id));
     const played = stale && (await db.query(`select 1 from asks where day=$1::date limit 1`, [day])).length > 0;
     if (!stale || played) {
-      setCache.set(day, found[0].question_ids);
+      setCache.set(day, { at: Date.now(), ids: found[0].question_ids });
       return found[0].question_ids;
     }
     await db.query(`delete from daily_sets where day=$1::date`, [day]);
@@ -171,7 +174,7 @@ export async function dailySet(db: Db, day: string): Promise<string[]> {
   // Open prompts (many answers the book does not know yet) still come round, so players can fill them in,
   // but at most OPEN_PER_DAY a day, so a day is never mostly answers waiting for confirmation.
   const open = await openPrompts(db, pool);
-  const rnd = seeded('tha-dieu-' + day);
+  const rnd = seeded('tha-dieu-' + SET_SALT + '-' + day);
   const order = pool.map((q) => ({ q, r: rnd() })).sort((a, b) => a.r - b.r).map((x) => x.q);
   const pick: typeof pool = [];
   for (const window of [42, 14, 3, 0]) {

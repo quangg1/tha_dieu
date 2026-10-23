@@ -364,7 +364,17 @@ describe('day by day', () => {
     const d2 = '2032-07-01';
     // A prompt no earlier test day has asked, so its first hidden answer is the book's.
     const used = new Set((await db.query<{ ids: string[] }>(`select question_ids as ids from daily_sets`)).flatMap((r) => r.ids));
-    const qid = (await db.query<{ id: string }>(`select id from questions where active order by id`)).map((r) => r.id).find((id) => !used.has(id))!;
+    let qid = '';
+    for (const { id } of await db.query<{ id: string }>(`select id from questions where active order by id`)) {
+      if (used.has(id)) continue;
+      const c = await S.loadQuestion(db, id);
+      // It needs a second hidden-answer candidate, or there is nothing to rotate to.
+      if ([...c.answers.entries()].filter(([k, a]) => a.status === 'approved' && a.prior >= 4 && k !== c.krillKey && !c.traps.has(k)).length) {
+        qid = id;
+        break;
+      }
+    }
+    expect(qid).not.toBe('');
     await db.query(`insert into daily_sets (day, question_ids) values ($1::date, $2) on conflict do nothing`, [d1, [qid]]);
     const q = await S.loadQuestion(db, qid);
     expect(await S.krillFor(db, d1, q)).toBe(q.krillKey);
