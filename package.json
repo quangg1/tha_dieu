@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.134.0",
+    "@fontsource/be-vietnam-pro": "^5.3.0",
     "@fontsource/grandstander": "^5.3.0",
     "@neondatabase/auth": "^0.5.0-beta",
     "@vercel/analytics": "^1.5.0",

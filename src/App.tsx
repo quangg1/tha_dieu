@@ -5,8 +5,9 @@ import { prefs } from './store';
 import { skinById } from './skins';
 import { SoundIcon } from './ui';
 import Home from './screens/Home';
-import Game, { type Summary } from './screens/Game';
-import Result from './screens/Result';
+import type { Summary } from './screens/Game';
+const Game = lazy(() => import('./screens/Game'));
+const Result = lazy(() => import('./screens/Result'));
 import { api } from './api';
 import { backFromGoogle } from './auth';
 
@@ -17,11 +18,24 @@ const Account = lazy(() => import('./screens/Account'));
 
 type Screen = { name: 'home' } | { name: 'play'; mode: 'daily' | 'night'; run: number } | { name: 'result'; summary: Summary } | { name: 'admin' } | { name: 'account' };
 
+/** Loads the game and result screens in the background once the home screen is up, so Play opens at once. */
+function prefetchScreens() {
+  const go = () => {
+    void import('./screens/Game');
+    void import('./screens/Result');
+  };
+  const ric = (window as Window & { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+  if (ric) ric(go, { timeout: 4000 });
+  else setTimeout(go, 2000);
+}
+
 export default function App() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [sky, setSky] = useState<SkyScene | null>(null);
   // Coming back from Google opens the account page, which finishes the sign-in.
   const [screen, setScreen] = useState<Screen>(() => (backFromGoogle() ? { name: 'account' } : { name: 'home' }));
+
+  useEffect(prefetchScreens, []);
 
   // A long hash may be the secret admin path: the server checks it, nothing about it lives in this code.
   useEffect(() => {
@@ -86,10 +100,14 @@ export default function App() {
       )}
       {sky && screen.name === 'home' && <Home sky={sky} soundButton={soundButton} onPlay={(mode) => setScreen({ name: 'play', mode, run: Date.now() })} onReview={(summary) => setScreen({ name: 'result', summary })} onAccount={() => setScreen({ name: 'account' })} />}
       {sky && screen.name === 'play' && (
+        <Suspense fallback={null}>
         <Game key={screen.run} sky={sky} mode={screen.mode} soundButton={soundButton} onExit={() => setScreen({ name: 'home' })} onDone={(summary) => setScreen({ name: 'result', summary })} />
+        </Suspense>
       )}
       {sky && screen.name === 'result' && (
+        <Suspense fallback={null}>
         <Result sky={sky} summary={screen.summary} soundButton={soundButton} onHome={() => setScreen({ name: 'home' })} onNight={() => setScreen({ name: 'play', mode: 'night', run: Date.now() })} />
+        </Suspense>
       )}
     </>
   );

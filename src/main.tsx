@@ -1,9 +1,21 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import '@fontsource/grandstander/700.css';
-import '@fontsource/grandstander/800.css';
-import '@fontsource/grandstander/900.css';
+// Self-hosted fonts, only the Latin and Vietnamese subsets (latin-ext was never needed): no third-party round trips.
+import '@fontsource/grandstander/latin-700.css';
+import '@fontsource/grandstander/vietnamese-700.css';
+import '@fontsource/grandstander/latin-800.css';
+import '@fontsource/grandstander/vietnamese-800.css';
+import '@fontsource/grandstander/latin-900.css';
+import '@fontsource/grandstander/vietnamese-900.css';
+import '@fontsource/be-vietnam-pro/latin-400.css';
+import '@fontsource/be-vietnam-pro/vietnamese-400.css';
+import '@fontsource/be-vietnam-pro/latin-500.css';
+import '@fontsource/be-vietnam-pro/vietnamese-500.css';
+import '@fontsource/be-vietnam-pro/latin-600.css';
+import '@fontsource/be-vietnam-pro/vietnamese-600.css';
+import '@fontsource/be-vietnam-pro/latin-700.css';
+import '@fontsource/be-vietnam-pro/vietnamese-700.css';
 import './brand.css';
 import './giaydiep.css';
 import './app.css';

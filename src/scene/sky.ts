@@ -240,6 +240,13 @@ export class SkyScene {
   }
 
   private held = false;
+  /** Smoothed gap between animation frames (ms) and whether the sky has dropped to half rate on a slow device. */
+  private prevRaf = 0;
+  private dprCap = LITE ? 1.25 : 2;
+  private gap = 16.7;
+  private seen = 0;
+  private slow = false;
+  private skip = false;
   private heldDrawn = 0;
   private wakeUntil = 0;
   private wake() {
@@ -505,7 +512,7 @@ export class SkyScene {
 
   private resize() {
     const r = this.canvas.getBoundingClientRect();
-    this.dpr = Math.min(LITE ? 1.25 : 2, window.devicePixelRatio || 1);
+    this.dpr = Math.min(this.dprCap, window.devicePixelRatio || 1);
     this.W = r.width;
     this.H = r.height;
     this.canvas.width = Math.round(r.width * this.dpr);
@@ -519,7 +526,7 @@ export class SkyScene {
     if (this.paints?.key === key) return this.paints;
     const U = this.U;
     const pd = Math.min(dpr, 1.5);
-    this.paints = {
+    const base = {
       key,
       hillsFar: Land.paintHills(W, Math.min(H * 0.16, 150), pd, 3, '#a9c9d6', '#c2dbe4', U * 1.4),
       hillsNear: Land.paintHills(W, Math.min(H * 0.1, 96), pd, 8, '#7fb07a', '#98c48c', U),
@@ -527,26 +534,72 @@ export class SkyScene {
       fields: Land.paintFields(W, Math.round(H * 0.7), pd, U),
       sea: Land.paintCloudSea(W, Math.round(Math.max(150, H * 0.3 * 0.3 + 120 * Math.max(0.8, U / 390))), pd, U),
       clouds: [Land.paintCloud(U * 0.6, pd, 1), Land.paintCloud(U * 0.6, pd, 2), Land.paintCloud(U * 0.6, pd, 3)],
-      galaxy: Sp.paintGalaxy(W, Math.round(H * 0.8), pd),
-      venus: Sp.paintPlanet('venus', Math.round(U * 0.24), dpr),
-      saturn: Sp.paintPlanet('saturn', Math.round(U * 0.36), dpr),
-      mars: Sp.paintPlanet('mars', Math.round(U * 0.26), dpr),
-      jupiter: Sp.paintPlanet('jupiter', Math.round(U * 0.5), dpr),
-      neptune: Sp.paintPlanet('neptune', Math.round(U * 0.3), dpr),
-      moon: Sp.paintMoon(Math.round(Math.min(U * 0.86, H * 0.48)), dpr),
-      comet: Sp.paintComet(Math.round(U * 0.62), dpr),
-      andromeda: Sp.paintAndromeda(Math.round(Math.min(Math.max(W * 1.15, H * 0.75), 1100)), pd),
-      nebulaA: Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 11, ['120,90,255', '70,140,255', '255,90,180', '90,200,255']),
-      nebulaB: Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 29, ['255,120,80', '255,80,140', '160,90,255', '255,190,90']),
-      cluster: Sp.paintCluster(W, Math.round(H * 0.7), pd),
-      web: Sp.paintWeb(W, Math.round(H * 0.9), pd),
-      firstLight: Sp.paintFirstLight(W, Math.round(H * 0.9), pd),
       cloudTones: ([1, 2] as const).map((tone) => [1, 2, 3].map((seed) => Land.paintCloud(U * 0.6, pd, seed, tone))),
-    };
+    } as unknown as Paints;
+    // The deep-space pictures (planets, nebulae, galaxies) only show high up: painting them is deferred until first
+    // used, and warmed one by one while the browser is idle, so the home screen opens without that start-up work.
+    const lazy = <K extends keyof Paints>(k: K, make: () => Paints[K]) =>
+      Object.defineProperty(base, k, {
+        configurable: true,
+        enumerable: true,
+        get() {
+          const v = make();
+          Object.defineProperty(base, k, { value: v, enumerable: true });
+          return v;
+        },
+      });
+    lazy('galaxy', () => Sp.paintGalaxy(W, Math.round(H * 0.8), pd));
+    lazy('venus', () => Sp.paintPlanet('venus', Math.round(U * 0.24), dpr));
+    lazy('saturn', () => Sp.paintPlanet('saturn', Math.round(U * 0.36), dpr));
+    lazy('mars', () => Sp.paintPlanet('mars', Math.round(U * 0.26), dpr));
+    lazy('jupiter', () => Sp.paintPlanet('jupiter', Math.round(U * 0.5), dpr));
+    lazy('neptune', () => Sp.paintPlanet('neptune', Math.round(U * 0.3), dpr));
+    lazy('moon', () => Sp.paintMoon(Math.round(Math.min(U * 0.86, H * 0.48)), dpr));
+    lazy('comet', () => Sp.paintComet(Math.round(U * 0.62), dpr));
+    lazy('andromeda', () => Sp.paintAndromeda(Math.round(Math.min(Math.max(W * 1.15, H * 0.75), 1100)), pd));
+    lazy('nebulaA', () => Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 11, ['120,90,255', '70,140,255', '255,90,180', '90,200,255']));
+    lazy('nebulaB', () => Sp.paintNebulaField(W, Math.round(H * 1.2), pd, 29, ['255,120,80', '255,80,140', '160,90,255', '255,190,90']));
+    lazy('cluster', () => Sp.paintCluster(W, Math.round(H * 0.7), pd));
+    lazy('web', () => Sp.paintWeb(W, Math.round(H * 0.9), pd));
+    lazy('firstLight', () => Sp.paintFirstLight(W, Math.round(H * 0.9), pd));
+    this.paints = base;
+    this.warmLater(key);
     return this.paints;
   }
 
+  private warmTimer = 0;
+  private warmLater(key: string) {
+    window.clearTimeout(this.warmTimer);
+    const names = ['galaxy', 'moon', 'venus', 'mars', 'jupiter', 'saturn', 'neptune', 'comet', 'andromeda', 'nebulaA', 'nebulaB', 'cluster', 'web', 'firstLight'] as const;
+    let i = 0;
+    const next = () => {
+      if (this.paints?.key !== key || i >= names.length) return;
+      void this.paints[names[i++]];
+      this.warmTimer = window.setTimeout(next, 250);
+    };
+    this.warmTimer = window.setTimeout(next, 3000);
+  }
+
   private frame(now: number) {
+    // Measure how the device keeps up. If it cannot hold about 45 fps, draw every second frame (the motion keeps its
+    // speed, it just steps at 30 fps, which is steadier than a stuttering 40) and lower the pixel density once.
+    if (this.prevRaf) {
+      const g = Math.min(100, now - this.prevRaf);
+      this.gap += (g - this.gap) * 0.06;
+      if (++this.seen > 90 && !this.slow && this.gap > 26 && !document.hidden) {
+        this.slow = true;
+        this.dprCap = Math.min(this.dprCap, 1.25);
+        this.resize();
+      }
+    }
+    this.prevRaf = now;
+    if (this.slow) {
+      this.skip = !this.skip;
+      if (this.skip) {
+        this.raf = requestAnimationFrame((t) => this.frame(t));
+        return;
+      }
+    }
     // Under a sheet the sky slows to a few frames a second, unless something just changed (a new kite, a new height),
     // which then plays at full speed for a moment so the player sees it at once.
     if (this.held && now > this.wakeUntil && now - this.heldDrawn < 160) {
