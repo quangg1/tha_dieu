@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { api } from '../api';
+import { TIERS } from '../../shared/scoring.js';
 
 const dm = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 const num = (n: number) => n.toLocaleString('vi-VN');
@@ -8,13 +9,17 @@ type Bank = Awaited<ReturnType<typeof api.admin.bank>>;
 type Item = Bank['items'][number];
 
 /** Bars for a list of counts. */
-function Bars({ rows, color = '#3a8fd8' }: { rows: { name: string; n: number }[]; color?: string }) {
+function Bars({ rows, color = '#3a8fd8', onPick, picked }: { rows: { name: string; n: number }[]; color?: string; onPick?: (name: string) => void; picked?: string | null }) {
   const peak = Math.max(1, ...rows.map((r) => r.n));
   return (
     <div>
       {rows.map((r) => (
         <div key={r.name} className="adm-spread">
-          <span>{r.name}</span>
+          {onPick ? (
+            <button className="adm-link" style={picked === r.name ? { fontWeight: 700, textDecoration: 'underline' } : undefined} onClick={() => onPick(r.name)}>{r.name}</button>
+          ) : (
+            <span>{r.name}</span>
+          )}
           <span className="adm-bar" style={{ width: `${(r.n / peak) * 100}%`, background: color }} />
           <b>{r.n}</b>
         </div>
@@ -30,6 +35,8 @@ export function BankPage({ token }: { token: string }) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<'miss' | 'plays' | 'avg' | 'krill'>('miss');
   const [only, setOnly] = useState<'all' | 'played' | 'paused' | 'unseen'>('played');
+  const [cat, setCat] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
   const load = () => api.admin.bank(token).then(setB).catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tải được.'));
   useEffect(() => void load(), [token]);
   const rows = useMemo(() => {
@@ -38,11 +45,12 @@ export function BankPage({ token }: { token: string }) {
     const missRate = (i: Item) => (i.plays + i.misses >= 10 ? i.misses / (i.plays + i.misses) : -1);
     return b.items
       .filter((i) => i.active || i.paused)
+      .filter((i) => !cat || i.category === cat)
       .filter((i) => (only === 'played' ? i.plays + i.misses > 0 : only === 'paused' ? i.paused : only === 'unseen' ? !i.seen && i.active : true))
       .filter((i) => !needle || i.prompt.toLowerCase().includes(needle) || i.category.toLowerCase().includes(needle) || i.id.includes(needle))
       .sort((x, y) => (sort === 'miss' ? missRate(y) - missRate(x) : sort === 'plays' ? y.plays - x.plays : sort === 'avg' ? y.avg - x.avg : y.krill - x.krill))
       .slice(0, 80);
-  }, [b, q, sort, only]);
+  }, [b, q, sort, only, cat]);
   const pause = async (i: Item, paused: boolean) => {
     try {
       await api.admin.pause(token, i.id, paused);
@@ -78,7 +86,8 @@ export function BankPage({ token }: { token: string }) {
       </section>
       <section className="gd-paper">
         <div className="gd-label" style={{ marginBottom: 8 }}>Theo chủ đề</div>
-        <Bars rows={b.byCategory} />
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Bấm một chủ đề để xem và sửa các câu của chủ đề đó ở bảng bên dưới.</p>
+        <Bars rows={b.byCategory} onPick={(n) => { setCat(cat === n ? null : n); setOnly('all'); setSort('plays'); document.getElementById('adm-bank-list')?.scrollIntoView({ behavior: 'smooth' }); }} picked={cat} />
         <div className="gd-label" style={{ margin: '14px 0 8px' }}>Theo mức khó</div>
         <Bars rows={b.byLevel} color="#8a5cd6" />
         <p className="gd-msg" style={{ margin: '8px 0 0' }}>Câu khó là câu hiếm nhất kho; thiếu câu khó thì chỗ 5 và 7 của ngày phải dùng câu vừa.</p>
@@ -139,7 +148,12 @@ export function BankPage({ token }: { token: string }) {
         <p className="gd-msg" style={{ margin: '0 0 8px' }}>
           “Hết gió” là tỷ lệ người chơi bí không trả lời được (tính khi có từ 10 lượt). Câu hết gió quá cao là câu khó hoặc mơ hồ; bấm Tạm dừng để ngưng hỏi ngay mà không cần triển khai lại.
         </p>
+        <div id="adm-bank-list" />
         <div className="adm-filters">
+          <select value={cat ?? ''} onChange={(e) => { setCat(e.target.value || null); if (e.target.value) setOnly('all'); }} aria-label="Chủ đề">
+            <option value="">Mọi chủ đề</option>
+            {b.byCategory.map((c) => <option key={c.name} value={c.name}>{c.name} ({c.n})</option>)}
+          </select>
           <input className="gd-input" style={{ fontSize: 15, minHeight: 36, flex: 1, minWidth: 160 }} placeholder="Tìm câu hỏi, chủ đề…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Tìm câu hỏi" />
           <select value={only} onChange={(e) => setOnly(e.target.value as typeof only)} aria-label="Lọc">
             <option value="played">Đã có người chơi</option>
@@ -162,15 +176,21 @@ export function BankPage({ token }: { token: string }) {
                 const all = i.plays + i.misses;
                 const bad = all >= 10 && i.misses / all > 0.4;
                 return (
-                  <tr key={i.id} style={i.paused ? { opacity: 0.55 } : undefined}>
-                    <td>{i.prompt}<br /><small style={{ opacity: 0.6 }}>{i.category} · {['dễ', 'vừa', 'khó'][i.level - 1] ?? i.level}{i.pop ? ' · đại chúng' : ''}{i.until ? ` · hạn ${dm(i.until)}` : ''}</small></td>
+                  <Fragment key={i.id}>
+                  <tr style={i.paused ? { opacity: 0.55 } : undefined}>
+                    <td>{i.prompt}{i.edited ? ' ✎' : ''}<br /><small style={{ opacity: 0.6 }}>{i.category} · {['dễ', 'vừa', 'khó'][i.level - 1] ?? i.level}{i.pop ? ' · đại chúng' : ''}{i.until ? ` · hạn ${dm(i.until)}` : ''}</small></td>
                     <td>{i.plays}</td>
                     <td style={bad ? { color: '#c0392b', fontWeight: 700 } : undefined}>{all >= 10 ? `${Math.round((i.misses / all) * 100)}%` : '—'}</td>
                     <td>{i.krill}</td>
                     <td>{i.clever}</td>
                     <td>{i.avg || '—'}</td>
-                    <td>{i.paused ? <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button> : <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button>}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <button className="gd-chip" onClick={() => setEditing(editing === i.id ? null : i.id)}>{editing === i.id ? 'Đóng' : 'Sửa'}</button>{' '}
+                      {i.paused ? <button className="gd-chip" onClick={() => void pause(i, false)}>Bật lại</button> : <button className="gd-chip" onClick={() => void pause(i, true)}>Tạm dừng</button>}
+                    </td>
                   </tr>
+                  {editing === i.id && <tr><td colSpan={7}><QuestionEditor token={token} id={i.id} onChanged={() => void load()} /></td></tr>}
+                  </Fragment>
                 );
               })}
               {rows.length === 0 && <tr><td colSpan={7}>Không có câu nào khớp.</td></tr>}
@@ -178,7 +198,128 @@ export function BankPage({ token }: { token: string }) {
           </table>
         </div>
       </section>
+      <EditsList token={token} />
     </>
+  );
+}
+
+/** Edits one prompt: its words, and every answer by tier (rename, move, remove) plus a form to add one. */
+function QuestionEditor({ token, id, onChanged }: { token: string; id: string; onChanged: () => void }) {
+  const [d, setD] = useState<Awaited<ReturnType<typeof api.admin.question>> | null>(null);
+  const [prompt, setPrompt] = useState('');
+  const [note, setNote] = useState('');
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [add, setAdd] = useState({ display: '', tier: 4, aliases: '' });
+  const [msg, setMsg] = useState('');
+  const load = () =>
+    api.admin
+      .question(token, id)
+      .then((r) => {
+        setD(r);
+        setPrompt(r.prompt);
+        setNote(r.note);
+        setNames({});
+      })
+      .catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa mở được.'));
+  useEffect(() => void load(), [id]);
+  const run = async (f: () => Promise<unknown>, ok: string) => {
+    try {
+      await f();
+      setMsg(ok);
+      await load();
+      onChanged();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Chưa lưu được.');
+    }
+  };
+  if (!d) return <p className="gd-msg" style={{ margin: 0 }}>{msg || 'Đang mở…'}</p>;
+  const changed = prompt !== d.prompt || note !== d.note;
+  return (
+    <div className="adm-edit">
+      <label className="gd-label" htmlFor={`p-${id}`}>Câu hỏi</label>
+      <input id={`p-${id}`} className="gd-input" value={prompt} onChange={(e) => setPrompt(e.target.value)} maxLength={200} />
+      <label className="gd-label" htmlFor={`n-${id}`}>Ghi chú dưới câu hỏi (có thể để trống)</label>
+      <input id={`n-${id}`} className="gd-input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} />
+      <div>
+        <button className="gd-chip" disabled={!changed} onClick={() => void run(() => api.admin.editQuestion(token, { questionId: id, prompt, note }), 'Đã lưu câu hỏi.')}>Lưu câu hỏi</button>{' '}
+        {(d.prompt !== d.bookPrompt || d.note !== d.bookNote) && (
+          <button className="gd-chip" onClick={() => void run(() => api.admin.editQuestion(token, { questionId: id, reset: true }), 'Đã trở về chữ gốc.')}>Về chữ gốc</button>
+        )}
+      </div>
+      <div className="gd-label" style={{ marginTop: 8 }}>Đáp án ({d.answers.length})</div>
+      <div className="tbl" style={{ maxHeight: 340, overflow: 'auto' }}>
+        <table>
+          <thead><tr><th>Tên</th><th>Bậc</th><th /></tr></thead>
+          <tbody>
+            {d.answers.map((a) => {
+              const isKrill = a.key === d.krillKey;
+              const val = names[a.key] ?? a.display;
+              return (
+                <tr key={a.key}>
+                  <td>
+                    <input className="gd-input" style={{ fontSize: 14, minHeight: 32 }} value={val} onChange={(e) => setNames((m) => ({ ...m, [a.key]: e.target.value }))} aria-label={`Tên đáp án ${a.display}`} maxLength={60} />
+                    {a.source === 'admin' && <small style={{ opacity: 0.6 }}> đã sửa ở admin</small>}
+                  </td>
+                  <td>
+                    {isKrill ? (
+                      <b>Độc nhất</b>
+                    ) : (
+                      <select value={a.tier} onChange={(e) => void run(() => api.admin.editAnswer(token, { questionId: id, key: a.key, tier: Number(e.target.value) }), `Đã chuyển “${a.display}”.`)} aria-label={`Bậc của ${a.display}`}>
+                        {TIERS.slice(0, 5).map((t) => <option key={t.index} value={t.index}>{t.name}</option>)}
+                      </select>
+                    )}
+                  </td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {val.trim() !== a.display && <button className="gd-chip" onClick={() => void run(() => api.admin.editAnswer(token, { questionId: id, key: a.key, display: val }), 'Đã đổi tên.')}>Lưu tên</button>}{' '}
+                    {!isKrill && <button className="gd-chip" onClick={() => { if (window.confirm(`Gỡ đáp án “${a.display}” khỏi sổ?`)) void run(() => api.admin.editAnswer(token, { questionId: id, key: a.key, remove: true }), 'Đã gỡ đáp án.'); }}>Gỡ</button>}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className="gd-label" style={{ marginTop: 8 }}>Thêm đáp án</div>
+      <div className="adm-filters">
+        <input className="gd-input" style={{ fontSize: 14, minHeight: 36, flex: 2, minWidth: 150 }} placeholder="Tên đáp án" value={add.display} onChange={(e) => setAdd({ ...add, display: e.target.value })} aria-label="Tên đáp án mới" maxLength={60} />
+        <input className="gd-input" style={{ fontSize: 14, minHeight: 36, flex: 2, minWidth: 150 }} placeholder="Tên gọi khác, ngăn bằng dấu phẩy" value={add.aliases} onChange={(e) => setAdd({ ...add, aliases: e.target.value })} aria-label="Tên gọi khác" />
+        <select value={add.tier} onChange={(e) => setAdd({ ...add, tier: Number(e.target.value) })} aria-label="Bậc">
+          {TIERS.slice(0, 5).map((t) => <option key={t.index} value={t.index}>{t.name}</option>)}
+        </select>
+        <button className="gd-chip" disabled={!add.display.trim()} onClick={() => void run(async () => { await api.admin.addAnswer(token, { questionId: id, display: add.display, tier: add.tier, aliases: add.aliases }); setAdd({ display: '', tier: 4, aliases: '' }); }, 'Đã thêm đáp án.')}>Thêm</button>
+      </div>
+      {msg && <p className="gd-msg gd-msg--hint" style={{ margin: 0 }}>{msg}</p>}
+    </div>
+  );
+}
+
+/** What was changed from this page: it wins over the code until someone folds it back into the release files. */
+function EditsList({ token }: { token: string }) {
+  const [e, setE] = useState<Awaited<ReturnType<typeof api.admin.edits>> | null>(null);
+  useEffect(() => {
+    api.admin.edits(token).then(setE).catch(() => {});
+  }, [token]);
+  if (!e || (e.prompts.length === 0 && e.answers.length === 0)) return null;
+  return (
+    <section className="gd-paper">
+      <div className="gd-label" style={{ marginBottom: 4 }}>Đã sửa ở trang này ({e.prompts.length + e.answers.length})</div>
+      <p className="gd-msg" style={{ margin: '0 0 8px' }}>Các chỉnh sửa này thắng sổ trong mã. Để sổ trong mã khớp, giao danh sách này cho Kiro gộp vào file release.</p>
+      <div className="tbl">
+        <table>
+          <tbody>
+            {e.prompts.map((p) => (
+              <tr key={p.question_id}><td>{p.question_id}</td><td>Câu hỏi: “{p.bookPrompt}” → “{p.prompt}”{p.note ? ` · ghi chú: ${p.note}` : ''}</td></tr>
+            ))}
+            {e.answers.map((a) => (
+              <tr key={a.question_id + a.key}>
+                <td>{a.question_id}</td>
+                <td>{a.status === 'rejected' ? `Gỡ đáp án “${a.display}”` : `${a.inBook ? 'Sửa' : 'Thêm'} đáp án “${a.display}” → ${TIERS[a.prior_tier]?.name ?? a.prior_tier}`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

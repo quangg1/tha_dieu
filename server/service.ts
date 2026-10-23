@@ -83,6 +83,9 @@ export async function setup(db: Db) {
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [ids]);
   // Prompts the village head paused from the admin page stay paused through a resync.
   const [pausedRow] = await db.query<{ value: string }>(`select value from meta where key='paused'`);
+  await db.query(
+    `update questions q set prompt=e.prompt, note=nullif(e.note, '') from question_edits e where q.id=e.question_id`,
+  );
   const paused = (() => {
     try {
       return (JSON.parse(pausedRow?.value ?? '[]') as unknown[]).map(String);
@@ -275,6 +278,16 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     [id],
   );
   const rekey = new Map<string, string>();
+  // Names and tiers the village head changed from the admin page win over the book's.
+  for (const l of learned) {
+    if (l.source !== 'admin' || l.status !== 'approved') continue;
+    const cur = answers.get(l.key);
+    const entry = entries.find((e) => e.key === l.key);
+    if (!cur || !entry) continue;
+    answers.set(l.key, { ...cur, display: l.display, prior: l.prior_tier, source: 'admin' });
+    entry.priorTier = l.prior_tier;
+    if (!entry.aliases.includes(l.display)) entry.aliases.push(l.display);
+  }
   for (const l of learned) {
     const key = answers.has(l.key) ? l.key : soft(l.display);
     rekey.set(l.key, key);
@@ -295,11 +308,12 @@ export async function loadQuestion(db: Db, id: string): Promise<LoadedQuestion> 
     const e = answers.get(key);
     if (e && !unvouched(e)) matcher.addAlias(a.alias, key, e.prior);
   }
+  const [edit] = await db.query<{ prompt: string; note: string | null }>(`select prompt, note from question_edits where question_id=$1`, [id]);
   const q: LoadedQuestion = {
     id: base.id,
     category: base.category,
-    prompt: base.prompt,
-    note: base.note ?? null,
+    prompt: edit?.prompt ?? base.prompt,
+    note: edit ? edit.note || null : base.note ?? null,
     krillKey: base.krillKey,
     strip: base.strip,
     level: base.level ?? 2,

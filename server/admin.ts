@@ -1,7 +1,8 @@
 import { BOOK, BOOK_BY_ID, RETIRED } from '../shared/book/questions.js';
 import { UNTIL } from '../shared/book/release.js';
 import type { Db } from './db.js';
-import { DB_VERSION, GameError, dayQuestion, forgetBoard, forgetQuestion, isPop, syncedVersion, vnToday } from './service.js';
+import { DB_VERSION, GameError, dayQuestion, forgetBoard, forgetQuestion, isPop, loadQuestion, syncedVersion, vnToday } from './service.js';
+import { soft } from '../shared/normalize.js';
 
 /* The village head's pages beyond the day's numbers: the question bank, players, and the state of the system. */
 
@@ -46,11 +47,13 @@ export async function adminBank(db: Db) {
       )
     ).map((r) => [r.question_id, r]),
   );
+  const edited = new Map((await db.query<{ question_id: string; prompt: string }>(`select question_id, prompt from question_edits`)).map((r) => [r.question_id, r.prompt]));
   const items = BOOK.map((q) => {
     const s = stat.get(q.id);
     return {
       id: q.id,
-      prompt: q.prompt,
+      prompt: edited.get(q.id) ?? q.prompt,
+      edited: edited.has(q.id),
       category: q.category,
       level: q.level ?? 2,
       pop: isPop(q),
@@ -183,5 +186,121 @@ export async function adminSystem(db: Db) {
     nets: nets.map((x) => ({ k: `${x.k.split(':')[0]}:${x.k.split(':')[1]?.slice(0, 6) ?? ''}`, n: x.n })),
     tables: t,
     inbox,
+  };
+}
+
+/* ------------------------------------------------------------------ editing from the admin page */
+
+const text = (v: unknown, max: number) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+const tierOf = (v: unknown) => {
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 0 || n > 4) throw new GameError(400, 'Bậc phải từ Thường đến Cực hiếm.');
+  return n;
+};
+
+/** One prompt with every answer the village knows, for the editor. */
+export async function adminQuestion(db: Db, id: string) {
+  const base = BOOK_BY_ID.get(id);
+  if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  const q = await loadQuestion(db, id);
+  const answers = [...q.answers.entries()]
+    .filter(([, e]) => !(e.status === 'pending' && e.source === 'crowd'))
+    .map(([key, e]) => ({ key, display: e.display, tier: key === q.krillKey ? 5 : e.prior, source: e.source ?? 'seed', status: e.status }))
+    .sort((a, b) => b.tier - a.tier || a.display.localeCompare(b.display, 'vi'));
+  return { id, category: q.category, prompt: q.prompt, note: q.note ?? '', bookPrompt: base.prompt, bookNote: base.note ?? '', krillKey: q.krillKey, answers };
+}
+
+/** Changes the words of a prompt or its note. Scoring and counts are untouched. */
+export async function adminEditQuestion(db: Db, id: string, prompt: unknown, note: unknown) {
+  if (!BOOK_BY_ID.has(id)) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  const p = text(prompt, 200);
+  if (p.length < 8) throw new GameError(400, 'Câu hỏi quá ngắn.');
+  const n = text(note, 300);
+  await db.query(
+    `insert into question_edits (question_id, prompt, note) values ($1,$2,$3)
+     on conflict (question_id) do update set prompt=excluded.prompt, note=excluded.note, updated_at=now()`,
+    [id, p, n],
+  );
+  await db.query(`update questions set prompt=$2, note=nullif($3, '') where id=$1`, [id, p, n]);
+  forgetQuestion(id);
+  return { ok: true };
+}
+
+/** Goes back to the book's own words. */
+export async function adminResetQuestion(db: Db, id: string) {
+  const base = BOOK_BY_ID.get(id);
+  if (!base) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  await db.query(`delete from question_edits where question_id=$1`, [id]);
+  await db.query(`update questions set prompt=$2, note=nullif($3, '') where id=$1`, [id, base.prompt, base.note ?? '']);
+  forgetQuestion(id);
+  return { ok: true };
+}
+
+/** Renames an answer, moves it to another tier, or takes it out. The key stays, so its counts and history stay with it. */
+export async function adminEditAnswer(db: Db, a: { questionId: string; key: string; display?: unknown; tier?: unknown; remove?: boolean }) {
+  const q = await loadQuestion(db, a.questionId);
+  const cur = q.answers.get(a.key);
+  if (!cur) throw new GameError(404, 'Không tìm thấy đáp án này.');
+  const isKrill = a.key === q.krillKey;
+  if (a.remove) {
+    if (isKrill) throw new GameError(400, 'Đây là đáp án làng giấu của câu này: đổi trong mã, không gỡ ở đây.');
+    await db.query(
+      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','rejected')
+       on conflict (question_id, key) do update set status='rejected'`,
+      [a.questionId, a.key, cur.display, cur.prior],
+    );
+  } else {
+    const display = a.display === undefined ? cur.display : text(a.display, 60);
+    if (!display) throw new GameError(400, 'Tên đáp án trống.');
+    const tier = a.tier === undefined || isKrill ? cur.prior : tierOf(a.tier);
+    await db.query(
+      `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','approved')
+       on conflict (question_id, key) do update set display=excluded.display, prior_tier=excluded.prior_tier, source='admin', status='approved'`,
+      [a.questionId, a.key, display, tier],
+    );
+    // Whoever types the new name finds it, and the old one still works.
+    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [a.questionId, soft(display), a.key]);
+  }
+  forgetQuestion(a.questionId);
+  return { ok: true };
+}
+
+/** Adds an answer the book lacks, with the names people also use for it. */
+export async function adminAddAnswer(db: Db, a: { questionId: string; display: unknown; tier: unknown; aliases?: unknown }) {
+  const q = await loadQuestion(db, a.questionId);
+  const display = text(a.display, 60);
+  if (!display) throw new GameError(400, 'Tên đáp án trống.');
+  const tier = tierOf(a.tier);
+  const found = q.matcher.match(display);
+  if (found?.exact || q.answers.has(soft(display))) throw new GameError(409, 'Đáp án này đã có trong sổ.');
+  const key = soft(display);
+  await db.query(
+    `insert into answers (question_id, key, display, prior_tier, source, status) values ($1,$2,$3,$4,'admin','approved')
+     on conflict (question_id, key) do update set display=excluded.display, prior_tier=excluded.prior_tier, source='admin', status='approved'`,
+    [a.questionId, key, display, tier],
+  );
+  const names = String(a.aliases ?? '')
+    .split(/[,|]/)
+    .map((x) => text(x, 60))
+    .filter(Boolean)
+    .slice(0, 10);
+  for (const n of [display, ...names]) {
+    await db.query(`insert into aliases (question_id, alias, key) values ($1,$2,$3) on conflict (question_id, alias) do update set key=excluded.key`, [a.questionId, soft(n), key]);
+  }
+  forgetQuestion(a.questionId);
+  return { ok: true };
+}
+
+/** Every change made from the admin page, to fold back into the release files so the book in code matches. */
+export async function adminEdits(db: Db) {
+  const prompts = await db.query<{ question_id: string; prompt: string; note: string | null; updated_at: string }>(
+    `select question_id, prompt, note, updated_at::text as updated_at from question_edits order by updated_at desc`,
+  );
+  const answers = await db.query<{ question_id: string; key: string; display: string; prior_tier: number; status: string }>(
+    `select question_id, key, display, prior_tier, status from answers where source='admin' order by question_id, status, display`,
+  );
+  return {
+    prompts: prompts.map((p) => ({ ...p, bookPrompt: BOOK_BY_ID.get(p.question_id)?.prompt ?? '' })),
+    answers: answers.map((x) => ({ ...x, inBook: !!BOOK_BY_ID.get(x.question_id)?.answers.some((b) => b.key === x.key) })),
   };
 }

@@ -885,6 +885,35 @@ describe('the village head other pages', () => {
     await S.mutePlayer(db, f.found[0].player_id);
     expect((await AD.adminFindPlayers(db, '')).muted.some((m) => m.player_id === f.found[0].player_id)).toBe(true);
     await AD.adminUnmute(db, f.found[0].player_id);
+    // Edits from the page: words, names, tiers, removal and new answers, all in the database, none in the code.
+    const qid = 'trai-cay';
+    const before = await AD.adminQuestion(db, qid);
+    const common = before.answers.find((x) => x.tier === 0)!;
+    const rareOne = before.answers.find((x) => x.tier === 3 && x.key !== before.krillKey)!;
+    const gone = before.answers.find((x) => x.tier === 2 && x.key !== before.krillKey)!;
+    await AD.adminEditQuestion(db, qid, 'Kể tên một loại trái cây (sửa thử)', 'Ghi chú thử.');
+    await AD.adminEditAnswer(db, { questionId: qid, key: common.key, display: 'Tên mới thử nghiệm', tier: 4 });
+    await AD.adminEditAnswer(db, { questionId: qid, key: gone.key, remove: true });
+    await AD.adminAddAnswer(db, { questionId: qid, display: 'Quả thử nghiệm xyz', tier: 3, aliases: 'qua thu nghiem' });
+    await expect(AD.adminAddAnswer(db, { questionId: qid, display: 'Quả thử nghiệm xyz', tier: 3 })).rejects.toThrow();
+    await expect(AD.adminEditAnswer(db, { questionId: qid, key: before.krillKey, remove: true })).rejects.toThrow();
+    const after = await S.loadQuestion(db, qid);
+    expect(after.prompt).toBe('Kể tên một loại trái cây (sửa thử)');
+    expect(after.note).toBe('Ghi chú thử.');
+    expect(after.answers.get(common.key)!.display).toBe('Tên mới thử nghiệm');
+    expect(after.answers.get(common.key)!.prior).toBe(4);
+    expect(after.matcher.match('Tên mới thử nghiệm')?.key).toBe(common.key);
+    expect(after.answers.has(gone.key)).toBe(false);
+    expect(after.matcher.match(gone.display)?.key).not.toBe(gone.key);
+    expect(after.matcher.match('qua thu nghiem')).toBeTruthy();
+    const ed = await AD.adminEdits(db);
+    expect(ed.prompts.some((x) => x.question_id === qid)).toBe(true);
+    expect(ed.answers.length).toBeGreaterThanOrEqual(3);
+    await S.setup(db); // a resync keeps the edits
+    expect((await S.loadQuestion(db, qid)).prompt).toBe('Kể tên một loại trái cây (sửa thử)');
+    await AD.adminResetQuestion(db, qid);
+    expect((await S.loadQuestion(db, qid)).prompt).toBe(before.bookPrompt);
+    expect(rareOne.key).toBeTruthy();
     const s = await AD.adminSystem(db);
     expect(s.config.length).toBeGreaterThan(3);
     expect(JSON.stringify(s)).not.toMatch(/sk-|postgres:/);

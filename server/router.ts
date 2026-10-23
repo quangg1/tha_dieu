@@ -357,6 +357,42 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return AD.adminBank(db);
     },
   },
+  'admin/question': {
+    method: 'GET',
+    admin: true,
+    async run({ db, query }) {
+      return AD.adminQuestion(db, query.get('id') ?? '');
+    },
+  },
+  'admin/question-edit': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      const id = String(body.questionId ?? '');
+      return body.reset ? AD.adminResetQuestion(db, id) : AD.adminEditQuestion(db, id, body.prompt, body.note);
+    },
+  },
+  'admin/answer-edit': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return AD.adminEditAnswer(db, { questionId: String(body.questionId ?? ''), key: String(body.key ?? ''), display: body.display, tier: body.tier, remove: body.remove === true });
+    },
+  },
+  'admin/answer-add': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return AD.adminAddAnswer(db, { questionId: String(body.questionId ?? ''), display: body.display, tier: body.tier, aliases: body.aliases });
+    },
+  },
+  'admin/edits': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return AD.adminEdits(db);
+    },
+  },
   'admin/pause': {
     method: 'POST',
     admin: true,

@@ -29,6 +29,14 @@ create table if not exists aliases (
   primary key (question_id, alias)
 );
 
+-- Prompt and note changed from the admin page: they win over the book in code until folded back into it.
+create table if not exists question_edits (
+  question_id text primary key,
+  prompt text not null,
+  note text,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists verdicts (
   question_id text not null,
   input_key text not null,

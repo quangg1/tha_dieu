@@ -248,10 +248,24 @@ export const api = {
         byLevel: { name: string; n: number }[];
         pop: number;
         timely: { id: string; prompt: string; until: string; daysLeft: number }[];
-        items: { id: string; prompt: string; category: string; level: number; pop: boolean; until: string | null; active: boolean; retired: boolean; paused: boolean; seen: boolean; plays: number; misses: number; krill: number; clever: number; avg: number }[];
+        items: { id: string; prompt: string; edited: boolean; category: string; level: number; pop: boolean; until: string | null; active: boolean; retired: boolean; paused: boolean; seen: boolean; plays: number; misses: number; krill: number; clever: number; avg: number }[];
         sets: { day: string; questions: { id: string; prompt: string }[] }[];
         krillToday: { id: string; prompt: string; krill: string }[];
       }>('admin/bank', undefined, { 'x-admin-token': token }),
+    question: (token: string, id: string) =>
+      call<{ id: string; category: string; prompt: string; note: string; bookPrompt: string; bookNote: string; krillKey: string; answers: { key: string; display: string; tier: number; source: string; status: string }[] }>(
+        `admin/question?id=${encodeURIComponent(id)}`,
+        undefined,
+        { 'x-admin-token': token },
+      ),
+    editQuestion: (token: string, b: { questionId: string; prompt?: string; note?: string; reset?: boolean }) => call<{ ok: boolean }>('admin/question-edit', b, { 'x-admin-token': token }),
+    editAnswer: (token: string, b: { questionId: string; key: string; display?: string; tier?: number; remove?: boolean }) => call<{ ok: boolean }>('admin/answer-edit', b, { 'x-admin-token': token }),
+    addAnswer: (token: string, b: { questionId: string; display: string; tier: number; aliases?: string }) => call<{ ok: boolean }>('admin/answer-add', b, { 'x-admin-token': token }),
+    edits: (token: string) =>
+      call<{
+        prompts: { question_id: string; prompt: string; note: string | null; updated_at: string; bookPrompt: string }[];
+        answers: { question_id: string; key: string; display: string; prior_tier: number; status: string; inBook: boolean }[];
+      }>('admin/edits', undefined, { 'x-admin-token': token }),
     pause: (token: string, questionId: string, paused: boolean) => call<{ ok: boolean }>('admin/pause', { questionId, paused }, { 'x-admin-token': token }),
     findPlayers: (token: string, q: string) =>
       call<{ found: { player_id: string; name: string | null; runs: number; last_day: string; best: number; muted: boolean }[]; muted: { player_id: string; at: string }[] }>(
