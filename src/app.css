@@ -676,6 +676,17 @@ button svg,a svg{flex-shrink:0}
 .jc-more{font-size:22px;line-height:1;color:rgba(255,255,255,.6)}
 .journey-card.compact .jc-track{margin-bottom:12px}
 
+/* danh hiệu: the title held, its step on the ladder, the bar to the next */
+.tc-name{position:relative;display:flex;align-items:center;gap:10px}
+.tc-name b{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,6.4vw,28px);line-height:1.05;color:#fff}
+.tc-step{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-family:var(--font-display);font-weight:900;font-size:16px;color:#3d2a00;background:linear-gradient(160deg,#ffe9a8,#ffc24d);box-shadow:0 0 0 2px rgba(255,255,255,.18),0 0 16px rgba(255,209,102,.4)}
+.tc-track{margin-bottom:0}
+.title-card .jc-foot{align-items:flex-end}
+.tc-kite{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.66)}
+.journey-card.compact.title-card{gap:8px}
+.tc-dot{font-family:var(--font-display);font-weight:900;font-size:17px;color:#cfd8f0;filter:none}
+.road-stop.done .tc-dot{color:#3d2a00}
+
 /* arrival moment */
 .arrival{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 18px 20px;border-radius:24px;text-align:center;color:#3d2a00;overflow:hidden;
   background:linear-gradient(160deg,#fff6d8 0%,#ffe08a 55%,#ffc24d 100%);box-shadow:0 16px 40px rgba(255,170,40,.35);animation:arrive .7s cubic-bezier(.2,1.3,.3,1) both}
@@ -845,8 +856,12 @@ button svg,a svg{flex-shrink:0}
 
 /* ---------- share preview sheet ---------- */
 .share-preview{display:flex;flex-direction:column;gap:12px}
-.share-preview-img{width:100%;max-width:360px;aspect-ratio:1080/1350;object-fit:contain;margin:0 auto;border-radius:16px;background:#0b1430;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.share-preview .next-btn{width:100%}
-.share-social{display:flex;gap:8px;flex-wrap:wrap}
-.share-social .pill-btn{flex:1;min-width:92px}
-.share-preview-hint{margin:0;font-size:13px;line-height:1.45;color:var(--bi-muted)}
+.share-preview-img{display:block;width:auto;max-width:100%;max-height:min(52dvh,520px);aspect-ratio:1080/1350;margin:0 auto;border-radius:16px;background:#0b1430;box-shadow:0 10px 30px rgba(15,39,71,.25)}
+.share-preview .next-btn{width:100%;margin-top:4px}
+.share-preview-hint{margin:-4px 0 0;text-align:center;font-size:13px;line-height:1.45;color:var(--bi-muted)}
+.sp-secondary{display:flex;gap:8px}
+.sp-btn{flex:1;min-height:46px;padding:0 14px;border-radius:999px;border:1.5px solid rgba(15,39,71,.16);background:#fff;color:var(--bi-ink);font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.sp-btn:hover{border-color:rgba(15,39,71,.32)}
+.sp-btn:focus-visible,.sp-links button:focus-visible{outline:3px solid var(--bi-gold);outline-offset:2px}
+.sp-links{margin:0;text-align:center;font-size:13px;color:var(--bi-muted)}
+.sp-links button{padding:0;border:0;background:none;font:inherit;font-weight:700;color:var(--bi-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}

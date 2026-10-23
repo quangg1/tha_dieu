@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BAND_RULES, DAY_BANDS, GIO_POINTS, RANK_MIN_PLAYERS, TIERS, TIERS_BY_RANK, dayBand, formatAlt, usesGio } from '../../shared/scoring.js';
-import { JourneyCard, JourneySheet } from '../components/Journey';
+import { TitleCard, TitlesSheet } from '../components/Titles';
 import { flute } from '../audio/flute';
 import { AnswerList } from '../components/AnswerList';
 import { api, type Reveal, type Support } from '../api';
@@ -360,7 +360,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
           </button>
         )}
 
-        <JourneyCard compact total={st.total} onOpen={() => { setJourney(true); track('journey'); }} />
+        <TitleCard compact total={st.total} onOpen={() => { setJourney(true); track('titles'); }} />
 
         <button className="mine-btn" onClick={onAccount}>
           <span>Bilion của tôi</span>
@@ -492,7 +492,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
         </div>
       )}
 
-      {journey && <JourneySheet onClose={() => setJourney(false)} />}
+      {journey && <TitlesSheet onClose={() => setJourney(false)} />}
       {howto && (
         <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label="Cách chơi" onClick={() => setHowto(false)}>
           <section className="sheet" onClick={(e) => e.stopPropagation()}>

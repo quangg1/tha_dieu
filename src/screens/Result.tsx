@@ -18,8 +18,8 @@ import { FeedbackSheet } from '../components/FeedbackSheet';
 import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
 import { CheckIcon, CloseIcon, FlagIcon } from '../glyphs';
 import { AnswerList } from '../components/AnswerList';
-import { JourneyArrival, JourneyCard, JourneySheet } from '../components/Journey';
-import { journeyAt } from '../../shared/journey.js';
+import { TitleArrival, TitleCard, TitlesSheet } from '../components/Titles';
+import { titleAt } from '../../shared/titles.js';
 
 export default function Result({ sky, summary, soundButton, onHome, onNight }: { sky: SkyScene; summary: Summary; soundButton: ReactNode; onHome: () => void; onNight: () => void }) {
   const { mode, rows } = summary;
@@ -36,6 +36,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const [busy, setBusy] = useState(false);
   // The rendered share image, previewed in a sheet before the player sends it.
   const [preview, setPreview] = useState<{ url: string; blob: Blob } | null>(null);
+  const [sent, setSent] = useState<'copied' | 'saved' | null>(null);
   const reached = lastMilestone(result.altitude);
   const upcoming = nextMilestone(result.altitude);
   const day = vnDay();
@@ -155,7 +156,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         grid: result.grid,
         points: mode === 'daily' ? rows.map((r) => r.points) : undefined,
         rare: moment ? { text: moment.r.display!, tier: moment.r.tier } : undefined,
-        station: mode === 'daily' ? journeyAt(st.total).here.name : undefined,
+        rank: mode === 'daily' ? titleAt(st.total).here.name : undefined,
         link,
         skin: prefs.skin,
         scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.5, kiteY: 0.22, decade: 0.5, kiteSize: 0.24, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
@@ -171,6 +172,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
   const closePreview = () => {
     if (preview) URL.revokeObjectURL(preview.url);
     setPreview(null);
+    setSent(null);
   };
 
   // From the preview sheet: the primary action adapts to the device — native share on phones, copy on desktop.
@@ -188,14 +190,15 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
     if (!preview) return;
     const r = await copyImage(preview.blob);
     track('share', { how: 'copied', mode, alt: result.altitude });
-    flash(r === 'copied' ? 'Đã chép ảnh. Dán thẳng vào Facebook hay Zalo nhé!' : 'Trình duyệt không chép được ảnh. Hãy lưu ảnh nhé.');
+    if (r === 'copied') setSent('copied');
+    else flash('Trình duyệt không chép được ảnh. Hãy lưu ảnh nhé.');
   };
 
   const saveFromPreview = () => {
     if (!preview) return;
     downloadImage(preview.blob);
     track('share', { how: 'downloaded', mode, alt: result.altitude });
-    flash('Đã lưu ảnh vào máy.');
+    setSent('saved');
   };
 
   const shareLink = async () => {
@@ -287,11 +290,11 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
       <div className="result-body">
         {mode === 'daily' && (
           <>
-            <JourneyArrival before={st.total - gained} after={st.total} />
-            <JourneyCard total={st.total} gained={gained} onOpen={() => setJourneyOpen(true)} />
+            <TitleArrival before={st.total - gained} after={st.total} />
+            <TitleCard total={st.total} gained={gained} onOpen={() => setJourneyOpen(true)} />
           </>
         )}
-        {journeyOpen && <JourneySheet onClose={() => setJourneyOpen(false)} />}
+        {journeyOpen && <TitlesSheet onClose={() => setJourneyOpen(false)} />}
         <section className="card card--dark share-card">
           <div className="card-k">Khoe với bạn bè</div>
           <div className="share-row" aria-hidden="true">
@@ -316,23 +319,33 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                 <button className="sheet-x" onClick={closePreview} aria-label="Đóng"><CloseIcon /></button>
               </div>
               <img className="share-preview-img" src={preview.url} alt="Ảnh kết quả để chia sẻ" />
-              <button className="next-btn" onClick={sendImage}>
-                {canShareImage(preview.blob) ? 'Chia sẻ ngay' : canCopyImage() ? 'Chép ảnh để dán' : 'Lưu ảnh về máy'}
-              </button>
-              <div className="home-row">
-                {canCopyImage() && <button className="pill-btn ghost" onClick={copyFromPreview}>Chép ảnh</button>}
-                <button className="pill-btn ghost" onClick={saveFromPreview}>Lưu ảnh</button>
-              </div>
-              <div className="share-social" aria-label="Chia sẻ lên mạng xã hội">
-                <button className="pill-btn ghost" onClick={() => openSocialShare('facebook', text, link)}>Facebook</button>
-                <button className="pill-btn ghost" onClick={() => openSocialShare('x', text, link)}>X</button>
-                <button className="pill-btn ghost" onClick={() => openSocialShare('telegram', text, link)}>Telegram</button>
-              </div>
-              <p className="share-preview-hint">
-                {canCopyImage()
-                  ? 'Mẹo: bấm “Chép ảnh” rồi dán (Ctrl+V) thẳng vào ô đăng Facebook, Messenger hay Zalo.'
-                  : 'Lưu ảnh rồi đính kèm khi đăng bài nhé.'}
-              </p>
+              {(() => {
+                // One clear way to send the picture on each device: the phone's share sheet (Zalo, Messenger and
+                // Facebook are all in it), else copy to paste on a computer, else save the file.
+                const phone = canShareImage(preview.blob);
+                const copyable = !phone && canCopyImage();
+                return (
+                  <>
+                    <button className="next-btn" onClick={phone ? sendImage : copyable ? copyFromPreview : saveFromPreview}>
+                      {phone ? 'Gửi ảnh' : copyable ? (sent === 'copied' ? 'Đã chép ảnh ✓' : 'Chép ảnh') : sent === 'saved' ? 'Đã lưu ảnh ✓' : 'Lưu ảnh'}
+                    </button>
+                    <p className="share-preview-hint">
+                      {phone
+                        ? 'Chọn Zalo, Messenger hay Facebook trong bảng chia sẻ của máy.'
+                        : copyable
+                          ? 'Rồi dán (Ctrl+V) thẳng vào bài đăng Facebook, Messenger hay Zalo.'
+                          : 'Rồi đính kèm ảnh khi đăng bài hay nhắn tin.'}
+                    </p>
+                    <div className="sp-secondary">
+                      {(phone || copyable) && <button className="sp-btn" onClick={saveFromPreview}>{sent === 'saved' ? 'Đã lưu ✓' : 'Lưu ảnh'}</button>}
+                      <button className="sp-btn" onClick={() => openSocialShare('facebook', text, link)}>Đăng lên Facebook</button>
+                    </div>
+                    <p className="sp-links">
+                      Gửi link qua <button onClick={() => openSocialShare('x', text, link)}>X</button> hoặc <button onClick={() => openSocialShare('telegram', text, link)}>Telegram</button>
+                    </p>
+                  </>
+                );
+              })()}
             </section>
           </div>
         )}

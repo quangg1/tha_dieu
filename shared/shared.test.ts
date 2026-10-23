@@ -196,9 +196,9 @@ describe('trailing filler words', () => {
   });
 });
 
-describe('day band by rank, journey', async () => {
+describe('day band by rank, titles', async () => {
   const { dayBand } = await import('./scoring.js');
-  const { journeyAt, stopsBetween, STATIONS } = await import('./journey.js');
+  const { titleAt, titlesBetween, TITLES } = await import('./titles.js');
   it('places a Nối gió day by rank in the village, with points standing in for a small village', () => {
     const d = GIO_FROM;
     expect(dayBand({ altitude: 0, score: 900, rank: 2, players: 400, day: d })).toBe(5);
@@ -209,12 +209,12 @@ describe('day band by rank, journey', async () => {
     expect(dayBand({ altitude: 0, score: 750, rank: 1, players: 5, day: d })).toBe(3);
     expect(dayBand({ altitude: 0, score: 0, rank: 1, players: 1, day: d })).toBe(0);
   });
-  it('adds up a journey that only moves forward', () => {
-    expect(journeyAt(0).here.name).toBe(STATIONS[0].name);
-    const j = journeyAt(9_500);
-    expect(j.here.name).toBe('Cung Trăng');
+  it('adds daily points up to a title that only moves forward', () => {
+    expect(titleAt(0).here.name).toBe(TITLES[0].name);
+    const j = titleAt(9_500);
+    expect(j.here.name).toBe('Bậc thầy gió');
     expect(j.left).toBe(12_500 - 9_500);
-    expect(stopsBetween(80, 650).map((s) => s.name)).toEqual(['Ngọn tre', 'Đàn cò', 'Tầng mây']);
-    expect(journeyAt(1e9).next).toBeNull();
+    expect(titlesBetween(80, 650).map((s) => s.name)).toEqual(['Tập thả', 'Biết đón gió', 'Thả có nghề']);
+    expect(titleAt(1e9).next).toBeNull();
   });
 });

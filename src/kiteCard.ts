@@ -26,8 +26,8 @@ export interface KiteCardData {
   skin: string;
   /** The flight's rarest answer, if any was rare. */
   rare?: { text: string; tier: number };
-  /** Where the player's long trip has reached. */
-  station?: string;
+  /** The player's title (danh hiệu), earned by all their daily flights added up. Not a place: the card's sky is today's. */
+  rank?: string;
   /** The sky at the player's height, painted without a kite at the card's size. */
   scene?: HTMLCanvasElement;
 }
@@ -338,7 +338,7 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   const meta = [`Diều ${formatAlt(d.altitude)}`, d.milestone ? `qua ${d.milestone}` : '', d.beaten != null ? `cao hơn ${d.beaten}% làng` : ''].filter(Boolean).join(' · ');
   const chips: { text: string; color?: string }[] = [];
   if (d.rare) chips.push({ text: `“${d.rare.text}” · ${TIERS[d.rare.tier]?.name ?? ''}`, color: TIER_COLOR[d.rare.tier] });
-  if (d.station) chips.push({ text: `Hành trình: ${d.station}` });
+  if (d.rank) chips.push({ text: d.rank });
 
   // Lay out bottom-up from the footer so nothing ever overlaps it.
   const footTop = H - 140;
@@ -381,7 +381,7 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  // Chips: the rarest answer and the long trip, side by side when they fit, the trip dropped when they do not.
+  // Chips: the rarest answer and the player's title, side by side when they fit, the title dropped when they do not.
   let cx = X;
   for (const ch of chips) {
     const pad = ch.color ? 56 : 24;
