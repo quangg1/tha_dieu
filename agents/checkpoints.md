@@ -2,6 +2,14 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 20:50
+- **TASK-002 đã nhận (chủ dự án duyệt).** Claude kiểm lại ví dụ neo bằng script: 162/162 từ có trong kho, nhưng **9 từ ghi sai mức** so với `pop` thật — đã sửa trong `docs/rubric-do-quen.md`, kiểm lại 0 sai. Bản sửa đã copy sang `bilion-rarity-audit`. Chi tiết trong mục Duyệt của TASK-002.
+- 8 trong 9 chỗ lệch cùng chiều: rubric chấm thấp hơn kho một mức. Chưa kết luận bên nào đúng — chờ `familiar.ts`.
+- Phát hiện thuộc về kho: `3 Hủ tiếu Mỹ Tho` (`lex/monan.ts:51`) bị `soft()` gộp vào mục `Hủ tiếu` (pop 4) nên vô hiệu — nên soát còn bao nhiêu dòng cùng kiểu; `Kvass` và `Makgeolli` trong `douong` có hai dòng pop 1 và 2.
+- **Chờ duyệt:** TASK-001 (WorkBuddy, kho động vật).
+- **Đang chạy:** TASK-003 (DeepSeek v4.1 Flash, `monan`), TASK-004 (HY3, `thucvat`).
+- **Chờ chủ dự án:** các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); truy vấn số 2 của báo cáo WorkBuddy.
+
 ## 2026-10-23 20:40
 - **Đã giao, chạy song song:** TASK-003 (WorkBuddy · DeepSeek v4.1 Flash — kho `monan`, 3.198 từ) và TASK-004 (WorkBuddy · HY3 — kho `thucvat`, 4.586 từ). Mỗi bên chấm thêm cùng một bộ `tu_doi_chieu_dongvat_120.tsv` để đo đồng thuận với bản chấm TASK-001.
 - Phiếu chấm sinh bằng `scripts/emit-lex-tsv.ts`, chỉ hai cột `lexicon · word` (không ghi `pop` hiện tại). Packet đủ cho cả hai model đã nằm trong `bilion-rarity-audit`: `TASK-003.md`, `TASK-004.md`, `RUBRIC.md`, `rubric-do-quen.md`, ba file TSV.

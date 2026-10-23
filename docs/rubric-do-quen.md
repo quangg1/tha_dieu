@@ -45,9 +45,9 @@ Mọi từ dưới đây là từ **có thật trong file kho tương ứng**, l
 |-----|-----------|
 | 5 | Phở, Bánh mì, Cơm tấm, Bánh chưng, Pizza |
 | 4 | Bún bò Huế, Mì Quảng, Cơm gà, Bánh xèo, Cháo lòng |
-| 3 | Bún thang, Hủ tiếu Mỹ Tho, Bánh giầy, Chè bà ba, Cơm âm phủ |
-| 2 | Bún bề bề, Bánh răng bừa, Cháo ám, Chè táo xọn, Nậm pịa |
-| 1 | Bún cù kỳ, Bánh coóc mò, Cháo nhum, Chè heo quay, Pa pỉnh tộp |
+| 3 | Bún thang, Bánh canh cua, Bánh giầy, Chè bà ba, Cơm âm phủ |
+| 2 | Bún bề bề, Bánh răng bừa, Cháo ám, Chè táo xọn, Pa pỉnh tộp |
+| 1 | Bún cù kỳ, Bánh coóc mò, Cháo nhum, Chè heo quay, Nậm pịa |
 
 Chỗ dễ nhầm: món vùng miền (Mì Quảng, Cao lầu) quen hơn với người miền đó nhưng vẫn
 là mức 3–4 toàn quốc. Món nước ngoài đã Việt hóa mạnh (Pizza, Sushi) để mức 5, món
@@ -72,7 +72,7 @@ quen, để mức 3; nhưng tên lạ (Horchata, Rooibos) vẫn mức 1.
 |-----|-----------|
 | 5 | Hà Nội, TP Hồ Chí Minh, Đà Nẵng |
 | 4 | Hải Phòng, Cần Thơ, Huế, Nghệ An, Lâm Đồng |
-| 3 | Lào Cai, Nam Định, Quảng Nam, Đắk Lắk, An Giang |
+| 3 | Lào Cai, Nam Định, Quảng Bình, Đắk Lắk, An Giang |
 | 2 | Tuyên Quang, Hà Nam, Ninh Thuận, Trà Vinh, Bạc Liêu |
 | 1 | Bắc Kạn, Hậu Giang |
 
@@ -98,7 +98,7 @@ dù người lớn tuổi nhận ra ngay — chấm theo người phổ thông m
 | Mức | Ví dụ neo |
 |-----|-----------|
 | 5 | Hồ Chí Minh, Quang Trung, Trần Hưng Đạo, Nguyễn Du, Albert Einstein |
-| 4 | Lê Lợi, Lý Thường Kiệt, Ngô Bảo Châu, Napoleon Bonaparte, Leonardo da Vinci |
+| 4 | Đinh Bộ Lĩnh, Trần Quốc Toản, Ngô Bảo Châu, Napoleon Bonaparte, Leonardo da Vinci |
 | 3 | Mạc Đĩnh Chi, Hàn Mặc Tử, Phan Đình Phùng, Socrates, Marco Polo |
 | 2 | Cao Lỗ, Đào Duy Từ, Tô Ngọc Vân, Immanuel Kant, James Cook |
 | 1 | Khúc Hạo, Lý Thiên Bảo, Vũ Cao Đàm, Hypatia, Ibn Battuta |
@@ -114,8 +114,8 @@ người đó, không tách.
 |-----|-----------|
 | 5 | Chuối, Táo, Cam, Xoài, Rau muống, Hoa hồng, Hoa sen, Lúa |
 | 4 | Dưa hấu, Sầu riêng, Cà rốt, Bắp cải, Hoa cúc, Thông, Đậu phộng |
-| 3 | Vú sữa, Khế, Su hào, Tía tô, Thạch thảo, Keo, Nấm rơm, Hạt sen |
-| 2 | Dâu da, Bồn bồn, Củ năng, Hoa phù dung, Sến mủ, Nấm mối, Quinoa |
+| 3 | Vú sữa, Khế, Su hào, Tía tô, Thạch thảo, Keo, Nấm mỡ, Hạt sen |
+| 2 | Dâu da, Bồn bồn, Củ năng, Hoa phù dung, Sến mủ, Nấm Portobello, Rau đắng |
 | 1 | Bứa, Rau tề, Củ ấu tẩu, Hoa tầm xuân, Kim giao, Nấm ruốc, Hạt ươi |
 
 Chỗ dễ nhầm: cây/quả đặc sản vùng (Sâm Ngọc Linh, Gạo ST25) được dân vùng đó hoặc dân

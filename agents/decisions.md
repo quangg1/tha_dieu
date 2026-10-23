@@ -22,4 +22,6 @@ Mỗi dòng: ngày · quyết định · lý do.
 - 2026-10-23 · Bộ 120 từ đối chiếu lấy cách đều trong từng mức của bản chấm TASK-001 (24 từ mỗi mức) · lấy mẫu ngẫu nhiên sẽ thiếu mức 4–5 (chỉ 9% kho động vật), mà chỗ lệch đáng lo nhất lại nằm ở đầu quen.
 - 2026-10-23 · Phiếu chấm giao cho model chỉ có hai cột `lexicon · word`, cố tình không ghi `pop` hiện tại · thấy số cũ là mất tính độc lập, bản chấm thành bản xác nhận.
 - 2026-10-23 · Kho giao: DeepSeek v4.1 Flash chấm `monan` (3.198 từ), HY3 chấm `thucvat` (4.586 từ) · hai kho lớn nhất còn lại; giao mỗi bên một kho để hai bản chấm bù phủ cho nhau thay vì trùng nhau.
-
+- 2026-10-23 · Ví dụ neo phải là **tên chính** của mục trong kho, không phải tên khác · `Hủ tiếu Mỹ Tho` bị `soft()` gộp vào mục `Hủ tiếu` (pop 4) nên dòng `3 Hủ tiếu Mỹ Tho` không có tác dụng; neo bằng tên khác là neo vào một con số không tồn tại.
+- 2026-10-23 · Sửa tay 9 từ neo lệch mức trong rubric đã nhận, thay vì mở lại TASK-002 · 9 con số tra được từ chính kho, và TASK-003/004 đã trỏ vào rubric nên trả đi trả lại sẽ chặn hai model. Mọi chỗ sửa ghi trong mục Duyệt.
+- 2026-10-23 · Chưa kết luận bên nào đúng ở 8 chỗ rubric chấm thấp hơn kho một mức · lệch một chiều là dấu hiệu kho có thể chấm quen quá tay, nhưng phải chờ `familiar.ts`; chín từ đó là chỗ bắt đầu soát khi có dữ liệu.
