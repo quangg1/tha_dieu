@@ -15,7 +15,9 @@ mkdirSync(outDir, { recursive: true });
 const rows = (lex: string) => {
   const entries = LEXICONS[lex];
   if (!entries) throw new Error(`không có kho "${lex}"`);
-  return entries.flatMap((e) => e.names.map((n) => ({ lex, word: n, pop: e.pop })));
+  // Chỉ tên chính: `pop` thuộc về cả mục, nên tên khác không chấm riêng được. Chấm riêng thì
+  // người chấm hạ `Water spinach` xuống 1 một cách đúng đắn, và số đó không so được với kho.
+  return entries.map((e) => ({ lex, word: e.names[0], pop: e.pop }));
 };
 const write = (name: string, rs: { lex: string; word: string }[]) => {
   const path = join(outDir, name);
