@@ -2,6 +2,16 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 21:35
+- **Duyệt TASK-001: `đã nhận`.** 2.209 dòng, 0 lệch thứ tự, `pop` nguyên 1–5, phân bố khớp từng số với báo cáo, 14/14 từ neo `RUBRIC.md` đúng mức, 7 dòng `?` đúng, 0 từ trùng chấm khác mức. Phiếu này chỉ có tên chính (0 dòng bí danh) nên không mắc lỗi phiếu của TASK-003/004. Nit: dòng cuối `Vắt xanh` thiếu ô `ghi_chu` rỗng, 3 cột thay vì 4.
+- Lý do duyệt muộn là lỗi kế hoạch của Claude: tiêu chí tự đặt lúc giao ("so với bản chấm riêng của Claude") chờ một bản chấm thứ ba không bao giờ có. Bộ 120 từ chồng đã thay được phép so đó.
+- **So với kho: 133 ca lệch ≥ 2 mức, 0 ca ngược chiều.** Khớp 60%, lệch ≤1 94%, lệch TB **+0,40**. Phân bố lệch −1:67 · 0:1.327 · +1:682 · +2:123 · +3:9 · +4:1 — không một dòng nào ở −2 trở xuống. Nặng nhất: `Khủng long` 1→5, `Lừa` 2→5, `Tép` 2→5, `Voi ma mút` 1→4, `Ruồi nhà` 1→4, `Giòi` 1→4.
+- **133 ca dồn vào bốn nhóm, sửa được theo nhóm:** (1) tuyệt chủng 8 ca (`Khủng long` 1→5, `Megalodon` 1→4, `Dodo` 1→3); (2) vật nuôi và giống gia súc/gia cầm 32 ca (`Lừa` 2→5, `Cừu` 3→5, `Gà Đông Tảo` 2→4); (3) sinh vật quanh nhà 11 ca (`Ruồi nhà` 1→4, `Mối` 3→5, `Lăng quăng` 1→3); (4) hải sản bàn ăn (`Tép` 2→5, `Cua đồng` 3→5, `Hến` 3→5). Nguyên nhân gốc: kho chấm theo "con vật này lạ đến đâu" thay vì "người ta có nói ra từ này không".
+- **SỬA một kết luận Claude nói sai ở TASK-003/004:** `pop` **có** lệch một chiều cố định trên cả ba kho (`dongvat` +0,40, `monan` +0,24, `thucvat` +0,54, ba người chấm khác nhau). Căn cứ cũ là ca `Chim cánh cụt`, nhưng kho cho pop 3 và model cho 4 — kho chấm *lạ* quá tay, không phải quen quá tay; 210 điểm của ca đó đến từ quy tắc trọng tài mặc định "Cực hiếm" (`c397b91`), không liên quan `pop`. Vẫn không chữa bằng hệ số chung vì lệch dồn vào bốn nhóm cụ thể. Đã sửa `decisions.md`.
+- **Bốn task đã xong vòng duyệt:** TASK-001 `đã nhận` · TASK-002 `đã nhận` · TASK-003 `đã nhận` · TASK-004 `đã nhận`.
+- **Chờ chủ dự án:** (1) xác nhận TASK-001 do model nào chấm — nếu là DeepSeek thì +0,40 còn đang *nói nhẹ* khoảng cách thật; (2) có áp sửa `pop` theo bốn nhóm trên không; (3) các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); (4) truy vấn số 2 của báo cáo WorkBuddy.
+- **Tiếp theo (Claude):** khi được đồng ý, dựng bản sửa `pop` theo nhóm cho `dongvat` trước (nhóm rõ nhất, 133 ca), kèm diff xem được trước khi ghi.
+
 ## 2026-10-23 21:30
 - **Duyệt lần hai TASK-004: `đã nhận`.** Sửa đúng 11 ô, không rộng hơn. Kiểm chéo bằng phân bố: từ 11 mức chốt suy ra mức 1 −2, mức 2 0, mức 3 −1, mức 4 +1, mức 5 +2 — khớp **cả năm mức** với phân bố thật (1.845→1.843, 1.446→1.446, 801→800, 411→412, 83→85). Có ô thứ 12 bị sửa thì ít nhất một dòng phải lệch. 0 từ còn chấm hai mức, 37/37 neo đúng, file 120 từ md5 không đổi.
 - **Điều cả hai bên chưa nói ra:** cả 11 ca trùng đều là **dòng bí danh** của hai mục khác nghĩa (`Gạo` = bí danh của `Hoa gạo` pop 4 và `Lúa` pop 5; `Mắm` của `Nước mắm` 5 và `Cây Mắm` 1; `Gỗ lim` của `Lim` 3 và `Cây gỗ lim` 1…). Không phải khuyết điểm của người chấm mà là hệ quả trực tiếp của phiếu rải mọi tên thành dòng riêng. Phiếu đã sửa làm cả lớp lỗi này mất hẳn — quy tắc "lấy nghĩa phổ thông hơn" vẫn đúng nhưng từ nay không có chỗ dùng. Ngoại lệ: `Măng tre` vừa là tên chính (kho pop 1) vừa là bí danh của `Măng` (pop 3); chốt 4 nằm trong danh sách 380 ca "kho chấm lạ quá tay".

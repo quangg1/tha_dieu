@@ -1,7 +1,7 @@
 # TASK-001: chấm độ quen cho 2.209 từ động vật
 
 - Người nhận: WorkBuddy
-- Trạng thái: chờ duyệt
+- Trạng thái: đã nhận
 - Giao ngày: 2026-10-23
 
 ## Bối cảnh
@@ -84,4 +84,59 @@ Chia 2.209 dòng thành 9 dải liên tiếp. Mỗi phần chỉ ghi **dãy số
 Không có. Nếu cần chấm tiếp nhóm kho khác, gửi TSV `lexicon · word` tương ứng là làm được ngay, cùng thang này.
 
 ## Duyệt (Claude điền)
-Claude sẽ so với số hiện tại và với bản chấm riêng của Claude, liệt kê từ lệch ≥ 2 mức, rồi đề xuất sửa. Không ghi đè số cũ khi chủ dự án chưa đồng ý.
+
+**Đã nhận.** Duyệt muộn, và lý do là lỗi kế hoạch của tôi: tiêu chí tôi tự đặt lúc giao ("so với bản chấm riêng của Claude") chờ một bản chấm thứ ba không bao giờ có. Bộ 120 từ chồng của TASK-003/004 đã cho đúng phép so đó, nên không cần nữa.
+
+| Kiểm | Kết quả |
+|---|---|
+| Đủ 2.209 dòng, cùng thứ tự và nguyên văn hai cột đầu với `tu_dong_vat_can_cham.tsv` | đạt, 0 lệch |
+| `pop` nguyên 1–5, không trống | đạt, 0 ô sai |
+| Phân bố có đủ các mức | đạt — 1.124 / 601 / 285 / 126 / 73, khớp từng số với báo cáo |
+| 14 từ neo của `RUBRIC.md` | 14/14 đúng mức (`Chồn hương`→`Cầy hương`, `Rái cá vuốt nhỏ`→`Rái cá vuốt bé`, `Quokka`→`Gấu túi Quokka` như báo cáo nêu) |
+| 7 dòng `?` | đúng 7 dòng, đều mức 1 |
+| Từ trùng chấm khác mức | 0 |
+| Dòng bí danh trong phiếu | 0 — phiếu này chỉ có tên chính, nên không mắc lỗi phiếu của TASK-003/004 |
+
+Một chỗ nhỏ không ảnh hưởng số: dòng cuối (`Vắt xanh`) chỉ có 3 cột, thiếu ô `ghi_chu` rỗng. 2.208 dòng còn lại đủ 4 cột.
+
+### So với kho: 133 ca lệch ≥ 2 mức, **không một ca nào ngược chiều**
+
+| | Số từ |
+|---|---|
+| Khớp đúng | 1.327 (60%) |
+| Lệch ≤ 1 mức | 2.076 (94%) |
+| Lệch ≥ 2 mức, model kéo **lên** | **133** |
+| Lệch ≥ 2 mức, model kéo **xuống** | **0** |
+
+Lệch trung bình **+0,40** (model chấm quen hơn kho). Phân bố lệch: −1: 67 · 0: 1.327 · +1: 682 · +2: 123 · +3: 9 · +4: 1. Không có một dòng nào ở −2 trở xuống.
+
+Nặng nhất: `Khủng long` 1→5 · `Lừa` 2→5 · `Tép` 2→5 · `Voi ma mút` 1→4 · `Hổ răng kiếm` 1→4 · `Khủng long bạo chúa` 1→4 · `Cá mập Megalodon` 1→4 · `Ruồi nhà` 1→4 · `Giun đũa` 1→4 · `Giòi` 1→4.
+
+### Bốn nhóm lỗi của kho, không phải 133 ca rời rạc
+
+Nhóm lại theo nhãn thì thấy rõ kho đang chấm theo **"con vật này lạ đến đâu"** thay vì **"người ta có nói ra từ này không"**:
+
+1. **Tuyệt chủng (8 ca)** — `Khủng long` 1→5, `Khủng long bạo chúa` 1→4, `Voi ma mút` 1→4, `Hổ răng kiếm` 1→4, `Megalodon` 1→4, `Chim Dodo` 1→3. Khủng long là từ trẻ con Việt nào cũng biết; kho để mức 1.
+2. **Vật nuôi và giống gia súc/gia cầm (32 ca)** — `Lừa` 2→5, `Cừu` 3→5, `Thỏ` 3→5, `Bồ câu` 3→5, `Gà chọi` 2→4, `Gà Đông Tảo` 2→4, `Lợn Móng Cái` 1→3, `Gà công nghiệp` 1→3.
+3. **Sinh vật quanh nhà (11 ca)** — `Ruồi nhà` 1→4, `Giòi` 1→4, `Nhặng` 1→3, `Mối` 3→5, `Nhện nhà` 1→3, `Lăng quăng` 1→3, `Kiến ba khoang` 1→3.
+4. **Hải sản trên bàn ăn** — `Tép` 2→5, `Cua đồng` 3→5, `Tôm sú` 3→5, `Hến` 3→5, `Ghẹ xanh` 1→3, `Hàu sữa` 1→3, `Trai sông` 1→3.
+
+Bốn nhóm này sửa được theo nhóm, không phải sửa 133 dòng rời.
+
+### Sửa một kết luận tôi nói sai ở TASK-003/004
+
+Lúc duyệt hai task kia tôi viết rằng `pop` "không lệch theo một chiều cố định", lấy ca `Chim cánh cụt` làm ví dụ kho chấm quen quá tay. **Sai.** Kho cho `Chim cánh cụt` pop **3**, model cho **4** — kho chấm *lạ* quá tay, cùng chiều với mọi thứ khác. 210 điểm của nó đến từ quy tắc trọng tài mặc định "Cực hiếm", đã sửa ở `c397b91`, không liên quan tới `pop`.
+
+Ba kho, ba người chấm, cùng một chiều: `dongvat` **+0,40** · `monan` **+0,24** · `thucvat` **+0,54**. Chiều ngược chỉ là thiểu số nhỏ (58 ca ở `monan`, 35 ở `thucvat`) và **bằng 0** ở `dongvat`. Đã sửa `decisions.md`.
+
+### Một giới hạn khi đọc con số +0,40
+
+Nếu TASK-001 do DeepSeek chấm (chính nó nói vậy trong báo cáo TASK-003) thì bản này nằm trên thang thấp hơn thang chung ~0,4 mức, nên khoảng cách thật giữa kho và độ quen thực tế **còn rộng hơn** +0,40. Cần chủ dự án xác nhận model nào đã chấm.
+
+### Chưa làm, chờ chủ dự án
+
+Không ghi đè `pop` nào. Danh sách đầy đủ 133 ca dựng lại bằng:
+
+```
+npx tsx scripts/compare-pop.ts "C:/Users/ADMIN/WorkBuddy AI/2026-10-23-16-28-25/bilion-rarity-audit/tu_dong_vat_workbuddy.tsv" dongvat
+```
