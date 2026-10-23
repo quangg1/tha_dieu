@@ -34,6 +34,26 @@
   /* Pack layer: neutral until a pack sets it */
   --pack-scene: var(--bi-sky);
   --pack-accent: var(--bi-red);
+
+  /*
+   * Type scale. Every fixed size in the interface comes from here, so two labels that look alike are alike.
+   * Nine steps, each about 1.2× the one below; `base` is reading text and `md` is the label that carries most
+   * of the chrome. The hero moments (the logo, the prompt, the altitude, a result headline) keep their own
+   * fluid `clamp()` where they are: each is tuned to one screen and used once, and a shared token there would
+   * only be the same number under another name.
+   */
+  --t-xs: 11px;
+  --t-sm: 12px;
+  --t-md: 13px;
+  --t-base: 15px;
+  --t-lg: 17px;
+  --t-xl: 20px;
+  --t-2xl: 25px;
+  --t-3xl: 28px;
+  --t-4xl: 34px;
+  --t-5xl: 44px;
+  /* The one fluid size used on more than one screen: an answer or a name under a headline. */
+  --t-fluid-sub: clamp(22px, 6.6vw, 34px);
 }
 
 /* Theme packs: scenery and accent only. */
