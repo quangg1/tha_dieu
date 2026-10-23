@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { TIERS } from '../../shared/scoring.js';
+import { TIER_COLOR } from '../icons';
 import { api, type Support } from '../api';
 import { BANKS, vietQr } from '../../shared/banks.js';
 
@@ -179,13 +180,14 @@ export default function Admin({ onExit }: { onExit: () => void }) {
   );
 }
 
-type Tab = 'overview' | 'questions' | 'reports' | 'feedback' | 'names' | 'book';
+type Tab = 'overview' | 'questions' | 'reports' | 'feedback' | 'names' | 'safety' | 'book';
 const TABS: [Tab, string][] = [
   ['overview', 'Tổng quan'],
   ['questions', 'Câu hỏi hôm nay'],
   ['reports', 'Báo cáo & lỗi'],
   ['feedback', 'Góp ý & ủng hộ'],
   ['names', 'Tên trên bảng'],
+  ['safety', 'Gian lận'],
   ['book', 'Sổ làng'],
 ];
 
@@ -197,7 +199,8 @@ function Insights({ tab, ins, token, onClosed }: { tab: Tab; ins: Ins; token: st
   if (tab === 'overview') return <Overview ins={ins} />;
   if (tab === 'questions') return <Questions ins={ins} />;
   if (tab === 'feedback') return <Feedback token={token} />;
-  if (tab === 'names') return <><Names token={token} /><Flags token={token} /></>;
+  if (tab === 'names') return <Names token={token} />;
+  if (tab === 'safety') return <Safety token={token} />;
   return <Reports ins={ins} token={token} onClosed={onClosed} />;
 }
 
@@ -526,55 +529,196 @@ function Names({ token }: { token: string }) {
   );
 }
 
-/** Flights the check held off the board: many hidden answers, many unknown ones, or answers too fast to be typed. */
-function Flags({ token }: { token: string }) {
+/** Anti-cheat dashboard: the numbers, today's spread, the runs to watch and the runs held off the board, each opened turn by turn. */
+function Safety({ token }: { token: string }) {
+  const [s, setS] = useState<Awaited<ReturnType<typeof api.admin.safety>> | null>(null);
   const [list, setList] = useState<Awaited<ReturnType<typeof api.admin.flags>>['flags']>([]);
+  const [open, setOpen] = useState<string | null>(null);
+  const [detail, setDetail] = useState<Awaited<ReturnType<typeof api.admin.flight>> | null>(null);
   const [msg, setMsg] = useState('');
-  useEffect(() => {
-    api.admin
-      .flags(token)
-      .then((r) => setList(r.flags))
-      .catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tải được.'));
-  }, [token]);
+  const refresh = () => {
+    api.admin.safety(token).then(setS).catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tải được.'));
+    api.admin.flags(token).then((r) => setList(r.flags)).catch(() => {});
+  };
+  useEffect(refresh, [token]);
+  const look = async (pid: string, day: string) => {
+    const key = pid + day;
+    if (open === key) return setOpen(null);
+    setOpen(key);
+    setDetail(null);
+    try {
+      setDetail(await api.admin.flight(token, pid, day));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Chưa mở được.');
+    }
+  };
   const set = async (f: (typeof list)[number], status: 'cleared' | 'open') => {
     try {
       await api.admin.flagSet(token, f.player_id, f.day, status);
-      setList((l) => l.map((x) => (x.player_id === f.player_id && x.day === f.day ? { ...x, status } : x)));
+      refresh();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Chưa lưu được.');
     }
   };
+  const Detail = () =>
+    !detail ? (
+      <p className="gd-msg" style={{ margin: 0 }}>Đang mở…</p>
+    ) : (
+      <div className="tbl">
+        <table>
+          <thead><tr><th>Câu hỏi</th><th>Đáp án</th><th>Bậc</th><th>Thời gian</th><th>Sổ làng</th></tr></thead>
+          <tbody>
+            {detail.rows.map((r, i) => (
+              <tr key={i}>
+                <td>{r.prompt}</td>
+                <td><b>{r.answer ?? '—'}</b></td>
+                <td style={r.tier != null && r.tier >= 0 ? { color: TIER_COLOR[r.tier], fontWeight: 700 } : undefined}>{r.tier != null && r.tier >= 0 ? TIERS[r.tier].name : 'hết gió'}</td>
+                <td style={r.fast ? { color: '#c0392b', fontWeight: 700 } : undefined}>{r.ms != null ? `${(r.ms / 1000).toFixed(1)}s` : '—'}{r.fast ? ' · quá nhanh' : ''}</td>
+                <td style={r.outside ? { color: '#c0392b', fontWeight: 700 } : undefined}>{r.answer ? (r.outside ? 'ngoài sổ' : 'có trong sổ') : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="gd-msg" style={{ margin: '6px 0 0' }}>Điểm đáng ngờ: <b>{detail.score}</b>{detail.reasons.length ? ` · ${detail.reasons.join('; ')}` : ''}</p>
+      </div>
+    );
+  if (!s) return <section className="gd-paper">{msg ? <p className="gd-msg gd-msg--hint" style={{ margin: 0 }}>{msg}</p> : <p className="gd-msg" style={{ margin: 0 }}>Đang tải…</p>}</section>;
+  const peak = Math.max(1, ...s.spread);
+  const labels = ['0 · bình thường', '1 · hơi lạ', '2 · đáng để mắt', `${s.threshold}+ · bị giữ`];
+  const open_ = list.filter((f) => f.status === 'open');
+  const cleared = list.filter((f) => f.status === 'cleared');
+  const tiles: [string | number, string, string?][] = [
+    [s.totals.held, 'chuyến đang bị giữ', 'không lên bảng xếp hạng'],
+    [s.now.heldToday, 'bị giữ hôm nay', `trên ${s.now.players} người bay`],
+    [s.totals.cleared, 'đã cho lên bảng', 'trưởng làng xem và cho qua'],
+    [s.now.krill, 'Độc nhất tìm ra hôm nay'],
+    [s.now.outside, 'đáp án ngoài sổ hôm nay'],
+    [s.now.fast, 'câu trả lời quá nhanh hôm nay', 'dưới 1,2 giây'],
+  ];
+  const peakDay = Math.max(1, ...s.days.map((d) => d.krill));
+  const Row = ({ f }: { f: (typeof list)[number] }) => (
+    <Fragment>
+      <tr style={f.status === 'cleared' ? { opacity: 0.6 } : undefined}>
+        <td>{dm(f.day)}</td>
+        <td style={{ wordBreak: 'break-word' }}>{f.name ?? f.player_id.slice(0, 8)}</td>
+        <td>{f.score}</td>
+        <td style={{ wordBreak: 'break-word' }}>{f.reasons}</td>
+        <td style={{ whiteSpace: 'nowrap' }}>
+          <button className="gd-chip" onClick={() => void look(f.player_id, f.day)}>{open === f.player_id + f.day ? 'Đóng' : 'Xem từng câu'}</button>{' '}
+          {f.status === 'open' ? (
+            <button className="gd-chip" onClick={() => void set(f, 'cleared')}>Cho lên bảng</button>
+          ) : (
+            <button className="gd-chip" onClick={() => void set(f, 'open')}>Gỡ lại</button>
+          )}
+        </td>
+      </tr>
+      {open === f.player_id + f.day && <tr><td colSpan={5}><Detail /></td></tr>}
+    </Fragment>
+  );
   return (
-    <section className="gd-paper">
-      <div className="gd-label" style={{ marginBottom: 8 }}>Chuyến bay đáng ngờ</div>
-      <p className="gd-msg" style={{ margin: '0 0 8px' }}>Những chuyến bay này bị gỡ khỏi bảng; người chơi vẫn thấy điểm và hạng bình thường. Bấm “Cho lên bảng” nếu bạn thấy chuyến bay hợp lệ, hệ thống sẽ không gắn cờ lại.</p>
-      {msg && <p className="gd-msg gd-msg--hint">{msg}</p>}
-      {list.length === 0 ? (
-        <p className="gd-msg" style={{ margin: 0 }}>Chưa có chuyến bay nào bị gắn cờ.</p>
-      ) : (
-        <div className="tbl">
-          <table>
-            <thead><tr><th>Ngày</th><th>Tên</th><th>Điểm</th><th>Lý do</th><th /></tr></thead>
-            <tbody>
-              {list.map((f) => (
-                <tr key={f.player_id + f.day} style={f.status === 'cleared' ? { opacity: 0.5 } : undefined}>
-                  <td>{f.day}</td>
-                  <td style={{ wordBreak: 'break-word' }}>{f.name ?? f.player_id.slice(0, 8)}</td>
-                  <td>{f.score}</td>
-                  <td style={{ wordBreak: 'break-word' }}>{f.reasons}</td>
-                  <td>
-                    {f.status === 'open' ? (
-                      <button className="gd-chip" onClick={() => void set(f, 'cleared')}>Cho lên bảng</button>
-                    ) : (
-                      <button className="gd-chip" onClick={() => void set(f, 'open')}>Gỡ lại</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Kiểm kê gian lận · {dm(s.today)}</div>
+        <p className="gd-msg" style={{ margin: '0 0 10px' }}>
+          Mỗi chuyến bay được chấm độ đáng ngờ khi người chơi lưu kết quả. Từ {s.threshold} điểm trở lên thì chuyến bay bị giữ: không lên bảng, nhưng người chơi vẫn thấy điểm và hạng như bình thường. Người từng bị giữ (cùng ID hoặc cùng thiết bị) bị giữ ngay khi có dấu hiệu đầu tiên.
+        </p>
+        <div className="adm-tiles">
+          {tiles.map(([v, l, sub]) => (
+            <div key={l}>
+              <b>{v}</b>
+              <span>{l}</span>
+              {sub && <em>{sub}</em>}
+            </div>
+          ))}
         </div>
+        {msg && <p className="gd-msg gd-msg--hint">{msg}</p>}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 8 }}>Hôm nay, người chơi theo điểm đáng ngờ</div>
+        {s.spread.map((n, i) => (
+          <div key={i} className="adm-spread">
+            <span>{labels[i]}</span>
+            <span className="adm-bar" style={{ width: `${(n / peak) * 100}%`, background: i >= 3 ? '#c0392b' : i === 2 ? '#e08a1e' : i === 1 ? '#f2b630' : '#3a8fd8' }} />
+            <b>{n}</b>
+          </div>
+        ))}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 8 }}>14 ngày qua</div>
+        {s.days.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa có dữ liệu.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Ngày</th><th>Người bay</th><th>Độc nhất</th><th /><th>Quá nhanh</th><th>Bị giữ</th><th>Cho qua</th></tr></thead>
+              <tbody>
+                {s.days.map((d) => (
+                  <tr key={d.day}>
+                    <td>{dm(d.day)}</td>
+                    <td>{d.players}</td>
+                    <td>{d.krill}</td>
+                    <td style={{ width: 100 }}><span className="adm-bar" style={{ width: `${(d.krill / peakDay) * 100}%` }} /></td>
+                    <td>{d.fast}</td>
+                    <td style={d.held ? { color: '#c0392b', fontWeight: 700 } : undefined}>{d.held}</td>
+                    <td>{d.cleared}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Đang bị giữ ({open_.length})</div>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Bấm “Xem từng câu” để đọc đáp án, thời gian trả lời và đáp án có trong sổ làng hay không. Hợp lệ thì “Cho lên bảng”, hệ thống sẽ không gắn cờ lại chuyến bay đó.</p>
+        {open_.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Không có chuyến bay nào đang bị giữ.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Ngày</th><th>Tên</th><th>Điểm</th><th>Lý do</th><th /></tr></thead>
+              <tbody>{open_.map((f) => <Row key={f.player_id + f.day} f={f} />)}</tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      <section className="gd-paper">
+        <div className="gd-label" style={{ marginBottom: 4 }}>Cần để mắt hôm nay ({s.watch.length})</div>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Có dấu hiệu lạ nhưng chưa đủ {s.threshold} điểm để bị giữ.</p>
+        {s.watch.length === 0 ? (
+          <p className="gd-msg" style={{ margin: 0 }}>Chưa có ai.</p>
+        ) : (
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Tên</th><th>Điểm</th><th>Dấu hiệu</th><th /></tr></thead>
+              <tbody>
+                {s.watch.map((w) => (
+                  <Fragment key={w.player_id}>
+                    <tr>
+                      <td>{w.name ?? w.player_id.slice(0, 8)}</td>
+                      <td>{w.score}</td>
+                      <td style={{ wordBreak: 'break-word' }}>{w.reasons.join('; ')}</td>
+                      <td><button className="gd-chip" onClick={() => void look(w.player_id, s.today)}>{open === w.player_id + s.today ? 'Đóng' : 'Xem từng câu'}</button></td>
+                    </tr>
+                    {open === w.player_id + s.today && <tr><td colSpan={4}><Detail /></td></tr>}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      {cleared.length > 0 && (
+        <section className="gd-paper">
+          <div className="gd-label" style={{ marginBottom: 8 }}>Đã cho lên bảng ({cleared.length})</div>
+          <div className="tbl">
+            <table>
+              <thead><tr><th>Ngày</th><th>Tên</th><th>Điểm</th><th>Lý do</th><th /></tr></thead>
+              <tbody>{cleared.map((f) => <Row key={f.player_id + f.day} f={f} />)}</tbody>
+            </table>
+          </div>
+        </section>
       )}
-    </section>
+    </>
   );
 }

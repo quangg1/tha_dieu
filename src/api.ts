@@ -224,6 +224,22 @@ export const api = {
     names: (token: string) => call<{ names: { player_id: string; name: string | null; score: number; muted: boolean }[] }>('admin/names', undefined, { 'x-admin-token': token }),
     flags: (token: string) => call<{ flags: { player_id: string; day: string; reasons: string; score: number; status: string; name: string | null }[] }>('admin/flags', undefined, { 'x-admin-token': token }),
     flagSet: (token: string, playerId: string, day: string, status: 'cleared' | 'open') => call<{ ok: boolean }>('admin/flag-set', { playerId, day, status }, { 'x-admin-token': token }),
+    safety: (token: string) =>
+      call<{
+        today: string;
+        threshold: number;
+        totals: { held: number; cleared: number };
+        now: { players: number; heldToday: number; krill: number; outside: number; fast: number };
+        spread: number[];
+        days: { day: string; players: number; krill: number; fast: number; held: number; cleared: number }[];
+        watch: { player_id: string; name: string | null; score: number; reasons: string[] }[];
+      }>('admin/safety', undefined, { 'x-admin-token': token }),
+    flight: (token: string, playerId: string, day: string) =>
+      call<{ rows: { prompt: string; answer: string | null; tier: number | null; ms: number | null; outside: boolean; fast: boolean }[]; score: number; reasons: string[] }>(
+        `admin/flight?playerId=${encodeURIComponent(playerId)}&day=${encodeURIComponent(day)}`,
+        undefined,
+        { 'x-admin-token': token },
+      ),
     mute: (token: string, playerId: string) => call<{ ok: boolean }>('admin/mute', { playerId }, { 'x-admin-token': token }),
   },
 };

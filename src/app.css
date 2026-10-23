@@ -834,3 +834,6 @@ button svg,a svg{flex-shrink:0}
 .alist-name{font-size:13px;color:var(--bi-ink);background:rgba(0,0,0,.05);border-radius:8px;padding:2px 8px}
 .alist-name.mine{outline:2px solid #f2b630;font-weight:700}
 .alist-empty{font-size:13px;color:var(--bi-muted);margin:0}
+
+.adm-spread{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;gap:10px;margin:6px 0;font-size:13px}
+.adm-spread b{text-align:right}

@@ -824,6 +824,15 @@ describe('flights that look wrong', () => {
     await S.setFlag(db, bots[0], d, 'cleared');
     await S.finish(db, { playerId: bots[0], day: d, mode: 'daily', dev: 'dev-x1', since: '2031-01-01' });
     expect((await S.board(db, d, 'daily')).players).toBe(1);
+    // The dashboard sees the flight turn by turn, with the numbers behind it.
+    const f = await S.adminFlight(db, bots[0], d);
+    expect(f.rows).toHaveLength(7);
+    expect(f.rows.every((r) => r.tier === 5)).toBe(true);
+    expect(f.score).toBeGreaterThanOrEqual(S.SUSPECT_AT);
+    const sf = await S.adminSafety(db);
+    expect(sf.totals.cleared).toBeGreaterThanOrEqual(1);
+    expect(sf.spread).toHaveLength(4);
+    expect(Array.isArray(sf.days)).toBe(true);
   });
 
   it('checks a partial flight too, and holds a new id from the device of a held player on the first sign', async () => {

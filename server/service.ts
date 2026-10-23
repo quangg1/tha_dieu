@@ -1416,6 +1416,95 @@ export async function adminFlags(db: Db) {
   );
 }
 
+export interface FlightRow {
+  prompt: string;
+  answer: string | null;
+  tier: number | null;
+  ms: number | null;
+  outside: boolean;
+  fast: boolean;
+}
+
+/** One flight turn by turn, for the village head: what was typed, how hard it landed, how fast, and whether the book knew it. */
+export async function adminFlight(db: Db, playerId: string, day: string): Promise<{ rows: FlightRow[]; score: number; reasons: string[] }> {
+  const turns = await db.query<{ question_id: string; answer_key: string | null; tier: number | null; ms: number | null }>(
+    `select question_id, answer_key, tier, (extract(epoch from (answered_at - started_at)) * 1000)::int as ms
+     from turns where player_id=$1 and day=$2::date and mode='daily' order by started_at`,
+    [playerId, day],
+  );
+  const rows: FlightRow[] = [];
+  for (const t of turns) {
+    const base = BOOK_BY_ID.get(t.question_id);
+    let answer: string | null = null;
+    if (t.answer_key && base) answer = (await loadQuestion(db, t.question_id)).answers.get(t.answer_key)?.display ?? t.answer_key;
+    rows.push({
+      prompt: base?.prompt ?? t.question_id,
+      answer,
+      tier: t.tier,
+      ms: t.ms,
+      outside: !!t.answer_key && !base?.answers.some((a) => a.key === t.answer_key),
+      fast: t.ms != null && t.ms < TOO_FAST_MS && t.tier != null && t.tier >= 0,
+    });
+  }
+  const s = suspicion(turns.map((r) => ({ questionId: r.question_id, key: r.answer_key, tier: r.tier, ms: r.ms })));
+  return { rows, score: s.score, reasons: s.reasons };
+}
+
+/** The numbers behind the flight check, for the village head's dashboard: the last two weeks, and today's suspicion spread. */
+export async function adminSafety(db: Db) {
+  const today = vnToday();
+  const from = vnToday(new Date(Date.now() - 13 * 86_400_000));
+  const series = await db.query<{ day: string; players: number; krill: number; fast: number }>(
+    `select day::text as day, count(distinct player_id)::int as players,
+            count(*) filter (where tier = 5)::int as krill,
+            count(*) filter (where tier >= 0 and extract(epoch from (answered_at - started_at)) * 1000 < $2)::int as fast
+     from turns where mode='daily' and day >= $1::date and answered_at is not null group by day order by day desc`,
+    [from, TOO_FAST_MS],
+  );
+  const flagged = await db.query<{ day: string; held: number; cleared: number }>(
+    `select day::text as day, count(*) filter (where status='open')::int as held, count(*) filter (where status='cleared')::int as cleared
+     from flags where day >= $1::date group by day`,
+    [from],
+  );
+  const days = series.map((s) => ({ ...s, held: flagged.find((f) => f.day === s.day)?.held ?? 0, cleared: flagged.find((f) => f.day === s.day)?.cleared ?? 0 }));
+  const [totals] = await db.query<{ held: number; cleared: number }>(
+    `select count(*) filter (where status='open')::int as held, count(*) filter (where status='cleared')::int as cleared from flags`,
+  );
+  // Today: everyone's flight through the same check, so the spread is visible and near misses can be watched.
+  const turns = await db.query<{ player_id: string; question_id: string; answer_key: string | null; tier: number | null; ms: number | null }>(
+    `select player_id, question_id, answer_key, tier, (extract(epoch from (answered_at - started_at)) * 1000)::int as ms
+     from turns where day=$1::date and mode='daily' and answered_at is not null`,
+    [today],
+  );
+  const by = new Map<string, FlightTurn[]>();
+  for (const r of turns) (by.get(r.player_id) ?? by.set(r.player_id, []).get(r.player_id)!).push({ questionId: r.question_id, key: r.answer_key, tier: r.tier, ms: r.ms });
+  const spread = [0, 0, 0, 0];
+  const scored: { player_id: string; score: number; reasons: string[] }[] = [];
+  let outside = 0;
+  for (const [pid, ts] of by) {
+    const s = suspicion(ts);
+    spread[Math.min(3, s.score)]++;
+    if (s.score > 0) scored.push({ player_id: pid, ...s });
+    outside += ts.filter((x) => x.tier != null && x.tier >= 0 && x.key && !BOOK_BY_ID.get(x.questionId)?.answers.some((a) => a.key === x.key)).length;
+  }
+  const held = new Set((await db.query<{ player_id: string }>(`select player_id from flags where day=$1::date and status='open'`, [today])).map((r) => r.player_id));
+  const names = new Map((await db.query<{ player_id: string; name: string | null }>(`select player_id, name from runs where day=$1::date and mode='daily'`, [today])).map((r) => [r.player_id, r.name]));
+  const watch = scored
+    .filter((s) => !held.has(s.player_id))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 30)
+    .map((s) => ({ ...s, name: names.get(s.player_id) ?? null }));
+  return {
+    today,
+    threshold: SUSPECT_AT,
+    totals: { held: totals?.held ?? 0, cleared: totals?.cleared ?? 0 },
+    now: { players: by.size, heldToday: held.size, krill: turns.filter((r) => r.tier === CUNG_TRANG).length, outside, fast: turns.filter((r) => r.tier != null && r.tier >= 0 && r.ms != null && r.ms < TOO_FAST_MS).length },
+    spread,
+    days,
+    watch,
+  };
+}
+
 /** The village head's decision: 'cleared' puts the run back on the board, 'open' holds it again. */
 export async function setFlag(db: Db, playerId: string, day: string, status: 'cleared' | 'open') {
   await db.query(`update flags set status=$3 where player_id=$1 and day=$2::date`, [playerId, day, status]);

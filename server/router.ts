@@ -333,6 +333,22 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
       return { flags: await S.adminFlags(db) };
     },
   },
+  'admin/safety': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return S.adminSafety(db);
+    },
+  },
+  'admin/flight': {
+    method: 'GET',
+    admin: true,
+    async run({ db, query }) {
+      const day = query.get('day') ?? '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new S.GameError(400, 'Ngày không hợp lệ.');
+      return S.adminFlight(db, S.checkPlayer(query.get('playerId')), day);
+    },
+  },
   'admin/flag-set': {
     method: 'POST',
     admin: true,
