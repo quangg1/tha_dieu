@@ -178,6 +178,24 @@ describe('chat shorthand', () => {
   });
 });
 
+describe('trailing filler words', () => {
+  const m = new Matcher(['bai'], [
+    { key: 'dvt', aliases: ['Đừng Về Trễ'], priorTier: 4 },
+    { key: 'lt', aliases: ['Lạc Trôi'], priorTier: 0 },
+    { key: 'cnd', aliases: ['Chạy Ngay Đi'], priorTier: 1 },
+    { key: 'ctktvn', aliases: ['Chúng Ta Không Thuộc Về Nhau'], priorTier: 2 },
+  ]);
+  it('reads an answer with a sentence-final filler tacked on ("nha", "nhé")', () => {
+    expect(m.match('đừng về trễ nha')).toEqual({ key: 'dvt', exact: true });
+    expect(m.match('lạc trôi nhé')).toEqual({ key: 'lt', exact: true });
+  });
+  it('does not cut a word that is really the end of the title', () => {
+    expect(m.match('Chạy Ngay Đi')).toEqual({ key: 'cnd', exact: true });
+    expect(m.match('chạy ngay đi')?.key).toBe('cnd');
+    expect(m.match('chúng ta không thuộc về nhau')?.key).toBe('ctktvn');
+  });
+});
+
 describe('day band by rank, journey', async () => {
   const { dayBand } = await import('./scoring.js');
   const { journeyAt, stopsBetween, STATIONS } = await import('./journey.js');

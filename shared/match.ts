@@ -136,6 +136,24 @@ export function expandShorthand(input: string): string {
     .join(' ');
 }
 
+/**
+ * Sentence-final filler words Vietnamese players tack onto an answer ("đừng về trễ nha", "lạc trôi nhé"). They carry
+ * no meaning, but their letters push the input past the typo budget, so the answer is refused. We only ever drop them
+ * as a last resort, after a normal match has already failed, so a title that really ends in one of these words
+ * ("Chạy Ngay Đi") still matches on its own first and is never cut.
+ */
+const TRAILING_PARTICLES = new Set([
+  'nha', 'nhé', 'nhe', 'nhá', 'nhỉ', 'nhở', 'ha', 'hả', 'á', 'ạ', 'ấy', 'đấy', 'đó', 'vậy', 'nào', 'nhau',
+]);
+
+/** Drops trailing filler words while at least two words remain; returns null when nothing was dropped. */
+export function stripTrailing(input: string): string | null {
+  const words = input.normalize('NFC').trim().split(/\s+/).filter(Boolean);
+  let end = words.length;
+  while (end > 1 && TRAILING_PARTICLES.has(words[end - 1].toLowerCase())) end--;
+  return end < words.length ? words.slice(0, end).join(' ') : null;
+}
+
 /** Whether the player typed Vietnamese tone or vowel marks (or đ). */
 function marked(s: string) {
   return /[\u00c0-\u1ef9]/.test(s.normalize('NFC'));
@@ -210,9 +228,19 @@ export class Matcher {
     const first = this.matchOne(input);
     if (first?.exact) return first;
     const long = expandShorthand(input);
-    if (long === input.trim()) return first;
-    const second = this.matchOne(long);
-    return second && (second.exact || !first) ? second : first;
+    let best = first;
+    if (long !== input.trim()) {
+      const second = this.matchOne(long);
+      if (second?.exact) return second;
+      if (second && !best) best = second;
+    }
+    // Last resort: drop sentence-final filler ("…nha", "…nhé") that a normal match could not see past.
+    const trimmed = stripTrailing(long);
+    if (trimmed) {
+      const third = this.matchOne(trimmed);
+      if (third?.exact || (third && !best)) return third;
+    }
+    return best;
   }
 
   private matchOne(input: string): MatchResult | null {
