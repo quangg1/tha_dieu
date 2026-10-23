@@ -156,7 +156,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
         station: mode === 'daily' ? journeyAt(st.total).here.name : undefined,
         link,
         skin: prefs.skin,
-        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.74, kiteY: 0.2, decade: 0.5, kiteSize: 0.26, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
+        scene: sky.snapshot(1080, 1350, result.altitude, { kiteX: 0.5, kiteY: 0.22, decade: 0.5, kiteSize: 0.24, kiteMax: 300, ruler: false, ground: -1.36, noKite: true }),
       });
       if (!blob) throw new Error();
       const how = await shareCard(blob, text, link);

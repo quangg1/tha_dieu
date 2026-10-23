@@ -242,35 +242,42 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
   }
-  // A soft shade under the footer, so it sits on any sky.
-  const fb = ctx.createLinearGradient(0, H - 300, 0, H);
+  // A shade rising from the bottom, so the words below read on any sky (sunny, cloud sea, stars); a lighter one at
+  // the top for the tag.
+  const fb = ctx.createLinearGradient(0, H - 560, 0, H);
   fb.addColorStop(0, 'rgba(6,14,36,0)');
-  fb.addColorStop(1, 'rgba(6,14,36,.5)');
+  fb.addColorStop(0.45, 'rgba(6,14,36,.55)');
+  fb.addColorStop(1, 'rgba(6,14,36,.86)');
   ctx.fillStyle = fb;
-  ctx.fillRect(0, H - 300, W, 300);
+  ctx.fillRect(0, H - 560, W, 560);
+  const ft = ctx.createLinearGradient(0, 0, 0, 200);
+  ft.addColorStop(0, 'rgba(6,14,36,.32)');
+  ft.addColorStop(1, 'rgba(6,14,36,0)');
+  ctx.fillStyle = ft;
+  ctx.fillRect(0, 0, W, 200);
 
-  // The kite, high on the right, and where its tail starts.
-  const kx = 800;
-  const ky = 250;
-  const kw = 290;
+  // The kite in the middle of the sky, the hero of the card, and where its tail starts.
+  const kx = W / 2;
+  const ky = 232;
+  const kw = 210;
   const kh = (kw * 220) / 120;
-  const tilt = -0.2;
+  const tilt = -0.12;
   const art = kiteArt(d.skin);
   const tip0 = art.tails[0]?.at ?? [60, 214];
   const tx = (tip0[0] / 120 - 0.5) * kw;
   const ty = (tip0[1] / 220 - 0.5) * kh;
   const tip = { x: kx + tx * Math.cos(tilt) - ty * Math.sin(tilt), y: ky + tx * Math.sin(tilt) + ty * Math.cos(tilt) };
 
-  // The tail: a long S from the kite down across the card.
+  // The tail: a loose S swinging under the kite, down to just above the words.
   const segs: Pt[][] = [
-    [tip, { x: tip.x + 40, y: tip.y + 150 }, { x: 740, y: 700 }, { x: 580, y: 740 }],
-    [{ x: 580, y: 740 }, { x: 400, y: 784 }, { x: 300, y: 880 }, { x: 420, y: 960 }],
-    [{ x: 420, y: 960 }, { x: 540, y: 1040 }, { x: 720, y: 990 }, { x: 800, y: 1110 }],
+    [tip, { x: tip.x + 40, y: tip.y + 70 }, { x: 820, y: 470 }, { x: 710, y: 545 }],
+    [{ x: 710, y: 545 }, { x: 590, y: 625 }, { x: 270, y: 565 }, { x: 290, y: 650 }],
+    [{ x: 290, y: 650 }, { x: 310, y: 735 }, { x: 640, y: 690 }, { x: 770, y: 760 }],
   ];
   const tailPath = () => {
     ctx.beginPath();
     ctx.moveTo(segs[0][0].x, segs[0][0].y);
-    for (const s of segs) ctx.bezierCurveTo(s[1].x, s[1].y, s[2].x, s[2].y, s[3].x, s[3].y);
+    for (const sg of segs) ctx.bezierCurveTo(sg[1].x, sg[1].y, sg[2].x, sg[2].y, sg[3].x, sg[3].y);
   };
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -283,7 +290,12 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   ctx.lineWidth = 5;
   ctx.stroke();
 
-  // Kite on top of the tail's start.
+  // A soft halo behind the kite, then the kite on top of the tail's start.
+  const halo = ctx.createRadialGradient(kx, ky, 20, kx, ky, 300);
+  halo.addColorStop(0, night ? 'rgba(190,170,255,.42)' : 'rgba(255,248,220,.5)');
+  halo.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(kx - 340, ky - 340, 680, 680);
   const img = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sailSvg(d.skin)));
   if (img) {
     ctx.save();
@@ -299,117 +311,120 @@ export async function renderKiteCard(d: KiteCardData): Promise<Blob | null> {
   // Seven bows along the tail, biggest near the kite.
   const cells = d.grid.split('').slice(0, 7);
   while (cells.length < 7) cells.push('x');
-  const at = evenly(segs, 7, 0.1, 0.99);
+  const at = evenly(segs, 7, 0.08, 0.99);
   cells.forEach((ch, i) => {
     const { p, a } = tailAt(segs, at[i]);
     const tier = ch === 'x' ? null : Number(ch);
-    bow(ctx, p, a, 128 - i * 4, Number.isNaN(tier as number) ? null : tier, i, d.points?.[i]);
+    bow(ctx, p, a, 112 - i * 4, Number.isNaN(tier as number) ? null : tier, i, d.points?.[i]);
   });
 
-  // Words, top left.
+  // The tag, top left.
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
   const tag = `Bilion · ${d.dayLabel}`;
   ctx.font = `700 30px ${BODY}`;
   ctx.fillStyle = '#e5533d';
   ctx.beginPath();
-  ctx.roundRect(72, 80, ctx.measureText(tag).width + 48, 58, 29);
+  ctx.roundRect(64, 64, ctx.measureText(tag).width + 48, 58, 29);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.fillText(tag, 96, 120);
+  ctx.fillText(tag, 88, 104);
 
-  // The words sit on a pane of dark glass, like the result screen: clean over clouds, stars or sunset.
-  const PX = 56;
-  const PW = 600;
-  const t = fitText(ctx, d.title, 900, DISPLAY, PW - 72, 104, 72);
-  const sub = fitText(ctx, d.subtitle, 600, BODY, PW - 72, 36, 30);
-  const titleH = t.lines.length * t.size * 0.98;
-  const subH = sub.lines.length * (sub.size + 10);
-  const top = 170;
-  const yTitle = top + 36 + t.size * 0.8;
-  const ySub = top + 36 + titleH + 22 + sub.size * 0.8;
-  const yAlt = top + 36 + titleH + 22 + subH + 30 + 88;
-  const yMeta = yAlt + 52;
-  const second = [d.milestone ? `qua ${d.milestone}` : '', d.beaten != null ? `cao hơn ${d.beaten}% làng` : ''].filter(Boolean).join(' · ');
-  // Extra lines: the rarest answer and the long trip, each on its own row.
-  const extras: { text: string; color?: string }[] = [];
-  if (d.rare) extras.push({ text: `“${d.rare.text}” · ${TIERS[d.rare.tier]?.name ?? ''}`, color: TIER_COLOR[d.rare.tier] });
-  if (d.station) extras.push({ text: `Hành trình: ${d.station}` });
-  const yExtra = yMeta + 66;
-  const bottom = yMeta + 40 + extras.length * 54;
-  ctx.save();
-  ctx.fillStyle = 'rgba(10,20,42,.62)';
-  ctx.shadowColor = 'rgba(4,10,30,.35)';
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 16;
-  ctx.beginPath();
-  ctx.roundRect(PX, top, PW, bottom - top, 40);
-  ctx.fill();
-  ctx.restore();
-  ctx.strokeStyle = 'rgba(255,255,255,.14)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(PX, top, PW, bottom - top, 40);
-  ctx.stroke();
+  // The words, bottom left, straight on the shaded sky: verdict, points, then the details in one line.
+  const X = 72;
+  const MAXW = W - 144;
+  const t = fitText(ctx, d.title, 900, DISPLAY, MAXW, 112, 76);
+  const sub = fitText(ctx, d.subtitle, 600, BODY, MAXW, 36, 30);
+  const meta = [`Diều ${formatAlt(d.altitude)}`, d.milestone ? `qua ${d.milestone}` : '', d.beaten != null ? `cao hơn ${d.beaten}% làng` : ''].filter(Boolean).join(' · ');
+  const chips: { text: string; color?: string }[] = [];
+  if (d.rare) chips.push({ text: `“${d.rare.text}” · ${TIERS[d.rare.tier]?.name ?? ''}`, color: TIER_COLOR[d.rare.tier] });
+  if (d.station) chips.push({ text: `Hành trình: ${d.station}` });
 
-  const X = PX + 36;
+  // Lay out bottom-up from the footer so nothing ever overlaps it.
+  const footTop = H - 140;
+  let y = footTop - 44;
+  const chipY = chips.length ? y : 0;
+  if (chips.length) y -= 70;
+  const metaY = y;
+  y -= 62;
+  const scoreY = y;
+  y -= 96 + 18;
+  const subY = y - (sub.lines.length - 1) * (sub.size + 10);
+  y = subY - sub.size - 22;
+  const titleY = y - (t.lines.length - 1) * t.size * 0.98;
+
   ctx.fillStyle = '#ffffff';
   ctx.shadowColor = '#e5533d';
-  ctx.shadowOffsetY = 6;
+  ctx.shadowOffsetY = 7;
   ctx.font = `900 ${t.size}px ${DISPLAY}`;
-  t.lines.forEach((l, i) => ctx.fillText(l, X, yTitle + i * t.size * 0.98));
-  ctx.shadowColor = 'transparent';
-  ctx.shadowOffsetY = 0;
-  ctx.fillStyle = 'rgba(255,255,255,.88)';
+  t.lines.forEach((l, i) => ctx.fillText(l, X, titleY + i * t.size * 0.98));
+  ctx.shadowColor = 'rgba(4,10,30,.6)';
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = 'rgba(255,255,255,.92)';
   ctx.font = `600 ${sub.size}px ${BODY}`;
-  sub.lines.forEach((l, i) => ctx.fillText(l, X + 2, ySub + i * (sub.size + 10)));
+  sub.lines.forEach((l, i) => ctx.fillText(l, X + 2, subY + i * (sub.size + 10)));
 
-  // Points lead (they decide the boards); the height follows in the line below.
-  ctx.font = `900 100px ${DISPLAY}`;
+  // Points lead (they decide the boards); the height and milestone follow on the line below.
+  ctx.font = `900 104px ${DISPLAY}`;
   ctx.fillStyle = '#ffd66b';
   const scoreText = d.score.toLocaleString('vi-VN');
-  ctx.fillText(scoreText, X, yAlt);
+  ctx.fillText(scoreText, X, scoreY);
   const sw = ctx.measureText(scoreText).width;
-  ctx.font = `800 40px ${DISPLAY}`;
-  ctx.fillText('điểm', X + sw + 16, yAlt);
-  const meta = [`diều ${formatAlt(d.altitude)}`, second].filter(Boolean).join(' · ');
-  const fitted = fitText(ctx, meta, 600, BODY, PW - 72, 32, 24);
-  ctx.font = `600 ${fitted.size}px ${BODY}`;
-  ctx.fillStyle = 'rgba(255,255,255,.88)';
-  ctx.fillText(fitted.lines[0], X + 2, yMeta + 4);
-  extras.forEach((e, i) => {
-    const y = yExtra + i * 54;
-    let x = X + 2;
-    if (e.color) {
-      ctx.fillStyle = e.color;
-      ctx.beginPath();
-      ctx.arc(x + 12, y - 10, 12, 0, Math.PI * 2);
-      ctx.fill();
-      x += 36;
-    }
-    const f = fitText(ctx, e.text, 700, BODY, PW - 72 - (x - X), 30, 22);
-    ctx.font = `700 ${f.size}px ${BODY}`;
-    ctx.fillStyle = e.color ? '#ffffff' : 'rgba(255,233,170,.95)';
-    ctx.fillText(f.lines[0], x, y);
-  });
+  ctx.font = `800 42px ${DISPLAY}`;
+  ctx.fillText('điểm', X + sw + 18, scoreY);
+  const mf = fitText(ctx, meta, 600, BODY, MAXW, 32, 24);
+  ctx.font = `600 ${mf.size}px ${BODY}`;
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  ctx.fillText(mf.lines[0], X + 2, metaY);
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
-  // Footer: the invitation and the address.
-  ctx.fillStyle = 'rgba(255,253,246,.96)';
-  ctx.beginPath();
-  ctx.roundRect(72, H - 150, W - 144, 96, 48);
-  ctx.fill();
-  ctx.fillStyle = '#0f2747';
-  ctx.font = `700 33px ${BODY}`;
-  ctx.fillText('Đáp án càng hiếm, diều càng cao.', 112, H - 92);
+  // Chips: the rarest answer and the long trip, side by side when they fit, the trip dropped when they do not.
+  let cx = X;
+  for (const ch of chips) {
+    const pad = ch.color ? 56 : 24;
+    const room = X + MAXW - cx;
+    const f = fitText(ctx, ch.text, 700, BODY, Math.min(room, MAXW) - pad - 24, 28, 22);
+    ctx.font = `700 ${f.size}px ${BODY}`;
+    const w = ctx.measureText(f.lines[0]).width + pad + 24;
+    if (w > room + 1) break;
+    ctx.fillStyle = 'rgba(255,255,255,.14)';
+    ctx.beginPath();
+    ctx.roundRect(cx, chipY - 40, w, 54, 27);
+    ctx.fill();
+    if (ch.color) {
+      ctx.fillStyle = ch.color;
+      ctx.beginPath();
+      ctx.arc(cx + 30, chipY - 13, 12, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = ch.color ? '#ffffff' : 'rgba(255,233,170,.95)';
+    ctx.fillText(f.lines[0], cx + pad, chipY - 3);
+    cx += w + 14;
+  }
+
+  // Footer: the invitation on the left, the address in a red pill on the right; the invitation shrinks to fit.
   const host = d.link.replace(/^https?:\/\//, '').split(/[/?]/)[0];
-  ctx.font = `800 28px ${BODY}`;
-  const hw = ctx.measureText(host).width + 40;
+  ctx.font = `800 30px ${BODY}`;
+  const hw = ctx.measureText(host).width + 48;
+  const fy = H - 112;
+  ctx.fillStyle = 'rgba(255,253,246,.97)';
+  ctx.beginPath();
+  ctx.roundRect(56, fy, W - 112, 76, 38);
+  ctx.fill();
   ctx.fillStyle = '#e5533d';
   ctx.beginPath();
-  ctx.roundRect(W - 72 - 24 - hw, H - 132, hw, 60, 30);
+  ctx.roundRect(W - 56 - 10 - hw, fy + 10, hw, 56, 28);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.fillText(host, W - 72 - 24 - hw + 20, H - 92);
+  ctx.fillText(host, W - 56 - 10 - hw + 24, fy + 49);
+  const inviteRoom = W - 112 - hw - 10 - 40 - 24;
+  const inv = fitText(ctx, 'Đáp án càng hiếm, diều càng cao.', 700, BODY, inviteRoom, 30, 20);
+  ctx.font = `700 ${inv.size}px ${BODY}`;
+  ctx.fillStyle = '#0f2747';
+  ctx.fillText(inv.lines.length > 1 ? 'Đáp án hiếm, diều cao.' : inv.lines[0], 92, fy + 49);
 
   return new Promise((res) => c.toBlob((b) => res(b), 'image/png'));
 }

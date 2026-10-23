@@ -127,7 +127,7 @@ export interface SkyLayout {
 export const LAYOUTS: Record<'home' | 'play' | 'result', SkyLayout> = {
   home: { kiteX: 0.64, kiteY: 0.34, decade: 0.95, kiteSize: 0.26, ruler: false, kiteMax: 170, column: 560, ground: -0.3 },
   play: { kiteX: 0.5, kiteY: 0.19, decade: 0.45, kiteSize: 0.2, ruler: true, top: 70, column: 680, kiteMax: 96, ground: -1.36, text: [0.33, 0.74], bottom: 92 },
-  result: { kiteX: 0.32, kiteY: 0.2, decade: 0.55, kiteSize: 0.16, ruler: false, column: 520, kiteMax: 130 },
+  result: { kiteX: 0.5, kiteY: 0.15, decade: 0.55, kiteSize: 0.19, ruler: false, column: 520, kiteMax: 150 },
 };
 
 const log = (alt: number) => Math.log10(Math.max(1, alt));
@@ -281,7 +281,7 @@ export class SkyScene {
     const c = document.createElement('canvas');
     c.width = w;
     c.height = h;
-    const keep = { ctx: this.ctx, W: this.W, H: this.H, dpr: this.dpr, layout: this.layout, camL: this.camL, alt: this.alt, paints: this.paints, village: this.village, kite: { ...this.kite }, parts: this.parts, rings: this.rings, rays: this.rays, flash: this.flash, streaks: this.streaks, meteors: this.meteors, hand: this.hand, lap: this.lap, warp: this.warp, tween: this.tween };
+    const keep = { ctx: this.ctx, W: this.W, H: this.H, dpr: this.dpr, t: this.t, layout: this.layout, camL: this.camL, alt: this.alt, paints: this.paints, village: this.village, kite: { ...this.kite }, parts: this.parts, rings: this.rings, rays: this.rays, flash: this.flash, streaks: this.streaks, meteors: this.meteors, hand: this.hand, lap: this.lap, warp: this.warp, tween: this.tween };
     try {
       this.ctx = c.getContext('2d')!;
       this.W = w;
@@ -301,6 +301,9 @@ export class SkyScene {
       this.flash = 0;
       this.streaks = [];
       this.meteors = [];
+      // A still picture: freeze the clock where the airliner is fully in frame (about a third across), so a card
+      // made at the airliner's height always shows it, nose and contrails, instead of wherever it happened to be.
+      this.t = (w * 0.34 + Math.min(this.U * 0.5, 260) / 2) / 40;
       this.draw();
     } finally {
       Object.assign(this, keep);
