@@ -2,6 +2,16 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 22:00
+- **Đã giao hết 22 kho còn lại trong một đợt, chạy song song:** TASK-005 (DeepSeek v4.1 Flash — 11 kho, 6.318 mục: `khainiem` 1.816, `thegioi` 1.099, `nghe` 702, `vanhoa` 623, `thienvan` 568, `xe` 413, `cothe` 383, `nhaccu` 347, `quocgia` 195, `hoahoc` 118, `dantoc` 54) và TASK-006 (HY3 — 11 kho, 6.322 mục: `nhanvat` 1.522, `diadanh` 1.173, `douong` 812, `tungu` 681, `ngonngu` 609, `dovat` 515, `cotich` 359, `thethao` 307, `quanao` 169, `mausac` 112, `diaphuong` 63). Lệch hai bên 4 mục.
+- **Bộ từ chồng mới: `tu_doi_chieu_22kho.tsv`, 160 từ rải đều cả 22 kho**, lấy cách đều trong từng mức pop hiện có. Cả hai model chấm bộ này **trước**, rồi mới chấm nửa của mình. Lấy trong chính 22 kho đó thay vì dùng lại bộ 120 từ động vật, vì bảng chuyển thang học trên động vật rồi áp cho món ăn là chỗ yếu đã biết của đợt trước.
+- Mỗi task gói sẵn 8 luật chấm rút từ ba đợt trước: không chuẩn hoá phân bố · cùng một chuỗi chữ phải cùng một `pop` (quét trước khi giao) · không tự hậu xử lý bằng danh sách tay, thấy mức nào lạm phát thì báo để Claude quyết · quy ước `?` · `pop` đo "tự kể ra" không đo "nhận ra khi đọc". Phiếu lần này chỉ có tên chính nên lớp lỗi bí danh không còn.
+- Bỏ `thudo` khỏi danh sách giao: kho dẫn xuất từ `extra` của `quocgia`, không có file nguồn nên không áp số vào được.
+- Packet đủ cho cả hai model đã nằm trong `bilion-rarity-audit`: `TASK-005.md`, `TASK-006.md`, `rubric-do-quen.md`, `RUBRIC.md`, `PROMPT.md`, 22 phiếu `tu_<kho>_can_cham.tsv`, `tu_doi_chieu_22kho.tsv`.
+- **Việc của Claude khi có kết quả:** kiểm từng file bằng `scripts/compare-pop.ts` → học bảng chuyển thang từ 160 từ chồng → áp bằng `scripts/apply-pop.ts --map ... ` (cổng tính trên mức thô, chỉ lệch ≥ 2 mức) → chạy `vitest`, `tsc`, `check:questions`.
+- **Chờ chủ dự án:** chuyển TASK-005 và TASK-006 cho hai model; các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); truy vấn số 2 của báo cáo WorkBuddy — vẫn là việc quan trọng nhất còn treo, vì đến giờ chưa có số nào được đối chiếu với lượt gõ thật.
+- **Hai phần lẻ chưa làm:** áp bản `thucvat` của HY3 (mức 5 do danh sách trắng tay đặt, cần quyết trước); 58 ca kéo xuống của `monan`.
+
 ## 2026-10-23 21:50
 - **Đã hiệu chỉnh và áp bản chấm TASK-003 vào kho `monan`: 215 mục** (109 dòng trong `lex/monan.ts`, 115 trong `lex2/monan.ts`; 9 từ nằm trên 2 dòng, cả hai dòng đổi cùng mức).
 - **Bảng chuyển thang học từ 120 từ chồng, chốt theo trung vị: `1→1 2→3 3→4 4→4 5→5`.** So bốn cách chốt trên chính 120 từ đó: trung vị khớp **82/120** · lệch TB **−0,09**; giữ nguyên 69 · −0,43; trung bình làm tròn 74 · +0,28; dịch một mức 66 · +0,38. Giới hạn: bảng học trên từ động vật, áp cho kho món ăn.
