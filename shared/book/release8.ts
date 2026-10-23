@@ -2,30 +2,6 @@
 import type { ReleaseQuestion } from './release1.js';
 
 export const RELEASE8: ReleaseQuestion[] = [
-{id:'r-tp-tbn',c:'Thế giới',q:'Kể tên một thành phố của Tây Ban Nha',s:['thanhpho','tp'],k:'Toledo',t:[
-'Madrid, Barcelona',
-'Valencia, Sevilla, Bilbao, Málaga',
-'Granada, Ibiza, Mallorca|Palma, Córdoba, San Sebastián, Zaragoza, Alicante',
-'Salamanca, Santiago de Compostela, Cádiz, Marbella, Pamplona, Valladolid, Murcia, Vigo, A Coruña, Girona, Tarragona, Segovia, Ronda, Benidorm, Santander',
-'Oviedo, Gijón, Burgos, León, Cuenca, Cáceres, Mérida, Almería, Huelva, Jerez, Lleida, Tenerife, Las Palmas, Sitges, Logroño, Ávila']},
-{id:'r-tp-nga',c:'Thế giới',q:'Kể tên một thành phố của Nga',s:['thanhpho','tp'],k:'Murmansk',t:[
-'Moskva|Moscow|Mát-xcơ-va, Saint Petersburg|Xanh Pê-téc-bua|Leningrad',
-'Vladivostok, Sochi, Kazan',
-'Novosibirsk, Yekaterinburg, Volgograd|Stalingrad, Kaliningrad, Irkutsk, Nizhny Novgorod',
-'Samara, Rostov|Rostov trên sông Đông, Omsk, Krasnoyarsk, Perm, Ufa, Khabarovsk, Yakutsk, Sevastopol, Tula, Smolensk, Arkhangelsk, Novgorod, Pskov, Yaroslavl, Suzdal, Vladimir',
-'Tver, Kursk, Voronezh, Saratov, Tomsk, Chelyabinsk, Barnaul, Kemerovo, Norilsk, Magadan, Petropavlovsk-Kamchatsky, Ulan-Ude, Chita, Astrakhan, Grozny, Makhachkala, Krasnodar, Anapa, Kostroma']},
-{id:'r-tp-canada',c:'Thế giới',q:'Kể tên một thành phố của Canada',s:['thanhpho','tp'],k:'Whitehorse',t:[
-'Toronto, Vancouver',
-'Montreal, Ottawa, Quebec|Thành phố Quebec, Calgary',
-'Edmonton, Winnipeg, Niagara Falls, Victoria, Halifax',
-'Hamilton, Mississauga, Regina, Saskatoon, Kelowna, Banff, Whistler, Kingston, London, Waterloo, Windsor, St. John\'s, Fredericton, Charlottetown, Moncton',
-'Yellowknife, Iqaluit, Thunder Bay, Sudbury, Gatineau, Laval, Surrey, Burnaby, Richmond, Kitchener, Oshawa, Red Deer, Lethbridge, Kamloops, Nanaimo, Jasper']},
-{id:'r-tp-dna',c:'Thế giới',q:'Kể tên một thành phố của Indonesia, Malaysia hoặc Philippines',s:['thanhpho','tp'],k:'Ipoh',t:[
-'Jakarta, Kuala Lumpur, Manila',
-'Bali|Denpasar, Penang, Malacca|Melaka, Cebu, Bandung, Surabaya',
-'Yogyakarta, Medan, Johor Bahru, Kota Kinabalu, Kuching, Putrajaya, Langkawi, Davao, Quezon, Makati, Boracay',
-'Semarang, Makassar, Palembang, Batam, Lombok, Ubud, Malang, Solo|Surakarta, George Town, Shah Alam, Petaling Jaya, Kota Bharu, Miri, Sandakan, Baguio, Iloilo, Bacolod, Puerto Princesa, Zamboanga, Vigan, Tagaytay, Angeles',
-'Balikpapan, Pontianak, Banjarmasin, Manado, Jayapura, Padang, Pekanbaru, Kupang, Labuan Bajo, Seremban, Kuantan, Kuala Terengganu, Alor Setar, Taiping, Cagayan de Oro, General Santos, Legazpi, Dumaguete, Tacloban']},
 {id:'r-tp-lao-cam',c:'Thế giới',q:'Kể tên một thành phố hoặc điểm du lịch của Lào hoặc Campuchia',s:['thanhpho','tp'],k:'Kampot',t:[
 'Viêng Chăn|Vientiane, Phnôm Pênh|Phnom Penh, Siem Reap|Xiêm Riệp',
 'Luang Prabang|Luông Pha Băng, Angkor Wat|Angkor, Sihanoukville|Kompong Som, Vang Vieng|Vàng Viêng',

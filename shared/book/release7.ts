@@ -56,12 +56,6 @@ export const RELEASE7: ReleaseQuestion[] = [
 'Xương ức, Xương bả vai, Xương cánh tay, Xương hàm, Xương gót, Xương ống chân|Xương chày, Xương quai xanh, Đốt sống',
 'Xương mác, Xương quay, Xương trụ, Xương cổ tay, Xương bàn tay, Xương ngón tay, Xương bàn chân, Xương sên, Xương thái dương, Xương trán, Xương đỉnh, Xương chẩm, Xương mũi, Xương gò má, Xương móng',
 'Xương búa, Xương đe, Xương bàn đạp, Xương sàng, Xương lá mía, Xương lệ, Xương khẩu cái, Xương thuyền, Xương nguyệt, Xương đậu, Xương móc, Xương hộp, Xương chêm']},
-{id:'r-nha-phat-minh',c:'Khoa học',q:'Kể tên một nhà phát minh nổi tiếng',s:[],k:'Guglielmo Marconi',t:[
-'Thomas Edison|Edison, Nikola Tesla|Tesla, Anh em nhà Wright',
-'Alexander Graham Bell|Graham Bell, James Watt, Benjamin Franklin, Leonardo da Vinci, Steve Jobs',
-'Johannes Gutenberg|Gutenberg, Alfred Nobel, Karl Benz, Henry Ford, Archimedes, Galileo, Louis Pasteur, Bill Gates, Tim Berners-Lee',
-'Samuel Morse, Alessandro Volta, Michael Faraday, Rudolf Diesel, George Stephenson, Eli Whitney, Louis Braille, Alexander Fleming, Wilhelm Röntgen, Anh em Lumière, Elon Musk, Hedy Lamarr, Charles Babbage, Ada Lovelace, Thái Luân',
-'Nicéphore Niépce, Louis Daguerre, John Logie Baird, Philo Farnsworth, Elisha Otis, Isaac Singer, Charles Goodyear, James Dyson, Martin Cooper, Willis Carrier, Percy Spencer, Chester Carlson, Gottlieb Daimler']},
 {id:'r-nha-khoa-hoc-nu',c:'Khoa học',q:'Kể tên một nhà khoa học nữ nổi tiếng',s:[],k:'Lise Meitner',t:[
 'Marie Curie',
 'Ada Lovelace, Rosalind Franklin, Jane Goodall, Tu Youyou|Đồ U U',

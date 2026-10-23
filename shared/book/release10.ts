@@ -2,24 +2,6 @@
 import type { ReleaseQuestion } from './release1.js';
 
 export const RELEASE10: ReleaseQuestion[] = [
-{id:'r-dong-ho',c:'Mua sắm',q:'Kể tên một thương hiệu đồng hồ đeo tay',s:['dongho','hang'],k:'Vacheron Constantin',t:[
-'Rolex, Casio',
-'Omega, Seiko, Citizen, Apple Watch, Orient',
-'Patek Philippe, Audemars Piguet|AP, Hublot, Tissot, Longines, Daniel Wellington|DW, Garmin, Fossil, G-Shock, Tag Heuer, Cartier, Swatch, Richard Mille',
-'Breitling, IWC, Panerai, Tudor, Frederique Constant, Hamilton, Movado, Bulova, Rado, Franck Muller, Zenith, Mido, Certina, Huawei Watch, Xiaomi Watch|Mi Band, Amazfit, Galaxy Watch|Samsung Galaxy Watch, Timex',
-'A. Lange & Söhne, Blancpain, Breguet, Jaeger-LeCoultre, Ulysse Nardin, Chopard, Piaget, Girard-Perregaux, Glashütte Original, Oris, Nomos, Sinn, Raymond Weil, Edox, Victorinox, Grand Seiko']},
-{id:'r-thoi-trang-nhanh',c:'Thời trang',q:'Kể tên một thương hiệu quần áo bình dân hoặc thời trang nhanh có cửa hàng ở Việt Nam',s:['hang','thuonghieu'],k:'Monki',t:[
-'Zara, Uniqlo, H&M',
-'Mango, Canifa, Routine, Owen, Ivy Moda, Yody, Shein',
-'Pull&Bear, Bershka, Stradivarius, Massimo Dutti, Gap, Levi\'s, Cotton On, Muji, Elise, NEM, Aristino, Việt Tiến, Coolmate, Charles & Keith, Pedro, Forever 21, Topshop',
-'Giordano, Padini, Bossini, Ninomaxx, Blue Exchange, PT2000, Hnoss, Totoday, 5S Fashion, An Phước, May 10, Adore Dress, Seven.AM, Marc Fashion, Oysho, Old Navy',
-'Weekday, COS, Desigual, Esprit, Superdry, Jack & Jones, Vero Moda, Only, Lindex, Pimkie, Promod, Kiabi, Primark, Lefties']},
-{id:'r-my-pham',c:'Mua sắm',q:'Kể tên một thương hiệu mỹ phẩm hoặc chăm sóc da',s:['hang','thuonghieu'],k:'Clé de Peau|Clé de Peau Beauté',t:[
-'Maybelline, L\'Oréal, Innisfree',
-'MAC, Laneige, The Ordinary, Cocoon, La Roche-Posay, Bioderma, 3CE, Black Rouge, Romand, Some By Mi',
-'Estée Lauder, Shiseido, Sulwhasoo, Clinique, Lancôme, NYX, Revlon, Clio, Hada Labo, Senka, Garnier, Pond\'s, Cetaphil, CeraVe, Simple, Eucerin, Vichy, Avène, Paula\'s Choice, Klairs, Cosrx, Ohui, Whoo|The History of Whoo, Kiehl\'s, SK-II',
-'La Mer, Tatcha, Drunk Elephant, Charlotte Tilbury, Benefit, Too Faced, Urban Decay, Nars, Tarte, Anastasia Beverly Hills, Etude House|Etude, Missha, Skinfood, Tony Moly, Nature Republic, Hera, Peripera, Merzy, Lemonade, Thorakao, Cỏ Mềm, Bobbi Brown, Fenty Beauty, Rare Beauty, Huda Beauty, Make Up For Ever, Shu Uemura',
-'Sisley, La Prairie, Guerlain, Cosme Decorte|Decorté, Kosé, Kanebo, Albion, Pola, Ipsa, Bourjois, Rimmel, Essence, Catrice, Pat McGrath, Glow Recipe, Laura Mercier']},
 {id:'r-dien-may',c:'Mua sắm',q:'Kể tên một chuỗi cửa hàng bán điện thoại, máy tính hoặc điện máy ở Việt Nam',s:['cuahang','chuoi'],k:'Viễn Thông A',t:[
 'Thế Giới Di Động, Điện Máy Xanh, FPT Shop',
 'CellphoneS, Hoàng Hà Mobile, Nguyễn Kim, Viettel Store, Di Động Việt, Phong Vũ',

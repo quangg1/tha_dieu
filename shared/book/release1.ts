@@ -5,72 +5,12 @@ import type { RawQuestion } from '../bank.js';
 export type ReleaseQuestion = RawQuestion & { lv?: number; until?: string };
 
 export const RELEASE1: ReleaseQuestion[] = [
-{id:'r-tp-nhat',c:'Thế giới',q:'Kể tên một thành phố của Nhật Bản',s:['thanhpho','tp'],k:'Kushiro',t:[
-'Tokyo, Osaka, Kyoto',
-'Hiroshima, Nagasaki, Sapporo, Nagoya, Yokohama, Kobe, Nara',
-'Fukuoka, Naha|Okinawa, Sendai, Kawasaki, Hakone, Nikko, Kamakura, Yokosuka',
-'Kanazawa, Kagoshima, Kumamoto, Hakodate, Niigata, Shizuoka, Okayama, Matsuyama, Takayama, Beppu, Saitama, Chiba, Himeji, Otaru, Gifu, Aomori, Akita, Nagano, Kochi, Takamatsu',
-'Toyama, Fukui, Tottori, Matsue, Yamaguchi, Shimonoseki, Kitakyushu, Miyazaki, Oita, Saga, Tokushima, Wakayama, Morioka, Yamagata, Fukushima, Mito, Utsunomiya, Kofu, Hamamatsu, Kurashiki, Onomichi, Ise']},
-{id:'r-tp-han',c:'Thế giới',q:'Kể tên một thành phố của Hàn Quốc',s:['thanhpho','tp'],k:'Boryeong',t:[
-'Seoul, Busan',
-'Incheon, Jeju, Daegu',
-'Gwangju, Daejeon, Ulsan, Suwon, Gyeongju, Sokcho',
-'Jeonju, Chuncheon, Pohang, Andong, Yeosu, Gangneung, Changwon, Goyang, Seongnam, Cheongju, Mokpo, Tongyeong, Paju, Seogwipo',
-'Gimhae, Gumi, Jinju, Wonju, Cheonan, Iksan, Gunsan, Suncheon, Geoje, Hwaseong, Yongin, Anyang, Bucheon, Uijeongbu, Namyangju']},
-{id:'r-tp-trung',c:'Thế giới',q:'Kể tên một thành phố của Trung Quốc',s:['thanhpho','tp'],k:'Tuyền Châu',t:[
-'Bắc Kinh|Beijing, Thượng Hải|Shanghai',
-'Quảng Châu, Thâm Quyến, Hồng Kông|Hong Kong, Ma Cao|Macau, Trùng Khánh, Thành Đô',
-'Hàng Châu, Tây An, Nam Ninh, Vũ Hán, Thiên Tân, Tô Châu, Nam Kinh, Côn Minh, Quế Lâm, Hạ Môn, Lệ Giang',
-'Thanh Đảo, Đại Liên, Cáp Nhĩ Tân, Trường Sa, Lạc Dương, Khai Phong, Hợp Phì, Tế Nam, Trịnh Châu, Lhasa|Lạp Tát, Urumqi|Ô Lỗ Mộc Tề, Phúc Châu, Đôn Hoàng, Tam Á, Dương Sóc, Đại Lý, Thẩm Dương, Hải Khẩu, Trương Gia Giới, Phượng Hoàng',
-'Bằng Tường, Đông Hưng, Hà Khẩu, Lan Châu, Tây Ninh, Ngân Xuyên, Thạch Gia Trang, Nam Xương, Quý Dương, Hô Hòa Hạo Đặc, Ninh Ba, Ôn Châu, Vô Tích, Dương Châu, Thiệu Hưng, Khúc Phụ, Cảnh Đức Trấn, Sán Đầu']},
 {id:'r-tp-thai',c:'Thế giới',q:'Kể tên một thành phố hoặc điểm du lịch của Thái Lan',s:['thanhpho','tp','dao'],k:'Bueng Kan',t:[
 'Bangkok|Băng Cốc, Pattaya, Phuket',
 'Chiang Mai, Krabi, Hua Hin, Ayutthaya',
 'Chiang Rai, Koh Samui|Samui, Pai, Udon Thani, Khon Kaen, Hat Yai, Kanchanaburi, Sukhothai, Nong Khai, Phi Phi|Koh Phi Phi',
 'Ubon Ratchathani, Nakhon Ratchasima|Korat, Surat Thani, Rayong, Koh Phangan, Koh Tao, Lopburi, Nakhon Phanom, Mukdahan, Trang, Songkhla, Nan, Lampang, Mae Hong Son, Koh Chang',
 'Phitsanulok, Sakon Nakhon, Roi Et, Buriram, Surin, Chanthaburi, Trat, Koh Lipe, Satun, Yala, Pattani, Phetchabun, Loei, Kalasin, Koh Lanta']},
-{id:'r-tp-my',c:'Thế giới',q:'Kể tên một thành phố của nước Mỹ',s:['thanhpho','tp'],k:'Cheyenne',t:[
-'New York, Washington|Washington D.C., Los Angeles',
-'San Francisco, Las Vegas, Chicago, Miami, Boston, Seattle, Houston',
-'Philadelphia, Orlando, San Diego, Dallas, Atlanta, Detroit, New Orleans, Denver, Honolulu',
-'Phoenix, Austin, Nashville, Portland, Minneapolis, Pittsburgh, Baltimore, Cleveland, San Jose, Sacramento, Salt Lake City, Memphis, St. Louis, Kansas City, Anchorage, Indianapolis, Charlotte, Milwaukee, Cincinnati, Tampa, Oakland',
-'Albuquerque, Tucson, Omaha, Boise, Des Moines, Little Rock, Raleigh, Richmond, Buffalo, Hartford, Providence, Savannah, Charleston, Santa Fe, Juneau, Fargo, Spokane, Reno, Fresno, El Paso, Garden Grove']},
-{id:'r-tp-phap',c:'Thế giới',q:'Kể tên một thành phố của Pháp',s:['thanhpho','tp'],k:'Quimper',t:[
-'Paris',
-'Marseille, Lyon, Nice, Cannes, Bordeaux',
-'Toulouse, Strasbourg, Lille, Nantes, Montpellier, Avignon, Versailles',
-'Rennes, Reims, Grenoble, Dijon, Rouen, Le Havre, Calais, Annecy, Chamonix, Tours, Orléans, Lourdes, Carcassonne, Saint-Tropez, Biarritz, Colmar, Arles, Metz, Nancy',
-'Brest, Caen, Amiens, Limoges, Clermont-Ferrand, Perpignan, Toulon, Poitiers, La Rochelle, Besançon, Mulhouse, Saint-Étienne, Le Mans, Angers, Nîmes, Ajaccio, Chartres, Vichy, Deauville, Saint-Malo']},
-{id:'r-tp-y',c:'Thế giới',q:'Kể tên một thành phố của Ý',s:['thanhpho','tp'],k:'Orvieto',t:[
-'Rome|Roma, Venice|Venezia, Milan|Milano',
-'Florence|Firenze, Naples|Napoli, Turin|Torino, Pisa, Verona',
-'Bologna, Genoa|Genova, Palermo, Siena, Amalfi, Como, Positano',
-'Bari, Catania, Trieste, Padua|Padova, Parma, Modena, Bergamo, Lucca, Assisi, Sorrento, Pompeii, Cagliari, Brescia, Perugia, Ravenna, Taormina, Lecce, Matera',
-'Ancona, Pescara, Salerno, Reggio Calabria, Messina, Trento, Bolzano, Udine, Ferrara, Mantova|Mantua, Cremona, Livorno, Rimini, San Gimignano, Siracusa, Agrigento, Alberobello, Aosta, Urbino, Spoleto']},
-{id:'r-tp-duc',c:'Thế giới',q:'Kể tên một thành phố của Đức',s:['thanhpho','tp'],k:'Görlitz',t:[
-'Berlin, Munich|München',
-'Frankfurt, Hamburg, Dortmund, Cologne|Köln',
-'Bonn, Dresden, Leipzig, Stuttgart, Düsseldorf, Bremen, Nuremberg|Nürnberg',
-'Heidelberg, Hannover, Leverkusen, Gelsenkirchen, Wolfsburg, Mainz, Freiburg, Augsburg, Potsdam, Weimar, Aachen, Mönchengladbach, Essen, Bochum, Kiel',
-'Rostock, Lübeck, Erfurt, Magdeburg, Kassel, Würzburg, Regensburg, Bamberg, Trier, Wiesbaden, Karlsruhe, Mannheim, Ulm, Konstanz, Baden-Baden, Jena, Chemnitz, Halle, Goslar']},
-{id:'r-tp-anh',c:'Thế giới',q:'Kể tên một thành phố của Vương quốc Anh',s:['thanhpho','tp'],k:'Whitby',t:[
-'London|Luân Đôn',
-'Manchester, Liverpool, Edinburgh, Oxford, Cambridge',
-'Birmingham, Glasgow, Leeds, Newcastle, Bristol, Cardiff, Belfast, Brighton, Southampton',
-'Sheffield, Nottingham, York, Bath, Leicester, Coventry, Aberdeen, Dundee, Inverness, Stratford-upon-Avon, Canterbury, Dover, Plymouth, Portsmouth, Swansea, Norwich, Sunderland, Middlesbrough, Wolverhampton, Blackpool',
-'Exeter, Durham, Lancaster, Chester, Winchester, Salisbury, Hull, Bradford, Derby, Stoke-on-Trent, Ipswich, Reading, Luton, Watford, Bournemouth, St Andrews, Stirling, Derry, Lincoln']},
-{id:'r-tp-uc',c:'Thế giới',q:'Kể tên một thành phố của Úc',s:['thanhpho','tp'],k:'Katherine',t:[
-'Sydney, Melbourne',
-'Canberra, Brisbane, Perth, Gold Coast',
-'Adelaide, Darwin, Cairns, Hobart',
-'Wollongong, Townsville, Alice Springs, Geelong, Sunshine Coast, Launceston, Byron Bay, Toowoomba, Ballarat, Bendigo, Broome, Fremantle, Newcastle',
-'Mackay, Rockhampton, Bundaberg, Mildura, Albury, Wagga Wagga, Dubbo, Bathurst, Port Douglas, Kalgoorlie, Coober Pedy, Esperance, Devonport, Burnie']},
-{id:'r-tp-ando',c:'Thế giới',q:'Kể tên một thành phố của Ấn Độ',s:['thanhpho','tp'],k:'Shillong',t:[
-'New Delhi|Delhi|Niu Đê-li, Mumbai',
-'Agra, Kolkata|Calcutta, Bangalore|Bengaluru, Chennai',
-'Hyderabad, Jaipur, Varanasi, Pune, Ahmedabad',
-'Udaipur, Jodhpur, Amritsar, Lucknow, Bodh Gaya|Bồ Đề Đạo Tràng, Rishikesh, Darjeeling, Shimla, Kochi, Mysore|Mysuru, Surat, Chandigarh',
-'Kanpur, Nagpur, Indore, Bhopal, Patna, Jaisalmer, Pushkar, Leh, Srinagar, Madurai, Pondicherry, Kanyakumari, Haridwar, Mathura, Vrindavan, Khajuraho, Hampi, Ooty, Manali']},
 {id:'r-dao-tg',c:'Thế giới',q:'Kể tên một hòn đảo nổi tiếng ở nước ngoài',s:['dao','hondao'],k:'Socotra',t:[
 'Bali, Hawaii, Phuket',
 'Jeju, Santorini, Greenland, Madagascar, Sicily, Okinawa',

@@ -1,6 +1,6 @@
 # Câu đã gỡ ngày 23/10/2026 (để Kiro đối soát khi soạn lô mới)
 
-Đợt rà soát đọc từng câu trong 403 câu đang hỏi và gỡ **106 câu** (còn **297 câu**). Danh sách nằm trong `RETIRED_REVIEW_2026_10_23` ở `shared/book/questions.ts`. Câu gỡ vẫn còn trong sổ (ngày cũ vẫn mở được), chỉ không được hỏi nữa. Muốn khôi phục một câu thì sửa trạng thái ở trang admin (tab Kho câu hỏi), không cần xoá khỏi danh sách.
+Đợt rà soát đọc từng câu trong 403 câu đang hỏi và gỡ **106 câu** (còn **297 câu**). Các câu này **đã bị xoá hẳn** khỏi các file câu hỏi (và khỏi database bằng script SQL), nên Kiro có thể dùng lại đúng id cũ trong một release mới mà không bị vướng. Danh sách id đầy đủ nằm bên dưới; muốn xem nội dung cũ của một câu thì xem lịch sử git (commit trước b68d24a).
 
 ## Bốn phép thử một câu mới phải qua
 

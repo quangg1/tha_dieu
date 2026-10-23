@@ -2,42 +2,12 @@
 import type { ReleaseQuestion } from './release1.js';
 
 export const RELEASE5: ReleaseQuestion[] = [
-{id:'r-bh-den',c:'Nhạc Việt',q:'Kể tên một bài hát của Đen Vâu',s:['bai','baihat'],k:'Cô gái bàn bên',t:[
-'Mang tiền về cho mẹ, Đi về nhà, Bài này chill phết',
-'Lối nhỏ, Hai triệu năm, Trốn tìm, Một triệu like, Anh đếch cần gì nhiều ngoài em, Ai muốn nghe không',
-'Đưa nhau đi trốn, Lộn xộn, Mười năm, Nấu ăn cho em, Luôn yêu đời, Cho tôi lang thang, Ta cứ đi cùng nhau, Đi theo bóng mặt trời',
-'Ngày lang thang, Vị, Friendship, Trời hôm nay nhiều mây cực, Lộn xộn 2, Lộn xộn 3',
-'']},
-{id:'r-bh-my-tam',c:'Nhạc Việt',q:'Kể tên một bài hát của Mỹ Tâm',s:['bai','baihat'],k:'Tóc nâu môi trầm',t:[
-'Họa mi tóc nâu, Hẹn ước từ hư vô, Đâu chỉ riêng em, Ước gì',
-'Cây đàn sinh viên, Nụ cười biệt ly, Rời bỏ, Người hãy quên em đi, Đúng cũng thành sai',
-'Như một giấc mơ, Em phải làm sao, Muộn màng là từ lúc, Chuyện như chưa bắt đầu, Nhớ mãi chuyến đi này',
-'',
-'']},
 {id:'r-bh-tcs',c:'Âm nhạc',q:'Kể tên một bài hát của nhạc sĩ Trịnh Công Sơn',s:['bai','baihat'],k:'Tình nhớ',t:[
 'Diễm xưa, Cát bụi, Hạ trắng',
 'Nối vòng tay lớn, Biển nhớ, Ru em từng ngón xuân nồng, Một cõi đi về, Như cánh vạc bay, Để gió cuốn đi, Tình xa',
 'Chiếc lá thu phai, Mưa hồng, Cuối cùng cho một tình yêu, Gọi tên bốn mùa, Ướt mi, Nắng thủy tinh, Một ngày như mọi ngày, Tuổi đá buồn, Ca dao mẹ, Hãy yêu nhau đi, Còn tuổi nào cho em',
 'Tình sầu, Lặng lẽ nơi này, Bốn mùa thay lá, Cỏ xót xa đưa, Phôi pha, Em còn nhớ mùa xuân, Xin cho tôi, Bên đời hiu quạnh, Như một lời chia tay, Đóa hoa vô thường, Em là hoa hồng nhỏ, Huyền thoại mẹ',
 'Vết lăn trầm, Quỳnh hương, Ngẫu nhiên, Xin trả nợ người, Mùa thu không trở lại, Có một dòng sông đã qua đời, Lời buồn thánh, Ngày dài trên quê hương']},
-{id:'r-bh-ha-noi',c:'Âm nhạc',q:'Kể tên một bài hát viết về Hà Nội',s:['bai','baihat'],k:'Chiều phủ Tây Hồ',t:[
-'Nhớ mùa thu Hà Nội, Hà Nội mùa vắng những cơn mưa, Em ơi Hà Nội phố',
-'Hà Nội đêm trở gió, Hướng về Hà Nội, Người Hà Nội, Hà Nội mùa thu, Hà Nội 12 mùa hoa|Mười hai mùa hoa Hà Nội, Nồng nàn Hà Nội',
-'Hà Nội niềm tin và hy vọng, Hoa sữa, Có phải em mùa thu Hà Nội, Hà Nội và tôi, Nhớ về Hà Nội, Hà Nội ngày trở về',
-'Thu Hà Nội, Gửi em ở cuối sông Hồng, Hà Nội trái tim hồng, Tiến về Hà Nội, Bài ca Hà Nội',
-'']},
-{id:'r-bh-me',c:'Âm nhạc',q:'Kể tên một bài hát về mẹ',s:['bai','baihat'],k:'Lòng mẹ 2',t:[
-'Lòng mẹ, Mẹ yêu con, Bông hồng cài áo',
-'Ba ngọn nến lung linh, Mẹ tôi, Gánh mẹ, Mừng tuổi mẹ, Cả nhà thương nhau, Mẹ ơi tại sao',
-'Ơn nghĩa sinh thành, Tình mẹ, Con nợ mẹ, Nhật ký của mẹ, Bàn tay mẹ, Bầm ơi, Cho con, Cô và mẹ',
-'Ca dao mẹ, Huyền thoại mẹ, Người mẹ của tôi, Ru con mùa đông, Mẹ yêu',
-'']},
-{id:'r-bh-thay-co',c:'Âm nhạc',q:'Kể tên một bài hát về thầy cô hoặc mái trường',s:['bai','baihat'],k:'Bài ca người giáo viên nhân dân',t:[
-'Bụi phấn, Người thầy, Mái trường mến yêu',
-'Bông hồng tặng cô, Em yêu trường em, Cô giáo em, Thầy cô cho em mùa xuân, Nhớ ơn thầy cô',
-'Ơn thầy, Cô giáo vùng cao, Phượng hồng, Tình thầy, Cô và mẹ, Bài ca đi học, Hoa học trò, Mong ước kỷ niệm xưa',
-'Khi tóc thầy bạc, Ngày đầu tiên đi học, Cô giáo miền xuôi, Bài học đầu tiên',
-'']},
 {id:'r-bh-cach-mang',c:'Âm nhạc',q:'Kể tên một bài hát cách mạng hoặc hát về đất nước',s:['bai','baihat'],k:'Hành khúc ngày và đêm',t:[
 'Tiến quân ca|Quốc ca, Như có Bác trong ngày vui đại thắng, Việt Nam quê hương tôi',
 'Đất nước trọn niềm vui, Giải phóng miền Nam, Tiến về Sài Gòn, Bài ca hy vọng, Năm anh em trên một chiếc xe tăng, Tự nguyện, Nối vòng tay lớn',
@@ -62,18 +32,6 @@ export const RELEASE5: ReleaseQuestion[] = [
 'Ice Cream, Pretty Savage, Forever Young, Solo, Lalisa, Money, Flower, On the Ground, Kiss and Make Up, Jump',
 'Hope Not, Sour Candy, Bet You Wanna, You Never Know, Crazy Over You, Love to Hate Me, Typa Girl, Hard to Love, Gone, Shoong, Rockstar, You & Me, Toxic Till the End, Number One Girl, New Woman',
 'Really, See U Later, Don\'t Know What to Do, Kick It, Yeah Yeah Yeah, Tally, Ready for Love, Happiest Girl, Moonlit Floor, Born Again, Mantra, Like Jennie']},
-{id:'r-bh-jack',c:'Nhạc Việt',q:'Kể tên một bài hát của Jack (J97)',s:['bai','baihat'],k:'Ngôi sao cô đơn',t:[
-'Hoa hải đường, Sóng gió, Bạc phận',
-'Hồng nhan, Em gì ơi, Đom đóm, Là một thằng con trai, Thiên lý ơi',
-'Về bên anh, Sao em vô tình, Dưới những cơn mưa, Hoa vô sắc, Laylalay',
-'',
-'']},
-{id:'r-ca-si-us',c:'Âm nhạc',q:'Kể tên một ca sĩ Âu Mỹ nổi tiếng',s:['casi'],k:'Hozier',t:[
-'Taylor Swift, Michael Jackson, Justin Bieber',
-'Ed Sheeran, Rihanna, Beyoncé, Adele, Lady Gaga, Bruno Mars, Billie Eilish, Ariana Grande, Selena Gomez, Katy Perry',
-'Madonna, Eminem, The Weeknd, Shawn Mendes, Dua Lipa, Charlie Puth, Britney Spears, Celine Dion, Mariah Carey, Whitney Houston, Elvis Presley, Olivia Rodrigo, Sabrina Carpenter, Harry Styles, Avril Lavigne, Sia',
-'Shakira, Jennifer Lopez, Drake, Post Malone, Sam Smith, Lana Del Rey, Doja Cat, Miley Cyrus, Nicki Minaj, Cardi B, Kanye West, Jay-Z, Freddie Mercury, John Lennon, Elton John, Stevie Wonder, Bob Marley, Frank Sinatra, Enrique Iglesias, Ricky Martin, Chappell Roan, Lewis Capaldi',
-'David Bowie, Prince, Tina Turner, Cher, Bon Jovi, Rod Stewart, George Michael, Sting, Phil Collins, Lionel Richie, Barbra Streisand, Kylie Minogue, Robbie Williams, Christina Aguilera, Usher, Ne-Yo, Charli XCX, Lorde, Halsey, SZA']},
 {id:'r-ban-nhac',c:'Âm nhạc',q:'Kể tên một ban nhạc hoặc nhóm nhạc nổi tiếng thế giới',s:['bannhac','nhom','nhomnhac'],k:'Fleetwood Mac',t:[
 'The Beatles, BTS, BLACKPINK',
 'Westlife, Backstreet Boys, Coldplay, Maroon 5, One Direction, ABBA, Queen, Imagine Dragons',
@@ -104,10 +62,4 @@ export const RELEASE5: ReleaseQuestion[] = [
 'Bữa trưa vui vẻ, Ký ức vui vẻ, Vua tiếng Việt, Siêu trí tuệ, Người ấy là ai, Running Man Việt Nam, Ca sĩ mặt nạ, Anh trai vượt ngàn chông gai, Em xinh say hi, Gặp nhau cuối tuần, Hãy chọn giá đúng, Vượt lên chính mình',
 'Rung chuông vàng, Chúng tôi là chiến sĩ, Sao Mai, Sao Mai điểm hẹn, Vietnam Idol, Bước nhảy hoàn vũ, Cuộc đua kỳ thú, Trò chơi âm nhạc, Nhanh như chớp, Thời sự 19h, Chuyển động 24h, Quà tặng cuộc sống, Vì bạn xứng đáng, Shark Tank Việt Nam',
 'Ở nhà chủ nhật, Siêu bất ngờ, Nhật ký Vàng Anh, Đuổi hình bắt chữ, Ai thông minh hơn học sinh lớp 5, Hát mãi ước mơ, Khi đàn ông mang bầu, Sao nhập ngũ, Nhà là nơi, Ký sự vùng cao']},
-{id:'r-phim-netflix',c:'Giải trí',q:'Kể tên một bộ phim hoặc series nổi tiếng trên Netflix',s:['phim'],k:'Dark',t:[
-'Trò chơi con mực|Squid Game, Stranger Things, Wednesday',
-'Money Heist|Phi vụ triệu đô, KPop Demon Hunters|Thợ săn quỷ K-pop, Bridgerton, The Witcher, The Crown, Vinh quang trong thù hận|The Glory, Peaky Blinders',
-'Narcos, Lupin, One Piece, Alice in Borderland, Black Mirror, Breaking Bad, You, Emily in Paris, All of Us Are Dead|Ngôi trường xác sống, Hạ cánh nơi anh, Adolescence, Sex Education, 13 Reasons Why',
-'The Queen\'s Gambit|Gambit hậu, Ozark, Mindhunter, House of Cards, Orange Is the New Black, Sweet Home, Kingdom|Vương triều xác sống, Arcane, Cobra Kai, Lucifer, The Umbrella Academy, Squid Game: The Challenge, 3 Body Problem|Tam thể, The Night Agent, Extraordinary Attorney Woo',
-'The OA, Bodyguard, Unorthodox, Maid, Beef, Baby Reindeer, The Haunting of Hill House, Midnight Mass, Love Death + Robots, Cyberpunk: Edgerunners, Castlevania, Blue Eye Samurai']},
 ];

@@ -274,12 +274,6 @@ export const BANK: RawQuestion[] = [
 'Solite, Custas, Hura, Goute, Swing, Pringles, Snickers, M&M|M&Ms, Chupa Chups, Haribo, Ritz, Tic Tac',
 'Toblerone, Ferrero Rocher|Ferrero, Marie, Dynamite, Hải Hà, Bibica, Kinh Đô, Richy, Slide, Pocky, Glico',
 'Twix, Bounty, Mars, Hershey\'s, Mikado, Doublemint, Lotus Biscoff|Biscoff, Tim Tam, Fisherman\'s Friend']},
-{id:'pop-danh-hai',c:'Giải trí',q:'Kể tên một danh hài Việt Nam',s:['nghe si'],k:'Văn Chung',t:[
-'Hoài Linh, Trấn Thành, Trường Giang, Xuân Bắc',
-'Tự Long, Công Lý, Việt Hương, Thu Trang, Chí Tài, Vân Dung, Quang Thắng, Thúy Nga',
-'Bảo Chung, Minh Nhí, Hồng Vân, Lê Giang, Tiến Luật, Lâm Vỹ Dạ, Hứa Minh Đạt, Huỳnh Lập, Mạc Văn Khoa, Long Đẹp Trai, Hải Triều, Bảo Quốc',
-'Văn Hiệp, Thành Lộc, Hữu Châu, Phước Sang, Duy Phương, Kiều Oanh, Hoàng Sơn, Quốc Khánh, Hán Văn Tình, Chiến Thắng, Vượng Râu, Quang Teo, Giang Còi, Trung Ruồi',
-'Tấn Beo, Tấn Hoàng, Hoài Tâm, Phi Phụng, Hiếu Hiền, Kiều Linh, Nhật Cường, Minh Vượng']},
 {id:'pop-xe-may',c:'Đường phố',q:'Kể tên một mẫu xe máy',s:['xe'],k:'Babetta',t:[
 'Wave|Wave Alpha, Vision, Air Blade|Airblade, SH',
 'Dream, Exciter, Sirius, Lead, Vespa',

@@ -26,22 +26,4 @@ export const RELEASE14: ReleaseQuestion[] = [
 'Yucatán, Kamchatka, Sinai, Jutland, Anatolia|Tiểu Á, Labrador, Baja California, Peloponnese, Lôi Châu, Sơn Đông, Liêu Đông, Cửu Long|Kowloon, Bán đảo Nam Cực|Nam Cực, Somali|Sừng châu Phi, Gallipoli, Cam Ranh, Phương Mai',
 'Cape York, Kola, Taymyr, Yamal, Chukotka, Bretagne|Brittany, Cornwall, Istria, Chalkidiki, Cotentin, Nova Scotia, Gaspé, Bảo Ninh, Cap Bon, Kenai, Shandong',
 'Delmarva, Avalon, Olympic, Valdés, Musandam, Qatar, Mount Athos|Athos']},
-{id:'r-tp-my-latin',c:'Thế giới',q:'Kể tên một thành phố ở Mỹ Latinh (Trung Mỹ, Nam Mỹ, Mexico, Caribe)',s:['thanhpho','tp'],k:'Valledupar',t:[
-'Rio de Janeiro|Rio, Mexico City|Thành phố Mexico, Buenos Aires, São Paulo',
-'Lima, Bogotá, Santiago, Havana|La Habana, Brasília, Cancún, Caracas, Medellín, Quito, Montevideo, La Paz, Cusco',
-'Guadalajara, Monterrey, Tijuana, Cartagena, Panama City|Thành phố Panama, San José, Salvador, Recife, Fortaleza, Manaus, Belo Horizonte, Curitiba, Porto Alegre, Florianópolis, Córdoba, Rosario, Mendoza, Ushuaia, Valparaíso, Asunción, Santa Cruz, Sucre, Guayaquil, Cali, Barranquilla, Maracaibo, Acapulco, Oaxaca, Puebla, Mérida, Tulum, Playa del Carmen, Puerto Vallarta, Cabo San Lucas|Los Cabos, Santo Domingo, San Juan, Kingston, Port-au-Prince',
-'Arequipa, Trujillo, Iquitos, Cuenca, Antigua Guatemala|Antigua, Bariloche, Salta, Punta del Este, Colonia del Sacramento, Potosí, Ouro Preto, Paraty, Natal, Belém, Foz do Iguaçu, Mar del Plata, Iquique, Punta Arenas, Arica, Cochabamba, Guanajuato, San Miguel de Allende, Querétaro, Veracruz, Chihuahua, Ciudad Juárez, Guatemala City, San Salvador, Tegucigalpa, Managua',
-'Paramaribo, Georgetown, Cayenne, Belmopan, Leticia, Puerto Natales, Chiclayo, Tarija, Riobamba, Encarnación, Santa Marta']},
-{id:'r-tp-trung-dong',c:'Thế giới',q:'Kể tên một thành phố ở Trung Đông',s:['thanhpho','tp'],k:'Umm al-Quwain',t:[
-'Dubai, Abu Dhabi, Mecca|Makkah',
-'Doha, Riyadh, Tehran, Baghdad, Jerusalem, Tel Aviv, Damascus, Beirut, Amman, Thành phố Kuwait|Kuwait City, Muscat, Medina',
-'Jeddah, Ankara, Manama, Sharjah, Aleppo, Mosul, Basra, Isfahan, Shiraz, Tabriz, Mashhad, Gaza, Haifa, Eilat, Sana\'a, Aden, Erbil, Bethlehem, Nazareth, Ramallah, Petra',
-'Ajman, Ras al-Khaimah, Fujairah, Al Ain, Salalah, Nizwa, Dammam, Taif, Tabuk, AlUla, Homs, Palmyra, Byblos, Tyre, Sidon, Baalbek, Aqaba, Jericho, Hebron, Najaf, Karbala, Qom, Yazd, Kerman',
-'Neom, Hofuf, Buraidah, Abha, Mukalla, Sohar, Khasab, Sulaymaniyah, Kirkuk, Kashan']},
-{id:'r-tp-chau-phi',c:'Thế giới',q:'Kể tên một thành phố ở châu Phi',s:['thanhpho','tp'],k:'Chinguetti',t:[
-'Cairo, Nairobi, Cape Town|Thành phố Cape, Johannesburg',
-'Lagos, Casablanca, Marrakech, Addis Ababa, Accra, Dakar, Tunis, Alger|Algiers, Durban, Pretoria, Alexandria, Luxor, Zanzibar',
-'Kinshasa, Abuja, Kampala, Kigali, Dar es Salaam, Mombasa, Luanda, Harare, Lusaka, Maputo, Antananarivo, Khartoum, Tripoli, Rabat, Fez, Tangier, Giza, Aswan, Timbuktu, Mogadishu, Djibouti, Windhoek, Gaborone, Abidjan, Bamako, Ouagadougou, Niamey, Port Louis',
-'Conakry, Freetown, Monrovia, Lomé, Cotonou, Douala, Yaoundé, Libreville, Brazzaville, Juba, Asmara, Kano, Ibadan, Benghazi, Sharm el-Sheikh, Hurghada, Arusha, Stone Town, Agadir, Essaouira, Chefchaouen, Kairouan, Sousse, Lalibela, Gondar, Bulawayo, Kisumu, Gqeberha|Port Elizabeth, Bloemfontein, Stellenbosch, Swakopmund, Aksum',
-'Nouakchott, Malabo, Bangui, N\'Djamena, Moroni, Praia, Maseru, Mbabane, Lilongwe, Bujumbura, Gitega, Dodoma, Mekele, Djenné, Ouidah, Kumasi, Ghardaïa']},
 ];

@@ -32,18 +32,6 @@ export const RELEASE11: ReleaseQuestion[] = [
 'Tiêu hóa, Hô hấp, Thận|Thận học, Tiết niệu, Nội tiết, Truyền nhiễm|Bệnh nhiệt đới, Gây mê hồi sức, Chẩn đoán hình ảnh, Phục hồi chức năng, Huyết học, Y học cổ truyền|Đông y, Lão khoa, Hồi sức tích cực|ICU, Phẫu thuật thẩm mỹ|Thẩm mỹ, Dinh dưỡng, Dị ứng miễn dịch',
 'Giải phẫu bệnh, Sơ sinh, Nam học, Hiếm muộn|Hỗ trợ sinh sản, Bỏng, Lồng ngực, Phẫu thuật thần kinh, Nội soi, Xạ trị, Y học thể thao, Pháp y, Vi sinh, Chống độc',
 'Y học dự phòng, Dịch tễ, Cơ xương khớp, Phẫu thuật tạo hình, Ký sinh trùng, Y học gia đình, Mạch máu, Truyền máu']},
-{id:'r-hang-cong-nghe',c:'Công nghệ',q:'Kể tên một công ty công nghệ lớn',s:['congty','hang','tapdoan'],k:'Cerebras',t:[
-'Apple, Samsung, Google, Microsoft',
-'Meta|Facebook, Amazon, Xiaomi, Oppo, Sony, Huawei, Tesla, Nvidia',
-'Intel, AMD, IBM, Dell, HP, Lenovo, Asus, Acer, LG, Vivo, ByteDance|TikTok, Tencent, Alibaba, Netflix, OpenAI, Qualcomm, TSMC, Cisco, Oracle, Adobe, Uber, Grab, Nokia, Panasonic, Toshiba, Canon, FPT, Viettel, VNG, Anthropic',
-'ASML, Broadcom, Arm, MediaTek, SK Hynix, Micron, Salesforce, SAP, Spotify, Airbnb, X|Twitter, Baidu, Foxconn, Honor, Realme, OnePlus, Motorola, Bkav, CMC, MoMo, Sea|Sea Group, Garena, Nikon',
-'Palantir, ServiceNow, Workday, Atlassian, Shopify, Stripe, Databricks, Snowflake, Infosys, Wipro, Tata Consultancy|TCS, Kakao, Naver, Xerox, Kodak, BlackBerry, Siemens, Philips, Ericsson, Mistral, xAI']},
-{id:'r-game',c:'Giải trí',q:'Kể tên một trò chơi điện tử (game) nổi tiếng',s:['game','trochoi'],k:'Ico',t:[
-'Liên Quân|Liên Quân Mobile|Arena of Valor, Free Fire, PUBG, Minecraft',
-'Liên Minh Huyền Thoại|LOL|League of Legends, Valorant, Roblox, Genshin Impact, GTA|Grand Theft Auto, FIFA|EA FC|FIFA Online, Đột Kích|CrossFire, Audition, Võ Lâm Truyền Kỳ|Võ Lâm, Super Mario|Mario',
-'Counter-Strike|CS:GO|CS2, Dota 2, Fortnite, Among Us, Candy Crush, Angry Birds, Flappy Bird, Subway Surfers, Plants vs. Zombies, Pokémon Go, Call of Duty, The Sims, Zelda|The Legend of Zelda, Tetris, Pac-Man, Contra, MU Online|MU, Gunny, Boom Online, Gunbound, Ragnarok, Half-Life, Warcraft, StarCraft, Đế Chế|Age of Empires, Elden Ring, Black Myth: Wukong|Wukong, Mobile Legends',
-'Hollow Knight, The Witcher, Red Dead Redemption, Cyberpunk 2077, Skyrim, Dark Souls, Resident Evil, Silent Hill, Final Fantasy, Street Fighter, Mortal Kombat, Tekken, Overwatch, Apex Legends, Hearthstone, Diablo, Stardew Valley, Terraria, Hades, Cuphead, Undertale, Portal, God of War, The Last of Us, Uncharted, Halo, Metal Gear, Kirby, Sonic, Animal Crossing, Kiếm Thế, Honor of Kings',
-'Disco Elysium, Outer Wilds, Baldur\'s Gate, Shadow of the Colossus, Okami, Katamari, Journey, Inside, Limbo, Braid, Fez, Return of the Obra Dinn, Factorio, RimWorld, Dwarf Fortress, NieR: Automata|Nier, Persona, Yakuza, Monster Hunter, Death Stranding, Sekiro, Bloodborne, Celeste']},
 {id:'r-dh-the-gioi',c:'Thế giới',q:'Kể tên một trường đại học nổi tiếng thế giới (không phải ở Việt Nam)',s:['daihoc','truong','university','dh','hocvien'],k:'Al-Azhar|Đại học Al-Azhar',t:[
 'Harvard, Oxford, MIT|Viện Công nghệ Massachusetts, Stanford',
 'Cambridge, Yale, Princeton, Columbia, Berkeley|UC Berkeley, Đại học Tokyo|Todai, Đại học Quốc gia Seoul|SNU, Thanh Hoa|Tsinghua, Bắc Kinh|Peking|Bắc Đại',
@@ -68,12 +56,6 @@ export const RELEASE11: ReleaseQuestion[] = [
 'Lướt ván buồm|Windsurfing, SUP|Chèo SUP|Chèo ván đứng, Lướt ván diều|Kitesurfing, Dù kéo|Parasailing, Lướt ván nước|Wakeboard, Trượt nước|Water ski, Đua thuyền rồng|Bơi trải, Đua thuyền máy, Vượt thác|Rafting, Lặn tự do|Freediving, Lặn ống thở|Snorkeling',
 'Bơi marathon|Bơi đường dài|Bơi vượt sông, Bodyboard, Flyboard, Khúc côn cầu dưới nước|Underwater hockey, Ba môn phối hợp|Triathlon, Bơi mùa đông, Canyoning, Skimboard, Lướt ván cánh ngầm|Foil',
 'Bóng bầu dục dưới nước|Underwater rugby, Kneeboard, Lặn săn cá|Spearfishing, Đua thuyền thúng, Hydroplane, Bóng chuyền dưới nước, Canoe polo']},
-{id:'r-nha-toan-hoc',c:'Khoa học',q:'Kể tên một nhà toán học nổi tiếng',s:['nhatoanhoc'],k:'Sophie Germain',t:[
-'Pythagoras|Pitago|Py-ta-go, Ngô Bảo Châu, Newton|Isaac Newton',
-'Euclid|Ơ-clít, Archimedes|Ác-si-mét, Gauss, Euler, Descartes|Đề-các, Pascal, Fermat, Thales|Ta-lét',
-'Leibniz, Riemann, Hilbert, Galois, Lagrange, Laplace, Fibonacci, Al-Khwarizmi, Alan Turing|Turing, Ramanujan, Gödel, Cantor, Poincaré, John Nash|Nash, Perelman, Lương Thế Vinh, Terence Tao, Andrew Wiles, Viète|Vi-ét, Bernoulli, Cauchy, Fourier, Hypatia',
-'Lê Văn Thiêm, Hoàng Tụy, Vũ Hà Văn, Emmy Noether|Noether, Abel, Jacobi, Dirichlet, Weierstrass, Kolmogorov, Grothendieck, von Neumann, Erdős, Mandelbrot, Lê Bá Khánh Trình, Maryam Mirzakhani, Brahmagupta, Omar Khayyam, Napier, Cardano, Tạ Quang Bửu',
-'Thurston, Serre, Langlands, Tartaglia, Kontsevich, Zhang Yitang|Trương Ích Đường, Ada Lovelace, Hamilton, Möbius, Bolyai, Lobachevsky']},
 {id:'r-tu-muon-phap',c:'Ngôn ngữ',q:'Kể tên một từ tiếng Việt vay mượn từ tiếng Pháp',s:['tu'],k:'Tông đơ',t:[
 'Cà phê, Xà phòng, Ga|Nhà ga, Ô tô',
 'Bơ, Phô mai, Pa tê, Sơ mi, Cà vạt, Ban công, Xăng, Ga ra, Búp bê, Sô cô la, Va li, Ti vi',

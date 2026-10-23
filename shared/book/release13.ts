@@ -2,12 +2,6 @@
 import type { ReleaseQuestion } from './release1.js';
 
 export const RELEASE13: ReleaseQuestion[] = [
-{id:'r-bia',c:'Ăn uống',q:'Kể tên một nhãn hiệu bia',s:['bia'],k:'Westvleteren',t:[
-'Heineken, Tiger, Bia Sài Gòn|Sài Gòn|Sabeco, 333|Ba ba ba',
-'Bia Hà Nội|Habeco, Huda, Larue, Budweiser, Sapporo, Carlsberg, Trúc Bạch, Halida, Corona, Bia Việt, Sư Tử Trắng|White Lion',
-'Hoegaarden, 1664|Blanc 1664|Kronenbourg 1664, Stella Artois, Guinness, Asahi, Kirin, San Miguel, Chang, Singha, Leo, Tsingtao|Thanh Đảo, Edelweiss, Erdinger, Paulaner, Hite, Cass, Bia hơi Hà Nội, Dung Quất, Harbin, Coors, Miller, Beck\'s, Strongbow',
-'Chimay, Leffe, Duvel, Pilsner Urquell, Peroni, Moretti|Birra Moretti, Amstel, Grimbergen, Weihenstephaner, Krombacher, Warsteiner, Bitburger, Franziskaner, Löwenbräu, Pasteur Street, Heart of Darkness, Bến Thành, Saigon Special, Đại Việt',
-'Orval, Rochefort, Delirium Tremens, Kwak, Lagunitas, BrewDog, Sierra Nevada, Kozel, Staropramen, Budvar, East West, Platinum']},
 {id:'r-pho-mai',c:'Ẩm thực',q:'Kể tên một loại phô mai (pho mát)',s:['phomai','phomat'],k:'Brunost|Gjetost',t:[
 'Mozzarella, Cheddar, Con Bò Cười|La Vache qui rit',
 'Parmesan|Parmigiano, Camembert, Brie, Gouda, Cream cheese|Phô mai kem, Feta, Phô mai xanh|Blue cheese, Emmental, Ricotta, Mascarpone',

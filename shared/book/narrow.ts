@@ -294,12 +294,6 @@ export const NARROW: (RawQuestion & { lv?: number })[] = [
 'Gabriel García Márquez|García Márquez|Marquez, Albert Camus|Camus, Kawabata Yasunari|Kawabata, Han Kang, Bob Dylan, Kazuo Ishiguro|Ishiguro, Mikhail Sholokhov|Sholokhov|Sô-lô-khốp, Boris Pasternak|Pasternak, Aleksandr Solzhenitsyn|Solzhenitsyn, Jean-Paul Sartre|Sartre, Hermann Hesse|Hesse, Rudyard Kipling|Kipling, Pablo Neruda|Neruda, John Steinbeck|Steinbeck, Thomas Mann',
 'William Faulkner|Faulkner, Toni Morrison, Orhan Pamuk|Pamuk, Ōe Kenzaburō|Oe Kenzaburo, Ivan Bunin|Bunin, Joseph Brodsky|Brodsky, Octavio Paz, Mario Vargas Llosa|Vargas Llosa, Doris Lessing, Alice Munro, Louise Glück, Annie Ernaux, Abdulrazak Gurnah, Jon Fosse, Patrick Modiano, Svetlana Alexievich, Peter Handke, Olga Tokarczuk, Wisława Szymborska|Szymborska, Czesław Miłosz, Seamus Heaney, Samuel Beckett|Beckett, T.S. Eliot, George Bernard Shaw|Bernard Shaw, W.B. Yeats|Yeats, Winston Churchill|Churchill, Pearl S. Buck|Pearl Buck, Ernest Hemingway, Sinclair Lewis, Eugene O\'Neill, Saul Bellow, Gabriela Mistral, Selma Lagerlöf, Knut Hamsun, Henryk Sienkiewicz, Romain Rolland, Anatole France, Maurice Maeterlinck, Luigi Pirandello, Naguib Mahfouz, Wole Soyinka, Nadine Gordimer, J.M. Coetzee|Coetzee, V.S. Naipaul|Naipaul, Cao Hành Kiện|Gao Xingjian, Imre Kertész, Elfriede Jelinek, Harold Pinter, José Saramago|Saramago, Dario Fo, Günter Grass, Camilo José Cela, Derek Walcott, Tomas Tranströmer, Bjørnstjerne Bjørnson, Sully Prudhomme, Theodor Mommsen, Paul Heyse, Gerhart Hauptmann, André Gide, Hermann Hesse, Halldór Laxness, Juan Ramón Jiménez, Salvatore Quasimodo, Giorgos Seferis, Ivo Andrić, Miguel Ángel Asturias, Heinrich Böll, Eyvind Johnson, Patrick White, Elias Canetti, William Golding, Claude Simon, Jaroslav Seifert, Le Clézio|J.M.G. Le Clézio, Herta Müller, Dario Fo',
 '','']},
-{id:'vh-shakespeare',lv:3,c:'Văn học',q:'Kể tên một vở kịch của Shakespeare',s:['vo','kich'],k:'Timon thành Athens|Timon of Athens',t:[
-'Romeo và Juliet|Romeo and Juliet, Hamlet',
-'Macbeth, Othello, Vua Lear|King Lear, Giấc mộng đêm hè|A Midsummer Night\'s Dream, Người lái buôn thành Venice|The Merchant of Venice',
-'Bão tố|Giông tố|The Tempest, Julius Caesar, Antony và Cleopatra|Antony and Cleopatra, Đêm thứ mười hai|Twelfth Night, Chuyện bé xé ra to|Much Ado About Nothing, Như ý|As You Like It, Thuần hóa cô vợ đanh đá|The Taming of the Shrew, Richard III, Henry V',
-'Những bà vợ vui tính ở Windsor|The Merry Wives of Windsor, Henry IV, Henry VI, Richard II, Vua John|King John, Henry VIII, Titus Andronicus, Coriolanus, Troilus và Cressida|Troilus and Cressida, Cymbeline, Chuyện mùa đông|The Winter\'s Tale, Pericles, Hai chàng quý tộc thành Verona|The Two Gentlemen of Verona, Hài kịch nhầm lẫn|The Comedy of Errors, Công cốc tình yêu|Love\'s Labour\'s Lost, Được cái này mất cái kia|All\'s Well That Ends Well, Dĩ ác báo ác|Measure for Measure, Hai người họ hàng quý tộc|The Two Noble Kinsmen',
-'']},
 {id:'vh-tay-du-ky',c:'Văn học',q:'Kể tên một nhân vật trong Tây Du Ký',s:[],k:'Lục Nhĩ Mi Hầu',t:[
 'Tôn Ngộ Không|Ngộ Không|Tề Thiên Đại Thánh, Trư Bát Giới|Bát Giới, Đường Tăng|Đường Tam Tạng|Tam Tạng, Sa Tăng|Sa Ngộ Tĩnh',
 'Bạch Long Mã, Ngưu Ma Vương, Thiết Phiến Công Chúa|Bà La Sát, Hồng Hài Nhi, Bạch Cốt Tinh, Như Lai|Phật Tổ Như Lai, Quan Âm|Quan Âm Bồ Tát|Quan Thế Âm, Ngọc Hoàng',
@@ -325,12 +319,6 @@ export const NARROW: (RawQuestion & { lv?: number })[] = [
 'Hồ Văn Chương, Hồ Đống Đa, Hồ Linh Đàm, Hồ Định Công, Hồ Yên Sở, Hồ Kim Liên, Hồ Hoàng Cầu, Hồ Láng Thượng, Hồ Đền Lừ, Hồ Văn Quán, Hồ Nghĩa Đô, Hồ Đắc Di, Hồ Hai Bà Trưng, Hồ Suối Hai, Hồ Đồng Mô, Hồ Quan Sơn',
 'Hồ Mễ Trì, Hồ Thanh Nhàn, Hồ Ngọc Hà, Hồ Đầm Vân Trì|Đầm Vân Trì, Hồ Tuy Lai, Hồ Ngải Sơn, Hồ Xuân Khanh, Hồ Văn Sơn, Hồ Đồng Quan, Hồ Hạ Đình, Hồ Phùng Khoang, Hồ Tân Mai',
 '']},
-{id:'dd-cho-noi',lv:3,c:'Du lịch',q:'Kể tên một chợ nổi ở miền Tây',s:['cho','noi','chonoi'],k:'Chợ nổi Vĩnh Thuận',t:[
-'Chợ nổi Cái Răng|Cái Răng',
-'Chợ nổi Cái Bè|Cái Bè, Chợ nổi Phong Điền|Phong Điền, Chợ nổi Ngã Bảy|Ngã Bảy|Phụng Hiệp',
-'Chợ nổi Long Xuyên|Long Xuyên, Chợ nổi Ngã Năm|Ngã Năm, Chợ nổi Trà Ôn|Trà Ôn, Chợ nổi Châu Đốc|Châu Đốc, Chợ nổi Cà Mau|Cà Mau',
-'Chợ nổi Vĩnh Thuận, Chợ nổi Long Phú',
-'']},
 {id:'dd-da-lat',c:'Du lịch',q:'Kể tên một điểm tham quan ở Đà Lạt',s:[],k:'Đường hầm điêu khắc',t:[
 'Hồ Xuân Hương, Thung lũng Tình Yêu, Chợ Đà Lạt|Chợ đêm Đà Lạt',
 'Langbiang|Núi Langbiang, Ga Đà Lạt|Ga xe lửa Đà Lạt, Đồi chè Cầu Đất|Cầu Đất, Hồ Tuyền Lâm, Thiền viện Trúc Lâm, Thác Datanla, Quảng trường Lâm Viên|Quảng trường hoa dã quỳ, Dinh Bảo Đại|Dinh III',
@@ -355,11 +343,6 @@ export const NARROW: (RawQuestion & { lv?: number })[] = [
 'Brisbane, Amsterdam, Stockholm, Helsinki, Melbourne, Rome|Roma, Mexico City, Munich|München, Montreal, St. Louis|Saint Louis, Antwerp|Antwerpen, Sochi, Pyeongchang|PyeongChang, Vancouver, Nagano, Sapporo, Salt Lake City, Turin|Torino, Lillehammer, Calgary, Sarajevo, Lake Placid, Innsbruck, Grenoble, Albertville, Milan|Milano, Cortina d\'Ampezzo|Cortina',
 'Chamonix, St. Moritz|Sankt Moritz, Garmisch-Partenkirchen, Oslo, Squaw Valley',
 '']},
-{id:'tg-noc-chau-luc',lv:3,c:'Thế giới',q:'Kể tên ngọn núi cao nhất của một châu lục',s:['nui','dinh'],k:'Vinson|Núi Vinson|Vinson Massif',t:[
-'Everest|Đỉnh Everest|Chomolungma',
-'Kilimanjaro|Núi Kilimanjaro, Mont Blanc|Núi Mont Blanc, Aconcagua|Núi Aconcagua',
-'Denali|McKinley|Núi McKinley, Elbrus|Núi Elbrus, Kosciuszko|Núi Kosciuszko, Puncak Jaya|Carstensz',
-'Vinson|Núi Vinson','']},
 /* ---------------------------------------------------------------- animals, plants, sky */
 {id:'dv-giong-cho',c:'Động vật',q:'Kể tên một giống chó',s:['cho','con','giong'],k:'Chó Bắc Hà',t:[
 'Husky, Chó Phú Quốc|Phú Quốc, Corgi, Poodle|Chó Poodle',

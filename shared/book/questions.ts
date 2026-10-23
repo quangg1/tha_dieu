@@ -227,10 +227,8 @@ export const SPECS: Spec[] = [
   q('nv-ly-le', 'Lịch sử', 'Kể tên một nhân vật lịch sử thời Lý hoặc Lê sơ', [S('nhanvat', undefined, { any: ['ly', 'le'] })]),
   q('nv-nguyen', 'Lịch sử', 'Kể tên một nhân vật thời nhà Nguyễn', [S('nhanvat', ['nguyen'])]),
   q('nv-cm', 'Lịch sử', 'Kể tên một anh hùng hoặc nhân vật thời kháng chiến', [S('nhanvat', ['vn'], { any: ['cm', 'cd'] })]),
-  q('nv-van-vn', 'Văn học', 'Kể tên một nhà văn hoặc nhà thơ Việt Nam', [S('nhanvat', ['vn', 'van'])]),
   q('nv-van-tg', 'Văn học', 'Kể tên một nhà văn hoặc nhà thơ nước ngoài', [S('nhanvat', ['tg', 'van'])]),
   q('nv-nhacsi-vn', 'Âm nhạc', 'Kể tên một nhạc sĩ Việt Nam', [S('nhanvat', ['vn', 'nhacsi'])]),
-  q('nv-nhacsi-tg', 'Âm nhạc', 'Kể tên một nhà soạn nhạc cổ điển', [S('nhanvat', ['tg', 'nhacsi'])]),
   q('nv-hoasi', 'Nghệ thuật', 'Kể tên một họa sĩ hoặc nhà điêu khắc nổi tiếng', [S('nhanvat', ['hoasi'])]),
   q('nv-bongda-tg', 'Thể thao', 'Kể tên một cầu thủ bóng đá nổi tiếng thế giới', [S('nhanvat', ['tg', 'bongda'])]),
   q('nv-bongda-vn', 'Thể thao', 'Kể tên một cầu thủ bóng đá Việt Nam', [S('nhanvat', ['vn', 'bongda'])], { min: 12 }),
@@ -286,7 +284,6 @@ export const SPECS: Spec[] = [
   q('vh-unesco', 'Văn hóa', 'Kể tên một di sản Việt Nam được UNESCO ghi danh', [S('vanhoa', ['unesco']), S('diadanh', ['unesco'])], {
     n: 'Di sản vật thể hoặc phi vật thể.',
   }),
-  q('dt-all', 'Văn hóa', 'Kể tên một trong 54 dân tộc Việt Nam', [S('dantoc')]),
 
   // ---------------------------------------------------------------- Thể thao, âm nhạc
   q('tt-bong', 'Thể thao', 'Kể tên một môn thể thao dùng bóng hoặc cầu', [S('thethao', ['bong'])]),
@@ -414,34 +411,6 @@ export const HARD_TO_BE_RARE_FAILS = new Set<string>(
     .split(/\s+/),
 );
 for (const id of HARD_TO_BE_RARE_FAILS) RETIRED.add(id);
-
-/**
- * Review of 23 October 2026 (all 403 asked prompts read one by one): prompts with no end to their answers (people, works,
- * brands, cities by country), duplicates of another prompt, closed lists too small to hold a rare answer, prompts a free
- * typed answer cannot match, and a batch of 26-answer everyday-object prompts everyone answers alike. They stay in the
- * book, so old days still open, but are never asked. The list and the reasons for Kiro are in docs/cau-da-go.md.
- */
-export const RETIRED_REVIEW_2026_10_23 = new Set<string>(
-  [
-    // A1 người nổi tiếng: sổ chỉ phủ một phần nhỏ, đa số tên người chơi gõ nằm ngoài sổ.
-    'r-cauthu-tg r-cauthu-vn r-nba r-tay-vot r-ca-si-us r-rapper-vn r-dao-dien r-hoa-si-tg r-nha-toan-hoc r-lich-su-tg r-trieu-dai-tq r-nha-phat-minh r-f1 r-vdv-nuoc-ngoai r-vdv-vn nv-van-vn nv-nhacsi-tg pop-danh-hai',
-    // A2 tác phẩm và thương hiệu nhiều vô kể.
-    'r-phim-netflix r-game r-tac-pham-tg r-tac-pham-vn r-kpop-group r-bia r-dong-ho r-thoi-trang-nhanh r-my-pham r-hang-cong-nghe',
-    // A3 "một thành phố của nước X": danh mục địa lý quá rộng.
-    'r-tp-my r-tp-trung r-tp-nhat r-tp-han r-tp-phap r-tp-y r-tp-duc r-tp-anh r-tp-uc r-tp-ando r-tp-tbn r-tp-nga r-tp-canada r-tp-dna r-tp-my-latin r-tp-trung-dong r-tp-chau-phi',
-    // B trùng hoặc gần trùng câu khác.
-    'r-dao-dien-phim r-chuong-trinh-tv r-hang-hang-khong r-bai-hat-thieu-nhi r-nhac-cu-dan-toc r-benh-truyen-nhiem r-giai-bong-da r-loai-bo-sat r-dong-vat-co-vu-bien r-chim-bien r-loai-nam r-cay-an-qua r-trai-cay-nhiet-doi tg-noc-chau-luc r-ngon-ngu-web',
-    // C tập đáp án đóng và nhỏ, không có đuôi hiếm.
-    'r-dt-wc-vo-dich dd-cho-noi r-bh-jack r-bh-my-tam r-tp-wc2026 r-dt-wc2026 r-thanh-pho-asiad r-olympic-dong r-phim-viet-moi r-bh-thay-co r-bh-ha-noi r-bh-me r-bh-den r-trieu-dai-vn r-truyen-kieu r-trieu-dai-trung-hoa dt-all vh-shakespeare',
-    // D khó khớp khi gõ tự do hoặc đề mơ hồ.
-    'r-thanh-ngu r-mon-thuong-hieu r-tu-ghep-an r-tu-han-viet r-bai-tho-sgk',
-    // E lô 26 đáp án, đề chung chung, ai cũng nói giống nhau.
-    'r-loai-den r-vat-dung-van-phong r-kieu-toc r-dung-cu-bep r-vat-dung-phong-khach r-do-dung-hoc-sinh r-bo-phan-xe-may r-bien-bao-giao-thong r-dung-cu-the-thao r-vi-tri-bong-da r-hoa-tiet-vai r-thiet-bi-thong-minh r-thuat-ngu-internet r-mon-chay r-mon-cuon r-nhac-cu-bo-go r-loai-vaccine r-bai-bien-vn r-hang-dong-vn r-xuong-mat r-tuyen-co-the r-chat-khi r-loai-te-bao',
-  ]
-    .join(' ')
-    .split(/\s+/),
-);
-for (const id of RETIRED_REVIEW_2026_10_23) RETIRED.add(id);
 
 /** The hand-written thickening passes, in order. */
 function thicken(q: QuestionDef, id: string): QuestionDef {
