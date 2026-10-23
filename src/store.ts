@@ -20,6 +20,21 @@ function write(key: string, value: unknown) {
   }
 }
 
+/**
+ * Bumping this wipes every device's flight memory (today's rows, streak and stats, collection) once, the next time the page
+ * opens. The player id, name and settings stay. Set to the date of the village-wide reset.
+ */
+const RESET_EPOCH = '2026-10-23';
+(function resetOnce() {
+  try {
+    if (read<string>('epoch', '') === RESET_EPOCH) return;
+    for (const k of ['today', 'stats', 'album', 'ydaySeen', 'coached']) localStorage.removeItem(K + k);
+    write('epoch', RESET_EPOCH);
+  } catch {
+    /* storage unavailable: nothing to reset */
+  }
+})();
+
 export function playerId(): string {
   let id = read<string>('player', '');
   if (!id) {
