@@ -22,7 +22,8 @@
   --bi-muted: #5b6778;
   --bi-faint: #8a97a8;
   --bi-paper: #ffffff;
-  --bi-paper-2: #eef2f7;
+  /* Mặt phụ: ấm theo giấy điệp, để ô chìm trong thẻ không lạc ra khỏi tờ giấy nó nằm trên. */
+  --bi-paper-2: #ece3cf;
   --bi-line: #dfe4ec;
   /* Brand: the gold of the hidden answer */
   --bi-gold: #ffd66b;
