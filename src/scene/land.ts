@@ -134,6 +134,22 @@ export function paintFields(W: number, h: number, dpr: number, unit: number): Fi
       if (water) {
         ctx.fillStyle = 'rgba(255,255,255,.55)';
         ctx.fillRect(x + w * 0.2, y0 + (y1 - y0) * 0.45, w * 0.35, Math.max(1, (y1 - y0) * 0.12));
+        ctx.fillRect(x + w * 0.55, y0 + (y1 - y0) * 0.7, w * 0.25, Math.max(1, (y1 - y0) * 0.08));
+      } else {
+        // Rice seedlings in short rows, and a darker lip along the bottom edge of each plot.
+        ctx.strokeStyle = 'rgba(45,100,40,.38)';
+        ctx.lineWidth = Math.max(0.8, (0.7 + i * 0.12) * s);
+        const step = Math.max(3, (3.2 + i * 0.9) * s);
+        for (let rowY = y0 + (y1 - y0) * 0.35; rowY < y1 - 1; rowY += Math.max(3, (y1 - y0) * 0.32)) {
+          for (let kx = x + step / 2; kx < x + w; kx += step) {
+            ctx.beginPath();
+            ctx.moveTo(kx + lean * 0.5, rowY);
+            ctx.lineTo(kx + lean * 0.5 + (r() - 0.5) * 1.2, rowY - Math.max(2, (y1 - y0) * 0.3));
+            ctx.stroke();
+          }
+        }
+        ctx.fillStyle = 'rgba(40,90,40,.10)';
+        ctx.fillRect(x, y1 - Math.max(1, (y1 - y0) * 0.16), w, Math.max(1, (y1 - y0) * 0.16));
       }
       x += w;
     }
@@ -173,29 +189,139 @@ export function paintFields(W: number, h: number, dpr: number, unit: number): Fi
     ctx.lineTo(x + (r() - 0.5) * 4, yy - 3 - r() * 4 * s);
     ctx.stroke();
   }
-  // Near paddies below the dyke, larger and darker.
-  let y = dyke + dh;
-  let i = 0;
-  while (y < h) {
-    const rowH = (34 + i * 26) * s;
-    const cell = (110 + i * 60) * s;
-    let x = -r() * cell;
-    while (x < W) {
-      const w = cell * (0.7 + r() * 0.8);
-      ctx.fillStyle = ['#6c9f45', '#77aa4c', '#5f9440', '#83b354'][Math.floor(r() * 4)];
-      ctx.fillRect(x, y, w, rowH);
-      ctx.fillStyle = 'rgba(239,230,196,.6)';
-      ctx.fillRect(x, y, Math.max(1.5, 2 * s), rowH);
-      x += w;
-    }
-    ctx.fillStyle = 'rgba(239,230,196,.7)';
-    ctx.fillRect(0, y, W, Math.max(1.5, 2 * s));
-    // Rows of rice seedlings.
-    ctx.fillStyle = 'rgba(40,80,30,.25)';
-    for (let k = 0; k < W; k += 7 * s * (1 + i * 0.5)) ctx.fillRect(k, y + rowH * 0.5, 1.4 * s, rowH * 0.18);
-    y += rowH;
-    i++;
+  // The meadow below the dyke: soft light and shade, then grass blades in three tones that grow with nearness,
+  // clover and wildflowers, and a few stones, so the ground reads as a place and not as coloured blocks.
+  const top = dyke + dh - 2;
+  const span = Math.max(1, h - top);
+  const gg = ctx.createLinearGradient(0, top, 0, h);
+  gg.addColorStop(0, '#79ae4e');
+  gg.addColorStop(0.3, '#69a143');
+  gg.addColorStop(1, '#4b8032');
+  ctx.fillStyle = gg;
+  ctx.fillRect(0, top, W, span + 2);
+  // Broad patches of sun and shade, flattened by perspective.
+  for (let k = 0; k < 34; k++) {
+    const t = Math.pow(r(), 1.3);
+    const py = top + t * span;
+    const rx = (70 + t * 260) * s * (0.6 + r() * 0.8);
+    ctx.fillStyle = r() < 0.5 ? 'rgba(190,225,110,.16)' : 'rgba(30,80,40,.14)';
+    ctx.beginPath();
+    ctx.ellipse(r() * W, py, rx, rx * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
+  // A worn track of paler, shorter grass where people walk, bending slowly across the foreground.
+  ctx.fillStyle = 'rgba(214,200,140,.20)';
+  ctx.beginPath();
+  ctx.moveTo(W * 0.3, top);
+  ctx.bezierCurveTo(W * 0.34, top + span * 0.3, W * 0.2, top + span * 0.6, W * 0.26, h);
+  ctx.lineTo(W * 0.4, h);
+  ctx.bezierCurveTo(W * 0.34, top + span * 0.6, W * 0.42, top + span * 0.3, W * 0.36, top);
+  ctx.closePath();
+  ctx.fill();
+  // Grass blades: many, thin, in fans, bigger towards the bottom edge.
+  const tones = ['#3f7a2c', '#4f8a35', '#5e9a3e', '#76ad48', '#9bcb62', '#b6d96e'];
+  const blades = Math.round((W * span) / (560 * s * s));
+  for (let k = 0; k < blades; k++) {
+    const t = Math.pow(r(), 0.85);
+    const by = top + 4 + t * (span - 4);
+    const bx = r() * W;
+    const len = (4 + t * 20) * s * (0.6 + r() * 0.8);
+    ctx.lineWidth = Math.max(0.8, (0.9 + t * 1.8) * s);
+    ctx.lineCap = 'round';
+    for (let f = -1; f <= 1; f++) {
+      ctx.strokeStyle = tones[Math.min(tones.length - 1, Math.floor(r() * (2 + t * 4)))];
+      const lean = f * (0.3 + r() * 0.35) + (r() - 0.5) * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(bx + f * 1.6 * s, by);
+      ctx.quadraticCurveTo(bx + lean * len * 0.4, by - len * 0.6, bx + lean * len, by - len);
+      ctx.stroke();
+    }
+  }
+  // Clover leaves and clumps.
+  for (let k = 0; k < Math.round(70 * (W / 700)); k++) {
+    const t = Math.pow(r(), 0.9);
+    const cx = r() * W;
+    const cy = top + 8 + t * (span - 8);
+    const rr = (2 + t * 5) * s;
+    ctx.fillStyle = r() < 0.5 ? '#8bc15a' : '#a5d070';
+    for (let q = 0; q < 3; q++) {
+      ctx.beginPath();
+      ctx.ellipse(cx + Math.cos(q * 2.1) * rr * 0.7, cy + Math.sin(q * 2.1) * rr * 0.4, rr * 0.7, rr * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Wildflowers on short stems: daisies, buttercups and small pink ones.
+  for (let k = 0; k < Math.round(95 * (W / 700)); k++) {
+    const t = Math.pow(r(), 0.8);
+    const fx = r() * W;
+    const fy = top + 10 + t * (span - 10);
+    const fr = (1.8 + t * 5.2) * s;
+    ctx.strokeStyle = '#3f7a2c';
+    ctx.lineWidth = Math.max(0.8, fr * 0.3);
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(fx + (r() - 0.5) * fr, fy - fr * 2.4);
+    ctx.stroke();
+    const hy = fy - fr * 2.4;
+    const kind = r();
+    if (kind < 0.45) {
+      ctx.fillStyle = '#ffffff';
+      for (let q = 0; q < 6; q++) {
+        ctx.beginPath();
+        ctx.ellipse(fx + Math.cos(q * 1.047) * fr * 0.9, hy + Math.sin(q * 1.047) * fr * 0.9, fr * 0.7, fr * 0.36, q * 1.047, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#f2b630';
+      ctx.beginPath();
+      ctx.arc(fx, hy, fr * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind < 0.8) {
+      ctx.fillStyle = '#f6c533';
+      ctx.beginPath();
+      ctx.arc(fx, hy, fr * 0.95, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffe58a';
+      ctx.beginPath();
+      ctx.arc(fx - fr * 0.25, hy - fr * 0.25, fr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#f08fb0';
+      for (let q = 0; q < 5; q++) {
+        ctx.beginPath();
+        ctx.arc(fx + Math.cos(q * 1.257) * fr * 0.7, hy + Math.sin(q * 1.257) * fr * 0.7, fr * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#fff3b0';
+      ctx.beginPath();
+      ctx.arc(fx, hy, fr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // A few stones.
+  for (let k = 0; k < Math.round(14 * (W / 700)); k++) {
+    const t = Math.pow(r(), 0.8);
+    const sx = r() * W;
+    const sy = top + 14 + t * (span - 14);
+    const sr = (3 + t * 8) * s;
+    ctx.fillStyle = 'rgba(40,60,30,.25)';
+    ctx.beginPath();
+    ctx.ellipse(sx + sr * 0.15, sy + sr * 0.3, sr * 1.1, sr * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = r() < 0.5 ? '#b9b7a8' : '#a6a595';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, sr, sr * 0.62, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.beginPath();
+    ctx.ellipse(sx - sr * 0.25, sy - sr * 0.2, sr * 0.45, sr * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Light falling off towards the bottom, so the eye stays on the dyke and the village.
+  const vg = ctx.createLinearGradient(0, top + span * 0.55, 0, h);
+  vg.addColorStop(0, 'rgba(20,50,25,0)');
+  vg.addColorStop(1, 'rgba(20,50,25,.22)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, top, W, span + 2);
   return { img: c, dyke };
 }
 

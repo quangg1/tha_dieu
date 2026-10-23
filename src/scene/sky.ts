@@ -1887,7 +1887,7 @@ export class SkyScene {
     const fh = P.fields.img.height / pd;
     ctx.drawImage(P.fields.img, 0, yg, W, fh);
     if (yg + fh < H) {
-      ctx.fillStyle = '#5f9440';
+      ctx.fillStyle = '#4b8032';
       ctx.fillRect(0, yg + fh - 1, W, H - yg - fh + 2);
     }
     ctx.fillStyle = 'rgba(30,60,20,.25)';
