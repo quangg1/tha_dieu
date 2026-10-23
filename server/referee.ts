@@ -128,7 +128,9 @@ const clean = (s: string, n = 60) => s.replace(/["\\\n\r]/g, ' ').slice(0, n);
 
 const RULES =
   `Đáp án hợp lệ khi nó có thật, đúng sự thật và đúng yêu cầu; chấp nhận lỗi chính tả nhỏ, gõ không dấu, tên địa phương, tên tiếng Anh. ` +
-  `Không hợp lệ nếu bịa, đùa, vô nghĩa, quá chung chung (ví dụ "con chim" cho câu hỏi về loài chim), hoặc không đúng loại.`;
+  `Không hợp lệ nếu bịa, đùa, vô nghĩa, quá chung chung (ví dụ "con chim" cho câu hỏi về loài chim), hoặc không đúng loại. ` +
+  `"canonical" phải là chính thứ người chơi gõ, chỉ sửa chính tả và thêm dấu, không đổi sang một đáp án khác. ` +
+  `Nếu đáp án quá ngắn hoặc mơ hồ, không chắc chỉ đúng một đáp án, thì valid=false, đừng đoán.`;
 
 function refereePrompt(prompt: string, note: string | undefined, input: string) {
   return (

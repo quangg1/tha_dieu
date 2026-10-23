@@ -669,16 +669,14 @@ export default function Game({ sky, mode, soundButton, onExit, onDone }: { sky: 
         <button className="hud-btn" onClick={quit} aria-label={quitArmed ? 'Bấm lần nữa để rời chuyến bay' : 'Rời chuyến bay'}>
           <BackIcon />
         </button>
-        <div className="hud-panel">
-          <span className="k score-k">
-            {gio && (
-              <span className={`gio-tag${wind > 0 ? ' on' : ''}`} key={wind} title="Nối gió: trả lời hiếm liên tiếp, gió càng mạnh, điểm càng nhân lên">
-                gió ×{fmtGio(gioMultiplier(wind))}
-              </span>
-            )}
-            Điểm
-          </span>
+        <div className="hud-panel score">
+          <span className="k score-k">Điểm</span>
           <span className="v gold">{Math.round(shownScore)}</span>
+          {gio && (
+            <span className={`gio-tag${wind > 0 ? ' on' : ''}`} key={wind} title="Nối gió: trả lời hiếm liên tiếp, gió càng mạnh, điểm càng nhân lên">
+              gió ×{fmtGio(gioMultiplier(wind))}
+            </span>
+          )}
         </div>
         {mode === 'daily' ? (
           /* Seven dots on their own thin line, no chip and no "2/7" beside them: the dots already say which

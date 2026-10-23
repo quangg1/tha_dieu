@@ -515,7 +515,10 @@ export class SkyScene {
 
   private resize() {
     const r = this.canvas.getBoundingClientRect();
-    this.dpr = Math.min(this.dprCap, window.devicePixelRatio || 1);
+    const dpr = Math.min(this.dprCap, window.devicePixelRatio || 1);
+    // Same size as before (a toolbar sliding, a rounding wobble): leave the canvas alone, resizing clears it.
+    if (this.W && Math.abs(r.width - this.W) < 1.5 && Math.abs(r.height - this.H) < 1.5 && dpr === this.dpr) return;
+    this.dpr = dpr;
     this.W = r.width;
     this.H = r.height;
     this.canvas.width = Math.round(r.width * this.dpr);
@@ -1413,15 +1416,7 @@ export class SkyScene {
       ctx.drawImage(img, x - w / 2, this.y(c.L) - h * 0.7, w, h);
       ctx.globalAlpha = 1;
     }
-    // Dragonflies darting over the fields a few metres up.
-    if (this.visible(1.1, 200)) {
-      for (let i = 0; i < 5; i++) {
-        const ph = this.t * (0.35 + i * 0.07) + i * 1.9;
-        const x = W * (0.12 + ((i * 0.23 + Math.sin(ph) * 0.12 + 1) % 1) * 0.76);
-        const y = this.y(0.75 + (i % 3) * 0.28) + Math.sin(ph * 2.3) * 14;
-        this.dragonfly(x, y, Math.min(this.U * 0.05, 26), Math.cos(ph) > 0 ? 1 : -1, i);
-      }
-    }
+    this.lowLife();
     // White storks.
     if (this.visible(2.08)) {
       const y0 = this.y(2.08);
@@ -1434,36 +1429,273 @@ export class SkyScene {
     }
   }
 
-  /** A chuồn chuồn: slim body, four glassy wings that flicker. */
-  private dragonfly(x: number, y: number, s: number, dir: number, i: number) {
-    const { ctx } = this;
-    const flap = this.reduce ? 0 : Math.sin(this.t * 40 + i) * 0.35;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(dir, 1);
-    ctx.fillStyle = 'rgba(235,248,255,.75)';
-    for (const ox of [0.12, -0.12]) {
-      for (const side of [-1, 1]) {
+  /** 1 while a thing anchored at altitude L is within sight of the kite, fading to 0 as the camera leaves it far behind or ahead. */
+  private near(L: number, below = 0.8, above = 1.1) {
+    const d = L - this.camL;
+    return d < 0 ? clamp(1 - (-d - below * 0.5) / (below * 0.5)) : clamp(1 - (d - above * 0.5) / (above * 0.5));
+  }
+
+  /**
+   * The life of the first hundred metres, each thing at its own height: dragonflies and butterflies over the
+   * meadow, petals on the breeze, swallows at tree-top height, other children's kites far off on their own strings.
+   */
+  private lowLife() {
+    const { ctx, W, H, U } = this;
+    if (this.camL > 2.7) return;
+    const lite = LITE || this.slow;
+    // Petals and seeds drifting up from the fields.
+    {
+      const n = lite ? 7 : 12;
+      for (let i = 0; i < n; i++) {
+        const L = 0.35 + ((i * 0.37) % 1) * 1.9;
+        const a = this.near(L, 0.9, 1.2) * 0.8;
+        if (a <= 0.02) continue;
+        const ph = this.t * (0.12 + (i % 4) * 0.03) + i * 1.7;
+        const x = ((((i * 0.173) % 1) + ph * 0.18) % 1) * (W + 40) - 20;
+        const y = this.y(L) + Math.sin(ph * 5 + i) * 9;
+        const r = U * (0.007 + (i % 3) * 0.002);
         ctx.save();
-        ctx.translate(s * ox, 0);
-        ctx.rotate(side * (Math.PI / 2 - 0.35 + flap) + (ox < 0 ? side * 0.25 : 0));
+        ctx.translate(x, y);
+        ctx.rotate(Math.sin(ph * 4 + i) * 0.9);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = i % 3 === 0 ? '#ffd9e2' : i % 3 === 1 ? '#ffffff' : '#fff0b8';
         ctx.beginPath();
-        ctx.ellipse(s * 0.36, 0, s * 0.38, s * 0.1, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, r * 1.7, r, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
+      ctx.globalAlpha = 1;
     }
-    const col = i % 2 ? '#e5533d' : '#3a8fd8';
-    ctx.strokeStyle = col;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(2, s * 0.12);
-    ctx.beginPath();
-    ctx.moveTo(-s * 0.75, 0);
-    ctx.lineTo(s * 0.35, 0);
-    ctx.stroke();
+    // Other children's kites far away, each on a thin string to the ground.
+    for (const [i, k] of ([[0.13, 1.72, '#3fae73', 1.0], [0.86, 1.52, '#f2b630', 0.8], [0.74, 2.05, '#4b8fdc', 0.62]] as const).entries()) {
+      const a = this.near(k[1], 0.9, 1.3);
+      if (a <= 0.02) continue;
+      const sway = Math.sin(this.t * 0.7 + i * 2.2);
+      const x = (this.wide ? this.gx(k[0]) : W * k[0]) + sway * 8;
+      const y = this.y(k[1]) + Math.sin(this.t * 0.5 + i) * 5;
+      const s = Math.min(U * 0.05, 26) * k[3];
+      ctx.save();
+      ctx.globalAlpha = a * 0.9;
+      ctx.strokeStyle = 'rgba(40,60,90,.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 1.2);
+      ctx.quadraticCurveTo(x - sway * 14, (y + H) / 2, x + (k[0] < 0.5 ? -26 : 26), H + 10);
+      ctx.stroke();
+      ctx.translate(x, y);
+      ctx.rotate(sway * 0.16);
+      // A diamond kite with a cross spine and a wiggling tail of bows.
+      ctx.fillStyle = k[2];
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(s * 0.62, -s * 0.1);
+      ctx.lineTo(0, s * 1.15);
+      ctx.lineTo(-s * 0.62, -s * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(0, s * 1.15);
+      ctx.moveTo(-s * 0.62, -s * 0.1);
+      ctx.lineTo(s * 0.62, -s * 0.1);
+      ctx.stroke();
+      ctx.strokeStyle = k[2];
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, s * 1.15);
+      for (let j = 1; j <= 6; j++) ctx.lineTo(Math.sin(this.t * 3 + j * 0.9 + i) * s * 0.28, s * 1.15 + j * s * 0.42);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // Swallows gliding past at tree-top height, in a loose flock.
+    {
+      const L = 1.58;
+      const a = this.near(L, 0.9, 1.2);
+      if (a > 0.02) {
+        const n = lite ? 3 : 5;
+        for (let i = 0; i < n; i++) {
+          const x = ((this.t * (26 + (i % 3) * 4) + i * 83) % (W + 120)) - 60;
+          const y = this.y(L + (i % 2) * 0.05) + Math.sin(i * 2.4) * 22 + Math.sin(this.t * 1.1 + i * 1.3) * 5;
+          this.swallow(x, y, Math.min(U * (0.034 + (i % 2) * 0.008), 20), a, i);
+        }
+      }
+    }
+    // Butterflies and dragonflies over the meadow.
+    {
+      const nb = lite ? 2 : 3;
+      for (let i = 0; i < nb; i++) {
+        const L = 0.7 + i * 0.22;
+        const a = this.near(L, 0.9, 1.2);
+        if (a <= 0.02) continue;
+        const ph = this.t * (0.5 + i * 0.1) + i * 2.3;
+        const x = W * (0.2 + ((i * 0.31 + Math.sin(ph * 0.7) * 0.18 + 1) % 1) * 0.6) + Math.sin(ph * 3) * 14;
+        this.butterfly(x, this.y(L) + Math.sin(ph * 2.1) * 18 + Math.sin(ph * 7) * 4, Math.min(U * 0.04, 20), a, i);
+      }
+      const nd = lite ? 3 : 5;
+      for (let i = 0; i < nd; i++) {
+        const L = 0.8 + (i % 3) * 0.3;
+        const a = this.near(L, 0.8, 1.1);
+        if (a <= 0.02) continue;
+        // Darts, then hovers: the position eases between spots, so each pause reads as hovering.
+        const seg = this.t * (0.22 + i * 0.05) + i * 1.9;
+        const k0 = Math.floor(seg);
+        const f = seg - k0;
+        const e = f < 0.7 ? 0 : (f - 0.7) / 0.3;
+        const pick = (k: number) => (Math.sin(k * 12.9898 + i * 78.233) * 43758.5453) % 1;
+        const px = (k: number) => 0.1 + Math.abs(pick(k)) * 0.8;
+        const py = (k: number) => Math.abs(pick(k + 17)) * 0.5;
+        const sm = e * e * (3 - 2 * e);
+        const x = W * (px(k0) + (px(k0 + 1) - px(k0)) * sm) + Math.sin(this.t * 2.6 + i) * 2.5;
+        const y = this.y(L + (py(k0) + (py(k0 + 1) - py(k0)) * sm) * 0.18) + Math.sin(this.t * 3.1 + i * 2) * 3;
+        const dir = px(k0 + 1) >= px(k0) ? 1 : -1;
+        this.dragonfly(x, y, Math.min(U * 0.075, 36), dir, i, a, sm > 0.01 && sm < 0.99 ? (dir > 0 ? 0.12 : -0.12) : 0);
+      }
+    }
+  }
+
+  /** A chuồn chuồn: a jewel-coloured body with a banded tail and four glassy veined wings that blur as they beat. */
+  private dragonfly(x: number, y: number, s: number, dir: number, i: number, alpha = 1, tilt = 0) {
+    const { ctx } = this;
+    const beat = this.reduce ? 0 : Math.sin(this.t * 46 + i * 1.7);
+    const col = ['#e4543c', '#f0a02a', '#2fa57a', '#d6407a', '#7a55c8'][i % 5];
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ctx.scale(dir, 1);
+    // Wings: two pairs, fore wings slightly longer, drawn as a quick flicker between two poses.
+    const wing = (ox: number, side: number, len: number, lift: number) => {
+      ctx.save();
+      ctx.translate(s * ox, -side * s * 0.02);
+      ctx.rotate(-side * (1.3 + lift) + side * 0.22);
+      const g = ctx.createLinearGradient(0, 0, s * len, 0);
+      g.addColorStop(0, 'rgba(255,255,255,.95)');
+      g.addColorStop(1, 'rgba(225,240,255,.62)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(s * len * 0.25, -s * 0.34, s * len * 0.8, -s * 0.3, s * len, -s * 0.02);
+      ctx.bezierCurveTo(s * len * 0.8, s * 0.2, s * len * 0.3, s * 0.2, 0, 0);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(70,110,150,.5)';
+      ctx.lineWidth = Math.max(0.6, s * 0.025);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(s * len * 0.95, -s * 0.02);
+      ctx.stroke();
+      ctx.fillStyle = col;
+      ctx.fillRect(s * len * 0.82, -s * 0.045, s * len * 0.1, s * 0.07);
+      ctx.restore();
+    };
+    for (const side of [-1, 1]) {
+      wing(0.2, side, 0.78, beat * 0.2);
+      wing(-0.02, side, 0.7, -beat * 0.2);
+    }
+    // Abdomen: a long tapered tail in bands, a little curved.
+    const segs = 9;
+    const tail = (j: number) => {
+      const f = j / segs;
+      return [-s * (0.15 + f * 1.0), Math.sin(f * 2.2 + this.t * 2 + i) * s * 0.05 * f] as const;
+    };
+    for (let j = segs - 1; j >= 0; j--) {
+      const [x1, y1] = tail(j);
+      const [x2, y2] = tail(j + 1);
+      ctx.strokeStyle = j % 2 ? '#26304a' : col;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = Math.max(1.6, s * (0.15 - (j / segs) * 0.06));
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    // Thorax and head with two big eyes.
     ctx.fillStyle = col;
+    ctx.strokeStyle = 'rgba(25,38,64,.75)';
+    ctx.lineWidth = Math.max(1, s * 0.04);
     ctx.beginPath();
-    ctx.arc(s * 0.44, 0, s * 0.13, 0, Math.PI * 2);
+    ctx.ellipse(s * 0.1, 0, s * 0.21, s * 0.14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(s * 0.36, 0, s * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#16233a';
+    for (const o of [-1, 1]) {
+      ctx.beginPath();
+      ctx.arc(s * 0.4, o * s * 0.07, s * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /** A butterfly: two wing pairs that close and open as it flutters. */
+  private butterfly(x: number, y: number, s: number, alpha: number, i: number) {
+    const { ctx } = this;
+    const open = this.reduce ? 0.8 : 0.25 + Math.abs(Math.sin(this.t * 9 + i * 2)) * 0.75;
+    const col = ['#ffd24a', '#ffffff', '#ff9a4a'][i % 3];
+    const edge = ['#d49a14', '#a9bfd6', '#c4631a'][i % 3];
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(Math.sin(this.t * 2 + i) * 0.25);
+    for (const side of [-1, 1]) {
+      ctx.save();
+      ctx.scale(side * open, 1);
+      ctx.fillStyle = col;
+      ctx.strokeStyle = edge;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(s * 0.55, -s * 0.35, s * 0.62, s * 0.5, -0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(s * 0.38, s * 0.38, s * 0.42, s * 0.34, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.strokeStyle = '#3a2a1f';
+    ctx.lineWidth = Math.max(1.5, s * 0.14);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.5);
+    ctx.lineTo(0, s * 0.5);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /** A swallow: a dark body, forked tail and long swept wings that beat slowly between glides. */
+  private swallow(x: number, y: number, s: number, alpha: number, i: number) {
+    const { ctx } = this;
+    const flap = this.reduce ? 0.2 : Math.sin(this.t * 5 + i * 1.9) * 0.55 + 0.1;
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.92;
+    ctx.translate(x, y);
+    ctx.fillStyle = '#1f2c48';
+    ctx.strokeStyle = '#1f2c48';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(1.4, s * 0.16);
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(side * s * 0.8, -s * (0.35 + flap), side * s * 1.6, -s * (0.05 + flap * 1.1));
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 0.3, s * 0.13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.2, 0);
+    ctx.lineTo(-s * 0.75, -s * 0.12);
+    ctx.moveTo(-s * 0.2, 0);
+    ctx.lineTo(-s * 0.75, s * 0.14);
+    ctx.stroke();
+    ctx.fillStyle = '#f2ede0';
+    ctx.beginPath();
+    ctx.ellipse(s * 0.05, s * 0.05, s * 0.18, s * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }

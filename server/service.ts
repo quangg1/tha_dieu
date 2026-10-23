@@ -7,7 +7,7 @@ import { newAnswerPrior } from '../shared/book/familiar.js';
 import type { NightReview, NightVerdict } from '../shared/book/night-verdicts.js';
 import { Matcher, namesBrands } from '../shared/match.js';
 import { boardName } from '../shared/names.js';
-import { norm, soft } from '../shared/normalize.js';
+import { editDistance, norm, soft } from '../shared/normalize.js';
 import {
   CUNG_TRANG,
   KHON_LOI,
@@ -589,7 +589,10 @@ async function judge(db: Db, q: LoadedQuestion, input: string, playerId: string,
   );
   if (cached.length) {
     const c = cached[0];
-    if (c.valid && c.canonical_key && q.answers.has(c.canonical_key)) return { key: c.canonical_key, reason: '' };
+    // A stored verdict that swapped the typed name for an unrelated answer is not trusted (it came from before this check).
+    const badSwap = c.valid && c.canonical_key && q.answers.has(c.canonical_key) && !relatedNames(input, q.answers.get(c.canonical_key)!.display);
+    if (c.valid && c.canonical_key && q.answers.has(c.canonical_key) && !badSwap) return { key: c.canonical_key, reason: '' };
+    if (badSwap) return { key: null, reason: `Chưa rõ “${input.slice(0, 40)}” là đáp án nào. Hãy gõ đầy đủ tên.` };
     if (c.valid && c.canonical_key) {
       // Another server learned this answer within the last minute: read the book again instead of paying for a second verdict.
       forgetQuestion(q.id);
@@ -786,6 +789,22 @@ export async function notices(db: Db, playerId: string) {
   return { learned: out };
 }
 
+/** Whether a referee's canonical name is still the thing the player typed: the same words, a spelling fix or a clear containment. */
+export function relatedNames(input: string, canonical: string): boolean {
+  const a = soft(input);
+  const b = soft(canonical);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const longer = Math.max(a.length, b.length);
+  if (editDistance(a, b, Math.ceil(longer * 0.4)) <= Math.ceil(longer * 0.4)) return true;
+  const ta = a.split(' ').filter((w) => w.length >= 2);
+  const tb = new Set(b.split(' ').filter((w) => w.length >= 2));
+  // A full name given by part of it ("Quách Tĩnh" for "Quách Tĩnh (Kim Dung)"), or a longer name containing the canonical one.
+  if (ta.length >= 2 && ta.every((w) => tb.has(w))) return true;
+  if (tb.size >= 1 && [...tb].every((w) => ta.includes(w))) return true;
+  return false;
+}
+
 /** The referee answered in time: the answer is in or out right away. */
 async function applyVerdict(db: Db, q: LoadedQuestion, input: string, v: Verdict) {
   const inputKey = soft(input);
@@ -797,6 +816,9 @@ async function applyVerdict(db: Db, q: LoadedQuestion, input: string, v: Verdict
   if (!v.valid) return refuse(v.reason || 'Trọng tài không công nhận đáp án này.');
   // "Chim" for a bird question is too general, whoever says it is fine.
   if (q.vague.has(soft(v.canonical)) || q.vague.has(norm(v.canonical))) return refuse(`“${v.canonical}” chung chung quá. Hãy kể tên một thứ cụ thể hơn.`);
+  // The referee may fix spelling and add tones, but must not swap what the player typed for a different answer
+  // ("ưng" is not "Ân Tố Tố"): if the verdict's name has nothing to do with the input, nothing is scored.
+  if (!relatedNames(input, v.canonical)) return refuse(`Chưa rõ “${input.slice(0, 40)}” là đáp án nào. Hãy gõ đầy đủ tên.`);
   // Only an exact name joins an existing answer: a near spelling of a different answer must not swallow it.
   const known = q.matcher.match(v.canonical);
   const sure = known?.exact ? known : null;

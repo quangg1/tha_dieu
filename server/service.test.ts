@@ -987,3 +987,14 @@ describe('the book in the database', () => {
     expect(ex.questions.length).toBe(BOOK.length);
   });
 });
+
+describe('relatedNames', () => {
+  it('accepts spelling fixes and rejects a swap for another answer', async () => {
+    const { relatedNames } = await import('./service.js');
+    expect(relatedNames('an to to', 'Ân Tố Tố')).toBe(true);
+    expect(relatedNames('quach tinh', 'Quách Tĩnh')).toBe(true);
+    expect(relatedNames('Dương Quả', 'Dương Quá')).toBe(true);
+    expect(relatedNames('ưng', 'Ân Tố Tố')).toBe(false);
+    expect(relatedNames('Hổ', 'Sư tử')).toBe(false);
+  });
+});
