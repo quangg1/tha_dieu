@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { BAND_RULES, DAY_BANDS, GIO_POINTS, RANK_MIN_PLAYERS, TIERS, TIERS_BY_RANK, dayBand, formatAlt, usesGio } from '../../shared/scoring.js';
 import { JourneyCard, JourneySheet } from '../components/Journey';
 import { flute } from '../audio/flute';
+import { AnswerList } from '../components/AnswerList';
 import { api, type Reveal, type Support } from '../api';
 import { TierIcon } from '../icons';
 import { LAYOUTS, type SkyScene } from '../scene/sky';
@@ -279,6 +280,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             <p key={r.questionId} className="yday-row">
               <span>{r.prompt}</span> <b>{r.krill}</b>
               {r.tier === 5 && <em className="rv-found"> bạn tìm ra!</em>}
+              <AnswerList reveal={r} />
             </p>
           ))}
           <button className="toast-link" onClick={closeYday}>Đã xem</button>

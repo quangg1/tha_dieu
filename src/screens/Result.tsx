@@ -17,6 +17,7 @@ import { DayBands, DayCurve, MyRecord, RarityStrings } from '../components/Playe
 import { FeedbackSheet } from '../components/FeedbackSheet';
 import { FriendsList, FriendsSheet, shareInvite } from '../components/Friends';
 import { CheckIcon, FlagIcon } from '../glyphs';
+import { AnswerList } from '../components/AnswerList';
 import { JourneyArrival, JourneyCard, JourneySheet } from '../components/Journey';
 import { journeyAt } from '../../shared/journey.js';
 
@@ -339,6 +340,7 @@ export default function Result({ sky, summary, soundButton, onHome, onNight }: {
                       <span className="row-rv">
                         {rv.top && <span>Cả làng hay nói: {rv.top}</span>}
                         {rv.krill && r.tier !== 5 && <span>Làng giấu: <b>{rv.krill}</b></span>}
+                        <AnswerList reveal={rv} />
                       </span>
                     );
                   })()}

@@ -197,7 +197,7 @@ function Insights({ tab, ins, token, onClosed }: { tab: Tab; ins: Ins; token: st
   if (tab === 'overview') return <Overview ins={ins} />;
   if (tab === 'questions') return <Questions ins={ins} />;
   if (tab === 'feedback') return <Feedback token={token} />;
-  if (tab === 'names') return <Names token={token} />;
+  if (tab === 'names') return <><Names token={token} /><Flags token={token} /></>;
   return <Reports ins={ins} token={token} onClosed={onClosed} />;
 }
 
@@ -516,6 +516,59 @@ function Names({ token }: { token: string }) {
                   <td style={{ wordBreak: 'break-word' }}>{n.name ?? '(đã ẩn)'}</td>
                   <td>{n.score}</td>
                   <td>{!n.muted && <button className="gd-chip" onClick={() => void mute(n.player_id)}>Ẩn</button>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Flights the check held off the board: many hidden answers, many unknown ones, or answers too fast to be typed. */
+function Flags({ token }: { token: string }) {
+  const [list, setList] = useState<Awaited<ReturnType<typeof api.admin.flags>>['flags']>([]);
+  const [msg, setMsg] = useState('');
+  useEffect(() => {
+    api.admin
+      .flags(token)
+      .then((r) => setList(r.flags))
+      .catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tải được.'));
+  }, [token]);
+  const set = async (f: (typeof list)[number], status: 'cleared' | 'open') => {
+    try {
+      await api.admin.flagSet(token, f.player_id, f.day, status);
+      setList((l) => l.map((x) => (x.player_id === f.player_id && x.day === f.day ? { ...x, status } : x)));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Chưa lưu được.');
+    }
+  };
+  return (
+    <section className="gd-paper">
+      <div className="gd-label" style={{ marginBottom: 8 }}>Chuyến bay đáng ngờ</div>
+      <p className="gd-msg" style={{ margin: '0 0 8px' }}>Những chuyến bay này bị gỡ khỏi bảng; người chơi vẫn thấy điểm và hạng bình thường. Bấm “Cho lên bảng” nếu bạn thấy chuyến bay hợp lệ, hệ thống sẽ không gắn cờ lại.</p>
+      {msg && <p className="gd-msg gd-msg--hint">{msg}</p>}
+      {list.length === 0 ? (
+        <p className="gd-msg" style={{ margin: 0 }}>Chưa có chuyến bay nào bị gắn cờ.</p>
+      ) : (
+        <div className="tbl">
+          <table>
+            <thead><tr><th>Ngày</th><th>Tên</th><th>Điểm</th><th>Lý do</th><th /></tr></thead>
+            <tbody>
+              {list.map((f) => (
+                <tr key={f.player_id + f.day} style={f.status === 'cleared' ? { opacity: 0.5 } : undefined}>
+                  <td>{f.day}</td>
+                  <td style={{ wordBreak: 'break-word' }}>{f.name ?? f.player_id.slice(0, 8)}</td>
+                  <td>{f.score}</td>
+                  <td style={{ wordBreak: 'break-word' }}>{f.reasons}</td>
+                  <td>
+                    {f.status === 'open' ? (
+                      <button className="gd-chip" onClick={() => void set(f, 'cleared')}>Cho lên bảng</button>
+                    ) : (
+                      <button className="gd-chip" onClick={() => void set(f, 'open')}>Gỡ lại</button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

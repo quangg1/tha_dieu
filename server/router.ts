@@ -15,6 +15,8 @@ let ready: Promise<void> | null = null;
 const BURST_PER_MINUTE = Number(process.env.BURST_PER_MINUTE) || 240;
 /** Thả vô tận prompts one network may draw in a day, and answers it may send: generous for people, tight for scripts. */
 const NIGHT_DRAWS_PER_NET = Number(process.env.NIGHT_DRAWS_PER_NET) || 800;
+/** Yesterday's full answer lists one network may open in a day. */
+const YESTERDAY_LISTS_PER_NET = 40;
 const ANSWERS_PER_NET = Number(process.env.ANSWERS_PER_NET) || 3000;
 
 /** Creates the tables, or resyncs the questions table, the first time a server instance meets a database from another book version. */
@@ -163,9 +165,11 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
   yesterday: {
     method: 'GET',
     cache: () => 'private, max-age=300',
-    async run({ db, query }) {
+    async run({ db, query, net }) {
       const pid = query.get('playerId');
-      return S.yesterday(db, pid && /^[A-Za-z0-9_-]{8,64}$/.test(pid) ? pid : undefined);
+      // The full answer lists are the book itself: a network that keeps asking with fresh players gets only the hidden answers.
+      const lists = !net || (await S.hit(db, `yl:${net}`, S.vnToday(), YESTERDAY_LISTS_PER_NET));
+      return S.yesterday(db, pid && /^[A-Za-z0-9_-]{8,64}$/.test(pid) ? pid : undefined, lists);
     },
   },
   // Sign in with a Neon Auth token (after Google): returns Bilion's own session and the account's player id.
@@ -320,6 +324,20 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     admin: true,
     async run({ db }) {
       return { names: await S.adminBoard(db, S.vnToday()) };
+    },
+  },
+  'admin/flags': {
+    method: 'GET',
+    admin: true,
+    async run({ db }) {
+      return { flags: await S.adminFlags(db) };
+    },
+  },
+  'admin/flag-set': {
+    method: 'POST',
+    admin: true,
+    async run({ db, body }) {
+      return S.setFlag(db, S.checkPlayer(body.playerId), (/^\d{4}-\d{2}-\d{2}$/.test(String(body.day)) ? String(body.day) : S.vnToday()), body.status === 'open' ? 'open' : 'cleared');
     },
   },
   'admin/mute': {

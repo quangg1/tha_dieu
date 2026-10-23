@@ -1347,6 +1347,82 @@ export async function computeScores(db: Db, day: string, playerId?: string): Pro
   return scores;
 }
 
+/* ------------------------------------------------------------------ flights that look wrong */
+
+export interface FlightTurn {
+  questionId: string;
+  key: string | null;
+  tier: number | null;
+  ms: number | null;
+}
+
+/** Suspicion at or above this holds a run off the board until the village head looks at it. */
+export const SUSPECT_AT = 3;
+/** An answer typed sooner than this after the clock opened was not typed by a person. */
+const TOO_FAST_MS = 1200;
+
+/**
+ * How odd a day's flight looks, with the reasons. Each signal is rare for a person alone and the rest add up:
+ *  - hidden answers (Độc nhất) are never shown before midnight, yet the book's first hidden answers sit in a public repo;
+ *  - answers the book does not know that the referee accepted, again and again, is a script feeding it names;
+ *  - several answers sent faster than anyone can type.
+ * It runs on whatever the player has answered so far, so skipping the other questions does not hide a few lucky ones.
+ */
+export function suspicion(turns: FlightTurn[]): { score: number; reasons: string[] } {
+  const done = turns.filter((t) => t.tier != null && t.tier >= 0 && t.key);
+  const reasons: string[] = [];
+  let score = 0;
+  const krill = done.filter((t) => t.tier === CUNG_TRANG).length;
+  if (krill >= 2) { score += 3; reasons.push(`${krill} đáp án Độc nhất`); }
+  else if (krill === 1) { score += 1; reasons.push('1 đáp án Độc nhất'); }
+  const outside = done.filter((t) => !BOOK_BY_ID.get(t.questionId)?.answers.some((a) => a.key === t.key)).length;
+  if (outside >= 4) { score += 3; reasons.push(`${outside} đáp án ngoài sổ`); }
+  else if (outside === 3) { score += 1; reasons.push('3 đáp án ngoài sổ'); }
+  const fast = done.filter((t) => t.ms != null && t.ms < TOO_FAST_MS).length;
+  if (fast >= 4) { score += 3; reasons.push(`${fast} câu trả lời dưới ${TOO_FAST_MS / 1000} giây`); }
+  else if (fast === 3) { score += 1; reasons.push('3 câu trả lời dưới 1,2 giây'); }
+  if (done.length >= 7 && done.every((t) => t.tier! >= 4 && t.tier !== KHON_LOI)) { score += 1; reasons.push('cả 7 câu từ Cực hiếm trở lên'); }
+  return { score, reasons };
+}
+
+/** Looks at one player's finished daily flight and holds it off the board when it looks wrong. A cleared run is left alone. */
+async function checkFlight(db: Db, day: string, playerId: string, points: number, dev?: string) {
+  const rows = await db.query<{ question_id: string; answer_key: string | null; tier: number | null; ms: number | null }>(
+    `select question_id, answer_key, tier, (extract(epoch from (answered_at - started_at)) * 1000)::int as ms
+     from turns where player_id=$1 and day=$2::date and mode='daily' and answered_at is not null`,
+    [playerId, day],
+  );
+  const s = suspicion(rows.map((r) => ({ questionId: r.question_id, key: r.answer_key, tier: r.tier, ms: r.ms })));
+  // Someone already held on another day, or on the same device, is held on the first sign: a new player id is no fresh start.
+  const [again] = await db.query<{ n: number }>(
+    `select count(*)::int as n from flags f where f.status='open' and f.day <> $2::date and (f.player_id = $1
+       or ($3::text is not null and exists (select 1 from runs r where r.player_id = f.player_id and r.dev = $3)))`,
+    [playerId, day, dev ?? null],
+  );
+  if (s.score < (again?.n ? 1 : SUSPECT_AT)) return;
+  const put = await db.query(
+    `insert into flags (player_id, day, reasons, score) values ($1,$2::date,$3,$4) on conflict (player_id, day) do nothing returning 1`,
+    [playerId, day, (again?.n ? 'đã bị gắn cờ trước đó; ' : '') + s.reasons.join('; '), points],
+  );
+  if (put.length) forgetBoard();
+}
+
+/** The runs held off the board, newest first, for the village head. */
+export async function adminFlags(db: Db) {
+  return db.query<{ player_id: string; day: string; reasons: string; score: number; status: string; name: string | null }>(
+    `select f.player_id, f.day::text as day, f.reasons, f.score, f.status,
+            (select r.name from runs r where r.player_id=f.player_id and r.day=f.day and r.mode='daily') as name
+     from flags f order by f.created_at desc limit 100`,
+  );
+}
+
+/** The village head's decision: 'cleared' puts the run back on the board, 'open' holds it again. */
+export async function setFlag(db: Db, playerId: string, day: string, status: 'cleared' | 'open') {
+  await db.query(`update flags set status=$3 where player_id=$1 and day=$2::date`, [playerId, day, status]);
+  forgetBoard();
+  return { ok: true };
+}
+
 interface Standing {
   player_id: string;
   name: string | null;
@@ -1354,6 +1430,8 @@ interface Standing {
   altitude: number;
   grid: string;
   replay: boolean;
+  /** Held off the board by the flight check: the player is shown as if they were on it. */
+  held?: boolean;
 }
 
 /** The day's runs ranked by settled score. A second run from the same device on the same day stays off the board. */
@@ -1365,13 +1443,16 @@ async function standings(db: Db, day: string, mode: Mode, own?: { playerId: stri
   const scores = mode === 'daily' ? new Map(await scoreDay(db, day)) : null;
   if (scores && own) scores.set(own.playerId, { score: own.score, grid: own.grid });
   const seenDev = new Set<string>();
+  const held = new Set(
+    mode === 'daily' ? (await db.query<{ player_id: string }>(`select player_id from flags where day=$1::date and status='open'`, [day])).map((r) => r.player_id) : [],
+  );
   const out: Standing[] = runs.map((r) => {
     // Only a player first seen today counts as a replay: a family sharing a network and a phone model keeps its runs.
     const replay = !!r.dev && !!r.fresh && seenDev.has(r.dev);
     if (r.dev) seenDev.add(r.dev);
     const s = scores?.get(r.player_id);
     const score = s ? s.score : r.score;
-    return { player_id: r.player_id, name: r.name, score, altitude: s ? altitudeFor(score, 'daily', day) : r.altitude, grid: s ? s.grid : r.grid, replay };
+    return { player_id: r.player_id, name: r.name, score, altitude: s ? altitudeFor(score, 'daily', day) : r.altitude, grid: s ? s.grid : r.grid, replay: replay || held.has(r.player_id), held: held.has(r.player_id) };
   });
   return out.sort((a, b) => b.altitude - a.altitude);
 }
@@ -1385,6 +1466,23 @@ export interface Reveal {
   top: string;
   mine: string | null;
   tier: number;
+  /** Every answer in the book, by tier: only for a player who has flown the whole day. The hidden one is left out until midnight. */
+  list?: { tier: number; names: string[] }[];
+}
+
+/** The book's answers for a prompt grouped by the tier each lands at today (the hidden answer only when it is open). */
+function answerList(q: LoadedQuestion, tally: Tally, showKrill: boolean): { tier: number; names: string[] }[] {
+  const by = new Map<number, string[]>();
+  for (const [key, e] of q.answers) {
+    if (unvouched(e)) continue;
+    const isKrill = key === q.krillKey;
+    if (isKrill && !showKrill) continue;
+    const tier = isKrill ? CUNG_TRANG : tierFromTally(q, key, e.prior, tally);
+    (by.get(tier) ?? by.set(tier, []).get(tier)!).push(e.display);
+  }
+  return [...by.entries()]
+    .sort((x, y) => x[0] - y[0])
+    .map(([tier, names]) => ({ tier, names: names.sort((x, y) => x.localeCompare(y, 'vi')) }));
 }
 
 /**
@@ -1392,7 +1490,7 @@ export interface Reveal {
  * who did not find it: shown at once, a first account could finish, read it, and hand it to a second browser or a
  * friend climbing the same day's board. It opens after midnight (Vietnam), on the home screen as yesterday's answers.
  */
-async function revealDay(db: Db, day: string, playerId: string, grid: string): Promise<Reveal[]> {
+async function revealDay(db: Db, day: string, playerId: string, grid: string, withList = false): Promise<Reveal[]> {
   const open = day < vnToday();
   const set = await dailySet(db, day);
   const mineRows = await db.query<{ question_id: string; answer_key: string | null }>(
@@ -1414,18 +1512,21 @@ async function revealDay(db: Db, day: string, playerId: string, grid: string): P
         top: c.top[0]?.display ?? '',
         mine: k ? q.answers.get(k)?.display ?? null : null,
         tier: grid[i] === 'x' || grid[i] == null ? -1 : Number(grid[i]),
+        ...(withList ? { list: answerList(q, tl.get(id)!, open || found) } : {}),
       };
     }),
   );
 }
 
 /** Yesterday's answers, hidden answers included, with how this player did (their row if they flew that day). */
-export async function yesterday(db: Db, playerId?: string) {
+export async function yesterday(db: Db, playerId?: string, withList = true) {
   const day = vnToday(new Date(Date.now() - 86_400_000));
   const [set] = await db.query<{ question_ids: string[] }>(`select question_ids from daily_sets where day=$1::date`, [day]);
   if (!set) return { day, reveal: [] as Reveal[] };
   const grid = playerId ? (await computeScores(db, day, playerId)).get(playerId)?.grid ?? '' : '';
-  return { day, reveal: await revealDay(db, day, playerId ?? '', grid) };
+  // The full lists go only to a player who flew that day, so one request cannot walk away with the whole book.
+  const flew = !!playerId && withList && (await flightDone(db, day, playerId));
+  return { day, reveal: await revealDay(db, day, playerId ?? '', grid, flew) };
 }
 
 async function flightDone(db: Db, day: string, playerId: string) {
@@ -1472,6 +1573,7 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
        grid = case when runs.mode = 'daily' or excluded.score >= runs.score then excluded.grid else runs.grid end`,
     [a.playerId, a.day, a.mode, name, score, altitude, grid, a.dev ?? null, !!a.since && a.since >= a.day],
   );
+  if (a.mode === 'daily') await checkFlight(db, a.day, a.playerId, score, a.dev);
   const all = await standings(db, a.day, a.mode, a.mode === 'daily' ? { playerId: a.playerId, score, grid } : undefined);
   const me = all.find((r) => r.player_id === a.playerId);
   const ranked = all.filter((r) => !r.replay);
@@ -1493,11 +1595,11 @@ export async function finish(db: Db, a: { playerId: string; day: string; mode: M
     players: total,
     beaten,
     dist: { w, counts },
-    replay: !!me?.replay,
+    replay: !!me?.replay && !me.held,
     settled,
     nameRefused,
     // The answers of the day once the whole flight is done; the hidden ones stay hidden until midnight (revealDay).
-    reveal: a.mode === 'daily' && (await flightDone(db, a.day, a.playerId)) ? await revealDay(db, a.day, a.playerId, grid) : undefined,
+    reveal: a.mode === 'daily' && (await flightDone(db, a.day, a.playerId)) ? await revealDay(db, a.day, a.playerId, grid, true) : undefined,
   };
 }
 

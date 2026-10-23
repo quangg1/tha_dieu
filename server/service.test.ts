@@ -3,6 +3,7 @@ import { pglite, type Db } from './db.js';
 import type { Referee } from './referee.js';
 import * as S from './service.js';
 import { soft } from '../shared/normalize.js';
+import { BOOK_BY_ID } from '../shared/book/questions.js';
 import { setWikiFetch } from './wikidata.js';
 
 let db: Db;
@@ -290,6 +291,12 @@ describe('settling the day', () => {
     // The day is still being played (it is in the future here): the hidden answer stays locked.
     expect(a.reveal?.[0].krill).toBeNull();
     expect(a.reveal?.[0].mine).toBe(rare[1].display);
+    // The full list comes with it, by tier, and leaves the hidden answer out while the day is open.
+    const list = a.reveal![0].list!;
+    expect(list.length).toBeGreaterThan(3);
+    expect(list.flatMap((g) => g.names)).toContain(rare[1].display);
+    expect(list.some((g) => g.tier === 5)).toBe(false);
+    expect(list.flatMap((g) => g.names)).not.toContain(q.answers.get(q.krillKey)!.display);
     // Same device, a player id first seen today: a replay in a private tab.
     const c = await S.finish(db, { playerId: players[3], day: d, mode: 'daily', dev: 'dev-a', since: d });
     expect(c.replay).toBe(true);
@@ -306,6 +313,8 @@ describe('the hidden answer', () => {
     expect(y.day).toBe(yday);
     const q = await S.dayQuestion(db, yday, qid);
     expect(y.reveal[0].krill).toBe(q.answers.get(q.krillKey)!.display);
+    // Nobody who did not fly yesterday gets the full lists.
+    expect(y.reveal[0].list).toBeUndefined();
     const today = await S.dailySet(db, day);
     await expect(S.startTurn(db, { playerId: 'night_scout_1', day, mode: 'night', questionId: today[0] })).rejects.toThrow();
     for (let i = 0; i < 20; i++) expect(today).not.toContain((await S.nightQuestion(db, [])).id);
@@ -769,5 +778,78 @@ describe('timely prompts', () => {
     expect(late.length).toBeGreaterThan(0);
     expect(late.every((id) => S.isTimely(id) && S.expired(id, '2099-01-01'))).toBe(true);
     expect(S.expiredIds('2026-10-23')).toEqual([]);
+  });
+});
+
+describe('flights that look wrong', () => {
+  // Keys the book knows, so only the signal under test fires.
+  const known = (i: number) => {
+    const q = [...BOOK_BY_ID.values()][i];
+    return { questionId: q.id, key: q.answers[0].key };
+  };
+  const turn = (i: number, tier: number, over: Partial<S.FlightTurn> = {}): S.FlightTurn => ({ ...known(i), tier, ms: 6000, ...over });
+
+  it('leaves an ordinary flight alone, however lucky', () => {
+    const lucky = [4, 3, 5, 2, 4, 1, 3].map((t, i) => turn(i, t));
+    expect(S.suspicion(lucky).score).toBeLessThan(S.SUSPECT_AT);
+  });
+
+  it('flags three or more hidden answers, a run of unknown answers, or answers too fast to type', () => {
+    const krill = [5, 5, 2, 2, 1, 0, 3].map((t, i) => turn(i, t));
+    expect(S.suspicion(krill).score).toBeGreaterThanOrEqual(S.SUSPECT_AT);
+    const outside = [3, 3, 3, 3, 3, 3, 3].map((t, i) => turn(i, t, { key: `unknown-${i}` }));
+    expect(S.suspicion(outside).reasons.join()).toMatch(/ngoài sổ/);
+    expect(S.suspicion(outside).score).toBeGreaterThanOrEqual(S.SUSPECT_AT);
+    const fast = [1, 2, 0, 3, 1, 2, 0].map((t, i) => turn(i, t, { ms: 300 }));
+    expect(S.suspicion(fast).score).toBeGreaterThanOrEqual(S.SUSPECT_AT);
+  });
+
+  it('holds a flagged run off the board, still ranks the player as if on it, and lets the village head clear it', async () => {
+    const d = '2031-05-01';
+    const set = await S.dailySet(db, d);
+    const bots = ['flag_bot_0001', 'flag_bot_0002'];
+    for (const p of bots) {
+      for (const id of set) {
+        await S.startTurn(db, { playerId: p, day: d, mode: 'daily', questionId: id });
+        const q = await S.dayQuestion(db, d, id);
+        const r = await S.answer(db, { playerId: p, day: d, mode: 'daily', questionId: id, input: q.answers.get(q.krillKey)!.display }, referee);
+        expect(r.tier).toBe(5);
+      }
+    }
+    const a = await S.finish(db, { playerId: bots[0], day: d, mode: 'daily', dev: 'dev-x1', since: '2031-01-01' });
+    expect(a.replay).toBe(false);
+    expect((await S.adminFlags(db)).some((f) => f.player_id === bots[0] && f.status === 'open')).toBe(true);
+    const board = await S.board(db, d, 'daily');
+    expect(board.players).toBe(0);
+    await S.setFlag(db, bots[0], d, 'cleared');
+    await S.finish(db, { playerId: bots[0], day: d, mode: 'daily', dev: 'dev-x1', since: '2031-01-01' });
+    expect((await S.board(db, d, 'daily')).players).toBe(1);
+  });
+
+  it('checks a partial flight too, and holds a new id from the device of a held player on the first sign', async () => {
+    const d = '2031-05-02';
+    const set = await S.dailySet(db, d);
+    const run = async (p: string, ids: string[], dev: string, krillOnly: boolean, day = d) => {
+      for (const id of ids) {
+        await S.startTurn(db, { playerId: p, day, mode: 'daily', questionId: id });
+        const q = await S.dayQuestion(db, day, id);
+        const input = krillOnly ? q.answers.get(q.krillKey)!.display : [...q.answers.values()].find((x) => x.prior === 0)!.display;
+        await S.answer(db, { playerId: p, day, mode: 'daily', questionId: id, input }, referee);
+      }
+      return S.finish(db, { playerId: p, day, mode: 'daily', dev, since: '2031-01-01' });
+    };
+    // Two hidden answers and the other five questions skipped: still held.
+    await run('flag_part_0001', set.slice(0, 2), 'dev-part', true);
+    expect((await S.adminFlags(db)).some((f) => f.player_id === 'flag_part_0001' && f.day === d)).toBe(true);
+    // Next day, a brand new id on the same device with a single hidden answer is held at once.
+    const d2 = '2031-05-03';
+    const set2 = await S.dailySet(db, d2);
+    await run('flag_part_0002', set2.slice(0, 1), 'dev-part', false, d2);
+    await run('flag_part_0002', [], 'dev-part', false, d2);
+    const q2 = await S.dayQuestion(db, d2, set2[1]);
+    await S.startTurn(db, { playerId: 'flag_part_0002', day: d2, mode: 'daily', questionId: set2[1] });
+    await S.answer(db, { playerId: 'flag_part_0002', day: d2, mode: 'daily', questionId: set2[1], input: q2.answers.get(q2.krillKey)!.display }, referee);
+    await S.finish(db, { playerId: 'flag_part_0002', day: d2, mode: 'daily', dev: 'dev-part', since: '2031-01-01' });
+    expect((await S.adminFlags(db)).some((f) => f.player_id === 'flag_part_0002' && f.day === d2)).toBe(true);
   });
 });

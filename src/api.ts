@@ -25,6 +25,8 @@ export interface Reveal {
   top: string;
   mine: string | null;
   tier: number;
+  /** Every answer by tier, for a player who flew the whole day. */
+  list?: { tier: number; names: string[] }[];
 }
 
 export interface AnswerResult {
@@ -220,6 +222,8 @@ export const api = {
       call<{ ok: boolean }>('admin/decide', b, { 'x-admin-token': token }),
     setup: (token: string) => call<{ questions: number }>('setup', {}, { 'x-admin-token': token }),
     names: (token: string) => call<{ names: { player_id: string; name: string | null; score: number; muted: boolean }[] }>('admin/names', undefined, { 'x-admin-token': token }),
+    flags: (token: string) => call<{ flags: { player_id: string; day: string; reasons: string; score: number; status: string; name: string | null }[] }>('admin/flags', undefined, { 'x-admin-token': token }),
+    flagSet: (token: string, playerId: string, day: string, status: 'cleared' | 'open') => call<{ ok: boolean }>('admin/flag-set', { playerId, day, status }, { 'x-admin-token': token }),
     mute: (token: string, playerId: string) => call<{ ok: boolean }>('admin/mute', { playerId }, { 'x-admin-token': token }),
   },
 };

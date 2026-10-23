@@ -193,6 +193,18 @@ create table if not exists reports (
   primary key (question_id, input_key, kind)
 );
 
+-- Daily flights that looked wrong (many hidden answers, many unknown answers, answers too fast to be typed).
+-- 'open' keeps the run off the board until the village head looks; 'cleared' puts it back and is never flagged again.
+create table if not exists flags (
+  player_id text not null,
+  day date not null,
+  reasons text not null,
+  score int not null default 0,
+  status text not null default 'open',
+  created_at timestamptz not null default now(),
+  primary key (player_id, day)
+);
+
 -- Players whose names the village head took off the board.
 create table if not exists muted (
   player_id text primary key,
