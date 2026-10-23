@@ -2,6 +2,17 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 21:50
+- **Đã hiệu chỉnh và áp bản chấm TASK-003 vào kho `monan`: 215 mục** (109 dòng trong `lex/monan.ts`, 115 trong `lex2/monan.ts`; 9 từ nằm trên 2 dòng, cả hai dòng đổi cùng mức).
+- **Bảng chuyển thang học từ 120 từ chồng, chốt theo trung vị: `1→1 2→3 3→4 4→4 5→5`.** So bốn cách chốt trên chính 120 từ đó: trung vị khớp **82/120** · lệch TB **−0,09**; giữ nguyên 69 · −0,43; trung bình làm tròn 74 · +0,28; dịch một mức 66 · +0,38. Giới hạn: bảng học trên từ động vật, áp cho kho món ăn.
+- **Cổng "lệch ≥ 2 mức" tính trên mức thô**, mức đặt vào mới lấy sau chuyển thang. Nếu lấy cổng sau chuyển thang thì số mục phải sửa nhảy 265 → **890** (33% kho) vì bảng đẩy mức 2 và 3 lên, mà hai mức đó chiếm 60% bản chấm — bảng tự đẻ ra ca lệch thay vì tìm chỗ hai bên thật sự bất đồng.
+- **Giữ nguyên 58 ca kéo xuống, tất cả đều 3→1.** Bảng đồng nhất ở mức 1 nên không hiệu chỉnh được chiều này; mức 1 của DeepSeek đã biết bị gán quá tay (trên 120 từ chồng, trung bình của mức 1 là 1,55 — 16/44 đáng là 2); và 58 ca dồn đúng nhóm DeepSeek tự nhận là cảm nhận (`Risotto`, `Borscht`, `Quiche`, `Ceviche`, `Biryani`, `Hummus`, bánh Pháp, đặc sản vùng cao). Hạ sai là chiều gây hại — cho ~200 điểm cho món nhiều người biết. Áp được bằng cách bỏ cờ `--up-only`.
+- Phân bố `pop` kho `monan` (tên chính): 637/1406/514/73/8 → **549/1292/501/260/36**. Sau khi áp còn 58 ca lệch ≥ 2 mức, đúng bằng số ca giữ lại.
+- `npx vitest run` 89/89 đạt · `tsc --noEmit` sạch · `check:questions` **0 lỗi · 11 chú ý**, đúng bằng trước khi sửa.
+- Thêm `scripts/apply-pop.ts` (cờ `--map`, `--up-only`, `--write`) — chạy lại được cho kho sau; chạy lại trên `dongvat` cho 0 mục, tức đã áp xong và không đổi gì thêm.
+- **Chưa làm:** áp bản `thucvat` của HY3 (nó ở trên thang đồng thuận nên không cần bảng chuyển, nhưng mức 5 do danh sách trắng tay đặt — cần quyết trước); 58 ca kéo xuống của `monan`; 9 từ `?` của `thucvat`; 7 từ `?` của `dongvat`.
+- **Chờ chủ dự án:** các bước SQL trên production (reset người chơi, redraw, xóa 106 câu); truy vấn số 2 của báo cáo WorkBuddy.
+
 ## 2026-10-23 21:45
 - **Đã sửa `pop` kho động vật: 133 mục** (75 dòng trong `lex/dongvat.ts`, 58 trong `lex2/dongvat.ts`). Chỉ sửa các chỗ lệch ≥ 2 mức so với bản chấm TASK-001, lấy đúng mức của bản chấm. Không đụng 682 chỗ lệch 1 mức — trong tầm nhiễu của một người chấm.
 - Kiểm sau khi sửa: so lại với bản chấm còn **0 ca lệch ≥ 2 mức**, lệch ≤1 mức 100%, lệch TB +0,40 → +0,28. Phân bố `pop` của kho: 1628/334/154/65/28 → **1523/316/241/88/41**.

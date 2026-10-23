@@ -45,7 +45,7 @@ export default `
 3 Phở chua # bac
 3 Phở khô Gia Lai|Phở hai tô # tn
 3 Mì vằn thắn|Mì hoành thánh|Hoành thánh
-3 Mì gói|Mì tôm|Mì ăn liền
+5 Mì gói|Mì tôm|Mì ăn liền
 3 Mì cay
 3 Mì vịt tiềm
 3 Hủ tiếu Mỹ Tho # nam
@@ -158,19 +158,19 @@ export default `
 3 Cơm chiên cá mặn
 2 Cơm dẻo
 2 Cơm cà ri
-2 Cơm bò lúc lắc
+4 Cơm bò lúc lắc
 2 Cơm chiên hải sản
 2 Cơm gà Phú Yên
 2 Cơm thố
 2 Cơm ống tre
 2 Cơm hến Huế
 2 Cơm ghè
-2 Cơm cuộn rong biển
+4 Cơm cuộn rong biển
 2 Cơm gói lá sen|Cơm sen
 2 Cơm đập|Cơm niêu đập
 2 Cơm muối vừng
 2 Cơm độn
-2 Cơm chiên trứng
+4 Cơm chiên trứng
 2 Cơm nắm muối vừng
 1 Cơm lam Tây Bắc
 1 Cơm hến Cồn Hến
@@ -197,7 +197,7 @@ export default `
 3 Bánh pía # nam
 3 Bánh cốm # bac
 3 Bánh đậu xanh # bac
-3 Bánh quy|Cookie|Biscuit|Bánh quy bơ # ngoai tet
+5 Bánh quy|Cookie|Biscuit|Bánh quy bơ # ngoai tet
 3 Bánh bông lan
 3 Bánh tiêu # nam
 3 Bánh ít|Bánh ít lá gai # trung
@@ -315,10 +315,10 @@ export default `
 2 Bánh ướt lòng gà
 2 Bánh cuốn trứng
 2 Bánh cuốn chả
-2 Bánh mì xíu mại
+4 Bánh mì xíu mại
 2 Bánh mì chả cá
 2 Bánh mì thổ nhĩ kỳ|Doner kebab|Kebab # ngoai
-2 Bánh mì ốp la
+4 Bánh mì ốp la
 2 Bánh mì heo quay
 2 Bánh mì bì
 2 Bánh mì xíu
@@ -327,7 +327,7 @@ export default `
 2 Bánh mì baguette|Baguette # ngoai
 2 Bánh mì sữa
 2 Bánh mì ruốc|Bánh mì chà bông
-2 Bánh ngọt
+4 Bánh ngọt
 2 Bánh bông lan cuộn|Bánh cuộn
 2 Bánh bông lan phô mai|Castella
 2 Bánh mochi|Mochi # ngoai
@@ -367,8 +367,8 @@ export default `
 2 Bánh gạo
 2 Bánh cốm Hàng Than
 2 Bánh mì Pháp
-2 Bánh ga tô
-2 Bánh dẻo|Bánh dẻo trung thu # trungthu
+4 Bánh ga tô
+4 Bánh dẻo|Bánh dẻo trung thu # trungthu
 2 Bánh nướng thập cẩm # trungthu
 2 Bánh nướng nhân đậu xanh # trungthu
 2 Bánh sinh nhật
@@ -425,7 +425,7 @@ export default `
 1 Bánh nếp nướng
 1 Bánh phong lan
 1 Bánh hạt dẻ
-1 Bánh trứng muối
+4 Bánh trứng muối
 1 Bánh in Kim Long
 1 Bánh tráng gạo lứt
 1 Bánh cuốn chay
@@ -534,7 +534,7 @@ export default `
 2 Chè đông sương
 2 Chè thạch
 2 Chè rau câu|Rau câu|Thạch rau câu
-2 Chè trân châu|Trân châu
+4 Chè trân châu|Trân châu
 2 Chè thạch đen|Thạch đen|Sương sáo
 2 Chè thạch găng
 2 Chè sương sâm|Sương sâm
@@ -558,7 +558,7 @@ export default `
 1 Chè rong biển
 1 Chè chuối nướng
 1 Chè trôi tàu
-1 Chè đậu phụng
+4 Chè đậu phụng
 1 Chè xíu mại
 1 Chè khoai dẻo
 @ xoi
@@ -635,13 +635,13 @@ export default `
 2 Lẩu mực
 2 Lẩu ốc
 2 Lẩu sườn
-2 Lẩu kim chi
+4 Lẩu kim chi
 2 Lẩu gà đen
 2 Lẩu chay
 2 Lẩu băng chuyền
 2 Lẩu nướng
 2 Lẩu bò nhúng mẻ
-1 Lẩu cháo
+4 Lẩu cháo
 1 Lẩu cá lăng
 1 Lẩu cá đuối Vũng Tàu
 1 Lẩu gà lá giang
@@ -725,7 +725,7 @@ export default `
 1 Canh rau ngổ
 1 Canh đu đủ
 1 Canh bông điên điển
-1 Canh sườn non
+4 Canh sườn non
 @ goi
 4 Gỏi cuốn|Nem cuốn|Spring roll
 4 Nộm|Gỏi|Nộm đu đủ|Gỏi đu đủ
@@ -814,90 +814,90 @@ export default `
 2 Thịt kho mắm ruốc
 2 Thịt heo kho mắm nêm
 2 Tép rang khế
-2 Tép rang
-2 Bò sốt vang
-2 Bò lúc lắc
-2 Sườn xào chua ngọt|Sườn chua ngọt
-2 Gà xào sả ớt|Gà sả ớt
+4 Tép rang
+4 Bò sốt vang
+5 Bò lúc lắc
+4 Sườn xào chua ngọt|Sườn chua ngọt
+5 Gà xào sả ớt|Gà sả ớt
 2 Ếch xào sả ớt
 2 Lươn xào sả ớt
 2 Mề gà xào
-2 Thịt bò xào|Bò xào
-2 Rau muống xào tỏi|Rau muống xào
-2 Đậu phụ nhồi thịt
+5 Thịt bò xào|Bò xào
+5 Rau muống xào tỏi|Rau muống xào
+4 Đậu phụ nhồi thịt
 2 Đậu phụ mắm tôm
-2 Trứng rán|Trứng chiên|Trứng ốp la
-2 Chả trứng
+5 Trứng rán|Trứng chiên|Trứng ốp la
+4 Chả trứng
 2 Trứng hấp
-2 Chả cá Lã Vọng|Chả cá # bac
+4 Chả cá Lã Vọng|Chả cá # bac
 2 Chả cá Nha Trang
-2 Chả mực|Chả mực Hạ Long # bac
+4 Chả mực|Chả mực Hạ Long # bac
 2 Chả rươi # bac
 2 Chả ốc
-2 Chả lá lốt|Bò lá lốt
-2 Chả giò|Nem rán|Nem
-2 Giò lụa|Chả lụa|Giò # tet
+4 Chả lá lốt|Bò lá lốt
+5 Chả giò|Nem rán|Nem
+4 Giò lụa|Chả lụa|Giò # tet
 2 Giò thủ # tet
 2 Giò bò
 2 Chả quế
-2 Nem chua # trung anvat
+4 Nem chua # trung anvat
 2 Nem chua Thanh Hóa
 2 Nem chạo
 2 Nem Lai Vung
 2 Nem tai
 2 Nem bùi
 2 Chạo tôm
-2 Dưa hành # tet
-2 Dưa cải chua|Dưa chua
+4 Dưa hành # tet
+4 Dưa cải chua|Dưa chua
 2 Dưa góp
 2 Cà pháo muối
 2 Kim chi|Kimchi # ngoai
 2 Củ kiệu muối|Củ kiệu # tet
-2 Lạp xưởng # tet
+4 Lạp xưởng # tet
 2 Thịt ngâm mắm
-2 Măng xào
+4 Măng xào
 2 Măng hầm
 2 Canh măng khô # tet
 2 Chân giò hầm|Giò heo hầm
-2 Thịt luộc
-2 Gà luộc # tet
-2 Vịt luộc
-2 Lợn quay|Heo quay|Thịt quay
-2 Vịt quay
-2 Ngỗng quay
-2 Gà nướng
+5 Thịt luộc
+5 Gà luộc # tet
+4 Vịt luộc
+4 Lợn quay|Heo quay|Thịt quay
+5 Vịt quay
+4 Ngỗng quay
+5 Gà nướng
 2 Bê thui
 2 Lợn mán
 2 Dê tái chanh|Dê tái
 2 Bò tái chanh|Bò tái
 2 Tái dê
-2 Tiết canh
-2 Lòng lợn|Lòng heo|Dồi
+4 Tiết canh
+5 Lòng lợn|Lòng heo|Dồi
 2 Dồi sụn
 2 Dồi trường
 2 Phá lấu # nam
-2 Bò bít tết|Bít tết|Beefsteak|Steak # ngoai
+5 Bò bít tết|Bít tết|Beefsteak|Steak # ngoai
 1 Thịt chua Thanh Sơn # bac
 1 Cá kho Bá Kiến
 1 Cá bống thệ kho
 1 Cá rô đồng kho tộ
-1 Thịt trâu gác bếp|Trâu gác bếp # taybac
-1 Thịt lợn gác bếp|Thịt heo gác bếp # taybac
+4 Thịt trâu gác bếp|Trâu gác bếp # taybac
+4 Thịt lợn gác bếp|Thịt heo gác bếp # taybac
 1 Lạp xưởng Cai Lậy
 1 Thịt nướng ống tre
 1 Gà đồi Tiên Yên
 1 Gà Đông Tảo hấp
 1 Vịt cỏ Vân Đình
 1 Dê núi Ninh Bình
-1 Bò một nắng|Bò một nắng Phú Yên
+4 Bò một nắng|Bò một nắng Phú Yên
 1 Mắm thái
-1 Mắm chưng
+4 Mắm chưng
 1 Chả rươi Tứ Kỳ
 1 Chả cá Thác Bà
 1 Nem chua Bùi
-1 Gà ủ muối
-1 Bò tơ Tây Ninh
-1 Bò né|Bò ne
+4 Gà ủ muối
+4 Bò tơ Tây Ninh
+4 Bò né|Bò ne
 1 Gà nướng cơm lam
 1 Thắng dền
 @ nuong
@@ -917,7 +917,7 @@ export default `
 3 Lợn cắp nách nướng
 3 Gà nướng lu
 3 Vịt nướng
-3 Ngô nướng|Bắp nướng # anvat
+5 Ngô nướng|Bắp nướng # anvat
 3 Khoai lang nướng # anvat
 3 Bánh tráng nướng|Pizza Việt|Bánh tráng nướng Đà Lạt # anvat
 3 Xiên nướng|Xiên que # anvat
@@ -927,14 +927,14 @@ export default `
 2 Ếch nướng
 2 Lươn nướng
 2 Cá saba nướng
-2 Tôm nướng
-2 Nướng Hàn Quốc|BBQ # ngoai
+4 Tôm nướng
+4 Nướng Hàn Quốc|BBQ # ngoai
 2 Yakitori # ngoai
 1 Chẩm chéo nướng
 1 Pa pỉnh tộp|Cá nướng Tây Bắc # taybac
 1 Gà nướng Bản Đôn # tn
 1 Heo tộc nướng
-1 Sườn heo nướng mật ong
+4 Sườn heo nướng mật ong
 @ anvat
 4 Bánh tráng trộn
 4 Ốc|Ốc luộc|Ốc xào
@@ -958,11 +958,11 @@ export default `
 3 Phá lấu
 3 Cút lộn xào me
 3 Gỏi khô bò
-3 Khô bò
+5 Khô bò
 3 Khô gà
-3 Khô mực|Mực khô|Mực nướng khô
+5 Khô mực|Mực khô|Mực nướng khô
 3 Ô mai # tet
-3 Mứt|Mứt Tết # tet
+5 Mứt|Mứt Tết # tet
 3 Mứt gừng # tet
 3 Mứt dừa # tet
 3 Mứt sen # tet
@@ -983,7 +983,7 @@ export default `
 3 Chè lam
 3 Bánh tráng phơi sương
 3 Đậu hũ|Tàu hũ|Tào phớ|Tàu hũ nước đường # ngot
-3 Sữa đậu nành
+5 Sữa đậu nành
 3 Tào phớ trân châu
 3 Kem xôi
 3 Kem bơ
@@ -1002,7 +1002,7 @@ export default `
 3 Sủi cảo
 3 Bánh bao nhân thịt
 3 Gà rán|Fried chicken # ngoai
-3 Xúc xích|Xúc xích nướng
+5 Xúc xích|Xúc xích nướng
 3 Nem rán Hà Nội
 3 Bánh khoai Hồ Tây|Bánh tôm Hồ Tây # bac
 3 Ốc len xào dừa
@@ -1013,91 +1013,91 @@ export default `
 3 Cánh gà chiên nước mắm
 3 Nem chua nướng
 3 Tré
-3 Nước mía
+5 Nước mía
 2 Bánh mì nướng muối ớt
 2 Bánh tráng kẹp Đà Lạt
 2 Bánh mì que Hải Phòng
-2 Trứng cút lộn
+4 Trứng cút lộn
 2 Ốc mít hấp sả
 2 Trứng gà nướng
 2 Ngô chiên
 2 Khoai lang kén
 2 Khoai môn chiên
-2 Đậu phộng rang|Lạc rang
-2 Hạt dưa
+4 Đậu phộng rang|Lạc rang
+4 Hạt dưa
 2 Hạt bí rang
-2 Me lắc
-2 Xoài lắc
+4 Me lắc
+4 Xoài lắc
 2 Cóc lắc
 2 Ổi lắc
 2 Trái cây lắc
-2 Ruốc|Chà bông
+4 Ruốc|Chà bông
 2 Da heo chiên giòn|Tóp mỡ
-2 Thịt xiên
+4 Thịt xiên
 2 Lạp xưởng nướng đá
 2 Cá mực nướng
 2 Chả cá viên
-2 Bò viên
-2 Tôm chiên xù
-2 Cá chiên xù
-2 Mực chiên giòn
+4 Bò viên
+4 Tôm chiên xù
+4 Cá chiên xù
+4 Mực chiên giòn
 2 Nem rán hải sản
-2 Phô mai que
-2 Bánh mì xíu mại
-2 Kem ống
+4 Phô mai que
+4 Bánh mì xíu mại
+4 Kem ống
 2 Kem bơ Đà Lạt
 2 Kem flan
 2 Chè ly
 2 Sương sáo
-2 Thạch dừa
-2 Trà sữa trân châu # ngoai
+4 Thạch dừa
+5 Trà sữa trân châu # ngoai
 2 Bánh bò thốt nốt
 2 Bánh da lợn
-2 Bánh bông lan trứng muối
+4 Bánh bông lan trứng muối
 2 Bánh khọt
 2 Bột chiên Sài Gòn
 2 Bột chiên Hà Nội
 2 Hủ tiếu gõ
-2 Súp cua # nam
-2 Súp gà
+4 Súp cua # nam
+4 Súp gà
 2 Súp hải sản
 2 Súp măng tây cua
 2 Súp nui
 2 Nui xào
-2 Mì xào giòn
+4 Mì xào giòn
 2 Bánh canh bột xắt
-1 Ốc bươu nhồi thịt
+4 Ốc bươu nhồi thịt
 1 Ốc nhồi lá gừng
 1 Bánh trứng nhện
-1 Ô mai sấu
-1 Ô mai mơ
-1 Mứt sấu
-1 Mứt chanh
-1 Mứt quất
+4 Ô mai sấu
+4 Ô mai mơ
+4 Mứt sấu
+4 Mứt chanh
+4 Mứt quất
 1 Mứt đào
 1 Mứt mãng cầu
 1 Kẹo dồi Nghệ An
 1 Kẹo cau
 1 Kẹo chuối
 1 Kẹo dứa
-1 Kẹo sìu châu
-1 Kẹo hồ lô
+4 Kẹo sìu châu
+4 Kẹo hồ lô
 1 Bánh tai heo chiên
-1 Bò khô nướng
-1 Mực một nắng
+4 Bò khô nướng
+4 Mực một nắng
 1 Cá thu một nắng
 1 Khô cá dứa
 1 Khô cá sặc
-1 Khô cá lóc
+4 Khô cá lóc
 1 Khô cá chỉ vàng
-1 Khô cá cơm
-1 Tôm khô
-1 Ruốc tôm
-1 Muối tôm Tây Ninh
+4 Khô cá cơm
+4 Tôm khô
+4 Ruốc tôm
+4 Muối tôm Tây Ninh
 1 Sá sùng nướng
 1 Đuông dừa chiên
-1 Nhộng tằm rang
-1 Châu chấu rang
+4 Nhộng tằm rang
+4 Châu chấu rang
 1 Sâu chít rang
 1 Dế chiên
 @ mam
@@ -1171,7 +1171,7 @@ export default `
 2 Kem bơ Đắk Lắk
 2 Cà đắng
 2 Heo rừng nướng
-1 Cá lăng nướng
+4 Cá lăng nướng
 1 Canh bồi
 1 Món nướng ống tre
 1 Bò tơ Ea Súp
@@ -1204,7 +1204,7 @@ export default `
 3 Mì vằn thắn
 3 Đậu phụ Tứ Xuyên|Mapo tofu
 3 Lẩu Tứ Xuyên
-3 Pad Thái|Pad Thai
+5 Pad Thái|Pad Thai
 3 Tom Yum|Tôm yum|Canh chua Thái
 3 Cà ri gà|Cà ri|Curry
 3 Cà ri Ấn Độ
@@ -1215,12 +1215,12 @@ export default `
 3 Paella
 3 Lasagna
 3 Risotto
-3 Salad|Xà lách trộn
+5 Salad|Xà lách trộn
 3 Salad Nga
 3 Súp bí đỏ
 3 Súp kem nấm
 3 Bít tết|Beefsteak|Steak
-3 Hot dog|Xúc xích kẹp bánh mì
+5 Hot dog|Xúc xích kẹp bánh mì
 3 Sandwich
 3 Kebab|Doner kebab
 3 Fish and chips|Cá và khoai tây chiên
@@ -1370,17 +1370,17 @@ export default `
 1 Jambalaya
 1 Gumbo
 1 Cobb salad
-1 Caesar salad|Salad Caesar
+4 Caesar salad|Salad Caesar
 1 Lobster roll
 1 Philly cheesesteak
-1 Buffalo wings|Cánh gà Buffalo
+4 Buffalo wings|Cánh gà Buffalo
 1 Pulled pork
 1 Hash brown
-1 Peking duck
+4 Peking duck
 1 Mì Lan Châu|Lamian
 1 Mì Biang Biang
-1 Đậu phụ thối
-1 Trứng bách thảo
+4 Đậu phụ thối
+4 Trứng bách thảo
 1 Bánh củ cải
 1 Hotpot Trùng Khánh
 1 Nem nướng Lào
