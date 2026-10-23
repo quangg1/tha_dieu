@@ -419,7 +419,7 @@ const routes: Record<string, { method: 'GET' | 'POST'; admin?: boolean; cache?: 
     method: 'GET',
     admin: true,
     async run({ db, query }) {
-      return AD.adminFindPlayers(db, query.get('q') ?? '');
+      return AD.adminFindPlayers(db, query.get('q') ?? '', query.get('sort') ?? 'recent');
     },
   },
   'admin/player': {

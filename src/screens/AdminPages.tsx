@@ -354,9 +354,10 @@ export function PlayersPage({ token }: { token: string }) {
   const [open, setOpen] = useState<string | null>(null);
   const [p, setP] = useState<Awaited<ReturnType<typeof api.admin.player>> | null>(null);
   const [msg, setMsg] = useState('');
-  const search = (text = q) =>
-    api.admin.findPlayers(token, text).then(setRes).catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tìm được.'));
-  useEffect(() => void search(''), [token]);
+  const [sort, setSort] = useState('recent');
+  const search = (text = q, by = sort) =>
+    api.admin.findPlayers(token, text, by).then(setRes).catch((e) => setMsg(e instanceof Error ? e.message : 'Chưa tìm được.'));
+  useEffect(() => void search('', sort), [token, sort]);
   const look = async (id: string) => {
     if (open === id) return setOpen(null);
     setOpen(id);
@@ -380,34 +381,43 @@ export function PlayersPage({ token }: { token: string }) {
   return (
     <>
       <section className="gd-paper">
-        <div className="gd-label" style={{ marginBottom: 4 }}>Tra người chơi</div>
-        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Gõ tên trên bảng hoặc phần đầu mã người chơi (ít nhất 2 ký tự). Hữu ích khi có người báo mất điểm hoặc bị ẩn tên.</p>
+        <div className="gd-label" style={{ marginBottom: 4 }}>Người chơi{res ? ` · ${num(res.total)} người đã có lượt bay, ${num(res.named)} người có tên` : ''}</div>
+        <p className="gd-msg" style={{ margin: '0 0 8px' }}>Bảng dưới luôn liệt kê người chơi mới nhất; gõ tên hoặc phần đầu mã (ít nhất 2 ký tự) để lọc. Hữu ích khi có người báo mất điểm hoặc bị ẩn tên.</p>
         <form className="name-row" onSubmit={(e) => { e.preventDefault(); void search(); }}>
           <input className="gd-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tên hoặc mã…" aria-label="Tên hoặc mã người chơi" />
           <button className="gd-btn" type="submit" style={{ fontSize: 16 }}>Tìm</button>
         </form>
+        <p className="gd-msg" style={{ margin: '8px 0 0' }}>
+          Xếp theo:{' '}
+          {([['recent', 'chơi gần nhất'], ['best', 'điểm cao nhất'], ['runs', 'nhiều lượt nhất']] as const).map(([k, label]) => (
+            <button key={k} className="gd-chip" aria-pressed={sort === k} style={sort === k ? { fontWeight: 700 } : undefined} onClick={() => setSort(k)}>{label}</button>
+          ))}
+        </p>
         {msg && <p className="gd-msg gd-msg--hint">{msg}</p>}
-        {res && q.trim().length >= 2 && (
+        {res && (
           <div className="tbl" style={{ marginTop: 10 }}>
             {res.found.length === 0 ? (
-              <p className="gd-msg" style={{ margin: 0 }}>Không thấy ai.</p>
+              <p className="gd-msg" style={{ margin: 0 }}>{q.trim().length >= 2 ? 'Không thấy ai.' : 'Chưa có ai bay.'}</p>
             ) : (
               <table>
-                <thead><tr><th>Tên</th><th>Mã</th><th>Lượt bay</th><th>Điểm cao nhất</th><th>Gần nhất</th><th /></tr></thead>
+                <thead><tr><th>Tên trên bảng</th><th>Tài khoản</th><th>Mã</th><th>Lượt bay</th><th>Số ngày</th><th>Điểm cao nhất</th><th>Gần nhất</th><th>Cờ</th><th /></tr></thead>
                 <tbody>
                   {res.found.map((f) => (
                     <Fragment key={f.player_id}>
                       <tr style={f.muted ? { opacity: 0.6 } : undefined}>
                         <td>{f.name ?? '(chưa đặt tên)'}{f.muted ? ' · đã ẩn' : ''}</td>
+                        <td>{f.account ?? '—'}</td>
                         <td>{f.player_id.slice(0, 8)}</td>
                         <td>{f.runs}</td>
+                        <td>{f.days}</td>
                         <td>{f.best}</td>
                         <td>{dm(f.last_day)}</td>
+                        <td>{f.held > 0 ? `${f.held} đang giữ` : '—'}</td>
                         <td><button className="gd-chip" onClick={() => void look(f.player_id)}>{open === f.player_id ? 'Đóng' : 'Xem'}</button></td>
                       </tr>
                       {open === f.player_id && (
                         <tr>
-                          <td colSpan={6}>
+                          <td colSpan={9}>
                             {!p ? (
                               <p className="gd-msg" style={{ margin: 0 }}>Đang mở…</p>
                             ) : (
@@ -449,10 +459,11 @@ export function PlayersPage({ token }: { token: string }) {
         ) : (
           <div className="tbl">
             <table>
-              <thead><tr><th>Mã</th><th>Từ</th><th /></tr></thead>
+              <thead><tr><th>Tên cũ</th><th>Mã</th><th>Từ</th><th /></tr></thead>
               <tbody>
                 {res.muted.map((m) => (
                   <tr key={m.player_id}>
+                    <td>{m.name ?? '—'}</td>
                     <td>{m.player_id.slice(0, 12)}</td>
                     <td>{m.at.slice(0, 10)}</td>
                     <td><button className="gd-chip" onClick={() => void act(m.player_id, 'unmute')}>Bỏ ẩn</button></td>

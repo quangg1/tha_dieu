@@ -269,12 +269,13 @@ export const api = {
     setStatus: (token: string, questionId: string, status: 'active' | 'paused' | 'retired') => call<{ ok: boolean }>('admin/book-status', { questionId, status }, { 'x-admin-token': token }),
     exportBook: (token: string) => call<unknown>('admin/book-export', undefined, { 'x-admin-token': token }),
     pause: (token: string, questionId: string, paused: boolean) => call<{ ok: boolean }>('admin/pause', { questionId, paused }, { 'x-admin-token': token }),
-    findPlayers: (token: string, q: string) =>
-      call<{ found: { player_id: string; name: string | null; runs: number; last_day: string; best: number; muted: boolean }[]; muted: { player_id: string; at: string }[] }>(
-        `admin/players?q=${encodeURIComponent(q)}`,
-        undefined,
-        { 'x-admin-token': token },
-      ),
+    findPlayers: (token: string, q: string, sort = 'recent') =>
+      call<{
+        found: { player_id: string; name: string | null; account: string | null; runs: number; days: number; last_day: string; first_day: string; best: number; held: number; muted: boolean }[];
+        muted: { player_id: string; at: string; name: string | null }[];
+        total: number;
+        named: number;
+      }>(`admin/players?q=${encodeURIComponent(q)}&sort=${sort}`, undefined, { 'x-admin-token': token }),
     player: (token: string, playerId: string) =>
       call<{ runs: { day: string; mode: string; name: string | null; score: number; altitude: number }[]; flags: { day: string; reasons: string; status: string }[]; muted: boolean; firstSeen: string | null; daysPlayed: number }>(
         `admin/player?playerId=${encodeURIComponent(playerId)}`,

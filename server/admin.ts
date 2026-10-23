@@ -1,5 +1,6 @@
 import { BOOK_BY_ID as CODE } from '../shared/book/questions.js';
 import * as bk from './book.js';
+import { UNTIL } from '../shared/book/release.js';
 import type { Db } from './db.js';
 import { DB_VERSION, GameError, dayQuestion, forgetBoard, forgetQuestion, isPop, loadQuestion, syncedVersion, vnToday } from './service.js';
 import { soft } from '../shared/normalize.js';
@@ -13,7 +14,7 @@ export async function adminSetStatus(db: Db, id: string, status: bk.Status) {
   const def = bk.get(id);
   if (!def) throw new GameError(404, 'Không tìm thấy câu hỏi.');
   if (!['active', 'paused', 'retired'].includes(status)) throw new GameError(400, 'Trạng thái không hợp lệ.');
-  await bk.save(db, def, { status });
+  await bk.save(db, def, { status, statusOnly: true });
   forgetQuestion(id);
   return { ok: true };
 }
@@ -105,21 +106,32 @@ export async function adminExport(db: Db) {
   return { at: new Date().toISOString(), version: DB_VERSION, questions: bk.all().map((def) => ({ def, status: bk.status(def.id), until: bk.until(def.id) })) };
 }
 
-/** Finds players by the start of their id or a part of their name; also lists the muted ones. */
-export async function adminFindPlayers(db: Db, q: string) {
+/** Lists players (the most recently active first, or by best score / most flights) and finds them by the start of their id or a part of their name; also lists the muted ones. */
+export async function adminFindPlayers(db: Db, q: string, sort = 'recent') {
   const needle = q.trim().slice(0, 40);
-  const found =
-    needle.length >= 2
-      ? await db.query<{ player_id: string; name: string | null; runs: number; last_day: string; best: number; muted: boolean }>(
-          `select r.player_id, max(r.name) as name, count(*)::int as runs, max(r.day)::text as last_day, max(r.score)::int as best,
-                  exists (select 1 from muted m where m.player_id = r.player_id) as muted
-           from runs r where starts_with(r.player_id, $1) or strpos(lower(r.name), lower($1)) > 0
-           group by r.player_id order by max(r.day) desc limit 20`,
-          [needle],
-        )
-      : [];
-  const muted = await db.query<{ player_id: string; at: string }>(`select player_id, at::text as at from muted order by at desc limit 50`);
-  return { found, muted };
+  const search = needle.length >= 2;
+  const order = sort === 'best' ? 'max(r.score) desc, max(r.day) desc' : sort === 'runs' ? 'count(*) desc, max(r.day) desc' : 'max(r.day) desc, max(r.created_at) desc';
+  const found = await db.query<{ player_id: string; name: string | null; account: string | null; runs: number; days: number; last_day: string; first_day: string; best: number; held: number; muted: boolean }>(
+    `select r.player_id,
+            (array_agg(r.name order by r.created_at desc) filter (where r.name is not null))[1] as name,
+            (select a.name from accounts a where a.player_id = r.player_id) as account,
+            count(*)::int as runs, count(distinct r.day)::int as days,
+            max(r.day)::text as last_day, min(r.day)::text as first_day, max(r.score)::int as best,
+            (select count(*)::int from flags f where f.player_id = r.player_id and f.status = 'open') as held,
+            exists (select 1 from muted m where m.player_id = r.player_id) as muted
+     from runs r ${search ? 'where starts_with(r.player_id, $1) or strpos(lower(r.name), lower($1)) > 0' : ''}
+     group by r.player_id order by ${order} limit ${search ? 20 : 60}`,
+    search ? [needle] : [],
+  );
+  const [t] = await db.query<{ players: number; named: number }>(
+    `select count(distinct player_id)::int as players, count(distinct player_id) filter (where name is not null)::int as named from runs`,
+  );
+  const muted = await db.query<{ player_id: string; at: string; name: string | null }>(
+    `select m.player_id, m.at::text as at,
+            (select r.name from runs r where r.player_id = m.player_id and r.name is not null order by r.created_at desc limit 1) as name
+     from muted m order by m.at desc limit 50`,
+  );
+  return { found, muted, total: t?.players ?? 0, named: t?.named ?? 0 };
 }
 
 /** One player's recent flights, flags and mute, for a complaint like "my score vanished". */
@@ -245,16 +257,12 @@ export async function adminEditQuestion(db: Db, id: string, prompt: unknown, not
   return { ok: true };
 }
 
-/** Goes back to the words the files in code have. */
+/** Puts a prompt back as the files in code have it, dropping every change made to it on the page; it follows the files again. */
 export async function adminResetQuestion(db: Db, id: string) {
   await bk.ensureBook(db);
-  const cur = bk.get(id);
   const code = CODE.get(id);
-  if (!cur || !code) throw new GameError(404, 'Không tìm thấy câu hỏi.');
-  const def: QuestionDef = { ...cur, prompt: code.prompt };
-  if (code.note) def.note = code.note;
-  else delete def.note;
-  await bk.save(db, def);
+  if (!bk.get(id) || !code) throw new GameError(404, 'Không tìm thấy câu hỏi.');
+  await bk.save(db, JSON.parse(JSON.stringify(code)) as QuestionDef, { until: UNTIL.get(id) ?? null, follow: true });
   forgetQuestion(id);
   return { ok: true };
 }

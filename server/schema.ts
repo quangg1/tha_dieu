@@ -39,6 +39,9 @@ create table if not exists book (
   seq bigserial,
   updated_at timestamptz not null default now()
 );
+-- A prompt untouched on the admin page follows the files in code; once edited there it is the database's alone.
+alter table book add column if not exists edited boolean not null default false;
+alter table book add column if not exists status_by_admin boolean not null default false;
 
 -- Prompt and note changed from the admin page: they win over the book in code until folded back into it.
 create table if not exists question_edits (

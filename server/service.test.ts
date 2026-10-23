@@ -880,6 +880,10 @@ describe('the village head other pages', () => {
     await expect(AD.adminPause(db, 'khong-co-cau-nay', true)).rejects.toThrow();
     const f = await AD.adminFindPlayers(db, 'flag_bot');
     expect(f.found.length).toBeGreaterThan(0);
+    const all = await AD.adminFindPlayers(db, '', 'best');
+    expect(all.found.length).toBeGreaterThan(0);
+    expect(all.found.some((x) => x.name)).toBe(true);
+    expect(all.total).toBeGreaterThanOrEqual(all.named);
     const p = await AD.adminPlayer(db, f.found[0].player_id);
     expect(p.runs.length).toBeGreaterThan(0);
     await S.mutePlayer(db, f.found[0].player_id);

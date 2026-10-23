@@ -1,4 +1,4 @@
-import { BOOK, RETIRED } from '../shared/book/questions.js';
+import { BOOK, BOOK_BY_ID, RETIRED } from '../shared/book/questions.js';
 import { UNTIL } from '../shared/book/release.js';
 import type { QuestionDef } from '../shared/match.js';
 import type { Db } from './db.js';
@@ -87,16 +87,31 @@ async function syncQuestions(db: Db, ids?: string[]) {
   await db.query(`update questions set active=false where not (id = any($1::text[]))`, [[...rows.keys()]]);
 }
 
-/** Writes one prompt's definition (and optionally its status or last day), and tells every instance. */
-export async function save(db: Db, def: QuestionDef, patch: { status?: Status; until?: string | null } = {}) {
+/** Key order does not matter when comparing definitions (jsonb reorders keys). */
+function canon(v: unknown): string {
+  if (Array.isArray(v)) return `[${v.map(canon).join(',')}]`;
+  if (v && typeof v === 'object') {
+    const o = v as Record<string, unknown>;
+    return `{${Object.keys(o).sort().filter((k) => o[k] !== undefined).map((k) => `${JSON.stringify(k)}:${canon(o[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(v) ?? 'null';
+}
+
+/**
+ * Writes one prompt's definition (and optionally its status or last day), and tells every instance.
+ * `follow` puts the prompt back under the files in code (an edit from the page takes it out of their hands).
+ */
+export async function save(db: Db, def: QuestionDef, patch: { status?: Status; until?: string | null; statusOnly?: boolean; follow?: boolean } = {}) {
   await ensureBook(db);
   const cur = rows.get(def.id);
   const st = patch.status ?? cur?.status ?? 'active';
   const un = patch.until === undefined ? cur?.until ?? null : patch.until;
   await db.query(
-    `insert into book (id, def, status, until) values ($1, $2::jsonb, $3, $4)
-     on conflict (id) do update set def=excluded.def, status=excluded.status, until=excluded.until, updated_at=now()`,
-    [def.id, JSON.stringify(def), st, un],
+    `insert into book (id, def, status, until, edited, status_by_admin) values ($1, $2::jsonb, $3, $4, $5, $6)
+     on conflict (id) do update set def=excluded.def, status=excluded.status, until=excluded.until, updated_at=now(),
+       edited = case when $7 then false when $8 then book.edited else true end,
+       status_by_admin = case when $7 then false when $9 then true else book.status_by_admin end`,
+    [def.id, JSON.stringify(def), st, un, !patch.follow && !patch.statusOnly, patch.statusOnly === true, patch.follow === true, patch.statusOnly === true, patch.status !== undefined],
   );
   await bump(db);
   await syncQuestions(db, [def.id]);
@@ -119,12 +134,22 @@ export async function seedBook(db: Db) {
       [chunk.map((q) => q.id), chunk.map((q) => JSON.stringify(q)), chunk.map((q) => (RETIRED.has(q.id) ? 'retired' : 'active')), chunk.map((q) => UNTIL.get(q.id) ?? '')],
     );
   }
+  // Once, for a book that moved here before the flags existed: a prompt changed since the first load counts as edited
+  // on the page, and a status that differs from the files' is the village head's.
+  const [init] = await db.query<{ value: string }>(`select value from meta where key='book_flags_init'`);
+  if (!init) {
+    await db.query(`update book set edited = true where updated_at > (select min(updated_at) from book) + interval '2 minutes'`);
+    const was = await db.query<{ id: string; status: string }>(`select id, status from book`);
+    const odd = was.filter((r) => BOOK_BY_ID.has(r.id) && r.status !== (RETIRED.has(r.id) ? 'retired' : 'active')).map((r) => r.id);
+    if (odd.length) await db.query(`update book set status_by_admin = true where id = any($1::text[])`, [odd]);
+    await db.query(`insert into meta (key, value) values ('book_flags_init', '1') on conflict (key) do nothing`);
+  }
   // The pause list from before the book moved here.
   const [paused] = await db.query<{ value: string }>(`select value from meta where key='paused'`);
   if (paused) {
     try {
       const ids = (JSON.parse(paused.value) as unknown[]).map(String);
-      if (ids.length) await db.query(`update book set status='paused' where id = any($1::text[]) and status='active'`, [ids]);
+      if (ids.length) await db.query(`update book set status='paused', status_by_admin = true where id = any($1::text[]) and status='active'`, [ids]);
     } catch {
       /* an unreadable list is dropped */
     }
@@ -140,7 +165,7 @@ export async function seedBook(db: Db) {
       def.prompt = e.prompt;
       if (e.note) def.note = e.note;
       else delete def.note;
-      await db.query(`update book set def=$2::jsonb, updated_at=now() where id=$1`, [e.question_id, JSON.stringify(def)]);
+      await db.query(`update book set def=$2::jsonb, edited=true, updated_at=now() where id=$1`, [e.question_id, JSON.stringify(def)]);
       changed = true;
     }
     await db.query(`delete from question_edits where question_id=$1`, [e.question_id]);
@@ -160,11 +185,33 @@ export async function seedBook(db: Db) {
       a.priorTier = o.prior_tier;
       if (!a.aliases.includes(o.display)) a.aliases.push(o.display);
     }
-    await db.query(`update book set def=$2::jsonb, updated_at=now() where id=$1`, [o.question_id, JSON.stringify(def)]);
+    await db.query(`update book set def=$2::jsonb, edited=true, updated_at=now() where id=$1`, [o.question_id, JSON.stringify(def)]);
     await db.query(`delete from answers where question_id=$1 and key=$2 and source='admin'`, [o.question_id, o.key]);
     changed = true;
   }
-  if (changed) await bump(db);
+  // A prompt nobody changed on the page follows the files: reworded questions, new answers, a last day, a retirement.
+  const cur = await db.query<{ id: string; def: QuestionDef | string; status: string; until: string | null; edited: boolean; status_by_admin: boolean }>(
+    `select id, def, status, until, edited, status_by_admin from book`,
+  );
+  let followed = 0;
+  for (const r of cur) {
+    const code = BOOK_BY_ID.get(r.id);
+    if (!code) continue;
+    if (!r.edited) {
+      const def: QuestionDef = typeof r.def === 'string' ? JSON.parse(r.def) : r.def;
+      const un = UNTIL.get(r.id) ?? null;
+      if (canon(def) !== canon(JSON.parse(JSON.stringify(code))) || r.until !== un) {
+        await db.query(`update book set def=$2::jsonb, until=$3, updated_at=now() where id=$1 and not edited`, [r.id, JSON.stringify(code), un]);
+        followed++;
+      }
+    }
+    const want = RETIRED.has(r.id) ? 'retired' : 'active';
+    if (!r.status_by_admin && r.status !== want) {
+      await db.query(`update book set status=$2, updated_at=now() where id=$1 and not status_by_admin`, [r.id, want]);
+      followed++;
+    }
+  }
+  if (changed || followed) await bump(db);
   await syncQuestions(db);
-  return { added: fresh.length };
+  return { added: fresh.length, followed };
 }
