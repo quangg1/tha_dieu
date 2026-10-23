@@ -2,6 +2,21 @@
 
 _Mới nhất ở trên._
 
+## 2026-10-23 23:40
+- **WorkBuddy (HY3) đã nộp TASK-007 — chờ duyệt.** Bảy kho bị trả lại trong TASK-006 đã chấm lại, mỗi kho một lượt riêng có tự kiểm. Bảy file `tu_<kho>_hy3_v2.tsv`, bản cũ để nguyên.
+- **Nguyên nhân bản cũ hỏng:** bốn kho lớn làm trước thì tốt, bảy kho nhỏ làm sau thì sập — mức 1 ra 0 từ ở cả 7 kho, `diaphuong` cho cả 63 tỉnh mức 5 (vi phạm 17/20 neo rubric), `dovat` cho `Chạn`/`Ang` mức 5 (rubric ghi 1).
+- **Phân bố bản v2 (HY3):**
+  - `tungu`: 681, dist=[18,65,300,229,69], ?=0
+  - `dovat`: 515, dist=[11,36,365,72,31], ?=0
+  - `cotich`: 359, dist=[5,0,72,47,235], ?=0
+  - `thethao`: 307, dist=[88,0,95,89,35], ?=0
+  - `quanao`: 169, dist=[1,16,39,97,16], ?=0
+  - `mausac`: 112, dist=[12,6,13,67,14], ?=0
+  - `diaphuong`: 63, dist=[2,12,34,10,5], ?=0
+- **Tự kiểm:** 7/7 kho mức 1 > 0; 74/74 từ neo khớp (0 lệch ≥2 mức); 0 từ trùng lệch mức; 7 file đều UTF-8 không BOM, LF, 4 cột.
+- **Nhận xét cần lưu ý:** `cotich` và `thethao` mức 2 = 0 là bản chất kho (nhị phân: hoặc rất quen hoặc rất lạ), không phải lỗi; `quanao` mức 1 chỉ 1 từ (`Xà cạp`) — đã đọc lại cả kho và xác nhận đúng, không bịa thêm.
+- **Việc đang chờ:** Claude kiểm 7 file v2, so với bản cũ `tu_<kho>_hy3.tsv` để xem đã đổi gì, rồi áp bằng `scripts/apply-pop.ts` (chỉ mục lệch ≥2 mức so với sổ).
+
 ## 2026-10-23 23:00
 - **Đã giao TASK-007 cho HY3: chấm lại 7 kho, bảy lượt riêng** — `tungu` 681 → `dovat` 515 → `cotich` 359 → `thethao` 307 → `quanao` 169 → `mausac` 112 → `diaphuong` 63. Kết quả ra file `tu_<kho>_hy3_v2.tsv`, bản cũ để nguyên để còn so hai bản.
 - **Mỗi lượt có cửa tự kiểm bắt buộc, ghi vào báo cáo rồi mới sang lượt sau:** (1) đếm số từ từng mức — mức 1 ra 0 từ thì dừng và đọc lại cả kho, nếu đọc lại vẫn là 0 thì ghi lý do chứ **đừng bịa từ mức 1 cho đủ hình**; (2) đối chiếu từ neo, lệch ≥ 2 mức thì chấm lại kho đó; (3) quét từ trùng chấm khác mức.

@@ -227,3 +227,16 @@ describe('newAnswerPrior', () => {
     expect(newAnswerPrior('Từ chưa ai biết xyz')).toBe(2);
   });
 });
+
+describe('bookVersion', () => {
+  it('moves when an answer’s starting tier moves, so a familiarity pass reaches the database', async () => {
+    const { bookVersion } = await import('./book/questions.js');
+    const q = (priorTier: number) => [{
+      id: 'q1', prompt: 'Kể tên một con vật', category: 'Động vật', krillKey: 'k', level: 1, family: 'f',
+      answers: [{ key: 'cho', display: 'Chó', priorTier, aliases: ['Chó'] }], traps: [],
+    }] as never;
+    const none = () => false;
+    expect(bookVersion(q(0), none)).toBe(bookVersion(q(0), none));
+    expect(bookVersion(q(0), none)).not.toBe(bookVersion(q(4), none));
+  });
+});

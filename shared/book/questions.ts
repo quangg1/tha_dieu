@@ -504,13 +504,22 @@ export const BOOK: QuestionDef[] = assembled.questions;
 export const DROPPED: string[] = assembled.dropped;
 export const BOOK_BY_ID = new Map(BOOK.map((x) => [x.id, x]));
 
-/** Changes whenever a question's wording or hidden answer changes, so servers know to resync the questions table. */
-export const BOOK_VERSION = (() => {
+/**
+ * Changes whenever a question's wording, hidden answer, answer list or starting tier changes, so servers know to
+ * resync. The answers and their tiers are in here because a familiarity pass over `lex/` moves `priorTier` without
+ * touching a single prompt: left out, the database would keep serving the old tiers until some other edit happened.
+ */
+export function bookVersion(list: QuestionDef[], retired: (id: string) => boolean): string {
   let h = 2166136261;
-  const s = BOOK.map((x) => [x.id, x.prompt, x.category, x.note ?? '', x.krillKey, x.level, x.family, RETIRED.has(x.id) ? 'r' : ''].join('|')).join('\n');
+  const s = list.map((x) =>
+    [x.id, x.prompt, x.category, x.note ?? '', x.krillKey, x.level, x.family, retired(x.id) ? 'r' : '',
+      x.answers.map((a) => `${a.key}:${a.priorTier}`).join(',')].join('|'),
+  ).join('\n');
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
-  return `${BOOK.length}-${(h >>> 0).toString(36)}`;
-})();
+  return `${list.length}-${(h >>> 0).toString(36)}`;
+}
+
+export const BOOK_VERSION = bookVersion(BOOK, (id) => RETIRED.has(id));
 
 export function answerCount(id: string) {
   return BOOK_BY_ID.get(id)?.answers.length ?? 0;
