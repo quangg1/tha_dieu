@@ -104,7 +104,7 @@ export async function renderCard(d: CardData): Promise<Blob | null> {
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#e5533d';
   ctx.font = "700 30px 'Be Vietnam Pro', system-ui, sans-serif";
-  const tag = `Bilion · Thả Diều · ${d.dayLabel}`;
+  const tag = `Bilion · thả diều mỗi ngày · ${d.dayLabel}`;
   ctx.beginPath();
   ctx.roundRect(72, 86, ctx.measureText(tag).width + 48, 58, 29);
   ctx.fill();
