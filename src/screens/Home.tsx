@@ -308,6 +308,7 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
       <div className="home-spacer" />
 
       <section className="home-card">
+        <div className="home-main">
         <div className="home-card-head">
           <div>
             <span className="k">Chuyến bay hôm nay</span>
@@ -351,6 +352,8 @@ export default function Home({ sky, soundButton, onPlay, onReview, onAccount }: 
             <LetterIcon /> {invited || 'Thách bạn bè bay cao hơn'}
           </button>
         )}
+
+        </div>
 
         <TitleCard compact total={st.total} onOpen={() => { setJourney(true); track('titles'); }} />
 
